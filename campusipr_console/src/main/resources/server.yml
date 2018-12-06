@@ -1,0 +1,40 @@
+ip: localhost:8080
+jdbc:
+    driverClassName : "com.mysql.jdbc.Driver"
+    url: "jdbc:mysql://192.168.2.71:3306/mercue_sample"
+    username: root
+    password: 54027890
+  
+hibernate:
+    dialect: org.hibernate.dialect.MySQLDialect
+    show_sql: true
+    format_sql: false
+    current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
+    connection_charset: utf8
+    connection_character_encoding: utf8
+  
+path:
+    image: /mnt/data1/image/message_images
+    video: /mnt/data1/image/message_images
+    file:
+    imagemagick: 
+    graphicsmagick: 
+   
+url:
+    image: "https://api.mercue.biz:663/imageservice/message_images/"
+    video: "https://api.mercue.biz:663/imageservice/message_images/"
+    file:
+
+
+jieba: 
+    dic_path : /mnt/data1/image/dic/dict.txt
+    usrdic_path : /mnt/data1/image/dic/userdict.dict
+    stop_word_path : /mnt/data1/image/dic/stopword.txt
+    prob_emit_path : /mnt/data1/image/dic/prob_emit.txt
+
+duckling: 
+    duckling_http_url : "http://192.168.2.61:8000/parse"
+    
+elasticsearch: 
+    elasticsearch_ip : "192.168.2.61"
+    port : "9200"
