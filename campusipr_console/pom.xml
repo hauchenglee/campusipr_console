@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>biz.mercue.seed</groupId>
-	<artifactId>MercueSample</artifactId>
+	<groupId>biz.mercue.campusipr</groupId>
+	<artifactId>campusipr</artifactId>
 	<packaging>war</packaging>
 	<version>1.0.0</version>
-	<name>Mercue Spring Seed Maven Webapp</name>
+	<name>campusipr Maven Webapp</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -232,11 +232,11 @@
 				<version>2.4</version>
 				<configuration>
 					<warSourceDirectory>src/main/webapp</warSourceDirectory>
-					<warName>MercueSample</warName>
+					<warName>campusipr_console</warName>
 					<failOnMissingWebXml>false</failOnMissingWebXml>
 				</configuration>
 			</plugin>
 		</plugins>
-		<finalName>MercueSample</finalName>
+		<finalName>campusipr_console</finalName>
 	</build>
 </project>
