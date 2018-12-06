@@ -9,8 +9,6 @@ public class YamlProperty {
 	private Map<String, String> hibernate;
 	private Map<String, String> path;
 	private Map<String, String> url;
-	private Map<String, String> fb;
-	private Map<String, String> line;
 	private Map<String, String> jieba;
 	private Map<String, String> duckling;
 	private Map<String, String> elasticsearch;
@@ -48,20 +46,6 @@ public class YamlProperty {
 	}
 	public void setUrl(Map<String, String> url) {
 		this.url = url;
-	}
-
-	public Map<String, String> getFb() {
-		return fb;
-	}
-	public void setFb(Map<String, String> fb) {
-		this.fb = fb;
-	}
-
-	public Map<String, String> getLine() {
-		return line;
-	}
-	public void setLine(Map<String, String> line) {
-		this.line = line;
 	}
 	public Map<String, String> getJieba() {
 		return jieba;

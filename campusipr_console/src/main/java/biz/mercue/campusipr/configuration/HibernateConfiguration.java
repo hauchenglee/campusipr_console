@@ -16,8 +16,8 @@ import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-//import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariDataSource;
+
 
 @Configuration
 @EnableTransactionManagement
@@ -42,32 +42,18 @@ public class HibernateConfiguration {
     public DataSource dataSource() {
 
     	
-    	ComboPooledDataSource dataSource = new ComboPooledDataSource();
-    	try {
-	        dataSource.setDriverClass(yamlConfig.getConfig().getJdbc().get("driverClassName"));
-	        dataSource.setJdbcUrl(yamlConfig.getConfig().getJdbc().get("url"));
-	        dataSource.setUser(yamlConfig.getConfig().getJdbc().get("username"));
-	        dataSource.setPassword(yamlConfig.getConfig().getJdbc().get("password"));
-	        
-//	        dataSource.setMaxPoolSize(300);
-//	        dataSource.setMinPoolSize(10);
-//	        dataSource.setAcquireIncrement(5);
-//	        dataSource.setMaxStatements(0);
-//	        dataSource.setIdleConnectionTestPeriod(60);
-    	} catch (IllegalStateException e) {
-    		log.error("IllegalStateException :"+e.getMessage() );
+    	 HikariDataSource dataSource = new HikariDataSource();
 
-		} catch (PropertyVetoException e) {
-			log.error("PropertyVetoException :"+e.getMessage() );
-		}
-    	
-//    	 HikariDataSource dataSource = new HikariDataSource();
-//
-//	     dataSource.setDataSourceClassName(yamlConfig.getConfig().getJdbc().get("driverClassName"));
-//	     dataSource.addDataSourceProperty("url",yamlConfig.getConfig().getJdbc().get("url"));
-//	     dataSource.addDataSourceProperty("user", yamlConfig.getConfig().getJdbc().get("username"));
-//	     dataSource.addDataSourceProperty("password",yamlConfig.getConfig().getJdbc().get("password"));
-//	     dataSource.setMaximumPoolSize(300);
+	     dataSource.setDataSourceClassName(yamlConfig.getConfig().getJdbc().get("driverClassName"));
+	     dataSource.addDataSourceProperty("url",yamlConfig.getConfig().getJdbc().get("url"));
+	     dataSource.addDataSourceProperty("user", yamlConfig.getConfig().getJdbc().get("username"));
+	     dataSource.addDataSourceProperty("password",yamlConfig.getConfig().getJdbc().get("password"));
+	     dataSource.setMaximumPoolSize(300);
+	     dataSource.setMinimumIdle(10);
+	     dataSource.setConnectionTimeout(20000);
+	     dataSource.setIdleTimeout(30000);
+	     dataSource.setMaxLifetime(1800000);
+	     dataSource.setConnectionTestQuery("SELECT 1");
 //    	 dataSource.addDataSourceProperty("cachePrepStmts", true);
 //    	 dataSource.addDataSourceProperty("prepStmtCacheSize", 250);
 //    	 dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);

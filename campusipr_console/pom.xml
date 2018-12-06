@@ -9,11 +9,11 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<hibernate.version>5.2.0.Final</hibernate.version>
+		<hibernate.version>5.2.10.Final</hibernate.version>
 		<springframework.version>5.1.1.RELEASE</springframework.version>
 		<spring.support.version>2.0.6</spring.support.version>
 		<jackson.version>2.9.5</jackson.version>
-		<mysql.connector.version>5.1.38</mysql.connector.version>
+		<mysql.connector.version>6.0.6</mysql.connector.version>
 	</properties>
 
 	<dependencies>
@@ -68,7 +68,7 @@
 			<version>${hibernate.version}</version>
 		</dependency>
 		
-	   <dependency>
+<!-- 	   <dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-c3p0</artifactId>
 			<version>${hibernate.version}</version>
@@ -78,8 +78,8 @@
    		 	<groupId>com.mchange</groupId>
     		<artifactId>mchange-commons-java</artifactId>
     		<version>0.2.11</version>
-		</dependency>
-<!--  		<dependency>
+		</dependency> -->
+  		<dependency>
       		<groupId>org.hibernate</groupId>
       		<artifactId>hibernate-hikaricp</artifactId>
       		<version>${hibernate.version}</version>
@@ -88,8 +88,8 @@
 		<dependency>
     		<groupId>com.zaxxer</groupId>
     		<artifactId>HikariCP</artifactId>
-    		<version>3.2.0</version>
-		</dependency> -->
+    		<version>2.6.1</version>
+		</dependency>
 	
 		
 		<dependency>
