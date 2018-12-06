@@ -17,6 +17,7 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+//import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
 @EnableTransactionManagement
@@ -48,17 +49,29 @@ public class HibernateConfiguration {
 	        dataSource.setUser(yamlConfig.getConfig().getJdbc().get("username"));
 	        dataSource.setPassword(yamlConfig.getConfig().getJdbc().get("password"));
 	        
-	        dataSource.setMaxPoolSize(300);
-	        dataSource.setMinPoolSize(10);
-	        dataSource.setAcquireIncrement(5);
-	        dataSource.setMaxStatements(0);
-	        dataSource.setIdleConnectionTestPeriod(60);
+//	        dataSource.setMaxPoolSize(300);
+//	        dataSource.setMinPoolSize(10);
+//	        dataSource.setAcquireIncrement(5);
+//	        dataSource.setMaxStatements(0);
+//	        dataSource.setIdleConnectionTestPeriod(60);
     	} catch (IllegalStateException e) {
     		log.error("IllegalStateException :"+e.getMessage() );
 
 		} catch (PropertyVetoException e) {
 			log.error("PropertyVetoException :"+e.getMessage() );
 		}
+    	
+//    	 HikariDataSource dataSource = new HikariDataSource();
+//
+//	     dataSource.setDataSourceClassName(yamlConfig.getConfig().getJdbc().get("driverClassName"));
+//	     dataSource.addDataSourceProperty("url",yamlConfig.getConfig().getJdbc().get("url"));
+//	     dataSource.addDataSourceProperty("user", yamlConfig.getConfig().getJdbc().get("username"));
+//	     dataSource.addDataSourceProperty("password",yamlConfig.getConfig().getJdbc().get("password"));
+//	     dataSource.setMaximumPoolSize(300);
+//    	 dataSource.addDataSourceProperty("cachePrepStmts", true);
+//    	 dataSource.addDataSourceProperty("prepStmtCacheSize", 250);
+//    	 dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
+//    	 dataSource.addDataSourceProperty("useServerPrepStmts", true);
         return dataSource;
     }
     

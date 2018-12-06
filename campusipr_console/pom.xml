@@ -9,11 +9,11 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<hibernate.version>5.1.1.Final</hibernate.version>
+		<hibernate.version>5.2.0.Final</hibernate.version>
 		<springframework.version>5.1.1.RELEASE</springframework.version>
 		<spring.support.version>2.0.6</spring.support.version>
 		<jackson.version>2.9.5</jackson.version>
-		<mysql.connector.version>6.0.6</mysql.connector.version>
+		<mysql.connector.version>5.1.38</mysql.connector.version>
 	</properties>
 
 	<dependencies>
@@ -46,12 +46,6 @@
 			<artifactId>spring-orm</artifactId>
 			<version>${springframework.version}</version>
 		</dependency>
-	
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-websocket</artifactId>
-			<version>${springframework.version}</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -67,17 +61,35 @@
 		</dependency>
 		
 		
-				<!-- Hibernate -->
+	     <!-- Hibernate -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>${hibernate.version}</version>
 		</dependency>
-		<dependency>
+		
+	   <dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-c3p0</artifactId>
 			<version>${hibernate.version}</version>
 		</dependency>
+		
+		<dependency>
+   		 	<groupId>com.mchange</groupId>
+    		<artifactId>mchange-commons-java</artifactId>
+    		<version>0.2.11</version>
+		</dependency>
+<!--  		<dependency>
+      		<groupId>org.hibernate</groupId>
+      		<artifactId>hibernate-hikaricp</artifactId>
+      		<version>${hibernate.version}</version>
+   		 </dependency>
+		
+		<dependency>
+    		<groupId>com.zaxxer</groupId>
+    		<artifactId>HikariCP</artifactId>
+    		<version>3.2.0</version>
+		</dependency> -->
 	
 		
 		<dependency>
@@ -169,12 +181,12 @@
 		    <groupId>org.quartz-scheduler</groupId>
 		    <artifactId>quartz</artifactId>
 		    <version>2.2.1</version>
-		    <exclusions>
+<!-- 		    <exclusions>
 		    	<exclusion>
 		    		<groupId>c3p0</groupId>
 		    		<artifactId>c3p0</artifactId>
 		    	</exclusion>
-		    </exclusions>
+		    </exclusions> -->
 		</dependency>
 
 		<dependency>
@@ -211,7 +223,6 @@
 		    <version>1.2.0</version>
 		</dependency>
 
-		
 	</dependencies>
 
 
