@@ -16,7 +16,7 @@ import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.PushService;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.ListResponseBody;
-import biz.mercue.campusipr.util.ObjectMapperUtil;
+import biz.mercue.campusipr.util.JacksonJSONUtils;
 
 
 
@@ -41,7 +41,7 @@ public class PushController {
 		listResponseBody.setCode(Constants.INT_SUCCESS);
 		listResponseBody.setMessage(Constants.MSG_SUCCESS);
 		listResponseBody.setList(list);
-		String result = ObjectMapperUtil.mapObjectWithView(listResponseBody, View.Public.class);
+		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.Public.class);
 		log.info("result :"+result);
 		return result;
 	}

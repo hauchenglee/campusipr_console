@@ -1,0 +1,25 @@
+package biz.mercue.campusipr.dao;
+
+
+import java.util.List;
+
+import biz.mercue.campusipr.model.Business;
+
+
+public interface BusinessDao {
+
+	Business getById(String id);
+
+	void create(Business bean);
+	
+	void delete(String id);
+	
+	List<Business> getAll();
+
+	List<Business> getAvailable(int page,int pageSize);
+		
+	List<Business> getByName(String name);
+	
+	List<Business> getByFuzzyName(String name);
+
+}

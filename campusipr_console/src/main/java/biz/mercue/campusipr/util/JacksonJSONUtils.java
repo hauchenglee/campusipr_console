@@ -14,9 +14,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 
-public class ObjectMapperUtil {
+public class JacksonJSONUtils {
 	
-	private static Logger log = Logger.getLogger(ObjectMapperUtil.class.getName());
+	private static Logger log = Logger.getLogger(JacksonJSONUtils.class.getName());
 	
 	public static String mapObjectWithView(Object obj, Class<?> view){
 		ObjectMapper mapper = new ObjectMapper();
@@ -40,8 +40,18 @@ public class ObjectMapperUtil {
 			} catch (IOException e) {
 				log.info("IOException :"+e.getMessage());
 			}
-			
 			return object;
+	}
+	
+	public static Object readValue(String strJson,TypeReference<?> typeReference){
+		ObjectMapper mapper = new ObjectMapper();
+		Object object = null;
+		try {
+			object = mapper.readValue(strJson, typeReference);
+		} catch (IOException e) {
+			log.info("IOException :"+e.getMessage());
+		}
+		return object;
 	}
 	
 

@@ -4,11 +4,12 @@ package biz.mercue.campusipr.util;
 
 public class Constants {
 	
-	public static final String LINE_VERIFY_ACCOUNT = "Udeadbeefdeadbeefdeadbeefdeadbeef";
+
 	
 	
 	public static String SYSTEM_LANGUAGE_TW = "tw";
 	public static String SYSTEM_LANGUAGE_US = "us";
+	public static String SYSTEM_LANGUAGE_CN = "cn";
 	
 	//Duckling LOCALE
 	//台灣
@@ -28,23 +29,22 @@ public class Constants {
 	public static final String DUCKLING_LANGUAGE_ZH = "zh";
 	public static final String DUCKLING_LANGUAGE_EN = "en";
 	
-	public static final String FB_GRAPH_API_URL = "https://graph.facebook.com/v2.11/";
-	public static final String FB_ACCESS_TOKEN_URL = "https://graph.facebook.com/v2.10/oauth/access_token?";
-	public static final String FB_LONG_LIVE_ACCESS_TOKEN_URL = "https://graph.facebook.com/v2.10/oauth/access_token?grant_type=fb_exchange_token&client_id=";
-	public static final String FB_USER_ID_URL = "https://graph.facebook.com/v2.10/me?access_token=";
-	public static final String FB_GET_FAN_PAGE_LIST = "/accounts?access_token=";
-	public static final String FB_LINK_WEBHOOK = "/subscriptions";
-	public static final String FB_PAGE_SUBSCRIB = "/subscribed_apps";
-	public static final String FB_GET_PICTURE = "/picture?access_token=";
-	
-	public static String LINE_WEBHOOK_URL_BASE = "";
-	public static String FB_WEBHOOK_URL_BASE = "";
-	public static String FB_APP_SYSTEM_APP_ID = "";
+
 	
 	public static String DUCKLING_API_URL = "";
 	
+	public static String MAIL_STARTTLS = "";
+	public static String MAIL_HOST = "";
+	public static String MAIL_PORT = "";
+	public static String MAIL_USER_NAME = "";
+	public static String MAIL_PASSWORD = "";
+	public static String SYSTEM_EMAIL = "";
+	
+	public static String RECAPTCHA_SECRET_TOKEN = "";
+	
 	public static String ELASTICSEARCH_IP = "";
 	public static String ELASTICSEARCH_PORT = "";
+	
 	
 	public static final String JSON_APP_ID = "bot_channel_id";
 	public static final String JSON_APP_SECRET = "bot_secret";
@@ -61,6 +61,7 @@ public class Constants {
 	public static final String CONTENT_TYPE_JSON = "application/json;charset=utf-8";
 	public static final String CONTENT_TYPE_PNG = "image/png";
 	
+	public static final int SHORT_IMAGE_NAME_LENGTH = 8;
 	
 	public static final String  JSON_CODE = "code";
 	public static final String  JSON_MESSAGE = "message";
@@ -68,8 +69,8 @@ public class Constants {
 	
 	public static final String  JSON_TOKEN = "token";
 	
-	public static String PICTURE_UPLOAD_PATH = "";
-	public static String PICTURE_LOAD_URL = "";
+	public static String IMAGE_UPLOAD_PATH = "";
+	public static String IMAGE_LOAD_URL = "";
 	public static String VIDEO_UPLOAD_PATH = "";
 	public static String VIDEO_LOAD_URL = "";
 	public static String FILE_UPLOAD_PATH = "";
@@ -80,53 +81,25 @@ public class Constants {
 	public static String GRAPHICSMAGICK_PATH = "";
 	public static String FFMPEG_PATH = "";
 	
-	public static String QUESTIONNAIRE_URL ="";
-	public static String QUESTIONNAIRE_IMAGEURL ="";
+
 	public static String JIEBA_DIC_PATH = "";
 	public static String JIEBA_USERDIC_PATH = "";
 	public static String JIEBA_STOP_WORD_PATH = "";
 	public static String JIEBA_PROB_EMIT_PATH = "";
-	
-	public static final String LINE = "line";
-	public static final String FB = "fb";
-	
-	public static final String FB_GRAPH_URL = "https://graph.facebook.com/v2.6/";
-	public static String LINE_MESSAGE_CONTENT_URL_BASE="https://api.line.me/v2/bot/message/";
-	public static String LINE_MESSAGE_CONTENT_URL_SUFFIX = "/content";
-	public static String LINE_MESSAGE_WEBVIEW_OBTAIN_URL="https://api.line.me/liff/v1/apps";
-	public static String LINE_MESSAGE_WEBVIEW_URL_BASE="line://app/";
+
 	
 	public static final String REDIRECT_LOGIN = "/login";
 	public static final String REDIRECT_MAINPAGE = "/mainpage";
-	public static final String REDIRECT_BOTPAGE = "/botpage";
-	public static final String URL_LOGIN = "/static/LoginPage.html";
-	public static final String URL_SIGN = "/static/Sign.html";
-	public static final String URL_MAINPAGE = "/static/MainPage.html";
-	public static final String URL_BOTPAGE = "/static/BotPage.html";
-	public static final String URL_DASHBOARD = "/static/views/index.html";
-	public static final String URL_CALL_CENTER = "/static/views/call_center.html";
-	
-	public static final int ACTION_CUSTOM_FINISH = 7;
-	
-	public static final int  INT_MESSAGE_COUNT = 15;
+
+
 	
 	
-	public static final String WEBLOCMESSAGE = "getweblocation";
-	public static final String LOCAIONMESSAGE = "LocationMessage";
-	public static final String ADDRESSMESSAGE = "AddressMessage";
-	
-	public static final String FOLLOW = "Follow";
-	public static final boolean IS_FOLLOW = true;
-	public static final String UNFOLLOW = "unFollow";
-	
-	public static final String GENDER_MALE = "男";
-	public static final String CODE_GENDER_MALE  = "male";
-	public static final String GENDER_FEMALE = "女";
-	public static final String CODE_GENDER_FEMALE = "female";
-	public static final String GENDER_OTHER = "其他";
-	public static final String CODE_GENDER_OTHER = "other";
-	public static final String CODE_ALL = "all";
-	public static final String CITY_ALL = "全部";
+	public static final String KEY_WIDTH = "width";
+	public static final String KEY_HEIGHT = "height";
+	public static final String KEY_SIZE = "size";
+	public static final String KEY_SUFFIX = "suffix";
+	public static final String KEY_RESULT = "result";
+
 	
 	public static final String  USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11";
 	public static final String  REQUEST_METHOD_GET = "GET";
@@ -265,99 +238,26 @@ public class Constants {
 	
 
 	
-	public static final String SOCIAL_TYPE_LINE = "line";
-	public static final String SOCIAL_TYPE_FACEBOOK = "fb";
-	public static final String SOCIAL_TYPE_WECHAT= "wechat";
-	public static final String SOCIAL_TYPE_APP= "app";
-	
-	
-	public static final String SOCIAL_MESSAGE_TYPE_TEXT = "text";
-	public static final String SOCIAL_MESSAGE_TYPE_IMAGE = "image";
-	public static final String SOCIAL_MESSAGE_TYPE_AUDIO = "audio";
-	public static final String SOCIAL_MESSAGE_TYPE_VIDEO = "video";
-	public static final String SOCIAL_MESSAGE_TYPE_FILE = "file";
-	
-	public static final String KEY_WIDTH = "width";
-	public static final String KEY_HEIGHT = "height";
-	public static final String KEY_SIZE = "size";
-	public static final String KEY_SUFFIX = "suffix";
-	public static final String KEY_RESULT = "result";
-	public static final String VALIDATE_KEY_MESSAGE_EN = "message_en";
-	public static final String VALIDATE_KEY_MESSAGE_CHI = "message_chi";
-	public static final String VALIDATE_KEY_ERROR_ID = "error_id_list";
-	
-	public static final int THUMBNAIL_IMAGE_SIDE_LENGTH = 240;
-	
-	public static final int SMALL_IMAGE_SIDE_LENGTH = 460;
-	public static final int MEDIUM_IMAGE_SIDE_LENGTH = 700;
-	public static final int LARGE_IMAGE_SIDE_LENGTH = 1024;
-	
-	public static final int LINE_RICH_MENU_HEIGHT_LENGTH = 2500;
-	public static final int LINE_RICH_MENU_WIDTH_LENGTH_FULL = 1686;
-	public static final int LINE_RICH_MENU_WIDTH_LENGTH_HALF = 843;
-	
-	public static final int FB_FILE_SIZE_LIMIT = 25;//MB
-	public static final int LINE_FILE_SIZE_LIMIT = 10;//MB
-	public static final int LINE_IMAGE_SIZE_LIMIT = 1;//MB
-	
-	public static final int LINE_VIDEO_DURATION_LIMIT = 1;//Minute
-	
-	public static final int LINE_IMAGE_LENGTH_LIMIT = 1024;//px
-	
-	public static final String SOCIAL_MESSAGE_TYPE_BUTTON = "button";
-	
-	
-	public static final String SOCIAL_MESSAGE_TYPE_LOCATION = "location";
-	public static final String SOCIAL_MESSAGE_TYPE_FB_GENERIC = "generic";
-	public static final String SOCIAL_MESSAGE_TYPE_FB_QUICK_REPLY = "quick_reply";
-	public static final String SOCIAL_MESSAGE_TYPE_COMMENT_MESSAGE = "comment_message";
-	public static final String SOCIAL_MESSAGE_TYPE_FB_LIST = "list";
-	public static final String SOCIAL_MESSAGE_TYPE_FB_MEDIA = "media";
 
 	
-	public static final String SOCIAL_MESSAGE_TYPE_LINE_STICKER = "sticker";
-	public static final String SOCIAL_MESSAGE_TYPE_LINE_CONFIRM = "confirm";
-	public static final String SOCIAL_MESSAGE_TYPE_LINE_CAROUSEL = "carousel";
-	public static final String SOCIAL_MESSAGE_TYPE_LINE_IMAGE_CAROUSEL = "image_carousel";
-	public static final String SOCIAL_MESSAGE_TYPE_LINE_IMAGEMAP = "imagemap";
 	
-	public static final String SOCIAL_MENU_TYPE_GREETING = "greeting";
-	public static final String SOCIAL_MENU_TYPE_GET_START = "get_started";
-	public static final String SOCIAL_MENU_TYPE_MENU = "menu";
+
 	
-	public static final int LINE_MENU_TYPE_1 = 1;
-	public static final int LINE_MENU_TYPE_2 = 2;
-	public static final int LINE_MENU_TYPE_3 = 3;
-	public static final int LINE_MENU_TYPE_4 = 4;
-	public static final int LINE_MENU_TYPE_5 = 5;
-	public static final int LINE_MENU_TYPE_6 = 6;
+
 	
-	public static String IP = "localhost:8080";
+
+	public static final int SYSTEM_PAGE_SIZE = 20;
+
 	
-	public static final int DM_LAYOUT_ONE = 1;
-	public static final int DM_LAYOUT_TWO_HORI = 2;
-	public static final int DM_LAYOUT_SIX = 3;
+
 	
-	public static final int DM_LAYOUT_TWO_VERT = 4;
-	public static final int DM_LAYOUT_THREE_EQUAL_VERT = 5;
+//	public static final int FB_FILE_SIZE_LIMIT = 25;//MB
+//	public static final int LINE_FILE_SIZE_LIMIT = 10;//MB
+//	public static final int LINE_IMAGE_SIZE_LIMIT = 1;//MB
 	
-	public static final int DM_LAYOUT_FOUR_SQUARE = 6;
+
 	
-	public static final int DM_LAYOUT_THREE_MAIN_HORI_SLAVE = 7;
-	
-	public static final int DM_LAYOUT_THREE_MAIN_VERT_SLAVE = 8;
-	
-	public static final String DM_SUB_TYPE_URL = "url";
-	
-	public static final String  DM_SUB_TYPE_PRODUCT = "product";
-	
-	//push types
-	public static final String PUSH_TYPE_PRODUCT = "product";
-	public static final String PUSH_TYPE_DM = "dm";
-	public static final String PUSH_TYPE_CAMPAIGN = "campaign";
-	public static final String PUSH_TYPE_MEDIA= "media";
-	public static final String PUSH_TYPE_TEXT = "text";
-	public static final String PUSH_TYPE_QUESTIONAIRE = "questionnaire";
+
 	
 	public static final String WEB_SOCKET_MESSAGEMAPPING_URL = "/chat/";
 	public static final String WEB_SOCKET_MESSAGE_SEND_URL = "/topic/messages/";
@@ -366,170 +266,9 @@ public class Constants {
 	public static final String APP_SOCKET_MESSAGE_SEND_URL = "/topic/app/messages/";
 	
 	
-	public static final String ACTIVATION_CODE_SUCCESS = "success";
-	public static final String ACTIVATION_CODE_FAIL = "fail";
-	public static final String ACTIVATION_CODE_EXPIRING = "expiring";
-	public static final String ACTIVATION_CODE_EXPIRED = "expired";
-	public static final String ACTIVATION_CODE_VALID = "valid";
-	public static final String ACTIVATION_CODE_INVALID = "invalid";
-	public static final String ACTIVATION_CODE_WELCOME = "welcome";
-	public static final String ACTIVATION_CODE_SELF = "self";
-	public static final String ACTIVATION_CODE_PUSH = "push";
-	
-	
-	public static final String ADMIN_ID = "80f5d577bc721c2c02b3ee00a25b092e";
-	public static final String APP_BOT_ID = "1f9d09f1976f0e1286206f3d7d7045fa";
-	public static final String BUSINESS_ID = "ad8ab7be26d597e88a20f616ce524405";
-	public static final String SYSTEM_UNKNOWN_FLOW_ID = "659d0b8de63d2cfe6d8c645866d6644f";
-	public static final String FLOWTYPE_UNKNOWN = "unknown";
-	public static final String FLOWTYPE_SYSTEM_UNKNOWN = "system_unknown";
-	public static final String ADMIN_MANAGEMENT_MODULE_CODE = "admin_management";
-	
-	public static final String QUESTIONNAIRE_TYPE_NUMBER = "num";
-	public static final String QUESTIONNAIRE_TYPE_TEXT = "text";
-	public static final String QUESTIONNAIRE_TYPE_LIST = "list";
-	
-	public static final String ORDER_TYPE_UNHANDLED_ID = "axmdlseirh932ha8s";
-	public static final String ORDER_TYPE_CANCELLED = "已取消";
-	public static final String ORDER_TYPE_SUCCESSFUL = "成功";
-	public static final String ORDER_TYPE_UNSUCCESSFUL = "未成功";
-	public static final String ORDER_TYPE_UNHANDLED = "尚未處理";
-	public static final String ORDER_TYPE_HANDLING = "處理中";
-	
-	public static final String AUTOREPLY_TYPE_OFFLINE = "agent_offine";
-	public static final String AUTOREPLY_TYPE_BUSY = "agent_busy";
-	public static final String AUTOREPLY_TYPE_OUT_OF_WORK = "out_of_work";
-	public static final String AUTOREPLY_TYPE_WELCOME = "welcome";
-	public static final String AUTOREPLY_TYPE_SELF_DEFINE = "self_define";
-	
-	public static final String AUTOREPLY_TYPE_SESSION_EXPIRE = "session_expire";
-	
-	
-	public static final String SYS_AUTOREPLY_TYPE_OFFLINE = "system_agent_offine";
-	public static final String SYS_AUTOREPLY_TYPE_BUSY = "system_agent_busy";
-	public static final String SYS_AUTOREPLY_TYPE_OUT_OF_WORK = "system_out_of_work";
-	public static final String SYS_AUTOREPLY_TYPE_WELCOME = "system_welcome";
-	
-	public static final String SYS_AUTOREPLY_TYPE_SESSION_EXPIRE = "system_session_expire";
-	
-	public static final String MESSAGE_SEND = "send";
-	public static final String MESSAGE_RECEIVE = "receive";
-	
+
 	public static final String SYSTEM_ADMIN_ID = "1";
 	public static final String SYSTEM_MANAGER_ROLE_NAME="系統管理者";
-	
-	public static final String INTENT_TYPE_PRODUCT = "product";
-	
-	public static final String AGENT_STATUS_ONLINE = "online";
-	public static final String AGENT_STATUS_OFFLINE = "offline";
-	public static final String AGENT_STATUS_LEAVING = "leaving";
-	public static final String AGENT_STATUS_BUSY = "busy";
-	
-	public static final String NODE_TYPE_QA = "qa";
-	
-	public static final String NODE_TYPE_QA_ASK = "ask";
-	
-	public static final String NODE_TYPE_CS = "cs";
-	
-	public static final String NODE_CS_KEYWORD = "專員,真人,轉客服";
-	
-	public static final String NODE_TYPE_TEXT = "text";
-	
-	public static final String NODE_TYPE_BUTTON = "button";
-	
-	public static final String NODE_TYPE_IMAGE = "image";
-	
-	public static final String NODE_TYPE_CAROUSEL= "carousel";
-	
-	public static final String NODE_TYPE_POSITION= "position";
-	
-	public static final String NODE_TYPE_VIDEO= "video";
-	
-	public static final String NODE_TYPE_AUDIO= "audio";
-	
-	
-	public static final String NODE_TYPE_QUESTIONNAIRE= "questionnaire";
-	
-	public static final String NODE_TYPE_COMMENT_MESSENGER= "comment_messenger";
-	
-	public static final String NODE_TYPE_FLOW= "flow";
-	
-	public static final String NODE_TYPE_API= "api";
-	
-	public static final String NODE_TYPE_END= "end";
-	
-	public static final String NODE_TYPE_QRCODE = "qrcode";
-	
-	public static final String NODE_TYPE_SYSTEM_END= "system_end";
-	
-	public static final String NODE_TYPE_PRODUCT= "product";
-	
-	public static final String NODE_TYPE_IMAGEMAP = "imagemap";
-	
-	public static final String NODE_TYPE_SYSTEM_QA = "system_qa";
-	
-	public static final String NODE_TYPE_SYSTEM_CS = "system_cs";
-	
-	public static final String NODE_TYPE_SYSTEM_API= "system_api";
-	
-	public static final String NODE_TYPE_SYSTEM_QUESTIONNAIRE= "system_questionnaire";
-	
-	public static final String NODE_TYPE_SYSTEM_COMMENT_MESSENGER= "system_cm";
-	
-	public static final String NODE_TYPE_SYSTEM_FLOW= "system_flow";
-	
-	public static final String NODE_TYPE_SYSTEM_QA_ASK = "system_qa_ask";
-	
-	public static final String NODE_TYPE_SYSTEM_TEXT = "system_text";
-	
-	public static final String NODE_TYPE_SYSTEM_IMAGE = "system_image";
-	
-	public static final String NODE_TYPE_SYSTEM_AUDIO = "system_audio";
-	
-	public static final String NODE_TYPE_SYSTEM_VIDEO = "system_video";
-	
-	public static final String NODE_TYPE_SYSTEM_POSITION = "system_position";
-	
-	public static final String NODE_TYPE_SYSTEM_BUTTON = "system_button";
-	public static final String NODE_TYPE_SYSTEM_CAROUSEL = "system_carousel";
-	public static final String NODE_TYPE_SYSTEM_PRODUCT = "system_product";
-	
-	public static final String NODE_TYPE_SYSTEM_QRCODE = "system_qrcode";
-	
-	public static final String NODE_TYPE_SYSTEM_IMAGEMAP = "system_imagemap";
-	
-	
-	public static final String FLOW_TYPE_SYSTEM_COMMON = "system_common";
-	public static final String FLOW_TYPE_SYSTEM_FB_COMMENT= "system_comment_messenger";
-	public static final String FLOW_TYPE_COMMON = "common";
-	public static final String FLOW_TYPE_FB_COMMENT = "comment_messenger";
-	public static final String FLOW_TYPE_BOT_START = "bot_start";
-
-	public static String WEB_REPLY_URL = "";
-	
-	
-	
-	
-	public static final String NODE_LINK_TYPE_TEXT = "text";
-	public static final String NODE_LINK_TYPE_BUTTON = "button";
-	
-	
-	public static final String NODE_INPUT_TYPE_TEXT = "text";
-	public static final String NODE_INPUT_TYPE_BUTTON = "button";
-	public static final String NODE_INPUT_TYPE_URL = "url";
-	
-	
-	public static final int NODE_LINK_STATE_SUCCESS = 1;
-	public static final int NODE_LINK_STATE_FAIL = 0;
-	
-	
-	public static final String FIELD_TEMPLATE = "{@}";
-	public static final String FIELD_TEMPLATE_PREFFIX = "{@";
-	public static final String FIELD_TEMPLATE_SUFFIX = "}";
-	public static final String FIELD_GROUP_SYSTEM= "system";
-	public static final String FIELD_GROUP_SLEF= "self";
-	
-	public static final String ITEM_TYPE_FLOW= "flow";
 	
 	//image
 	public static final String MEDIA_TYPE_JPEG = "jpeg";
@@ -547,50 +286,4 @@ public class Constants {
 	public static final String MEDIA_TYPE_MP3 = "mp3";
 	public static final String MEDIA_TYPE_M4A = "m4a";
 	
-	
-	public static String CODE_URL= "";
-	public static final String CODE_REGEX_PATTERN = "\\{@(.*?)\\}";
-	public static final String CODE_TYPE_QRCODE= "qrcode";
-	public static final String CODE_TYPE_BARCODE= "barcode";
-	
-	public static final String MEDIA_VIDEO_PRIFIX= "orginal";
-	
-	public static final String FIELD_GROUP_TYPE_SYSTEM= "system";
-	public static final String FIELD_GROUP_TYPE_SELF= "self";
-	public static final String FIELD_GROUP_ITEM_TYPE_USER= "user";
-	public static final String FIELD_GROUP_ITEM_TYPE_FLOW= "flow";
-	
-	public static final String FIELD_TYPE_STRING = "string";
-	public static final String FIELD_TYPE_PHONE = "phone";
-	public static final String FIELD_TYPE_NUM = "num";
-	public static final String FIELD_TYPE_ADDRESS = "address";
-	public static final String FIELD_TYPE_DATETIME = "datetime";
-	public static final String FIELD_TYPE_GENDER = "gender";
-	public static final String FIELD_TYPE_YESNO = "boolean";
-	public static final String FIELD_TYPE_RESOURCE_URL = "url";
-	
-	
-	public static final String FIELD_NAME_PHONE= "user_phone";
-	public static final String FIELD_NAME_USER_NAME= "user_name";
-	public static final String FIELD_NAME_ADDRESS= "user_address";
-	public static final String FIELD_NAME_BIRTHDAY= "user_birthday";
-	public static final String FIELD_NAME_GENDER= "user_gender";
-	public static final String FIELD_NAME_EMAIL= "user_email";
-	public static final String FIELD_NAME_USER_ID= "user_id";
-	public static final String FIELD_NAME_BOT= "bot_id";
-	public static final String FIELD_NAME_BUSINESS= "business_id";
-	
-	public static final int BOT_STATE_BOT = 1;
-	public static final int BOT_STATE_CS = 2;
-	public static final int BOT_STATE_MIXED = 3;
-	
-	public static final int IMAGEMAP_TYPR_NO_BUTTON = 0;
-	public static final int IMAGEMAP_TYPR_1 = 1;
-	public static final int IMAGEMAP_TYPR_2 = 2;
-	public static final int IMAGEMAP_TYPR_3 = 3;
-	public static final int IMAGEMAP_TYPR_4 = 4;
-	public static final int IMAGEMAP_TYPR_5 = 5;
-	public static final int IMAGEMAP_TYPR_6 = 6;
-	public static final int IMAGEMAP_TYPR_7 = 7;
-	public static final int IMAGEMAP_TYPR_8 = 8;
 }

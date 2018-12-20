@@ -1,5 +1,9 @@
 package biz.mercue.campusipr.util;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +16,7 @@ import org.im4java.core.IMOperation;
 import org.im4java.core.IdentifyCmd;
 import org.im4java.process.ArrayListOutputConsumer;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 @Component
 public class ImageUtils {
@@ -25,6 +30,32 @@ public class ImageUtils {
 	public ImageUtils() {
 		identifyCmd = new IdentifyCmd(true);
 		convertCmd = new ConvertCmd();
+	}
+	
+	public static boolean writeFile(MultipartFile file, File finalFile) {
+		BufferedOutputStream outputStream = null;
+		boolean result = false;
+		try {
+			outputStream = new BufferedOutputStream(new FileOutputStream(finalFile));
+			log.info("save file : " + finalFile.getAbsolutePath());
+			outputStream.write(file.getBytes());
+			outputStream.flush();
+			result = true;
+			log.info("file: " +file.getOriginalFilename() + " saved ");
+		} catch (FileNotFoundException e) {
+			log.error("file dir not found error: " + e.getMessage());
+		} catch (IOException e) {
+			log.error("upload file error: " + e.getMessage());
+		} finally {
+			if (outputStream != null) {
+				try {
+					outputStream.close();
+				} catch (IOException e) {
+					log.error("fail to close output stream, error: " + e);
+				}
+			}
+		}
+		return result;
 	}
 
 

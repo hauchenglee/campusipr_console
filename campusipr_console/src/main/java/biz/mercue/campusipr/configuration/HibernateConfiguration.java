@@ -48,7 +48,7 @@ public class HibernateConfiguration {
 	     dataSource.addDataSourceProperty("url",yamlConfig.getConfig().getJdbc().get("url"));
 	     dataSource.addDataSourceProperty("user", yamlConfig.getConfig().getJdbc().get("username"));
 	     dataSource.addDataSourceProperty("password",yamlConfig.getConfig().getJdbc().get("password"));
-	     dataSource.setMaximumPoolSize(300);
+	     dataSource.setMaximumPoolSize(30);
 	     dataSource.setMinimumIdle(10);
 	     dataSource.setConnectionTimeout(20000);
 	     dataSource.setIdleTimeout(30000);
