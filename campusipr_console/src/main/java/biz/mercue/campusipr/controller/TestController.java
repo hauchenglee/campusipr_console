@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-
+import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.View;
+import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
+import biz.mercue.campusipr.util.ServiceTaiwanPatent;
 
 @Controller
 public class TestController {
@@ -45,6 +47,22 @@ public class TestController {
 		listResponseBody.setMessage(Constants.MSG_SUCCESS);
 		listResponseBody.setList(list);
 		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.Public.class);
+		log.info("result :"+result);
+		return result;
+	}
+	
+	@RequestMapping(value="/getpatent", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String getPatent(HttpServletRequest request) {
+		log.info("getPatent ");
+		ListResponseBody listResponseBody  = new ListResponseBody();
+		
+		List<Patent> patentList = ServiceTaiwanPatent.getPatentRightByPatentNo("I621340");
+		
+		listResponseBody.setCode(Constants.INT_SUCCESS);
+		listResponseBody.setMessage(Constants.MSG_SUCCESS);
+		listResponseBody.setList(patentList);
+		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.PatentDetail.class);
 		log.info("result :"+result);
 		return result;
 	}

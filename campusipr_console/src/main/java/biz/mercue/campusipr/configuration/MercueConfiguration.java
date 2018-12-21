@@ -59,6 +59,10 @@ public class MercueConfiguration implements WebMvcConfigurer{
 		
 		Constants.IMAGEMAGICK_PATH = yamlConfig.getConfig().getPath().get("imagemagick");
 		Constants.GRAPHICSMAGICK_PATH = yamlConfig.getConfig().getPath().get("graphicsmagick");
+		
+		//set patent key in here
+		Constants.PATENT_WEB_SERVICE_TW = yamlConfig.getConfig().getPatent_api().get("patent_webservice_tw");
+		Constants.PATENT_KEY_TW = yamlConfig.getConfig().getPatent_api().get("patent_key_tw");
 	}
 	
 	

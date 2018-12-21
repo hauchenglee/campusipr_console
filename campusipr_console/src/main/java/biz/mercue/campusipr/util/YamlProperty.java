@@ -12,6 +12,7 @@ public class YamlProperty {
 	private Map<String, String> jieba;
 	private Map<String, String> duckling;
 	private Map<String, String> elasticsearch;
+	private Map<String, String> patent_api;
 	
 	public String getIp() {
 		return ip;
@@ -65,4 +66,11 @@ public class YamlProperty {
 	public void setElasticsearch(Map<String, String> elasticsearch) {
 		this.elasticsearch = elasticsearch;
 	}
+	public Map<String, String> getPatent_api() {
+		return patent_api;
+	}
+	public void setPatent_api(Map<String, String> patent_api) {
+		this.patent_api = patent_api;
+	}
+	
 }

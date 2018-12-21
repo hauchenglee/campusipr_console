@@ -29,7 +29,10 @@ public class Constants {
 	public static final String DUCKLING_LANGUAGE_ZH = "zh";
 	public static final String DUCKLING_LANGUAGE_EN = "en";
 	
-
+	
+	//patent api for local
+	public static String PATENT_WEB_SERVICE_TW = "";
+	public static String PATENT_KEY_TW = "";
 	
 	public static String DUCKLING_API_URL = "";
 	
