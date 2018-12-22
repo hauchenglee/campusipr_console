@@ -6,6 +6,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,17 +20,21 @@ import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
+import biz.mercue.campusipr.util.StringResponseBody;
 
 @Controller
 public class TestController {
 	
 	private Logger log = Logger.getLogger(this.getClass().getName());
 	
+	@Autowired
+	PasswordEncoder encoder;
+	
 	
 	@RequestMapping(value="/gettestid", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String getCountryList(HttpServletRequest request) {
-		log.info("getPatentList ");
+	public String getTestID(HttpServletRequest request) {
+		log.info("getTestID ");
 		ListResponseBody listResponseBody  = new ListResponseBody();
 		
 
@@ -47,6 +53,27 @@ public class TestController {
 		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.Public.class);
 		log.info("result :"+result);
 		return result;
+	}
+	
+	
+	@RequestMapping(value="/generatepassword", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String generatePassword(HttpServletRequest request) {
+		log.info("generatePassword ");
+
+		
+		
+		log.info(encoder.encode("abc123"));
+		
+		log.info(encoder.matches("abc123", "$2a$10$iejovjHKL1wDgk8HNGtXC.09I5IqPeNnYgQKwfqHcdhuztJQbP6J."));
+		
+		log.info(encoder.encode("abc123hj"));
+		
+		
+		log.info(encoder.matches("abc123hj", "$2a$10$iejovjHKL1wDgk8HNGtXC.09I5IqPeNnYgQKwfqHcdhuztJQbP6J."));
+		
+		log.info(encoder.encode("12345678901234567890"));
+		return "";
 	}
 
 }

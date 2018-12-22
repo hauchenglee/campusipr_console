@@ -9,8 +9,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
+
 
 @Entity
 @Table(name="admin")
@@ -35,6 +41,18 @@ public class Admin {
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name="business_id")
 	private Business business;
+	
+	
+	@OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
+	@JoinColumn(name="role_id", referencedColumnName="role_id")
+	@JsonView(View.Perissmion.class)
+	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+	@NotFound(action=NotFoundAction.IGNORE)
+	private Role role;
+	
+	@Transient
+	@JsonView(View.Public.class)
+	private String role_name;
 	
 	private Date create_date;
 	
@@ -94,6 +112,30 @@ public class Admin {
 
 	public void setUpdate_date(Date update_date) {
 		this.update_date = update_date;
+	}
+
+	public Business getBusiness() {
+		return business;
+	}
+
+	public void setBusiness(Business business) {
+		this.business = business;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+
+	public String getRole_name() {
+		return role_name;
+	}
+
+	public void setRole_name(String role_name) {
+		this.role_name = role_name;
 	}
 	
 

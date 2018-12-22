@@ -13,6 +13,8 @@ public class YamlProperty {
 	private Map<String, String> duckling;
 	private Map<String, String> elasticsearch;
 	
+	private Map<String, String> google;
+	
 	public String getIp() {
 		return ip;
 	}
@@ -64,5 +66,11 @@ public class YamlProperty {
 	}
 	public void setElasticsearch(Map<String, String> elasticsearch) {
 		this.elasticsearch = elasticsearch;
+	}
+	public Map<String, String> getGoogle() {
+		return google;
+	}
+	public void setGoogle(Map<String, String> google) {
+		this.google = google;
 	}
 }

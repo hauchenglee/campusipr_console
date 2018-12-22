@@ -39,4 +39,6 @@ duckling:
 elasticsearch: 
     elasticsearch_ip : "192.168.2.61"
     port : "9200"
+google: 
+    recaptcha : 6LesJYQUAAAAAE1OFDeCDjVkGtuCjbS-AIMLeZGW
   

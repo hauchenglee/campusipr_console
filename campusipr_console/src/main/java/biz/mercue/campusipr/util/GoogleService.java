@@ -10,9 +10,9 @@ import java.net.URL;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
-public class GoogleReCaptcha {
+public class GoogleService {
 
-	private static Logger log = Logger.getLogger(GoogleReCaptcha.class.getName());
+	private static Logger log = Logger.getLogger(GoogleService.class.getName());
 	
 	public static boolean getReCaptchaResult(String payloadStr) {
 		
@@ -26,7 +26,7 @@ public class GoogleReCaptcha {
 //			data.put("response", payloadStr);
 			
 			URL url = new URL("https://www.google.com/recaptcha/api/siteverify?secret=" + 
-			Constants.RECAPTCHA_SECRET_TOKEN + "&response=" + payloadStr);
+			Constants.RECAPTCHA_SECRET_KEY + "&response=" + payloadStr);
 			con = (HttpURLConnection) url.openConnection();
 			con.setDoInput(true);
 			con.setDoOutput(true);

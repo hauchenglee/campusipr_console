@@ -9,18 +9,20 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Component
 public class JWTUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JWTUtils.class);
 
-    @Value("${grokonez.app.jwtSecret}")
-    private String jwtSecret;
 
-    @Value("${grokonez.app.jwtExpiration}")
-    private int jwtExpiration;
+    private static String jwtSecret ="leo's test";
 
-    public String generateJwtToken(String adminId) {
+
+    private static int jwtExpiration = 30;
+
+    public static String generateJwtToken(String adminId) {
 
      
 
@@ -32,7 +34,7 @@ public class JWTUtils {
 		                .compact();
     }
     
-    public boolean validateJwtToken(String authToken) {
+    public static boolean validateJwtToken(String authToken) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;
@@ -51,10 +53,20 @@ public class JWTUtils {
         return false;
     }
     
-    public String getAdminIdFromJwtToken(String token) {
+    public static String getAdminIdFromJwtToken(String token) {
         return Jwts.parser()
 			                .setSigningKey(jwtSecret)
 			                .parseClaimsJws(token)
 			                .getBody().getSubject();
     }
+    
+    public static String getJwtToken(HttpServletRequest request) {
+		String authHeader = request.getHeader("Authorization");
+
+		if (authHeader != null && authHeader.startsWith("Bearer ")) {
+			return authHeader.replace("Bearer ", "");
+		}
+
+		return null;
+	}
 }

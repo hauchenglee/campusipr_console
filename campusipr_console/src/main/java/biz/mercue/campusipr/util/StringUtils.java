@@ -66,8 +66,18 @@ public class StringUtils {
 			return str;
 		}
 	}
+	public static boolean validatePassword(String password,String storedPassword){
+		return false;
+	}
 	
-	public static boolean validatePassword(String password,String storedPassword)throws NoSuchAlgorithmException, InvalidKeySpecException{
+	public static String  generatePasswordHash(String password) {
+		return "";
+	}
+	
+	
+	
+	
+	public static boolean validatePBKDF2Password(String password,String storedPassword)throws NoSuchAlgorithmException, InvalidKeySpecException{
 		Logger.getLogger(StringUtils.class.getName()).info("validatePassword");
 	    String[] parts = storedPassword.split(":");
         int iterations = 1000;
@@ -89,7 +99,7 @@ public class StringUtils {
 	}
 	
 	//output salt:hashPassword
-	public static String generatePasswordHash(String password)throws NoSuchAlgorithmException, InvalidKeySpecException{
+	public static String generatePBKDF2PasswordHash(String password)throws NoSuchAlgorithmException, InvalidKeySpecException{
 		int iterations = 1000;
         char[] chars = password.toCharArray();
         byte[] salt = generateSalt().getBytes();

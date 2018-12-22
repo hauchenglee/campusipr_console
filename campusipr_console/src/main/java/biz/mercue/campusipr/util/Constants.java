@@ -40,7 +40,7 @@ public class Constants {
 	public static String MAIL_PASSWORD = "";
 	public static String SYSTEM_EMAIL = "";
 	
-	public static String RECAPTCHA_SECRET_TOKEN = "";
+	public static String RECAPTCHA_SECRET_KEY = "";
 	
 	public static String ELASTICSEARCH_IP = "";
 	public static String ELASTICSEARCH_PORT = "";
@@ -140,37 +140,11 @@ public class Constants {
 	public static final String MSG_USER_DUPLICATE =  "Email已被註冊" ;
 	
 	public static final int INT_DATA_DUPLICATE =  -4 ;
-	public static final String MSG_DATA_DUPLICATE =  "資料重覆" ;
-	
-	public static final int INT_MODULE_CODE_DUPICATE = -4;
-	public static final String MSG_MODULE_CODE_DUPLICATE = "module code重複";
-	
-	public static final int INT_MODULE_LANGUAGE_DUPLICATE = -4;
-	public static final String MSG_MODULE_LANGUAGE_DUPLICATE = "language重複";
-	
+	public static final String MSG_DATA_DUPLICATE =  "資料重複" ;
 	
 	public static final int INT_DATA_ERROR =  -5 ;
-	public static final int INT_LINE_IMAGE_SIZE_ERROR =  -1 ;
-	public static final int INT_LINE_FILE_SIZE_ERROR =  -2 ;
-	public static final int INT_FB_FILE_SIZE_ERROR =  -3 ;
-	public static final int INT_LINE_IMAGE_FORMAT_ERROR =  -4 ;
-	public static final int INT_LINE_VIDEO_FORMAT_ERROR =  -5 ;
-	public static final int INT_LINE_AUDIO_FORMAT_ERROR =  -6 ;
-	public static final int INT_LINE_IMAGE_WIDTH_HEIGHT_ERROR =  -7 ;
-	public static final int INT_LINE_VIDEO_DURATION_ERROR =  -8 ;
-	public static final int INT_LINE_NOT_SUPPORT_ERROR =  -9 ;
 	public static final String MSG_DATA_ERROR =  "輸入資料錯誤" ;
-	public static final String MSG_IMAGE_SIZE_ERROR =  "圖片大於1MB" ;
-	public static final String MSG_FILE_SIZE_ERROR =  "圖片大於10MB" ;
-	public static final String MSG_FB_FILE_SIZE_ERROR =  "檔案大於25MB" ;
-	public static final String MSG_LINE_IMAGE_FORMAT_ERROR =  "圖片格式錯誤，僅支援jepg、jpg、png" ;
-	public static final String MSG_LINE_VIDEO_FORMAT_ERROR =  "圖片格式錯誤，僅支援mp4" ;
-	public static final String MSG_LINE_AUDIO_FORMAT_ERROR =  "音檔格式錯誤，僅支援m4a" ;
-	public static final String MSG_LINE_IMAGE_WIDTH_HEIGHT_ERROR =  "圖片大小超出，圖片最大長寬1024x1024 px" ;
-	public static final String MSG_LINE_VIDEO_DURATION_ERROR =  "影片長度過長，目前僅支援長度一分鐘內的影片" ;
-	public static final String MSG_MESSAGE_FORMAT_ERROR = "訊息格式錯誤";
-	public static final String MSG_LINE_NOT_SUPPORT_FILE_ERROR =  "Line不支援其他檔案格式" ;
-
+	
 	public static final int INT_USER_LOGOUT =  -6 ;
 	public static final String MSG_USER_LOGOUT =  "已登出系統" ;
 	

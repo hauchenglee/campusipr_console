@@ -31,21 +31,17 @@ public class Role  extends BaseBean{
 	@JsonView(View.Public.class)
 	private String role_name;
 	
-	@JsonView(View.Public.class)
-	private int role_status;
+
 	
     @JsonView(View.Public.class)
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
     @JoinTable(name = "role_permission", 
 	joinColumns = { @JoinColumn(name = "role_id", referencedColumnName="role_id") }, 
 	inverseJoinColumns = { @JoinColumn(name = "permission_id") })
     @OrderBy("permission_group_order,permission_order ASC")
 	private List<Permission> permissionList;
 
-	@JsonView({View.Business.class,View.Public.class})
-    @OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
-	@JoinColumn(name="business_id", referencedColumnName="business_id")
-	private Business business;
+
     
 	public String getRole_id() {
 		return role_id;
@@ -63,14 +59,6 @@ public class Role  extends BaseBean{
 		this.role_name = role_name;
 	}
 
-	public int getRole_status() {
-		return role_status;
-	}
-
-	public void setRole_status(int role_status) {
-		this.role_status = role_status;
-	}
-
 	public List<Permission> getPermissionList() {
 		return permissionList;
 	}
@@ -79,13 +67,5 @@ public class Role  extends BaseBean{
 		this.permissionList = permissionList;
 	}
 
-	public Business getBusiness() {
-		return business;
-	}
-
-	public void setBusiness(Business business) {
-		this.business = business;
-	}
-	
 
 }
