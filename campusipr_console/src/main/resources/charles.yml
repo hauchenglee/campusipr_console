@@ -41,7 +41,7 @@ elasticsearch:
     port : "9200"
 google: 
     recaptcha : 6LesJYQUAAAAAE1OFDeCDjVkGtuCjbS-AIMLeZGW
-  
-patent_api: 
+patent_api:
     patent_webservice_tw : "https://tiponet.tipo.gov.tw/OpenDataApi/OpenData/API"
     patent_key_tw : 8rSwrxyD
+  

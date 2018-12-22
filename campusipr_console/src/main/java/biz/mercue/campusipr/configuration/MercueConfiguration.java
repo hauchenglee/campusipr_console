@@ -64,6 +64,10 @@ public class MercueConfiguration implements WebMvcConfigurer{
 		
 		
 		Constants.RECAPTCHA_SECRET_KEY = yamlConfig.getConfig().getGoogle().get("recaptcha");
+		//set patent key in here
+		Constants.PATENT_WEB_SERVICE_TW = yamlConfig.getConfig().getPatent_api().get("patent_webservice_tw");
+		Constants.PATENT_KEY_TW = yamlConfig.getConfig().getPatent_api().get("patent_key_tw");
+
 	}
 	
 	
