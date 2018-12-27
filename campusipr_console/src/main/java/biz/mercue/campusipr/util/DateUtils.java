@@ -119,6 +119,25 @@ public class DateUtils {
 		return sdf.parse(strDate);
 	}
 	
+	/**
+	 * Formate:yyyy-MM-ddTHH:mm:ssZ
+	 * Example:2017-01-20 12:00:00
+	 */
+	public static String getUTCFormatDateTime(Date date){
+		SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		return sdFormat.format(date.getTime());
+	}
+	
+	/**
+	 * Parse Formate:yyyy-MM-ddTHH:mm:ssZ
+	 * Example:2017-01-20 12:00:00
+	 */
+	public static Date parserDateTimeUTCString(String strDate) throws ParseException{
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		return sdf.parse(strDate);
+	}
+	
 
 	/**
 	 * Parse Formate:yyyyMMdd

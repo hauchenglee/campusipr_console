@@ -33,6 +33,11 @@ public class Constants {
 	//patent api for local
 	public static String PATENT_WEB_SERVICE_TW = "";
 	public static String PATENT_KEY_TW = "";
+	public static String PATENT_WEB_SERVICE_US = "";
+	public static String PATENT_INVENTOR_WEB_SERVICE_US = "";
+	public static String PATENT_CONTEXT_WEB_SERVICE_US = "";
+	public static String PATENT_WEB_SERVICE_EU = "";
+	public static String PATENT_TOKEN_EU = "";
 	
 	public static String DUCKLING_API_URL = "";
 	

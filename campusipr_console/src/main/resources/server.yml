@@ -38,3 +38,12 @@ duckling:
 elasticsearch: 
     elasticsearch_ip : "192.168.2.61"
     port : "9200"
+    
+patent_api:
+    patent_webservice_tw : "https://tiponet.tipo.gov.tw/OpenDataApi/OpenData/API"
+    patent_key_tw : 8rSwrxyD
+    patent_webservice_us : "https://developer.uspto.gov/ibd-api/v1/patent/application"
+    patent_inventor_webservice_us : "https://ped.uspto.gov/api/queries"
+    patent_context_webservice_us : "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN%2F"
+    patent_webservice_eu : "https://ops.epo.org/3.2"
+    patent_token_eu : QWV0UjhhdGlmeTZiRzBzRDNiZkdsaHBObVBmUkRlZ0E6YTY1bXVjUzZobm5yMGNRUg==

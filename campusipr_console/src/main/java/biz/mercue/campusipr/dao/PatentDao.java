@@ -26,5 +26,5 @@ public interface PatentDao {
 	
 	List<Patent> fieldSearchPatent(Patent patent);
 	
-
+	Patent getByPatentNo(String patentNo);
 }

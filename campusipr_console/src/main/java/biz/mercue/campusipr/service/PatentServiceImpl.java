@@ -138,6 +138,11 @@ public class PatentServiceImpl implements PatentService{
 	public List<Patent> getByPatentIds(List<String> list){
 		return patentDao.getByPatentIds(list);
 	}
+	
+	@Override
+	public Patent getByPatentNo(String patentNo){
+		return patentDao.getByPatentNo(patentNo);
+	}
 
 	
 }

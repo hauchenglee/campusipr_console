@@ -6,9 +6,11 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,13 +18,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.View;
+import biz.mercue.campusipr.service.PatentService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
+import biz.mercue.campusipr.util.ServiceChinaPatent;
 import biz.mercue.campusipr.util.StringResponseBody;
 import biz.mercue.campusipr.util.ServiceTaiwanPatent;
+import biz.mercue.campusipr.util.ServiceUSPatent;
 
 @Controller
 public class TestController {
@@ -31,6 +36,9 @@ public class TestController {
 	
 	@Autowired
 	PasswordEncoder encoder;
+	
+	@Autowired
+	PatentService patentService;
 	
 	
 	@RequestMapping(value="/gettestid", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
@@ -79,13 +87,81 @@ public class TestController {
 		return "";
 	}
 
-	@RequestMapping(value="/getpatent", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/syncpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String getPatent(HttpServletRequest request) {
-		log.info("getPatent ");
+	public String syncPatent(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		log.info("sync Patent ");
+		JSONObject receiveJSONObj = new JSONObject(receiveJSONString);
+		String assignee = receiveJSONObj.optString("assignee");
 		ListResponseBody listResponseBody  = new ListResponseBody();
 		
-		List<Patent> patentList = ServiceTaiwanPatent.getPatentRightByPatentNo("I621340");
+		List<Patent> patentList = ServiceTaiwanPatent.getPatentRightByAssigneeNameCh(assignee, 10);
+		
+		for (Patent patent:patentList) {
+			Patent patentCheck = patentService.getByPatentNo(patent.getPatent_no());
+			if (patentCheck == null) {
+				patentService.addPatent(patent);
+			}
+		}
+		
+		List<Patent> patentEnList = ServiceTaiwanPatent.getPatentRightByAssigneeNameEn(assignee, 10);
+		
+		for (Patent patent:patentEnList) {
+			Patent patentCheck = patentService.getByPatentNo(patent.getPatent_no());
+			if (patentCheck == null) {
+				patentService.addPatent(patent);
+			}
+		}
+		
+		listResponseBody.setCode(Constants.INT_SUCCESS);
+		listResponseBody.setMessage(Constants.MSG_SUCCESS);
+		listResponseBody.setList(patentList);
+		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.PatentDetail.class);
+		log.info("result :"+result);
+		return result;
+	}
+	
+	@RequestMapping(value="/syncpatentus", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String syncPatentUS(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		log.info("sync Patent ");
+		JSONObject receiveJSONObj = new JSONObject(receiveJSONString);
+		String assignee = receiveJSONObj.optString("assignee");
+		ListResponseBody listResponseBody  = new ListResponseBody();
+		
+		List<Patent> patentList = ServiceUSPatent.getPatentRightByAssigneeName(assignee, 10);
+		
+		for (Patent patent:patentList) {
+			Patent patentCheck = patentService.getByPatentNo(patent.getPatent_no());
+			if (patentCheck == null) {
+				patentService.addPatent(patent);
+			}
+		}
+		
+		listResponseBody.setCode(Constants.INT_SUCCESS);
+		listResponseBody.setMessage(Constants.MSG_SUCCESS);
+		listResponseBody.setList(patentList);
+		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.PatentDetail.class);
+		log.info("result :"+result);
+		return result;
+	}
+	
+	@RequestMapping(value="/syncpatentcn", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String syncPatentCN(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		log.info("sync Patent ");
+		JSONObject receiveJSONObj = new JSONObject(receiveJSONString);
+		String assignee = receiveJSONObj.optString("assignee");
+		ListResponseBody listResponseBody  = new ListResponseBody();
+		
+		List<Patent> patentList = ServiceChinaPatent.getPatentRightByAssigneeName("上海建工集团股份有限公司");
+		
+		for (Patent patent:patentList) {
+			Patent patentCheck = patentService.getByPatentNo(patent.getPatent_no());
+			if (patentCheck == null) {
+				patentService.addPatent(patent);
+			}
+		}
 		
 		listResponseBody.setCode(Constants.INT_SUCCESS);
 		listResponseBody.setMessage(Constants.MSG_SUCCESS);

@@ -25,5 +25,7 @@ public interface PatentService {
 	Patent getById(String businessId,String id);
 	
 	Patent getById(String id);
+	
+	Patent getByPatentNo(String patentNo);
 
 }
