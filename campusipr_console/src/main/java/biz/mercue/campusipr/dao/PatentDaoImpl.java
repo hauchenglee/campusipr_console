@@ -31,6 +31,14 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.add(Restrictions.eq("patent_id", id));
 		return (Patent) criteria.uniqueResult();
 	}
+	
+	
+	@Override
+	public Patent getByApplNo(String applNo) {
+		Criteria criteria =  createEntityCriteria();
+		criteria.add(Restrictions.eq("patent_appl_no", applNo));
+		return (Patent) criteria.uniqueResult();
+	}
 
 	@Override
 	public void create(Patent patent) {

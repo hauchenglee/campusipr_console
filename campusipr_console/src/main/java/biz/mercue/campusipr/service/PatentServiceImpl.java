@@ -6,11 +6,14 @@ import java.awt.print.Pageable;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.formula.functions.Count;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import biz.mercue.campusipr.dao.PatentDao;
+import biz.mercue.campusipr.model.Business;
+import biz.mercue.campusipr.model.Country;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentContext;
@@ -85,13 +88,43 @@ public class PatentServiceImpl implements PatentService{
 
 	@Override
 	public int addPatent(Patent patent) {
+		int taskResult= -1;
 		if(StringUtils.isNULL(patent.getPatent_id())) {
 			patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
 		}
+		
+		if(patent.getBusiness() == null) {
+			return Constants.INT_DATA_ERROR;
+		}
+		
+		String applNo =  patent.getPatent_appl_no();
+		
+		if(!StringUtils.isNULL(applNo)) {
+			Patent appNoPatent = patentDao.getByApplNo(applNo);
+			if(appNoPatent!=null) {
+				List<Business> listBusiness = appNoPatent.getListBusiness();
+				for(Business business : listBusiness) {
+					if(patent.getBusiness().getBusiness_id().equals(business.getBusiness_id())) {
+						return Constants.INT_DATA_DUPLICATE;
+					}
+				}
+			}
+		}
+		
 
 		patentDao.create(patent);
 		return Constants.INT_SUCCESS;
 	}
+	
+	
+	@Override
+	public int addPatentByApplNo(Patent patent) {
+		
+		
+		return Constants.INT_CANNOT_FIND_DATA;
+	}
+	
+
 
 
 	@Override
@@ -203,6 +236,9 @@ public class PatentServiceImpl implements PatentService{
 		
 		return form;
 	}
+	
+	
+
 
 	
 }

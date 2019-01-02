@@ -62,9 +62,27 @@ public class PatentController {
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Patent.class);
-		log.info("result :"+result);
-		return result;
+		return responseBody.getJacksonString( View.Patent.class);
+	}
+	
+	
+	@RequestMapping(value="/api/addpatentbyapplno", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String addPatentByApplNo(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		log.info("addPatent ");
+		
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+			
+		if(tokenBean!=null) {
+			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
+			int taskResult = patentService.addPatent(patent);
+			responseBody.setCode(taskResult);
+
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString( View.Patent.class);
 	}
 	
 	

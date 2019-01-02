@@ -18,6 +18,7 @@ import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Where;
 
@@ -149,6 +150,11 @@ public class Patent extends BaseBean{
 	@JsonView(View.PatentDetail.class)
 	@JoinColumn(name="patent_family_id")
 	private PatentFamily family;
+	
+	//for update and add patent
+	@Transient
+	@JsonView(View.PatentDetail.class)
+	private Business business;
 	
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_portfolio", 
@@ -386,6 +392,14 @@ public class Patent extends BaseBean{
 
 	public void setPatent_extension(PatentExtension patent_extension) {
 		this.patent_extension = patent_extension;
+	}
+
+	public Business getBusiness() {
+		return business;
+	}
+
+	public void setBusiness(Business business) {
+		this.business = business;
 	}
 
 //	public List<PatentContact> getListContact() {

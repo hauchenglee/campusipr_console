@@ -10,6 +10,7 @@ import biz.mercue.campusipr.model.Patent;
 public interface PatentService {
 
 	int addPatent(Patent patent);
+	int addPatentByApplNo(Patent patent);
 
 	int updatePatent(Patent patent);
 
@@ -23,6 +24,9 @@ public interface PatentService {
 	ListQueryForm searchPatent(String text,String businessId,int page);
 	
 	ListQueryForm fieldSearchPatent(String text,String businessId,int page);
+	
+	
+	//Patent getByApplNo(String applNo,String businessId);
 		
 	Patent getById(String businessId,String id);
 	

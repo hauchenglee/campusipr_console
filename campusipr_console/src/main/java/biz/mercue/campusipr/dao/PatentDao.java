@@ -10,6 +10,8 @@ public interface PatentDao {
 	Patent getById(String id);
 	
 	Patent getById(String businessId,String id);
+	
+	Patent getByApplNo(String applNo);
 
 	void create(Patent patent);
 	
