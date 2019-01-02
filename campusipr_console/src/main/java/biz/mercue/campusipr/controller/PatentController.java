@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,11 +17,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import biz.mercue.campusipr.model.AdminToken;
+import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.View;
+import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.PatentService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
+import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
@@ -36,20 +41,27 @@ public class PatentController {
 	PatentService patentService;
 	
 	
+	@Autowired
+	AdminTokenService adminTokenService;
 	
-	@RequestMapping(value="/addpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	
+	
+	@RequestMapping(value="/api/addpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String addPatent(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("addPatent ");
 		Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
 		StringResponseBody responseBody  = new StringResponseBody();
-		String businessId ="04ea692278889b6621409d68c88aab17";
-		patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
-		
-		patentService.addPatent(patent);
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+			
+		if(tokenBean!=null) {
+			patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
+			int taskResult = patentService.addPatent(patent);
+			responseBody.setCode(taskResult);
 
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
 		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Patent.class);
 		log.info("result :"+result);
 		return result;
@@ -57,146 +69,152 @@ public class PatentController {
 	
 	
 	
-	@RequestMapping(value="/updatepatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/updatepatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String updatePatent(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("updatePatent ");
 		Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
 		StringResponseBody responseBody  = new StringResponseBody();
-		String businessId ="04ea692278889b6621409d68c88aab17";
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			int taskResult =  patentService.updatePatent(patent);
+			responseBody.setCode(taskResult);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
 
-		patentService.updatePatent(patent);
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
-
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Patent.class);
-		log.info("result :"+result);
-		return result;
+		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
-	@RequestMapping(value="/patentlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/patentlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getPatentList(HttpServletRequest request,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
 		log.info("getPatentList ");
-		ListResponseBody listResponseBody  = new ListResponseBody();
-		String businessId ="04ea692278889b6621409d68c88aab17";
-
-		List<Patent> list = patentService.getByBusinessId(businessId, 1, 20);
-		listResponseBody.setCode(Constants.INT_SUCCESS);
-		listResponseBody.setMessage(Constants.MSG_SUCCESS);
-		listResponseBody.setList(list);
-		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.Patent.class);
-		log.info("result :"+result);
-		return result;
+		ListResponseBody responseBody  = new ListResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			ListQueryForm form = patentService.getByBusinessId(tokenBean.getBusiness().getBusiness_id(), page);
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setListQuery(form);;
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
 	
 	
-	@RequestMapping(value="/getpatentbyid/{patentId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/getpatentbyid/{patentId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getPatentbyId(HttpServletRequest request,@PathVariable String patentId) {
 		log.info("getPatentbyId ");
 		BeanResponseBody responseBody  = new BeanResponseBody();
-		String businessId ="04ea692278889b6621409d68c88aab17";
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Patent patent = patentService.getById(tokenBean.getBusiness().getBusiness_id(), patentId);
+		
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setBean(patent);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
 
-		Patent patent = patentService.getById(businessId, patentId);
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
-		responseBody.setBean(patent);
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.PatentDetail.class);
-		log.info("result :"+result);
-		return result;
+		return responseBody.getJacksonString(View.PatentDetail.class);
 	}
 	
 	
-	@RequestMapping(value="/combinepatentfamily", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/combinepatentfamily", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String combinePatentFamily(HttpServletRequest request,@RequestBody String receiveJSONString){
 		log.info("combinePatentFamily ");
-		ListResponseBody listResponseBody  = new ListResponseBody();
-		String businessId ="123";
-		
-		List<Patent> list = patentService.getByBusinessId(businessId, 1, 20);
-		listResponseBody.setCode(Constants.INT_SUCCESS);
-		listResponseBody.setMessage(Constants.MSG_SUCCESS);
-		listResponseBody.setList(list);
-		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.Patent.class);
-		log.info("result :"+result);
-		return result;
+		ListResponseBody responseBody  = new ListResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			//TODO
+			responseBody.setCode(Constants.INT_SUCCESS);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
 	
-	@RequestMapping(value="/exportpatentexcel", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/exportpatentexcel", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String exportPatentexcel(HttpServletRequest request,@RequestBody String receiveJSONString){
 		log.info("exportpatent ");
 		StringResponseBody responseBody  = new StringResponseBody();
-		String businessId ="123";
-		
-		List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});
-		List<Patent> PatentList =  patentService.getByPatentIds(patentIds);
-		
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
-		//responseBody.setData(data);
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Patent.class);
-		log.info("result :"+result);
-		return result;
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			//TODO 
+			
+			responseBody.setCode(Constants.INT_SUCCESS);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
 	
-	@RequestMapping(value="/importpatentexcel", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/importpatentexcel", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String importPatentexcel(HttpServletRequest request,@RequestBody String receiveJSONString){
 		log.info("exportpatent ");
 		StringResponseBody responseBody  = new StringResponseBody();
-		String businessId ="123";
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
 		
-		List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});
-		List<Patent> PatentList =  patentService.getByPatentIds(patentIds);
-		
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
-		//responseBody.setData(data);
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Patent.class);
-		log.info("result :"+result);
-		return result;
+			List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});		
+			responseBody.setCode(Constants.INT_SUCCESS);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+
+		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
 	
 	
 	
-	@RequestMapping(value="/searchpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/searchpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String searchPatent(HttpServletRequest request,@RequestBody String receiveJSONString){
+	public String searchPatent(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page){
 		log.info("exportpatent ");
-		StringResponseBody responseBody  = new StringResponseBody();
-		String businessId ="123";
-		
-		List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});
-		List<Patent> PatentList =  patentService.getByPatentIds(patentIds);
-		
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
-		//responseBody.setData(data);
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Patent.class);
-		log.info("result :"+result);
-		return result;
+		ListResponseBody responseBody  = new ListResponseBody();
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		String searchText = jsonObject.getString("searchText");
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+
+			ListQueryForm form =  patentService.searchPatent(searchText, tokenBean.getBusiness().getBusiness_id(), page);
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setListQuery(form);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+
+		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
-	@RequestMapping(value="/advancedsearchpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/advancedsearchpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String advancedSearchPatent(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("exportpatent ");
-		StringResponseBody responseBody  = new StringResponseBody();
-		String businessId ="123";
+	public String advancedSearchPatent(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page){
+		log.info("advancedSearchPatent ");
+		ListResponseBody responseBody  = new ListResponseBody();
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		String searchText = jsonObject.getString("searchText");
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
 		
-		List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});
-		List<Patent> PatentList =  patentService.getByPatentIds(patentIds);
+	
+			ListQueryForm form = patentService.fieldSearchPatent(searchText, tokenBean.getBusiness().getBusiness_id(), page);
 		
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
-		//responseBody.setData(data);
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setListQuery(form);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+
 		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Patent.class);
 		log.info("result :"+result);
 		return result;

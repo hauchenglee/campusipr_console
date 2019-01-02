@@ -66,13 +66,13 @@ public class StringUtils {
 			return str;
 		}
 	}
-	public static boolean validatePassword(String password,String storedPassword){
-		return false;
-	}
-	
-	public static String  generatePasswordHash(String password) {
-		return "";
-	}
+//	public static boolean validatePassword(String password,String storedPassword){
+//		return false;
+//	}
+//	
+//	public static String  generatePasswordHash(String password) {
+//		return "";
+//	}
 	
 	
 	

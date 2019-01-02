@@ -1,6 +1,5 @@
 package biz.mercue.campusipr.controller;
 
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,12 +13,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import biz.mercue.campusipr.model.AdminToken;
+import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Portfolio;
 import biz.mercue.campusipr.model.View;
-import biz.mercue.campusipr.model.View.PortfolioDetail;
+import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.PortfolioService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
+import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
 
@@ -32,95 +34,106 @@ public class PortfolioController {
 	@Autowired
 	PortfolioService portfolioService;
 	
+	@Autowired
+	AdminTokenService adminTokenService;
 	
-	@RequestMapping(value="/portfoliolist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	
+	@RequestMapping(value="/api/portfoliolist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getPortfolioList(HttpServletRequest request,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
 		log.info("getPortfolioList ");
-		ListResponseBody listResponseBody  = new ListResponseBody();
-		String businessId ="04ea692278889b6621409d68c88aab17";
-
-		List<Portfolio> list = portfolioService.getByBusinessId(businessId, page, Constants.SYSTEM_PAGE_SIZE);
-		listResponseBody.setCode(Constants.INT_SUCCESS);
-		listResponseBody.setMessage(Constants.MSG_SUCCESS);
-		listResponseBody.setList(list);
-		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.Portfolio.class);
-		log.info("result :"+result);
-		return result;
+		ListResponseBody responseBody  = new ListResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			ListQueryForm form = portfolioService.getByBusinessId(tokenBean.getBusiness_id(), page);
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setListQuery(form);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString( View.Portfolio.class);
 	}
 	
 	
-	@RequestMapping(value="/getportfoliobyid/{portfoliId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/getportfoliobyid/{portfoliId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getPortfolioById(HttpServletRequest request,@PathVariable String portfoliId) {
-		log.info("addPortfolio ");
-		
-		
+		log.info("getPortfolioById ");
 		BeanResponseBody responseBody  = new BeanResponseBody();
-		String businessId ="04ea692278889b6621409d68c88aab17";
-
-		Portfolio portfolio = portfolioService.getById(businessId, portfoliId);
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
-		responseBody.setBean(portfolio);
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.PortfolioDetail.class);
-		log.info("result :"+result);
-		return result;
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			log.info("tokenBean.getBusiness_id():"+tokenBean.getBusiness_id());
+			Portfolio portfolio = portfolioService.getById(tokenBean.getBusiness_id(), portfoliId);
+			if(portfolio !=null) {
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setBean(portfolio);
+			}else {
+				responseBody.setCode(Constants.INT_CANNOT_FIND_DATA);
+			}
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+	
+		return responseBody.getJacksonString(View.PortfolioDetail.class);
 	}
 	
 	
-	@RequestMapping(value="/addportfolio", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/addportfolio", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String addPortfolio(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("addPortfolio ");
 		
 		Portfolio portfolio = (Portfolio) JacksonJSONUtils.readValue(receiveJSONString, Portfolio.class);
 		BeanResponseBody responseBody  = new BeanResponseBody();
-		String businessId ="04ea692278889b6621409d68c88aab17";
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			int taskResult = portfolioService.addPortfolio(portfolio);
 
-		portfolioService.addPortfolio(portfolio);
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
+			responseBody.setCode(taskResult);
+		
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
 
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Portfolio.class);
-		log.info("result :"+result);
-		return result;
+		return  responseBody.getJacksonString(View.Portfolio.class);
 	}
 	
 	
-	@RequestMapping(value="/updateportfolio", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/updateportfolio", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String updatePortfolio(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("updatePortfolio ");
 		
 		Portfolio portfolio = (Portfolio) JacksonJSONUtils.readValue(receiveJSONString, Portfolio.class);
-		ListResponseBody listResponseBody  = new ListResponseBody();
-		String businessId ="04ea692278889b6621409d68c88aab17";
-
-		portfolioService.updatePortfolio(portfolio);
-		listResponseBody.setCode(Constants.INT_SUCCESS);
-		listResponseBody.setMessage(Constants.MSG_SUCCESS);
+		ListResponseBody responseBody  = new ListResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			int taskResult = portfolioService.updatePortfolio(portfolio);
+			responseBody.setCode(taskResult);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
 	
-		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.Portfolio.class);
-		log.info("result :"+result);
-		return result;
+		return  responseBody.getJacksonString(View.Portfolio.class);
 	}
 	
 	
-	@RequestMapping(value="/removeportfolio", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/removeportfolio", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String removePortfolio(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("removePortfolio ");
 		Portfolio portfolio = (Portfolio) JacksonJSONUtils.readValue(receiveJSONString, Portfolio.class);
-		ListResponseBody listResponseBody  = new ListResponseBody();
-		String businessId ="04ea692278889b6621409d68c88aab17";
+		ListResponseBody responseBody  = new ListResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
 
-		portfolioService.deletePortfolio(portfolio);
-		listResponseBody.setCode(Constants.INT_SUCCESS);
-		listResponseBody.setMessage(Constants.MSG_SUCCESS);
-		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.Portfolio.class);
-		log.info("result :"+result);
-		return result;
+			int taskResult = portfolioService.deletePortfolio(portfolio);
+			responseBody.setCode(taskResult);
+
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString(View.Portfolio.class);
 	}
 	
 

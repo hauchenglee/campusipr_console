@@ -13,9 +13,9 @@ import biz.mercue.campusipr.dao.PermissionDao;
 import biz.mercue.campusipr.model.Permission;
 
 
-@Service("permissionService")
+@Service("rolePermissionService")
 @Transactional
-public class PermissionServiceImpl implements PermissionService{
+public class RolePermissionServiceImpl implements PermissionService{
 	private Logger log = Logger.getLogger(this.getClass().getName());
 	
 	@Autowired

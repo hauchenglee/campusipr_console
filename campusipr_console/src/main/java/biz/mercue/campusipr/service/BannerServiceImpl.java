@@ -66,6 +66,7 @@ public class BannerServiceImpl implements BannerService{
 
 	@Override
 	public void deleteBanner(Banner banner) {
+		log.info("banner id "+banner.getBanner_id());
 		Banner dbBean = bannerDao.getById(banner.getBanner_id());
 
 		if(dbBean!=null){

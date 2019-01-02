@@ -1,13 +1,10 @@
 package biz.mercue.campusipr.dao;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -32,8 +29,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.createAlias("listBusiness","bs");
 		criteria.add(Restrictions.eq("bs.business_id", businessId));
 		criteria.add(Restrictions.eq("patent_id", id));
-		//criteria.addOrder(Order.desc("push_date"));
-		//criteria.addOrder(Order.desc("push_type"));
 		return (Patent) criteria.uniqueResult();
 	}
 
@@ -55,40 +50,43 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		Criteria criteria =  createEntityCriteria();
 		criteria.createAlias("listBusiness","bs");
 		criteria.add(Restrictions.eq("bs.business_id", businessId));
-		//criteria.addOrder(Order.desc("push_date"));
-		//criteria.addOrder(Order.desc("push_type"));
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
 		return criteria.list();
 	}
 	
+	
 	@Override
-	public List<Patent> getByPatentIds(List<String> ids){
+	public int  getCountByBusinessId(String businessId) {
+		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("listBusiness","bs");
+		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		criteria.setProjection(Projections.rowCount());
+		long count = (long)criteria.uniqueResult();
+		return (int)count;
+	}
+	
+	@Override
+	public List<Patent> getByPatentIds(List<String> ids,String businessId){
 		Criteria criteria =  createEntityCriteria();
 		criteria.add(Restrictions.in("patent_id", ids));
-		//criteria.addOrder(Order.desc("push_date"));
-		//criteria.addOrder(Order.desc("push_type"));
 		return criteria.list();
 	}
 	
+	@Override
+	public List<Patent> searchPatent(String  searchText,String businessId,int page,int pageSize){
+		Criteria criteria =  createEntityCriteria();
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
+		return criteria.list();
+	}
 	
-
-	
-	
-//	@Override
-//	public List<Patent> getByAdminId(String adminId,int page,int pageSize){
-//		log.info("123");
-//		Criteria criteria =  createEntityCriteria();
-//		criteria.add(Restrictions.eq("admin_id", adminId));
-//		//criteria.addOrder(Order.desc("push_date"));
-//		//criteria.addOrder(Order.desc("push_type"));
-//			
-//		return criteria.list();
-//	}
 
 	@Override
-	public List<Patent> fieldSearchPatent(Patent patent) {
+	public List<Patent> fieldSearchPatent(Patent patent,String businessId,int page,int pageSize){
 		Criteria criteria =  createEntityCriteria();
-		//criteria.add(Restrictions.eq("admin_id", adminId));
-
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
 		return criteria.list();
 	}
 	

@@ -4,11 +4,12 @@ public class View {
 	public interface Public {}
 	public interface Token extends Public {}
 	
-	public interface Account extends Public {}
-	public interface Perissmion extends Public {}
+	public interface Admin extends Public {}
+	public interface Role extends Public {}
+	public interface Permission extends Public {}
 
 	public interface Business extends Public {}
-	public interface BusinessDetail extends Public {}
+	public interface BusinessDetail extends Business {}
 	
 	public interface Patent extends Public {}
 	

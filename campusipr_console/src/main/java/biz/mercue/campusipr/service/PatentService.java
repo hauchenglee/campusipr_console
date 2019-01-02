@@ -2,26 +2,28 @@ package biz.mercue.campusipr.service;
 
 import java.util.List;
 
+import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 
 
 
 public interface PatentService {
 
-	void addPatent(Patent patent);
+	int addPatent(Patent patent);
 
 	int updatePatent(Patent patent);
 
-	void deletePatent(Patent patent);
+	int deletePatent(Patent patent);
 
-	List<Patent> getByBusinessId(String businessId,int page,int pageSize);
+	ListQueryForm getByBusinessId(String businessId,int page);
 	
 	
-	List<Patent> getByPatentIds(List<String> list);
+	List<Patent> getByPatentIds(List<String> idList,String businessId);
 	
-//	List<Patent> getByAdminId(String adminId,int page,int pageSize);
+	ListQueryForm searchPatent(String text,String businessId,int page);
 	
-	
+	ListQueryForm fieldSearchPatent(String text,String businessId,int page);
+		
 	Patent getById(String businessId,String id);
 	
 	Patent getById(String id);

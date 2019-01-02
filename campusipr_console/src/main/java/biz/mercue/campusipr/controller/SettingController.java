@@ -14,6 +14,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.BaselineSessionEventsListenerBuilder;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -61,7 +62,7 @@ public class SettingController {
 	BannerService bannerService;
 	
 	
-	@RequestMapping(value="/countrylist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/countrylist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getCountryList(HttpServletRequest request,@RequestParam(value ="lang",required=false,defaultValue ="tw") String lang) {
 		log.info("getPatentList ");
@@ -79,7 +80,7 @@ public class SettingController {
 	
 
 	
-	@RequestMapping(value="/getannuityreminder", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/getannuityreminder", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getAnnuityReminder(HttpServletRequest request) {
 		log.info("Annuity ");
@@ -96,7 +97,7 @@ public class SettingController {
 	}
 	
 	
-	@RequestMapping(value="/updateannuityreminder", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/updateannuityreminder", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String updateAnnuityReminder(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("updateAnnuityReminder ");
@@ -115,7 +116,7 @@ public class SettingController {
 	
 	
 	
-	@RequestMapping(value="/getbannerlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/getbannerlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getBannerList(HttpServletRequest request) {
 		log.info("getBannerList ");
@@ -131,7 +132,7 @@ public class SettingController {
 		return result;
 	}
 	
-	@RequestMapping(value="/getavailablebannerlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/getavailablebannerlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getAvailableBannerList(HttpServletRequest request) {
 		log.info("getAvailableBannerList ");
@@ -149,7 +150,7 @@ public class SettingController {
 	}
 	
 	
-	@RequestMapping(value="/addbanner", method = {RequestMethod.POST} , produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed", "multipart/form-data" })
+	@RequestMapping(value="/api/addbanner", method = {RequestMethod.POST} , produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed", "multipart/form-data" })
 	@ResponseBody
 	public String addBanner(HttpServletRequest request,@RequestParam("data") String  receiveJSONString,@RequestPart("file") MultipartFile[] files) {
 		log.info("addBanner");
@@ -192,7 +193,7 @@ public class SettingController {
 		return result;
 	}
 	
-	@RequestMapping(value="/updatebanner", produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed", "multipart/form-data" })
+	@RequestMapping(value="/api/updatebanner", produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed", "multipart/form-data" })
 	@ResponseBody
 	public String updateBanner(HttpServletRequest request,@RequestParam("data") String  receiveJSONString,@RequestPart("file") MultipartFile[] files) {
 		log.info("updateBanner");
@@ -233,7 +234,28 @@ public class SettingController {
 	}
 	
 	
-	@RequestMapping(value="/updatebannerorder", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/deletebanner", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String deleteBanner(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		log.info("deleteBanner");
+
+		BeanResponseBody responseBody  = new BeanResponseBody();
+		Banner banner =  (Banner) JacksonJSONUtils.readValue(receiveJSONString, Banner.class);
+		log.info("banner :"+banner.getBanner_id());
+	
+		//TODO delete banner file
+		bannerService.deleteBanner(banner);
+		responseBody.setCode(Constants.INT_SUCCESS);
+		responseBody.setMessage(Constants.MSG_SUCCESS);
+		//responseBody.setBean(reminder);
+		
+		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Banner.class);
+		log.info("result :"+result);
+		return result;
+	}
+	
+	
+	@RequestMapping(value="/api/updatebannerorder", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String updateBannerOrder(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		

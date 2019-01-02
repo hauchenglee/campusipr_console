@@ -17,6 +17,7 @@ import biz.mercue.campusipr.model.Business;
 import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
+import biz.mercue.campusipr.util.StringUtils;
 
 
 
@@ -39,14 +40,18 @@ public class AdminTokenServiceImpl implements AdminTokenService{
 
 	@Override
 	public AdminToken getById(String token) {
-		AdminToken tokenBean = dao.getById(token);
-		if(tokenBean != null && tokenBean.getAdminBean() !=null && tokenBean.getAdminBean().getRole() !=null ){
-			
-			List<Permission> permissionList = tokenBean.getAdminBean().getRole().getPermissionList();
-			
-			tokenBean.setPermissionList(tokenBean.getAdminBean().getRole().getPermissionList());
-			
+		if(StringUtils.isNULL(token)) {
+			return null;
 		}
+		AdminToken tokenBean = dao.getById(token);
+		if(tokenBean != null && tokenBean.getAdmin() !=null && tokenBean.getAdmin().getRole() !=null ){
+			
+			List<Permission> permissionList = tokenBean.getAdmin().getRole().getPermissionList();
+			
+			tokenBean.setPermissionList(tokenBean.getAdmin().getRole().getPermissionList());
+			tokenBean.setBusiness_id(tokenBean.getBusiness().getBusiness_id());
+		}
+		
 		
 		
 		return tokenBean;
@@ -56,6 +61,9 @@ public class AdminTokenServiceImpl implements AdminTokenService{
 
 	@Override
 	public int logout(String adminId) {
+		if(StringUtils.isNULL(adminId)) {
+			return Constants.INT_SYSTEM_PROBLEM;
+		}
 		log.info("logout admin :"+adminId);
 
 		
@@ -90,10 +98,10 @@ public class AdminTokenServiceImpl implements AdminTokenService{
 			
 			AdminToken tokenBean  = new  AdminToken();
 			tokenBean.setAdmin_token_id(KeyGeneratorUtils.generateRandomString());
-			tokenBean.setAdminBean(adminBean);
+			tokenBean.setAdmin(adminBean);
 			tokenBean.setAvailable(true);
 			tokenBean.setLogin_date(new Date());
-			tokenBean.setBusinessId(business.getBusiness_id());
+			tokenBean.setBusiness(business);
 			tokenBean.setPermissionList(permissionList);
 			Calendar cal  = Calendar.getInstance();
 			cal.add(Calendar.DATE, 60);

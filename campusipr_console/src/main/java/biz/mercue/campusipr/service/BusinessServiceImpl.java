@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import biz.mercue.campusipr.dao.BusinessDao;
-import biz.mercue.campusipr.dao.PatentDao;
 import biz.mercue.campusipr.model.Business;
-import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.ListQueryForm;
+import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.StringUtils;
 
@@ -39,11 +39,18 @@ public class BusinessServiceImpl implements BusinessService{
 	}
 	
 	@Override
-	public int saveAddBusiness(Business business) {
-		//add anuityReminder
-		addBusiness(business);
+	public int safeAddBusiness(Business business) {
+		int result = -1;
+		if(StringUtils.isNULL(business.getBusiness_id())) {
+		    business.setBusiness_id(KeyGeneratorUtils.generateRandomString());    
+			//add anuityReminder
+			addBusiness(business);
+			result = Constants.INT_SUCCESS;
+		}else {
+			result = Constants.INT_DATA_ERROR;
+		}
 		
-		return 0;
+		return result;
 	}
 
 	
@@ -51,7 +58,7 @@ public class BusinessServiceImpl implements BusinessService{
 	public int updateBusiness(Business business) {
 		
 		Business dbBean =businessDao.getById(business.getBusiness_id());
-
+		int result = -1;
 		if(dbBean!=null){
 			dbBean.setBusiness_alias(business.getBusiness_alias());
 			dbBean.setBusiness_alias_en(business.getBusiness_alias_en());
@@ -65,8 +72,11 @@ public class BusinessServiceImpl implements BusinessService{
 			dbBean.setContact_tel_extension(business.getContact_tel_extension());
 			dbBean.setContact_phone(business.getContact_phone());
 			dbBean.setUpdate_date(new Date());
+			result = Constants.INT_SUCCESS;
+		}else {
+			result = Constants.INT_CANNOT_FIND_DATA;
 		}
-		return 0;
+		return result;
 	}
 
 	
@@ -81,9 +91,16 @@ public class BusinessServiceImpl implements BusinessService{
 	
 	
 	@Override
-	public List<Business> getAll(){
-		return businessDao.getAll();
+	public ListQueryForm getAll(int page){
+		List<Business> businessesList = businessDao.getAll(page,Constants.SYSTEM_PAGE_SIZE);
+		int count = businessDao.getAllCount();
+		log.info("count:"+count);
+		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,businessesList);
+		return form;
 	}
+	
+	
+	
 
 	
 	@Override

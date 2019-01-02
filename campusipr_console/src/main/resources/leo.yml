@@ -1,7 +1,7 @@
 ip: localhost:8080
 jdbc:
     driverClassName : "com.mysql.cj.jdbc.MysqlConnectionPoolDataSource"
-    url: "jdbc:mysql://192.168.2.71:3306/campusipr_console?useSSL=false"
+    url: "jdbc:mysql://192.168.2.71:3306/campusipr_console?useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Taipei&characterEncoding=utf8"
     username: root
     password: 54027890
   
@@ -41,7 +41,7 @@ elasticsearch:
     port : "9200"
 google: 
     recaptcha : 6LesJYQUAAAAAE1OFDeCDjVkGtuCjbS-AIMLeZGW
-  
-patent_api: 
+patent_api:
     patent_webservice_tw : "https://tiponet.tipo.gov.tw/OpenDataApi/OpenData/API"
     patent_key_tw : 8rSwrxyD
+  

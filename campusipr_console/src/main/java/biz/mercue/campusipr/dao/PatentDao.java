@@ -18,13 +18,16 @@ public interface PatentDao {
 	
 	List<Patent> getByBusinessId(String businessId,int page,int pageSize);
 	
-//	List<Patent> getByAdminId(String adminId,int page,int pageSize);
+	int  getCountByBusinessId(String businessId);	
+	
+	List<Patent> getByPatentIds(List<String> ids,String businessId);
 	
 	
-	List<Patent> getByPatentIds(List<String> ids);
+	List<Patent> searchPatent(String  searchText,String businessId,int page,int pageSize);
+	
+	List<Patent> fieldSearchPatent(Patent patent,String businessId,int page,int pageSize);
 	
 	
-	List<Patent> fieldSearchPatent(Patent patent);
 	
 
 }

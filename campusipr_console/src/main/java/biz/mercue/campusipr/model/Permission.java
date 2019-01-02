@@ -36,6 +36,9 @@ public class Permission extends BaseBean{
 	@JsonView(View.Public.class)
 	private int permission_order;
 	
+	
+	private String role_id;
+	
 //	@JsonView(View.Public.class)
 //	private String function_url;
 //	
@@ -98,6 +101,14 @@ public class Permission extends BaseBean{
 
 	public void setPermission_model_name(String permission_model_name) {
 		this.permission_model_name = permission_model_name;
+	}
+
+	public String getRole_id() {
+		return role_id;
+	}
+
+	public void setRole_id(String role_id) {
+		this.role_id = role_id;
 	}
 
 }

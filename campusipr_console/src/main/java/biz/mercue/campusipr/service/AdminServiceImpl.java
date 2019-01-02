@@ -8,17 +8,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.stream.events.EndDocument;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.itextpdf.text.pdf.PdfStructTreeController.returnType;
+
 import biz.mercue.campusipr.dao.AdminDao;
 import biz.mercue.campusipr.dao.AdminTokenDao;
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.AdminToken;
 import biz.mercue.campusipr.model.Business;
+import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Role;
 import biz.mercue.campusipr.util.Constants;
@@ -86,7 +91,7 @@ public class AdminServiceImpl implements AdminService{
 			} 
 			
 		}else{
-			return Constants.INT_CANNOT_FIND_USER;
+			return Constants.INT_CANNOT_FIND_DATA;
 			
 		}
 		
@@ -102,29 +107,32 @@ public class AdminServiceImpl implements AdminService{
 		return Constants.INT_SUCCESS;
 	}
 
+//	@Override
+//	public List<Admin> getListByBusinessId(String businessId) {
+//		List<Admin> list = dao.getByBusinessId(businessId);
+//		return list;
+//	}
+	
+	
+//	@Override
+//	public List<Admin> getAllBusiness(){
+//		return dao.getAllAdminList();
+//	}
+	
 	@Override
-	public List<Admin> getListByBusinessId(String businessId) {
-		List<Admin> newlist = new ArrayList<Admin>();
-		List<Admin> list = dao.getByBusinessId(businessId);
-		for(Admin bean : list) {
-
-			if(bean != null){
-				Admin newadmin = new Admin();
-				newadmin.setAdmin_id(bean.getAdmin_id());
-				newadmin.setAdmin_name(bean.getAdmin_name());
-				newadmin.setAdmin_email(bean.getAdmin_email());
-				newadmin.setAvailable(bean.isAvailable());
-				if(bean.getRole()!=null) {
-					newadmin.setRole_name(bean.getRole().getRole_name());
-				}else {
-					newadmin.setRole_name("");
-				}
-				newadmin.setBusiness(bean.getBusiness());
-				newlist.add(newadmin);
-			}
-		}
+	public ListQueryForm getRoleBusinessAdminList(String roleId,String businessId,int page){
+		List list = dao.getRoleBusinessAdminList(roleId, businessId,page,Constants.SYSTEM_PAGE_SIZE);
+		int cout = dao.getRoleBusinessAdminCount(roleId, businessId);
+		ListQueryForm form = new ListQueryForm(cout, Constants.SYSTEM_PAGE_SIZE, list);
 		
-		return newlist;
+		return form;
+	}
+	@Override
+	public ListQueryForm getRoleAdminList(String roleId,int page){
+		List list = dao.getRoleAdminList(roleId,page,Constants.SYSTEM_PAGE_SIZE);
+		int cout = dao.getRoleAdminCount(roleId);
+		ListQueryForm form = new ListQueryForm(cout, Constants.SYSTEM_PAGE_SIZE, list);
+		return form;
 	}
 
 	@Override
@@ -160,17 +168,39 @@ public class AdminServiceImpl implements AdminService{
 			
 				dbBean.setAdmin_email(admin.getAdmin_email());
 				dbBean.setAdmin_name(admin.getAdmin_name());
+				dbBean.setAdmin_unit_name(admin.getAdmin_unit_name());
 				dbBean.setRole(admin.getRole());
 				dbBean.setUpdate_date(new Date());
 				
 				if(!StringUtils.isNULL(admin.getAdmin_password())){
-					dbBean.setAdmin_password(StringUtils.generatePasswordHash(admin.getAdmin_password()));
+					dbBean.setAdmin_password(encoder.encode(admin.getAdmin_password()));
 				}
 	
 				return Constants.INT_SUCCESS;
 			}else{
 				
-				return Constants.INT_CANNOT_FIND_USER;
+				return Constants.INT_CANNOT_FIND_DATA;
+			}
+		}catch (Exception e) {
+			log.error(e.getMessage());
+			return Constants.INT_SYSTEM_PROBLEM;
+		}
+
+	}
+	
+	@Override
+	public int updatePassword(String adminId,String password) {
+		Admin dbBean = dao.getById(adminId);
+		try{
+			if(dbBean != null){
+
+				dbBean.setAdmin_password(encoder.encode(password));
+				
+	
+				return Constants.INT_SUCCESS;
+			}else{
+				
+				return Constants.INT_CANNOT_FIND_DATA;
 			}
 		}catch (Exception e) {
 			log.error(e.getMessage());
@@ -189,47 +219,49 @@ public class AdminServiceImpl implements AdminService{
 			return Constants.INT_SUCCESS;
 		}else{
 			
-			return Constants.INT_CANNOT_FIND_USER;
+			return Constants.INT_CANNOT_FIND_DATA;
 		}
 
 	}
 	
 
 	
-	@Override
-	public List<Permission> getPermissionById(String adminId){
-		List<Permission> list = new ArrayList<Permission>();
-		Admin admin = getById(adminId);
-		if(admin != null && admin.getRole() != null){
-			list = admin.getRole().getPermissionList();
-			log.info("permisstion list :"+list.size());
-		}
-		return list;
-		
-	}
+//	@Override
+//	public List<Permission> getPermissionById(String adminId){
+//		List<Permission> list = new ArrayList<Permission>();
+//		Admin admin = getById(adminId);
+//		if(admin != null && admin.getRole() != null){
+//			list = admin.getRole().getPermissionList();
+//			log.info("permisstion list :"+list.size());
+//		}
+//		return list;
+//		
+//	}
 	
 	@Override
 	public Admin getByEmail(String email){
 		Admin admin = dao.getByEmail(email);
-		Business business = admin.getBusiness();
-		if(business!=null){
-			log.info(business.getBusiness_name());
+		if(admin!=null) {
+			Business business = admin.getBusiness();
+			if(business!=null){
+				log.info(business.getBusiness_name());
+			}
 		}
 		return admin;
 	}
 
-	@Override
-	public Map<String, Admin> getMapByBusinessId(String businessId) {
-		List<Admin> list = getListByBusinessId(businessId);
-		
-		Map<String,Admin> map = new HashMap<String,Admin>();
-		if(list.size() > 0){
-			for(Admin admin : list){
-				map.put(admin.getAdmin_id(), admin);
-			}
-		}
-		return map;
-	}
+//	@Override
+//	public Map<String, Admin> getMapByBusinessId(String businessId) {
+//		List<Admin> list = getListByBusinessId(businessId);
+//		
+//		Map<String,Admin> map = new HashMap<String,Admin>();
+//		if(list.size() > 0){
+//			for(Admin admin : list){
+//				map.put(admin.getAdmin_id(), admin);
+//			}
+//		}
+//		return map;
+//	}
 	
 	
 
