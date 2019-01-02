@@ -8,7 +8,7 @@ import biz.mercue.campusipr.model.Role;
 public interface RoleService {
 	
 	//List<Role> getAllBusinessRole(String businessId);
-	
+	Role getById(String roleId);
 	//int addRole(Role bean);
 	int updateRole(Role bean);
 	//int deleteRole(Role bean);

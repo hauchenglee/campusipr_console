@@ -1,20 +1,20 @@
 package biz.mercue.campusipr.service;
 
-import java.util.List;
 
+import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Portfolio;
 
 
 
 public interface PortfolioService {
 
-	void addPortfolio(Portfolio portfolio);
+	int addPortfolio(Portfolio portfolio);
 
 	int updatePortfolio(Portfolio portfolio);
 
-	void deletePortfolio(Portfolio portfolio);
+	int deletePortfolio(Portfolio portfolio);
 
-	List<Portfolio> getByBusinessId(String businessId,int page,int pageSize);
+	ListQueryForm getByBusinessId(String businessId,int page);
 	
 	
 	Portfolio getById(String businessId,String id);

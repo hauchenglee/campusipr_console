@@ -18,6 +18,9 @@ import javax.persistence.OrderColumn;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -129,9 +132,13 @@ public class Patent extends BaseBean{
 	
 	
 	@JsonView(View.PatentDetail.class)
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
+	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private PatentContext patentContext;
+	
+	
+	@JsonView(View.Patent.class)
+	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private PatentExtension patent_extension;
 	
 	
 	@JsonView(View.PatentHistory.class)
@@ -143,6 +150,11 @@ public class Patent extends BaseBean{
 	@JsonView(View.PatentDetail.class)
 	@JoinColumn(name="patent_family_id")
 	private PatentFamily family;
+	
+	//for update and add patent
+	@Transient
+	@JsonView(View.PatentDetail.class)
+	private Business business;
 	
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_portfolio", 
@@ -372,6 +384,22 @@ public class Patent extends BaseBean{
 
 	public void setListBusiness(List<Business> listBusiness) {
 		this.listBusiness = listBusiness;
+	}
+
+	public PatentExtension getPatent_extension() {
+		return patent_extension;
+	}
+
+	public void setPatent_extension(PatentExtension patent_extension) {
+		this.patent_extension = patent_extension;
+	}
+
+	public Business getBusiness() {
+		return business;
+	}
+
+	public void setBusiness(Business business) {
+		this.business = business;
 	}
 
 //	public List<PatentContact> getListContact() {

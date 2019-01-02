@@ -31,7 +31,7 @@ public class PushController {
 
 	private Logger log = Logger.getLogger(this.getClass().getName());
 	
-	@RequestMapping(value="/pushlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/pushlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getPushList(HttpServletRequest request){
 		ListResponseBody listResponseBody  = new ListResponseBody();

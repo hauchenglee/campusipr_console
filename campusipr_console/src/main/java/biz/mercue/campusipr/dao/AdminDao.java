@@ -10,7 +10,7 @@ public interface AdminDao {
 	
 	Admin getById(String id);
 	
-	List<Admin> getByBusinessId(String businessId);
+
 	
 	Admin getByEmail(String email);
 	
@@ -18,7 +18,17 @@ public interface AdminDao {
 
 	void deleteAdmin(Admin bean);
 	
-	List<Admin> getAvailableByBusinessId(String businessId);
+	//List<Admin> getAvailableByBusinessId(String businessId);
+	
+	//List<Admin> getAllAdminList();
+	
+	//List<Admin> getByBusinessId(String businessId);
+	
+	List<Admin> getRoleBusinessAdminList(String roleId,String businessId,int page,int pageSize);
+	int getRoleBusinessAdminCount(String roleId,String businessId);
+	
+	List<Admin> getRoleAdminList(String roleId,int page,int pageSize);
+	int getRoleAdminCount(String roleId);
 	
 
 

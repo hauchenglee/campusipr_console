@@ -14,7 +14,9 @@ public interface BusinessDao {
 	
 	void delete(String id);
 	
-	List<Business> getAll();
+	List<Business> getAll(int page,int pageSize);
+	
+	int getAllCount();
 
 	List<Business> getAvailable(int page,int pageSize);
 		

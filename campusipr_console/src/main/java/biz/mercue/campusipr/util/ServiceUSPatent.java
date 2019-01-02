@@ -87,7 +87,7 @@ public class ServiceUSPatent {
 			Patent patent = new Patent();
 			patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
 			patent.setPatent_name_en(patentObj.optString("title"));
-			patent.setPatent_appl_country("us");
+			patent.setPatent_appl_country("US");
 			
 			try {
 				String applDateStr = patentObj.optString("applicationDate");
@@ -285,7 +285,7 @@ public class ServiceUSPatent {
 		
 	private static void convertPatentContextHtml(Document doc, Patent patent) {
 		PatentContext patentContext = new PatentContext();
-		
+		patentContext.setPatent_context_id(KeyGeneratorUtils.generateRandomString());
 		Elements tables = doc.select("center");
 		
 		for (Element table:tables) {
@@ -313,7 +313,7 @@ public class ServiceUSPatent {
 					if (claim == true) {
 						String context = cNode.toString().replace("<br>", "").replace("<hr>", "");
 						if(!StringUtils.isNULL(context)) {
-		            		claimStr += context + "\n";
+							claimStr += context + "\n";
 		            	}
 		            }
 					
@@ -336,6 +336,7 @@ public class ServiceUSPatent {
 				}
 			}
 		}
+		
 		
 		patentContext.setContext_claim(claimStr);
 		patentContext.setContext_desc(descStr);

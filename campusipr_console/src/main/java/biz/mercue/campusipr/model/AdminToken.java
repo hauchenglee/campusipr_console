@@ -1,5 +1,6 @@
 package biz.mercue.campusipr.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,8 +32,19 @@ public class AdminToken  extends BaseBean{
 	private Admin admin;
 	
 	
+	@Transient
+	@JsonView(View.Public.class)
+	private String business_id;
+	
+	
+	@OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
+	@JoinColumn(name="business_id")
+	private Business business;
+	
+	
 	private Date login_date;
 	
+	@JsonView(View.Public.class)
 	private Date expire_date;
 	
 	private Date create_date;
@@ -47,7 +59,9 @@ public class AdminToken  extends BaseBean{
 	
 	@Transient
 	@JsonView(View.Public.class)
-	private String businessId;
+	private List<String> permissionIds;
+	
+
 	
 
 
@@ -59,11 +73,11 @@ public class AdminToken  extends BaseBean{
 		this.admin_token_id = admin_token_id;
 	}
 
-	public Admin getAdminBean() {
+	public Admin getAdmin() {
 		return admin;
 	}
 
-	public void setAdminBean(Admin admin) {
+	public void setAdmin(Admin admin) {
 		this.admin = admin;
 	}
 
@@ -113,15 +127,46 @@ public class AdminToken  extends BaseBean{
 
 	public void setPermissionList(List<Permission> permissionList) {
 		this.permissionList = permissionList;
+		if(permissionIds == null) {
+			permissionIds = new ArrayList<String>();
+		}
+		for(Permission permission : permissionList) {
+			permissionIds.add(permission.getPermission_id());
+		}
 	}
 
-	public String getBusinessId() {
-		return businessId;
+	public List<String> getPermissionIds() {
+		return permissionIds;
 	}
 
-	public void setBusinessId(String businessId) {
-		this.businessId = businessId;
+	public void setPermissionIds(List<String> permissionIds) {
+		this.permissionIds = permissionIds;
+	
 	}
+	
+	public boolean checkPermission(String permissionId) {
+		return true;
+	}
+
+	public String getBusiness_id() {
+		return business_id;
+	}
+
+	public void setBusiness_id(String business_id) {
+		this.business_id = business_id;
+	}
+
+	public Business getBusiness() {
+		this.business_id = business.getBusiness_id();
+		return business;
+	}
+
+	public void setBusiness(Business business) {
+		this.business = business;
+		this.business_id = business.getBusiness_id();
+	}
+	
+	
 	
 
 }

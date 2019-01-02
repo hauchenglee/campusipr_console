@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity
 @Table(name="admin")
-public class Admin {
+public class Admin extends BaseBean {
 	
 	
 	@Id
@@ -35,17 +35,25 @@ public class Admin {
 	
 	private String admin_password;
 	
+	@Transient
+	private String re_admin_password;
+	
+	@JsonView(View.Public.class)
+	private String admin_unit_name;
+	
 	@JsonView(View.Public.class)
 	private boolean available;
 	
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	
+	@JsonView(View.Role.class)
+	@OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
 	@JoinColumn(name="business_id")
 	private Business business;
 	
 	
 	@OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
 	@JoinColumn(name="role_id", referencedColumnName="role_id")
-	@JsonView(View.Perissmion.class)
+	@JsonView(View.Admin.class)
 	@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 	@NotFound(action=NotFoundAction.IGNORE)
 	private Role role;
@@ -136,6 +144,22 @@ public class Admin {
 
 	public void setRole_name(String role_name) {
 		this.role_name = role_name;
+	}
+
+	public String getAdmin_unit_name() {
+		return admin_unit_name;
+	}
+
+	public void setAdmin_unit_name(String admin_unit_name) {
+		this.admin_unit_name = admin_unit_name;
+	}
+
+	public String getRe_admin_password() {
+		return re_admin_password;
+	}
+
+	public void setRe_admin_password(String re_admin_password) {
+		this.re_admin_password = re_admin_password;
 	}
 	
 

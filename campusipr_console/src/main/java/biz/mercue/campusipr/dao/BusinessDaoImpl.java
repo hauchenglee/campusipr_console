@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -37,18 +38,27 @@ public class BusinessDaoImpl extends AbstractDao<String,  Business> implements B
 	}
 
 	@Override
-	public List<Business> getAll(){
+	public List<Business> getAll(int page,int pageSize){
 		Criteria criteria =  createEntityCriteria();
-		//criteria.addOrder(Order.asc("banner_order"));
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
 		return criteria.list();
+	}
+	
+	@Override
+	public int getAllCount() {
+		Criteria criteria =  createEntityCriteria();
+		criteria.setProjection(Projections.rowCount());
+		long count = (long)criteria.uniqueResult();
+		return (int)count;
 	}
 	
 	@Override
 	public List<Business> getAvailable(int page,int pageSize){
 		Criteria criteria =  createEntityCriteria();
 		criteria.add(Restrictions.eq("available", true));
-		//criteria.addOrder(Order.asc("banner_order"));
-		//criteria.addOrder(Order.desc("push_type"));
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
 		return criteria.list();
 	}
 	

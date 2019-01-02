@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import biz.mercue.campusipr.model.Business;
+import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.BusinessService;
 import biz.mercue.campusipr.util.BeanResponseBody;
@@ -33,23 +34,20 @@ public class BusinessController {
 	@Autowired
 	BusinessService businessService;
 	
-	@RequestMapping(value="/getbusinesslist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/getbusinesslist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String getBusinessList(HttpServletRequest requests) {
+	public String getBusinessList(HttpServletRequest requests,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
 		
-		ListResponseBody responseBody  = new ListResponseBody();
-		List<Business> list = businessService.getAll();
+		ListResponseBody responseBody = new ListResponseBody();
+		ListQueryForm form  = businessService.getAll(page);
 		
 		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
-		responseBody.setList(list);
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Business.class);
-		log.info("result :"+result);
-		return result;
+		responseBody.setListQuery(form);
+		return responseBody.getJacksonString(View.Business.class);
 	}
 	
 	
-	@RequestMapping(value="/getavailablebusinesslist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/getavailablebusinesslist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getAvailableBusinessList(HttpServletRequest requests,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
 		
@@ -65,13 +63,13 @@ public class BusinessController {
 	
 	
 	
-	@RequestMapping(value="/safeaddbusiness", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/safeaddbusiness", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String safeAddBusiness(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		Business business = (Business) JacksonJSONUtils.readValue(receiveJSONString, Business.class);
 		StringResponseBody responseBody  = new StringResponseBody();
-		
-		businessService.saveAddBusiness(business);
+	
+		int taskResult = businessService.safeAddBusiness(business);
 		
 		responseBody.setCode(Constants.INT_SUCCESS);
 		responseBody.setMessage(Constants.MSG_SUCCESS);
@@ -82,7 +80,7 @@ public class BusinessController {
 	}
 	
 	
-	@RequestMapping(value="/getbusinessbyid/{businessId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/getbusinessbyid/{businessId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getBusinessById(HttpServletRequest request,@PathVariable String businessId) {
 		Business business  = businessService.getById(businessId);
@@ -98,7 +96,7 @@ public class BusinessController {
 	
 	
 	
-	@RequestMapping(value="/updatebusiness", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/updatebusiness", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String updateBusiness(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		Business business = (Business) JacksonJSONUtils.readValue(receiveJSONString, Business.class);

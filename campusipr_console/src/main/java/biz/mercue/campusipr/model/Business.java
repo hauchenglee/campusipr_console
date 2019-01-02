@@ -16,13 +16,13 @@ import com.fasterxml.jackson.annotation.JsonView;
 public class Business extends BaseBean{
 	
 	@Id
-	@JsonView(View.Business.class)
+	@JsonView({View.Business.class,View.Role.class})
 	private String business_id;
 	
-	@JsonView(View.Business.class)
+	@JsonView({View.Business.class,View.Role.class})
 	private String business_name;
 	
-	@JsonView(View.Business.class)
+	@JsonView({View.Business.class,View.Role.class})
 	private String business_name_en;
 	
 	@JsonView(View.BusinessDetail.class)

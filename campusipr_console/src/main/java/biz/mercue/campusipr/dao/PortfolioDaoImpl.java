@@ -1,13 +1,10 @@
 package biz.mercue.campusipr.dao;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -32,8 +29,6 @@ public class PortfolioDaoImpl extends AbstractDao<String,  Portfolio> implements
 		criteria.createAlias("business","bs");
 		criteria.add(Restrictions.eq("bs.business_id", businessId));
 		criteria.add(Restrictions.eq("portfolio_id", id));
-		//criteria.addOrder(Order.desc("push_date"));
-		//criteria.addOrder(Order.desc("push_type"));
 		return (Portfolio) criteria.uniqueResult();
 	}
 
@@ -51,12 +46,23 @@ public class PortfolioDaoImpl extends AbstractDao<String,  Portfolio> implements
 	}
 
 	@Override
-	public List<Portfolio> getByBusinessId(String id,int page,int pageSize){
+	public List<Portfolio> getByBusinessId(String businessId,int page,int pageSize){
 		Criteria criteria =  createEntityCriteria();
-		//criteria.add(Restrictions.eq("business_id", id));
-		//criteria.addOrder(Order.desc("push_date"));
-		//criteria.addOrder(Order.desc("push_type"));
+		criteria.createAlias("business","bs");
+		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
 		return criteria.list();
+	}
+	
+	@Override
+	public int getCountByBusinessId(String businessId) {
+		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("business","bs");
+		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		criteria.setProjection(Projections.rowCount());
+		long count = (long)criteria.uniqueResult();
+		return (int)count;
 	}
 	
 

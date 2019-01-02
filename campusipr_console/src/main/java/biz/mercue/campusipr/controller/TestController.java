@@ -17,8 +17,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.Permission;
+import biz.mercue.campusipr.model.Role;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.PatentService;
+import biz.mercue.campusipr.service.PermissionService;
+import biz.mercue.campusipr.service.RoleService;
+import biz.mercue.campusipr.service.SysRolePermissionService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
@@ -39,6 +44,16 @@ public class TestController {
 	
 	@Autowired
 	PatentService patentService;
+	
+	
+	@Autowired
+	RoleService roleService;
+	
+	@Autowired
+	PermissionService permissionService;
+	
+	@Autowired
+	SysRolePermissionService sysRolePermissionService;
 	
 	
 	@RequestMapping(value="/gettestid", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
@@ -170,5 +185,28 @@ public class TestController {
 		log.info("result :"+result);
 		return result;
 	}
+	
+	
+	@RequestMapping(value="/setupsysrolepermission", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String setupSysRolePermission(HttpServletRequest request) {
+		log.info("getPatent ");
+		ListResponseBody listResponseBody  = new ListResponseBody();
+		
+		List<Permission> listP = permissionService.getAllPermission();
+		
+		sysRolePermissionService.updatesysRole(Constants.ROLE_PLATFORM_MANAGER, listP);
+		
+		
+		
+		
+		listResponseBody.setCode(Constants.INT_SUCCESS);
+		listResponseBody.setMessage(Constants.MSG_SUCCESS);
+
+		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.PatentDetail.class);
+		log.info("result :"+result);
+		return result;
+	}
+
 
 }

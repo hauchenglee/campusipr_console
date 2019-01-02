@@ -117,106 +117,69 @@ public class Constants {
 	
 	public static final int  INT_SUCCESS = 1;
 	public static final String  MSG_SUCCESS = "成功";
+	public static final String  MSG_EN_SUCCESS = "Success";
 	
-	public static final int  INT_SUCCESS_AND_INFORM = 2;
-	
-	public static final int  INT_FAIL = -1;
-	public static final String  MSG_FAIL = "失效";
-	public static final String  MSG_MENU_EXPIRED = "圖文選單過期";
-	
+
 	public static final int INT_SYSTEM_PROBLEM =  -1 ;
 	public static final String MSG_SYSTEM_PROBLEM  =  "系統發生問題" ;
+	public static final String MSG_EN_SYSTEM_PROBLEM  =  "System problem" ;
 	
-	public static final String MSG_BUILD_BOT_PROBLEM  =  "建立機器人失敗，請重新嘗試或是聯絡客服人員。" ;
 	
-	public static final int INT_CANNOT_FIND_USER =  -2 ;
-	public static final String MSG_CANNOT_FIND_USER =  "找不到使用者" ;
+//	public static final int INT_CANNOT_FIND_USER =  -2 ;
+//	public static final String MSG_CANNOT_FIND_USER =  "找不到使用者" ;
+//	public static final String MSG_EN_CANNOT_FIND_USER =  "Can not find User" ;
 	
 	public static final int INT_CANNOT_FIND_DATA =  -2 ;
 	public static final String MSG_CANNOT_FIND_DATA =  "找不到資料" ;
-	
-	public static final int INT_CANNOT_FIND_AGENT =  -2 ;
-	public static final String MSG_CANNOT_FIND_AGENT =  "尚未有客服";
-	
-	public static final int INT_MODULE_CODE_UNREGISTERED = -2;
-	public static final String MSG_MODULE_CODE_UNREGISTERED = "module code尚未註冊";
+	public static final String MSG_EN_CANNOT_FIND_DATA =  "Can not find Data" ;
 	
 	public static final int INT_PASSWORD_ERROR =  -3 ;
 	public static final String MSG_PASSWORD_ERROR =  "帳號或密碼錯誤" ;
+	public static final String MSG_EN_PASSWORD_ERROR =  "Account and password do not match" ;
 	
 	public static final int INT_USER_DUPLICATE =  -4 ;
 	public static final String MSG_USER_DUPLICATE =  "Email已被註冊" ;
-	
-	public static final int INT_DATA_DUPLICATE =  -4 ;
-	public static final String MSG_DATA_DUPLICATE =  "資料重複" ;
+	public static final String MSG_EN_USER_DUPLICATE =  "The email address is already in use by another account" ;
+
 	
 	public static final int INT_DATA_ERROR =  -5 ;
 	public static final String MSG_DATA_ERROR =  "輸入資料錯誤" ;
+	public static final String MSG_EN_DATA_ERROR =  "The data you entered is not correct" ;
 	
 	public static final int INT_USER_LOGOUT =  -6 ;
 	public static final String MSG_USER_LOGOUT =  "已登出系統" ;
+	public static final String MSG_EN_USER_LOGOUT =  "Your login session has expired" ;
+
 	
 	public static final int INT_NO_PERMISSION=  -7 ;
-	public static final String MSG_NO_PERMISSION  =  "無登入系統權限" ;
+	public static final String MSG_NO_PERMISSION  =  "無使用權限" ;
+	public static final String MSG_EN_NO_PERMISSION  =  "You have no permission to operate" ;
+
 	
 	public static final int  INT_ACCESS_TOKEN_ERROR = -10;
-	public static final String  MSG_ACCESS_TOKEN_ERROR= "Token錯誤！";
+	public static final String  MSG_ACCESS_TOKEN_ERROR= "已登出系統" ;
+	public static final String  MSG_EN_ACCESS_TOKEN_ERROR =  "Your login session has expired" ;
 	
-	public static final int  INT_LACK_ESSENTIAL_DATA= -11;
-	public static final String  MSG_LACK_ESSENTIAL_DATA = "缺少必備資料！";
-	
-	public static final int INT_FILE_TOO_BIG_ERROR= -12;
-	public static final String MSA_FILE_TOO_BIG_ERROR= "檔案過大！";
-		
-	public static final int INT_FILE_FORMAT_ERROR= -13;
-	public static final String MSG_FILE_FORMAT_ERROR= "檔案格式錯誤！";
-	
-	public static final int  INT_NODE_LINK_DELETE_FAIL = -14;
-	public static final String  MSG_NODE_LINK_DELETE_FAIL = "不需要刪除線";
-	
-	public static final int INT_FILE_SAVE_ERROR= -15;
-	public static final String MSG_FILE_SAVE_ERROR= "檔案儲存失敗！";
+//	public static final int  INT_LACK_ESSENTIAL_DATA= -11;
+//	public static final String  MSG_LACK_ESSENTIAL_DATA = "缺少必備資料！";
+//	
+//	public static final int INT_FILE_TOO_BIG_ERROR= -12;
+//	public static final String MSA_FILE_TOO_BIG_ERROR= "檔案過大！";
+//		
+//	public static final int INT_FILE_FORMAT_ERROR= -13;
+//	public static final String MSG_FILE_FORMAT_ERROR= "檔案格式錯誤！";
+//		
+//	public static final int INT_FILE_SAVE_ERROR= -15;
+//	public static final String MSG_FILE_SAVE_ERROR= "檔案儲存失敗！";
 
-	public static final int INT_FLOW_OPRATION_ERROR = -16;
-	public static final String MSG_SYSTEM_FLOW_CANNOT_BE_COPIED = "無法複製系統流程";
-	public static final String MSG_FLOW_CANNOT_BE_DELETED = "無法刪除系統流程";
+	
+	public static final int INT_DATA_DUPLICATE =  -16 ;
+	public static final String MSG_DATA_DUPLICATE =  "資料重複" ;
+	public static final String MSG_EN_DATA_DUPLICATE =  "The data you entered is not correct" ;
 
 
-	//web socket ACTION CODE
-	public static final int AGENT_CLOSE_CONNECTION = -1;
-	public static final int AGENT_GET_ALL_ACCOUNTS_MESSAGES = 1;
-	public static final int AGENT_SEND_A_MESSAGE = 2;
-	public static final int AGENT_RECEIVE_A_MESSAGE = 3;
-	public static final int AGENT_GET_SINGLE_ACCOUNT_MESSAGES = 4;
-	//public static final int SEND_NEW_ACCOUNT_AND_MESSAGE_TO_SOCKET = 5;
-	//public static final int SEND_NEW_ACCOUNT_LIST_TO_ADMIN_BY_HTTP = 6;
-	public static final int AGENT_CHECK_CONNECTION = 7;
-	
-	public static final int AGENT_READ_MESSAGE = 8;
-	
-	public static final int AGENT_ALL_READ_MESSAGE = 9;
-	
-	public static final int AGENT_IS_TYPING = 10;
-	
-	public static final int AGENT_UNTYPED= 11;
-	
-	
-	public static final int AGENT_REFRESH_OFFLINE_MESSAGE= 12;
-	
-	//app socket action code
-	public static final int APP_GET_ALL_ACCOUNTS_MESSAGES = 21;
-	public static final int APP_SEND_A_MESSAGE = 22;
-	public static final int APP_RECEIVE_A_MESSAGE = 23;
-	
-	public static final int APP_READ_MESSAGE = 24;
-	
-	public static final int APP_ALL_READ_MESSAGE = 25;
-	
-	public static final int APP_LOGOUT = 26;
-	
-	public static final int APP_IS_TYPING = 27;
-	
-	public static final int APP_UNTYPED = 28;
+
+
 	
 
 	
@@ -268,4 +231,41 @@ public class Constants {
 	public static final String MEDIA_TYPE_MP3 = "mp3";
 	public static final String MEDIA_TYPE_M4A = "m4a";
 	
+	
+	public static final String ROLE_PLATFORM_MANAGER = "a45e5e977721ed92dd3b914e3efd8dcf";
+	public static final String ADD_ADMIN_PLATFORM_MANAGER = "d8492b4ec0b23574cdc4cfc9407ed4f0";
+	public static final String EDIT_ADMIN_PLATFORM_MANAGER = "63f5ce8ac07727e82044a8ac09979fd4";
+	public static final String VIEW_ADMIN_PLATFORM_MANAGER = "55a3d1e1e26ea93e51f7de262a2c4c48";
+	
+
+	
+	public static final String ROLE_PLATFORM_PATENT = "ed9f24e7998c679c3932161880327984";
+	public static final String ADD_ADMIN_PLATFORM_PATENT = "4a1c7dae9894c686d984ed431db79514";
+	public static final String EDIT_ADMIN_PLATFORM_PATENT  = "269ab3f26085ad2a18796f704fe3a187";
+	public static final String VIEW_ADMIN_PLATFORM_PATENT  = "93112edc7d5c9a2a628a6d45b87ebb04";
+	
+	
+	
+	public static final String ROLE_BUSINESS_MANAGER = "ab9baaedd20c3a62e89891df8ef38365";
+	public static final String ADD_BUSINESS_MANAGER  = "3bdc558b3004cadb5820db7fc47b512d";
+	public static final String EDIT_BUSINESS_MANAGER  = "ff7acd10470d4b3b72b637da7e904d76";
+	public static final String VIEW_BUSINESS_MANAGER  = "b1ab967b591ed32bec1f9256594c8493";
+	
+	
+	public static final String ROLE_BUSINESS_PATENT = "a19c8c01d3cea53cf0722509100d1754";
+	public static final String ADD_ADMIN_BUSINESS_PATENT = "ed9f24e7998c679c3932161880327984";
+	public static final String EDIT_ADMIN_BUSINESS_PATENT  = "269ab3f26085ad2a18796f704fe3a187";
+	public static final String VIEW_ADMIN_BUSINESS_PATENT  = "93112edc7d5c9a2a628a6d45b87ebb04";
+	
+	
+	public static final String ROLE_COMMON_USER = "f950f7d5be2cff1d20228e1c9a3adf0d";
+	public static final String ADD_ADMIN_USER = "86206d55203397ff7103b07244049f89";
+	public static final String EDIT_ADMIN_USER  = "54dcc500a45d746605abbe4df85a07b0";
+	public static final String VIEW_ADMIN_USER  = "400eacc099896a08be66393c32804f40";
+	
+	
+	
+	public static final String VIEW  = "view";
+	public static final String EDIT  = "edit";
+	public static final String ADD  = "add";
 }

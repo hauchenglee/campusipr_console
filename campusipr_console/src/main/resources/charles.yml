@@ -1,9 +1,9 @@
 ip: localhost:8080
 jdbc:
     driverClassName : "com.mysql.cj.jdbc.MysqlConnectionPoolDataSource"
-    url: "jdbc:mysql://192.168.2.71:3306/campusipr_console?useSSL=false"
+    url: "jdbc:mysql://127.0.0.1:3306/campusipr_console?useSSL=false&serverTimezone=UTC"
     username: root
-    password: 54027890
+    password: p4t6889xa
   
 hibernate:
     dialect: org.hibernate.dialect.MySQLDialect
@@ -12,7 +12,7 @@ hibernate:
     current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
     connection_charset: utf8
     connection_character_encoding: utf8
-  
+    
 path:
     image: /Users/leo/Desktop/Project/nfs/image/campusipr
     video: /Users/leo/Desktop/Project/nfs/image/campusipr

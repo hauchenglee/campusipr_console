@@ -7,7 +7,7 @@ import biz.mercue.campusipr.model.Role;
 
 
 
-public interface PermissionService {
+public interface RolePermissionService {
 	List<Permission> getAllPermission();
 	
 	

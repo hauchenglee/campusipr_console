@@ -28,12 +28,10 @@ public class PatentFamily extends BaseBean{
 	@JsonView(View.PatentDetail.class)
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY,mappedBy ="family")
 	private List<Patent> listPatent;
-	
-	@JsonView(View.PatentDetail.class)
+
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date create_date;
 	
-	@JsonView(View.PatentDetail.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date update_date;
 

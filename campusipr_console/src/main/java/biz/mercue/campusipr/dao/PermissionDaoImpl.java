@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import biz.mercue.campusipr.model.Permission;
@@ -22,5 +23,21 @@ public class PermissionDaoImpl extends AbstractDao<String,  Permission> implemen
 		crit.addOrder(Order.asc("permission_order"));
 		return crit.list();
 	}
+	
+	public Permission getByRoleIdAndModule(String roleId,String module) {
+		Criteria criteria = createEntityCriteria();	
+	
+		criteria.add(Restrictions.eq("role_id", roleId));
+		criteria.add(Restrictions.eq("permission_name", module));
+		return (Permission) criteria.uniqueResult();
+	}
 
+	
+	public List<Permission> getRolePermission(String roleId) {
+		Criteria crit = createEntityCriteria();	
+		//TODO
+		crit.addOrder(Order.asc("permission_group_order"));
+		crit.addOrder(Order.asc("permission_order"));
+		return crit.list();
+	}
 }
