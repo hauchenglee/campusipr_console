@@ -35,14 +35,19 @@ public class ServiceTaiwanPatent {
 		
 	private static  Logger log = Logger.getLogger(ServiceTaiwanPatent.class.getName());
 	
-	public static List<Patent> getPatentRightByPatentNo(String patentNo) {
-		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&patentno=%s";
-		url = String.format(url, Constants.PATENT_KEY_TW ,patentNo);
+	public static List<Patent> getPatentRightByApplNo(String applNo) {
+		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s";
+		url = String.format(url, Constants.PATENT_KEY_TW ,applNo);
 		
 		List<Patent> patentList = new ArrayList<Patent>();
 		try {
 			JSONObject getObject = new JSONObject(HttpRequestUtils.sendGet(url));
-			patentList = convertPatentInfoCh(getObject);
+			List<Patent> patentListI = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsI"));
+			List<Patent> patentListM = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsM"));
+			List<Patent> patentListD = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsD"));
+			patentList.addAll(patentListI);
+			patentList.addAll(patentListM);
+			patentList.addAll(patentListD);
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -66,7 +71,12 @@ public class ServiceTaiwanPatent {
 		List<Patent> patentList = new ArrayList<Patent>();
 		try {
 			JSONObject getObject = new JSONObject(HttpRequestUtils.sendGet(url));
-			patentList = convertPatentInfoCh(getObject);
+			List<Patent> patentListI = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsI"));
+			List<Patent> patentListM = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsM"));
+			List<Patent> patentListD = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsD"));
+			patentList.addAll(patentListI);
+			patentList.addAll(patentListM);
+			patentList.addAll(patentListD);
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -117,7 +127,6 @@ public class ServiceTaiwanPatent {
 				for (int index = 0; index < patentContentObj.length(); index++) {
 					JSONObject patentObj = patentContentObj.optJSONObject(index);
 					Patent patent = new Patent();
-					patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
 					patent.setPatent_name(patentObj.optJSONObject("patent-title").optString("patent-name-chinese"));
 					patent.setPatent_name_en(patentObj.optJSONObject("patent-title").optString("patent-name-english"));
 					patent.setPatent_appl_country("TW");
@@ -204,7 +213,6 @@ public class ServiceTaiwanPatent {
 					for (int inventorIndex = 0; inventorIndex < inventors.length(); inventorIndex++) {
 						JSONObject invObj = inventors.optJSONObject(inventorIndex);
 						Inventor inv = new Inventor();
-						inv.setInventor_id(KeyGeneratorUtils.generateRandomString());
 						inv.setInventor_name(invObj.optString("chinese-name"));
 						inv.setInventor_name_en(invObj.optString("english-name"));
 						inv.setCountry_id(invObj.optString("english-country"));
@@ -222,7 +230,6 @@ public class ServiceTaiwanPatent {
 					for (int assigneeIndex = 0; assigneeIndex < assignee.length(); assigneeIndex++) {
 						JSONObject assigneeObj = assignee.optJSONObject(assigneeIndex);
 						Assignee assign = new Assignee();
-						assign.setAssignee_id(KeyGeneratorUtils.generateRandomString());
 						assign.setAssignee_name(assigneeObj.optString("chinese-name"));
 						assign.setAssignee_name_en(assigneeObj.optString("english-name"));
 						assign.setCountry_id(assigneeObj.optString("english-country"));
@@ -245,7 +252,6 @@ public class ServiceTaiwanPatent {
 	
 	private static PatentContext convertPatentContextXmlCh(String content) {
 		PatentContext patentContext = new PatentContext();
-		patentContext.setPatent_context_id(KeyGeneratorUtils.generateRandomString());
 		try{
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setValidating(false);

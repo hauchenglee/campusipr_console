@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import biz.mercue.campusipr.dao.PatentDao;
+import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Business;
 import biz.mercue.campusipr.model.Country;
+import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentContext;
@@ -118,14 +120,58 @@ public class PatentServiceImpl implements PatentService{
 	
 	
 	@Override
-	public int addPatentByApplNo(Patent patent) {
+	public Patent addPatentByApplNo(Patent patent) {
+		int taskResult= -1;
 		
+		String applNo =  patent.getPatent_appl_no();
 		
-		return Constants.INT_CANNOT_FIND_DATA;
+		if(!StringUtils.isNULL(applNo)) {
+			Patent appNoPatent = patentDao.getByApplNo(applNo);
+			if(appNoPatent==null) {
+				if(StringUtils.isNULL(patent.getPatent_id())) {
+					patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
+				}
+				patent.getPatentContext().setPatent_context_id(KeyGeneratorUtils.generateRandomString());
+				for (Inventor inventor:patent.getListInventor()) {
+					inventor.setInventor_id(KeyGeneratorUtils.generateRandomString());
+				}
+				for (Assignee assignee:patent.getListAssignee()) {
+					assignee.setAssignee_id(KeyGeneratorUtils.generateRandomString());
+				}
+				patentDao.create(patent);
+				return patent;
+			} else {
+				appNoPatent.setPatent_name(patent.getPatent_name());
+				appNoPatent.setPatent_name_en(patent.getPatent_name_en());
+				appNoPatent.setPatent_appl_country(patent.getPatent_appl_country());
+
+				appNoPatent.setPatent_notice_no(patent.getPatent_notice_no());
+				appNoPatent.setPatent_notice_date(patent.getPatent_notice_date());
+				
+				appNoPatent.setPatent_publish_no(patent.getPatent_publish_no());
+				appNoPatent.setPatent_publish_date(patent.getPatent_publish_date());
+				
+				appNoPatent.setPatent_no(patent.getPatent_no());
+				appNoPatent.setPatent_bdate(patent.getPatent_bdate());
+				appNoPatent.setPatent_edate(patent.getPatent_edate());
+				
+				appNoPatent.setPatent_cancel_date(patent.getPatent_cancel_date());
+				appNoPatent.setPatent_charge_expire_date(patent.getPatent_charge_expire_date());
+				
+				appNoPatent.setPatent_charge_duration_year(patent.getPatent_charge_duration_year());
+				
+				appNoPatent.getPatentContext().setContext_claim(patent.getPatentContext().getContext_claim());
+				appNoPatent.getPatentContext().setContext_abstract(patent.getPatentContext().getContext_abstract());
+				appNoPatent.getPatentContext().setContext_desc(patent.getPatentContext().getContext_desc());
+				
+				updatePatent(appNoPatent);
+				return appNoPatent;
+			}
+		} else {
+		
+			return null;
+		}
 	}
-	
-
-
 
 	@Override
 	public int  updatePatent(Patent patent){

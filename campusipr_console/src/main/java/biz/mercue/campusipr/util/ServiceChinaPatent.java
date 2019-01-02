@@ -29,10 +29,10 @@ public class ServiceChinaPatent {
 	
 private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName());
 	
-	public static List<Patent> getPatentRightByApplicantNo(String patentNo) {
+	public static List<Patent> getPatentRightByApplicantNo(String applNo) {
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/search?q=%s";
 		try {
-			url = String.format(url,URLEncoder.encode("ap=CN"+patentNo, "UTF-8"));
+			url = String.format(url,URLEncoder.encode("ap=CN"+applNo, "UTF-8"));
 		} catch (UnsupportedEncodingException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -164,7 +164,6 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 			Document doc = db.parse(is);
 			doc.getDocumentElement().normalize();
 			
-			patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
 			patent.setPatent_appl_country("CN");
 			
 			NodeList titleList = doc.getElementsByTagName("invention-title");
@@ -185,8 +184,12 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 							if ("docdb".equals(cElement.getAttribute("document-id-type"))) {
 								Node pubNode = cElement.getElementsByTagName("doc-number").item(0);
 								Node pubDateNode = cElement.getElementsByTagName("date").item(0);
-								patent.setPatent_publish_no(pubNode.getTextContent());
-								patent.setPatent_notice_no(pubNode.getTextContent());
+								String publicateNo = pubNode.getTextContent().substring(2, pubNode.getTextContent().length());
+								if (publicateNo.length() > 9) {
+									publicateNo = publicateNo.substring(0, publicateNo.length()-1);
+								}
+								patent.setPatent_publish_no(publicateNo);
+								patent.setPatent_notice_no(publicateNo);
 								try {
 									String publishDateStr =pubDateNode.getTextContent();
 									if (StringUtils.isNULL(publishDateStr) == false) {
@@ -216,8 +219,12 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 							if ("epodoc".equals(cElement.getAttribute("document-id-type"))) {
 								Node applNode = cElement.getElementsByTagName("doc-number").item(0);
 								Node applDateNode = cElement.getElementsByTagName("date").item(0);
-								patent.setPatent_appl_no(applNode.getTextContent());
-								patent.setPatent_no(applNode.getTextContent());
+								String applNo = applNode.getTextContent().substring(2, applNode.getTextContent().length());
+								if (applNo.length() > 12) {
+									applNo = applNo.substring(0, applNo.length()-1);
+								}
+								patent.setPatent_appl_no(applNo);
+								patent.setPatent_no(applNo);
 								try {
 									String publishDateStr =applDateNode.getTextContent();
 									if (StringUtils.isNULL(publishDateStr) == false) {
@@ -246,7 +253,6 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 						Element inventor = (Element) inventorList.item(temp1);
 						NodeList nameList = inventor.getElementsByTagName("name");
 						Inventor inv = new Inventor();
-						inv.setInventor_id(KeyGeneratorUtils.generateRandomString());
 						inv.setInventor_name(nameList.item(0).getTextContent().replace(",", ""));
 						inv.setInventor_order(Integer.parseInt(inventor.getAttribute("sequence")));
 						inv.setPatent(patent);
@@ -267,7 +273,6 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 						Element applicant = (Element) applicantList.item(temp1);
 						NodeList nameList = applicant.getElementsByTagName("name");
 						Assignee assign = new Assignee();
-						assign.setAssignee_id(KeyGeneratorUtils.generateRandomString());
 						assign.setAssignee_name(nameList.item(0).getTextContent());
 						assign.setAssignee_order(Integer.parseInt(applicant.getAttribute("sequence")));
 						assign.setPatent(patent);
@@ -278,7 +283,6 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 			}
 			
 			PatentContext patentContext = new PatentContext();
-			patentContext.setPatent_context_id(KeyGeneratorUtils.generateRandomString());
 			NodeList abstractList = doc.getElementsByTagName("abstract");
 			for (int temp = 0; temp < abstractList.getLength(); temp++) {
 				Node nNode = abstractList.item(temp);

@@ -10,7 +10,7 @@ import biz.mercue.campusipr.model.Patent;
 public interface PatentService {
 
 	int addPatent(Patent patent);
-	int addPatentByApplNo(Patent patent);
+	Patent addPatentByApplNo(Patent patent);
 
 	int updatePatent(Patent patent);
 

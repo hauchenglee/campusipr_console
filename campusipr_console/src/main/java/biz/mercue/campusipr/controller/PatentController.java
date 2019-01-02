@@ -1,5 +1,6 @@
 package biz.mercue.campusipr.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +30,9 @@ import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
+import biz.mercue.campusipr.util.ServiceChinaPatent;
+import biz.mercue.campusipr.util.ServiceTaiwanPatent;
+import biz.mercue.campusipr.util.ServiceUSPatent;
 import biz.mercue.campusipr.util.StringResponseBody;
 
 @Controller
@@ -71,16 +75,41 @@ public class PatentController {
 	public String addPatentByApplNo(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("addPatent ");
 		
-		StringResponseBody responseBody  = new StringResponseBody();
+		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 			
 		if(tokenBean!=null) {
 			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
-			int taskResult = patentService.addPatent(patent);
-			responseBody.setCode(taskResult);
-
+			List<Patent> patentList = new ArrayList<>();
+			//查詢台灣專利
+			patentList = ServiceTaiwanPatent.getPatentRightByApplNo(patent.getPatent_appl_no());
+			if (patentList.isEmpty()) {
+				//查詢不到改美國
+				patentList = ServiceUSPatent.getPatentRightByapplNo(patent.getPatent_appl_no());
+				if (patentList.isEmpty()) {
+					//查詢不到改中國
+					patentList = ServiceChinaPatent.getPatentRightByApplicantNo(patent.getPatent_appl_no());
+				}
+			}
+			if (!patentList.isEmpty()) {
+				List<Patent> newPatentList = new ArrayList<>();
+				for (Patent updatepatent:patentList) {
+					updatepatent = patentService.addPatentByApplNo(updatepatent);
+					if (updatepatent != null) {
+						newPatentList.add(updatepatent);
+					}
+				}
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setMessage(Constants.MSG_SUCCESS);
+				responseBody.setList(newPatentList);
+			} else {
+				//查無資料
+				responseBody.setCode(Constants.INT_CANNOT_FIND_DATA);
+				responseBody.setMessage(Constants.MSG_CANNOT_FIND_DATA);
+			}
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			responseBody.setMessage(Constants.MSG_ACCESS_TOKEN_ERROR);
 		}
 		return responseBody.getJacksonString( View.Patent.class);
 	}

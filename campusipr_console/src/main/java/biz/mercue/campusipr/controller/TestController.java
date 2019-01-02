@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentContext;
 import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Role;
 import biz.mercue.campusipr.model.View;
@@ -102,54 +103,35 @@ public class TestController {
 		return "";
 	}
 
-	@RequestMapping(value="/syncpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/matasyncpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String syncPatent(HttpServletRequest request,@RequestBody String receiveJSONString) {
+	public String mataSyncPatent(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("sync Patent ");
 		JSONObject receiveJSONObj = new JSONObject(receiveJSONString);
 		String assignee = receiveJSONObj.optString("assignee");
 		ListResponseBody listResponseBody  = new ListResponseBody();
 		
-		List<Patent> patentList = ServiceTaiwanPatent.getPatentRightByAssigneeNameCh(assignee, 10);
+		List<Patent> patentList = ServiceTaiwanPatent.getPatentRightByAssigneeNameCh(assignee, 1000);
 		
 		for (Patent patent:patentList) {
-			Patent patentCheck = patentService.getByPatentNo(patent.getPatent_no());
-			if (patentCheck == null) {
-				patentService.addPatent(patent);
-			}
-		}
-		
-		List<Patent> patentEnList = ServiceTaiwanPatent.getPatentRightByAssigneeNameEn(assignee, 10);
-		
-		for (Patent patent:patentEnList) {
-			Patent patentCheck = patentService.getByPatentNo(patent.getPatent_no());
-			if (patentCheck == null) {
-				patentService.addPatent(patent);
-			}
-		}
-		
-		listResponseBody.setCode(Constants.INT_SUCCESS);
-		listResponseBody.setMessage(Constants.MSG_SUCCESS);
-		listResponseBody.setList(patentList);
-		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.PatentDetail.class);
-		log.info("result :"+result);
-		return result;
-	}
-	
-	@RequestMapping(value="/syncpatentus", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public String syncPatentUS(HttpServletRequest request,@RequestBody String receiveJSONString) {
-		log.info("sync Patent ");
-		JSONObject receiveJSONObj = new JSONObject(receiveJSONString);
-		String assignee = receiveJSONObj.optString("assignee");
-		ListResponseBody listResponseBody  = new ListResponseBody();
-		
-		List<Patent> patentList = ServiceUSPatent.getPatentRightByAssigneeName(assignee, 10);
-		
-		for (Patent patent:patentList) {
-			Patent patentCheck = patentService.getByPatentNo(patent.getPatent_no());
-			if (patentCheck == null) {
-				patentService.addPatent(patent);
+			PatentContext patentContext = patent.getPatentContext();
+			if (patentContext != null) {
+				int abstractLength = 0; 
+				int claimLength = 0;
+				int descLength = 0;
+				if (patentContext.getContext_abstract() != null) {
+					abstractLength = patentContext.getContext_abstract().length();
+				}
+				if (patentContext.getContext_claim() != null) {
+					claimLength = patentContext.getContext_claim().length();
+				}
+				if (patentContext.getContext_desc() != null) {
+					descLength = patentContext.getContext_desc().length();
+				}
+				if (abstractLength + claimLength + descLength > 32767) {
+					patent.setPatentContext(null);
+				}
+				patentService.addPatentByApplNo(patent);
 			}
 		}
 		
@@ -161,20 +143,75 @@ public class TestController {
 		return result;
 	}
 	
-	@RequestMapping(value="/syncpatentcn", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/matasyncpatentus", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String syncPatentCN(HttpServletRequest request,@RequestBody String receiveJSONString) {
+	public String mataSyncPatentUS(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("sync Patent ");
 		JSONObject receiveJSONObj = new JSONObject(receiveJSONString);
 		String assignee = receiveJSONObj.optString("assignee");
 		ListResponseBody listResponseBody  = new ListResponseBody();
 		
-		List<Patent> patentList = ServiceChinaPatent.getPatentRightByAssigneeName("上海建工集团股份有限公司");
+		List<Patent> patentList = ServiceUSPatent.getPatentRightByAssigneeName(assignee, 1000);
 		
 		for (Patent patent:patentList) {
-			Patent patentCheck = patentService.getByPatentNo(patent.getPatent_no());
-			if (patentCheck == null) {
-				patentService.addPatent(patent);
+			PatentContext patentContext = patent.getPatentContext();
+			if (patentContext != null) {
+				int abstractLength = 0; 
+				int claimLength = 0;
+				int descLength = 0;
+				if (patentContext.getContext_abstract() != null) {
+					abstractLength = patentContext.getContext_abstract().length();
+				}
+				if (patentContext.getContext_claim() != null) {
+					claimLength = patentContext.getContext_claim().length();
+				}
+				if (patentContext.getContext_desc() != null) {
+					descLength = patentContext.getContext_desc().length();
+				}
+				if (abstractLength + claimLength + descLength > 32767) {
+					patent.setPatentContext(null);
+				}
+				patentService.addPatentByApplNo(patent);
+			}
+		}
+		
+		listResponseBody.setCode(Constants.INT_SUCCESS);
+		listResponseBody.setMessage(Constants.MSG_SUCCESS);
+		listResponseBody.setList(patentList);
+		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.PatentDetail.class);
+		log.info("result :"+result);
+		return result;
+	}
+	
+	@RequestMapping(value="/matasyncpatentcn", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String mataSyncPatentCN(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		log.info("sync Patent ");
+		JSONObject receiveJSONObj = new JSONObject(receiveJSONString);
+		String assignee = receiveJSONObj.optString("assignee");
+		ListResponseBody listResponseBody  = new ListResponseBody();
+		
+		List<Patent> patentList = ServiceChinaPatent.getPatentRightByAssigneeName(assignee);
+		
+		for (Patent patent:patentList) {
+			PatentContext patentContext = patent.getPatentContext();
+			if (patentContext != null) {
+				int abstractLength = 0; 
+				int claimLength = 0;
+				int descLength = 0;
+				if (patentContext.getContext_abstract() != null) {
+					abstractLength = patentContext.getContext_abstract().length();
+				}
+				if (patentContext.getContext_claim() != null) {
+					claimLength = patentContext.getContext_claim().length();
+				}
+				if (patentContext.getContext_desc() != null) {
+					descLength = patentContext.getContext_desc().length();
+				}
+				if (abstractLength + claimLength + descLength > 32767) {
+					patent.setPatentContext(null);
+				}
+				patentService.addPatentByApplNo(patent);
 			}
 		}
 		
