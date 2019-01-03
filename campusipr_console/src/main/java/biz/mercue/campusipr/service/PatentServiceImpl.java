@@ -131,12 +131,18 @@ public class PatentServiceImpl implements PatentService{
 				if(StringUtils.isNULL(patent.getPatent_id())) {
 					patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
 				}
-				patent.getPatentContext().setPatent_context_id(KeyGeneratorUtils.generateRandomString());
-				for (Inventor inventor:patent.getListInventor()) {
-					inventor.setInventor_id(KeyGeneratorUtils.generateRandomString());
+				if (patent.getPatentContext() != null) {
+					patent.getPatentContext().setPatent_context_id(KeyGeneratorUtils.generateRandomString());
 				}
-				for (Assignee assignee:patent.getListAssignee()) {
-					assignee.setAssignee_id(KeyGeneratorUtils.generateRandomString());
+				if (patent.getListInventor() != null) {
+					for (Inventor inventor:patent.getListInventor()) {
+						inventor.setInventor_id(KeyGeneratorUtils.generateRandomString());
+					}
+				}
+				if (patent.getListAssignee() != null) {
+					for (Assignee assignee:patent.getListAssignee()) {
+						assignee.setAssignee_id(KeyGeneratorUtils.generateRandomString());
+					}
 				}
 				patentDao.create(patent);
 				return patent;
@@ -160,10 +166,11 @@ public class PatentServiceImpl implements PatentService{
 				
 				appNoPatent.setPatent_charge_duration_year(patent.getPatent_charge_duration_year());
 				
-				appNoPatent.getPatentContext().setContext_claim(patent.getPatentContext().getContext_claim());
-				appNoPatent.getPatentContext().setContext_abstract(patent.getPatentContext().getContext_abstract());
-				appNoPatent.getPatentContext().setContext_desc(patent.getPatentContext().getContext_desc());
-				
+				if (appNoPatent.getPatentContext() != null) {
+					appNoPatent.getPatentContext().setContext_claim(patent.getPatentContext().getContext_claim());
+					appNoPatent.getPatentContext().setContext_abstract(patent.getPatentContext().getContext_abstract());
+					appNoPatent.getPatentContext().setContext_desc(patent.getPatentContext().getContext_desc());
+				}
 				updatePatent(appNoPatent);
 				return appNoPatent;
 			}
