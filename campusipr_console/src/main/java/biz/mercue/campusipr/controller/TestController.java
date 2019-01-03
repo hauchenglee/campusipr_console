@@ -113,6 +113,7 @@ public class TestController {
 		
 		List<Patent> patentList = ServiceTaiwanPatent.getPatentRightByAssigneeNameCh(assignee, 1000);
 		
+		List<Patent> newPatentList = new ArrayList<>();
 		for (Patent patent:patentList) {
 			PatentContext patentContext = patent.getPatentContext();
 			if (patentContext != null) {
@@ -131,14 +132,17 @@ public class TestController {
 				if (abstractLength + claimLength + descLength > 32767) {
 					patent.setPatentContext(null);
 				}
-				patentService.addPatentByApplNo(patent);
+				patent = patentService.addPatentByApplNo(patent);
+				if (patent != null) {
+					newPatentList.add(patent);
+				}
 			}
 		}
 		
 		listResponseBody.setCode(Constants.INT_SUCCESS);
 		listResponseBody.setMessage(Constants.MSG_SUCCESS);
-		listResponseBody.setList(patentList);
-		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.PatentDetail.class);
+		listResponseBody.setList(newPatentList);
+		String result = listResponseBody.getJacksonString( View.Patent.class);
 		log.info("result :"+result);
 		return result;
 	}
@@ -153,6 +157,7 @@ public class TestController {
 		
 		List<Patent> patentList = ServiceUSPatent.getPatentRightByAssigneeName(assignee, 1000);
 		
+		List<Patent> newPatentList = new ArrayList<>();
 		for (Patent patent:patentList) {
 			PatentContext patentContext = patent.getPatentContext();
 			if (patentContext != null) {
@@ -171,14 +176,17 @@ public class TestController {
 				if (abstractLength + claimLength + descLength > 32767) {
 					patent.setPatentContext(null);
 				}
-				patentService.addPatentByApplNo(patent);
+				patent = patentService.addPatentByApplNo(patent);
+				if (patent != null) {
+					newPatentList.add(patent);
+				}
 			}
 		}
 		
 		listResponseBody.setCode(Constants.INT_SUCCESS);
 		listResponseBody.setMessage(Constants.MSG_SUCCESS);
-		listResponseBody.setList(patentList);
-		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.PatentDetail.class);
+		listResponseBody.setList(newPatentList);
+		String result = listResponseBody.getJacksonString( View.Patent.class);
 		log.info("result :"+result);
 		return result;
 	}
@@ -193,6 +201,7 @@ public class TestController {
 		
 		List<Patent> patentList = ServiceChinaPatent.getPatentRightByAssigneeName(assignee);
 		
+		List<Patent> newPatentList = new ArrayList<>();
 		for (Patent patent:patentList) {
 			PatentContext patentContext = patent.getPatentContext();
 			if (patentContext != null) {
@@ -211,14 +220,17 @@ public class TestController {
 				if (abstractLength + claimLength + descLength > 32767) {
 					patent.setPatentContext(null);
 				}
-				patentService.addPatentByApplNo(patent);
+				patent = patentService.addPatentByApplNo(patent);
+				if (patent != null) {
+					newPatentList.add(patent);
+				}
 			}
 		}
 		
 		listResponseBody.setCode(Constants.INT_SUCCESS);
 		listResponseBody.setMessage(Constants.MSG_SUCCESS);
-		listResponseBody.setList(patentList);
-		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.PatentDetail.class);
+		listResponseBody.setList(newPatentList);
+		String result = listResponseBody.getJacksonString( View.Patent.class);
 		log.info("result :"+result);
 		return result;
 	}
