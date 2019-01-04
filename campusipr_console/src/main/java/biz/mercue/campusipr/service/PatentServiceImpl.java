@@ -40,11 +40,8 @@ public class PatentServiceImpl implements PatentService{
 	@Autowired
 	private PatentDao patentDao;
 	
-<<<<<<< HEAD
-=======
 	@Autowired
 	private PatentFamilyDao familyDao;
->>>>>>> branch 'master' of http://charles@192.168.2.21:7070/gitblit/r/campusipr_console.git
 
 	@Override
 	public Patent getById(String businessId,String id) {
@@ -350,8 +347,8 @@ public class PatentServiceImpl implements PatentService{
 	public ListQueryForm searchPatent(String text, String businessId, int page) {
 		
 		//TODO no finish yet
-		List<Patent> list = patentDao.searchPatent(text, businessId, page, Constants.SYSTEM_PAGE_SIZE);
-		int count = patentDao.getCountByBusinessId(businessId);
+		List<Patent> list = patentDao.searchPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
+		int count = list.size();
 		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,list);
 		
 		return form;
