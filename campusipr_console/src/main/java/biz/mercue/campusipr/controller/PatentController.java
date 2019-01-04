@@ -101,16 +101,13 @@ public class PatentController {
 					}
 				}
 				responseBody.setCode(Constants.INT_SUCCESS);
-				responseBody.setMessage(Constants.MSG_SUCCESS);
 				responseBody.setList(newPatentList);
 			} else {
 				//查無資料
 				responseBody.setCode(Constants.INT_CANNOT_FIND_DATA);
-				responseBody.setMessage(Constants.MSG_CANNOT_FIND_DATA);
 			}
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-			responseBody.setMessage(Constants.MSG_ACCESS_TOKEN_ERROR);
 		}
 		return responseBody.getJacksonString( View.Patent.class);
 	}
