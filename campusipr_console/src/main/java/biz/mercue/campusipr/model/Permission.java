@@ -21,19 +21,25 @@ import com.fasterxml.jackson.annotation.JsonView;
 public class Permission extends BaseBean{
 	
 	@Id
-	@JsonView(View.Public.class)
+	@JsonView({View.Permission.class,View.PermissionId.class,View.Role.class})
 	private String permission_id;
 	
-	@JsonView(View.Public.class)
+	@JsonView({View.Permission.class,View.Role.class})
 	private String permission_model_name;
 	
-	@JsonView(View.Public.class)
+	@JsonView({View.Permission.class,View.Role.class})
+	private String permission_model_name_en;
+	
+	@JsonView({View.Permission.class,View.Role.class})
+	private String permission_model_code;
+	
+	@JsonView({View.Permission.class,View.Role.class})
 	private String permission_name;
 	
-	@JsonView(View.Public.class)
+	@JsonView(View.Permission.class)
 	private int permission_group_order;
 
-	@JsonView(View.Public.class)
+	@JsonView(View.Permission.class)
 	private int permission_order;
 	
 	

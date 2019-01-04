@@ -24,6 +24,8 @@ public class PermissionDaoImpl extends AbstractDao<String,  Permission> implemen
 		return crit.list();
 	}
 	
+
+	
 	public Permission getByRoleIdAndModule(String roleId,String module) {
 		Criteria criteria = createEntityCriteria();	
 	
@@ -34,10 +36,9 @@ public class PermissionDaoImpl extends AbstractDao<String,  Permission> implemen
 
 	
 	public List<Permission> getRolePermission(String roleId) {
-		Criteria crit = createEntityCriteria();	
-		//TODO
-		crit.addOrder(Order.asc("permission_group_order"));
-		crit.addOrder(Order.asc("permission_order"));
-		return crit.list();
+		Criteria criteria = createEntityCriteria();	
+		criteria.add(Restrictions.eq("role_id", roleId));
+		criteria.addOrder(Order.asc("permission_order"));
+		return criteria.list();
 	}
 }

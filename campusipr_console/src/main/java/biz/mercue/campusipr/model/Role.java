@@ -46,14 +46,10 @@ public class Role  extends BaseBean{
     @OrderBy("permission_group_order,permission_order ASC")
 	private List<Permission> permissionList;
     
-    
     @Transient
     @JsonView(View.Role.class)
-    private boolean canAdd = false;
-    
-    @Transient
-    @JsonView(View.Role.class)
-    private boolean canUpdate =false; 
+    private List<Permission> listRolePermission;
+
     
     @Transient
     @JsonView(View.Role.class)
@@ -93,21 +89,6 @@ public class Role  extends BaseBean{
 		this.permissionList = permissionList;
 	}
 
-	public boolean isCanAdd() {
-		return canAdd;
-	}
-
-	public void setCanAdd(boolean canAdd) {
-		this.canAdd = canAdd;
-	}
-
-	public boolean isCanUpdate() {
-		return canUpdate;
-	}
-
-	public void setCanUpdate(boolean canUpdate) {
-		this.canUpdate = canUpdate;
-	}
 
 	public List<Admin> getListAdmin() {
 		return listAdmin;
@@ -140,6 +121,16 @@ public class Role  extends BaseBean{
 	public void setPage_size(int page_size) {
 		this.page_size = page_size;
 	}
+
+	public List<Permission> getListRolePermission() {
+		return listRolePermission;
+	}
+
+	public void setListRolePermission(List<Permission> listRolePermission) {
+		this.listRolePermission = listRolePermission;
+	}
+
+
 
 
 }

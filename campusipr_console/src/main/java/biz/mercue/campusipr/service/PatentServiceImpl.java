@@ -3,6 +3,7 @@ package biz.mercue.campusipr.service;
 
 
 import java.awt.print.Pageable;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -12,8 +13,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import biz.mercue.campusipr.dao.PatentDao;
+import biz.mercue.campusipr.dao.PatentFamilyDao;
+import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Business;
 import biz.mercue.campusipr.model.Country;
+import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentContext;
@@ -33,6 +37,9 @@ public class PatentServiceImpl implements PatentService{
 
 	@Autowired
 	private PatentDao patentDao;
+	
+	@Autowired
+	private PatentFamilyDao familyDao;
 
 	@Override
 	public Patent getById(String businessId,String id) {
@@ -42,6 +49,7 @@ public class PatentServiceImpl implements PatentService{
 			PatentFamily family = patent.getFamily();
 			if(family!=null) {
 				log.info("family id :"+family.getPatent_family_id());
+				log.info(patent.getFamily().getListPatent().size());
 			}else {
 				log.info("family is null");
 			}
@@ -60,7 +68,7 @@ public class PatentServiceImpl implements PatentService{
 			}
 			
 			
-			
+
 			patent.getListBusiness().size();
 			//TODO change eger
 			patent.getListIPC().size();
@@ -88,12 +96,18 @@ public class PatentServiceImpl implements PatentService{
 
 	@Override
 	public int addPatent(Patent patent) {
-		int taskResult= -1;
+		
 		if(StringUtils.isNULL(patent.getPatent_id())) {
 			patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
 		}
 		
 		if(patent.getBusiness() == null) {
+			log.error("no business data");
+			return Constants.INT_DATA_ERROR;
+		}
+		
+		if(StringUtils.isNULL(patent.getPatent_appl_country())) {
+			log.error("no applicant country");
 			return Constants.INT_DATA_ERROR;
 		}
 		
@@ -110,7 +124,22 @@ public class PatentServiceImpl implements PatentService{
 				}
 			}
 		}
+		patent.addBusiness(patent.getBusiness());
 		
+		List<Applicant> listApplicant =patent.getListApplicant();
+		if(listApplicant  !=null  && listApplicant.size() >0) {
+			for(Applicant mApplicant : listApplicant) {
+				mApplicant.setApplicant_id(KeyGeneratorUtils.generateRandomString());
+			}
+		}
+		
+		List<Inventor> listInventor =patent.getListInventor();
+		if(listInventor  !=null  && listInventor.size() >0) {
+			for(Inventor mInventor : listInventor) {
+				mInventor.setInventor_id(KeyGeneratorUtils.generateRandomString());
+			}
+		}
+ 		
 
 		patentDao.create(patent);
 		return Constants.INT_SUCCESS;
@@ -163,11 +192,11 @@ public class PatentServiceImpl implements PatentService{
 			dbBean.setFamily(patent.getFamily());
 			
 			//TODO update list
-			//dbBean.setListApplicant(patent.getListApplicant());
-			//dbBean.setListContact(patent.getListContact());
-//			dbBean.setListInventor(patent.getListInventor());
-//			dbBean.setListCost(patent.getListCost());
-//			dbBean.setListPortfolio(patent.getListPortfolio());
+			dbBean.setListApplicant(patent.getListApplicant());
+			dbBean.setListContact(patent.getListContact());
+			dbBean.setListInventor(patent.getListInventor());
+			dbBean.setListCost(patent.getListCost());
+			dbBean.setListPortfolio(patent.getListPortfolio());
 			
 			//update List Edit History
 			//dbBean.setListHistory(patent.getListHistory());
@@ -180,6 +209,49 @@ public class PatentServiceImpl implements PatentService{
 		}else {
 			return Constants.INT_CANNOT_FIND_DATA;
 		}
+	}
+	
+	
+	@Override
+	public int combinePatentFamily(List<String> ids,String businessId) {
+		List<Patent> list = patentDao.getByPatentIds(ids, businessId);
+		PatentFamily family = null;
+		for(Patent patent : list) {
+			if(patent.getFamily()!=null) {
+				if(family ==null) {
+					family = patent.getFamily();
+				}else {
+					if(!family.getPatent_family_id().equals(patent.getFamily().getPatent_family_id())) {
+						return Constants.INT_DATA_DUPLICATE;
+					}
+				}
+			}else {
+				if(family!=null) {
+					patent.setFamily(family);
+				}
+			}	
+		}
+		
+		if(family == null) {
+			log.info("no family");
+			family = new PatentFamily();
+			family.setPatent_family_id(KeyGeneratorUtils.generateRandomString());
+			family.setCreate_date(new Date ());
+			family.setUpdate_date(new Date());
+			familyDao.create(family);
+			for(Patent patent : list) {
+				patent.setFamily(family);
+			}
+			return Constants.INT_SUCCESS;
+		}else {
+			for(Patent patent : list) {
+				if(patent.getFamily() == null) {
+					patent.setFamily(family);
+				}
+			}
+		}
+		
+		return Constants.INT_SUCCESS;
 	}
 	
 

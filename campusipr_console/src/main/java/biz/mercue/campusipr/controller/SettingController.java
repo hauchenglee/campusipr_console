@@ -18,6 +18,7 @@ import org.hibernate.cfg.BaselineSessionEventsListenerBuilder;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,18 +30,23 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
+import biz.mercue.campusipr.model.AdminToken;
 import biz.mercue.campusipr.model.AnnuityReminder;
 import biz.mercue.campusipr.model.Banner;
 import biz.mercue.campusipr.model.Country;
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentField;
 import biz.mercue.campusipr.model.View;
+import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.AnnuityReminderService;
 import biz.mercue.campusipr.service.BannerService;
 import biz.mercue.campusipr.service.CountryService;
+import biz.mercue.campusipr.service.PermissionService;
+import biz.mercue.campusipr.service.FieldService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.ImageUtils;
+import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
@@ -61,21 +67,24 @@ public class SettingController {
 	@Autowired
 	BannerService bannerService;
 	
+	@Autowired
+	AdminTokenService adminTokenService;
+	
+	@Autowired
+	FieldService fieldService;
+	
 	
 	@RequestMapping(value="/api/countrylist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getCountryList(HttpServletRequest request,@RequestParam(value ="lang",required=false,defaultValue ="tw") String lang) {
-		log.info("getPatentList ");
+		log.info("getCountryList ");
 		ListResponseBody listResponseBody  = new ListResponseBody();
-		String businessId ="123";
+
 
 		List<Country> list = countryService.getListByLanguage(lang);
 		listResponseBody.setCode(Constants.INT_SUCCESS);
-		listResponseBody.setMessage(Constants.MSG_SUCCESS);
 		listResponseBody.setList(list);
-		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.Public.class);
-		log.info("result :"+result);
-		return result;
+		return listResponseBody.getJacksonString(View.Public.class);
 	}
 	
 
@@ -84,16 +93,19 @@ public class SettingController {
 	@ResponseBody
 	public String getAnnuityReminder(HttpServletRequest request) {
 		log.info("Annuity ");
-		BeanResponseBody reesponseBody  = new BeanResponseBody();
-		String businessId ="04ea692278889b6621409d68c88aab17";
+		BeanResponseBody responseBody  = new BeanResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		
-		AnnuityReminder reminder = annuityReminderService.getByBusinessId(businessId);
-		reesponseBody.setCode(Constants.INT_SUCCESS);
-		reesponseBody.setMessage(Constants.MSG_SUCCESS);
-		reesponseBody.setBean(reminder);
-		String result = JacksonJSONUtils.mapObjectWithView(reesponseBody, View.Reminder.class);
-		log.info("result :"+result);
-		return result;
+		if(tokenBean!=null) {
+		
+			AnnuityReminder reminder = annuityReminderService.getByBusinessId(tokenBean.getBusiness().getBusiness_id());
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setBean(reminder);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			
+		}
+		return responseBody.getJacksonString(View.Reminder.class);
 	}
 	
 	
@@ -101,17 +113,19 @@ public class SettingController {
 	@ResponseBody
 	public String updateAnnuityReminder(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("updateAnnuityReminder ");
-		AnnuityReminder reminder = (AnnuityReminder) JacksonJSONUtils.readValue(receiveJSONString, AnnuityReminder.class);
-		BeanResponseBody reesponseBody  = new BeanResponseBody();
-		String businessId ="04ea692278889b6621409d68c88aab17";
 		
-		annuityReminderService.update(reminder);
-		reesponseBody.setCode(Constants.INT_SUCCESS);
-		reesponseBody.setMessage(Constants.MSG_SUCCESS);
-		reesponseBody.setBean(reminder);
-		String result = JacksonJSONUtils.mapObjectWithView(reesponseBody, View.Reminder.class);
-		log.info("result :"+result);
-		return result;
+		BeanResponseBody responseBody  = new BeanResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			AnnuityReminder reminder = (AnnuityReminder) JacksonJSONUtils.readValue(receiveJSONString, AnnuityReminder.class);
+			annuityReminderService.update(reminder);
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setBean(reminder);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			
+		}
+		return responseBody.getJacksonString(View.Reminder.class);
 	}
 	
 	
@@ -127,9 +141,7 @@ public class SettingController {
 		responseBody.setCode(Constants.INT_SUCCESS);
 		responseBody.setMessage(Constants.MSG_SUCCESS);
 		responseBody.setList(list);
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Banner.class);
-		log.info("result :"+result);
-		return result;
+		return responseBody.getJacksonString(View.Banner.class);
 	}
 	
 	@RequestMapping(value="/api/getavailablebannerlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
@@ -144,93 +156,98 @@ public class SettingController {
 		responseBody.setCode(Constants.INT_SUCCESS);
 		responseBody.setMessage(Constants.MSG_SUCCESS);
 		responseBody.setList(list);
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Banner.class);
-		log.info("result :"+result);
-		return result;
+		return responseBody.getJacksonString(View.Banner.class);
 	}
 	
 	
-	@RequestMapping(value="/api/addbanner", method = {RequestMethod.POST} , produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed", "multipart/form-data" })
+	@RequestMapping(value = "/api/addbanner", method = {
+			RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed",
+					"multipart/form-data" })
 	@ResponseBody
-	public String addBanner(HttpServletRequest request,@RequestParam("data") String  receiveJSONString,@RequestPart("file") MultipartFile[] files) {
+	public String addBanner(HttpServletRequest request, @RequestParam("data") String receiveJSONString,
+			@RequestPart("file") MultipartFile[] files) {
 		log.info("addBanner");
-		MapResponseBody responseBody  = new MapResponseBody();
-		try {
-			log.info("receiveJSONString:"+receiveJSONString);
-			
-			Banner banner = (Banner) JacksonJSONUtils.readValue(receiveJSONString, Banner.class);
-			String bannerId = KeyGeneratorUtils.generateRandomString(Constants.SHORT_IMAGE_NAME_LENGTH);
-			banner.setBanner_id(bannerId);
-			log.info("files.length :"+files.length);
-			for (int fileIndex = 0; fileIndex < files.length; fileIndex++) {
-				
-				
-				MultipartFile file = files[fileIndex];
-				if(file != null && !file.getOriginalFilename().isEmpty()) {
-					String imageName = file.getOriginalFilename();
-					String extendName = FilenameUtils.getExtension(imageName);
-					String finalFileName = bannerId + "." + extendName;
-		
-					File finalFile = new File(Constants.IMAGE_UPLOAD_PATH + File.separator + finalFileName);
-				
-					if (ImageUtils.writeFile(file, finalFile)){
-						banner.setBanner_image_file(finalFileName);
-					}
-				} 
-			}
-			
-			bannerService.addBanner(banner);
-			responseBody.setCode(Constants.INT_SUCCESS);
-			responseBody.setMessage(Constants.MSG_SUCCESS);
-		}catch (Exception e) {
-			log.error("Exception :"+e.getMessage());
-			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
-			responseBody.setMessage(Constants.MSG_SYSTEM_PROBLEM);
-		}
+		MapResponseBody responseBody = new MapResponseBody();
 
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Banner.class);
-		log.info("result :"+result);
-		return result;
+		AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if (tokenBean != null) {
+			try {
+				log.info("receiveJSONString:" + receiveJSONString);
+
+				Banner banner = (Banner) JacksonJSONUtils.readValue(receiveJSONString, Banner.class);
+				String bannerId = KeyGeneratorUtils.generateRandomString(Constants.SHORT_IMAGE_NAME_LENGTH);
+				banner.setBanner_id(bannerId);
+				log.info("files.length :" + files.length);
+				for (int fileIndex = 0; fileIndex < files.length; fileIndex++) {
+
+					MultipartFile file = files[fileIndex];
+					if (file != null && !file.getOriginalFilename().isEmpty()) {
+						String imageName = file.getOriginalFilename();
+						String extendName = FilenameUtils.getExtension(imageName);
+						String finalFileName = bannerId + "." + extendName;
+
+						File finalFile = new File(Constants.IMAGE_UPLOAD_PATH + File.separator + finalFileName);
+
+						if (ImageUtils.writeFile(file, finalFile)) {
+							banner.setBanner_image_file(finalFileName);
+						}
+					}
+				}
+
+				bannerService.addBanner(banner);
+				responseBody.setCode(Constants.INT_SUCCESS);
+			} catch (Exception e) {
+				log.error("Exception :" + e.getMessage());
+				responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+
+		}
+		return responseBody.getJacksonString(View.Banner.class);
 	}
 	
-	@RequestMapping(value="/api/updatebanner", produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed", "multipart/form-data" })
+	@RequestMapping(value = "/api/updatebanner", produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed",
+			"multipart/form-data" })
 	@ResponseBody
-	public String updateBanner(HttpServletRequest request,@RequestParam("data") String  receiveJSONString,@RequestPart("file") MultipartFile[] files) {
+	public String updateBanner(HttpServletRequest request, @RequestParam("data") String receiveJSONString,
+			@RequestPart("file") MultipartFile[] files) {
 		log.info("updateBanner");
-		MapResponseBody responseBody  = new MapResponseBody();
-		try {
-			
-			Banner banner = (Banner) JacksonJSONUtils.readValue(receiveJSONString, Banner.class);
-			String  bannerId = banner.getBanner_id();
-			for (int fileIndex = 0; fileIndex < files.length; fileIndex++) {
-				
-				
-				MultipartFile file = files[fileIndex];
-				if(file != null && !file.getOriginalFilename().isEmpty()) {
-					String imageName = file.getOriginalFilename();
-					String extendName = FilenameUtils.getExtension(imageName);
-					String finalFileName = bannerId + "." + extendName;
-		
-					File finalFile = new File(Constants.IMAGE_UPLOAD_PATH + File.separator + finalFileName);
-				
-					if (ImageUtils.writeFile(file, finalFile)){
-						banner.setBanner_image_file(finalFileName);
+		MapResponseBody responseBody = new MapResponseBody();
+		AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if (tokenBean != null) {
+			try {
+
+				Banner banner = (Banner) JacksonJSONUtils.readValue(receiveJSONString, Banner.class);
+				String bannerId = banner.getBanner_id();
+				for (int fileIndex = 0; fileIndex < files.length; fileIndex++) {
+
+					MultipartFile file = files[fileIndex];
+					if (file != null && !file.getOriginalFilename().isEmpty()) {
+						String imageName = file.getOriginalFilename();
+						String extendName = FilenameUtils.getExtension(imageName);
+						String finalFileName = bannerId + "." + extendName;
+
+						File finalFile = new File(Constants.IMAGE_UPLOAD_PATH + File.separator + finalFileName);
+
+						if (ImageUtils.writeFile(file, finalFile)) {
+							banner.setBanner_image_file(finalFileName);
+						}
 					}
-				} 
+				}
+
+				bannerService.updateBanner(banner);
+				responseBody.setCode(Constants.INT_SUCCESS);
+			} catch (Exception e) {
+				log.error("Exception :" + e.getMessage());
+				responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
 			}
-			
-			bannerService.updateBanner(banner);
-			responseBody.setCode(Constants.INT_SUCCESS);
-			responseBody.setMessage(Constants.MSG_SUCCESS);
-		}catch (Exception e) {
-			log.error("Exception :"+e.getMessage());
-			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
-			responseBody.setMessage(Constants.MSG_SUCCESS);
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+
 		}
 
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Banner.class);
-		log.info("result :"+result);
-		return result;
+		return responseBody.getJacksonString(View.Banner.class);
 	}
 	
 	
@@ -240,18 +257,22 @@ public class SettingController {
 		log.info("deleteBanner");
 
 		BeanResponseBody responseBody  = new BeanResponseBody();
-		Banner banner =  (Banner) JacksonJSONUtils.readValue(receiveJSONString, Banner.class);
-		log.info("banner :"+banner.getBanner_id());
-	
-		//TODO delete banner file
-		bannerService.deleteBanner(banner);
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
-		//responseBody.setBean(reminder);
+		AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if (tokenBean != null) {
+			Banner banner =  (Banner) JacksonJSONUtils.readValue(receiveJSONString, Banner.class);
+			log.info("banner :"+banner.getBanner_id());
 		
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Banner.class);
-		log.info("result :"+result);
-		return result;
+			//TODO delete banner file
+			bannerService.deleteBanner(banner);
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setMessage(Constants.MSG_SUCCESS);
+		
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+
+		}
+		
+		return responseBody.getJacksonString(View.Banner.class);
 	}
 	
 	
@@ -259,18 +280,54 @@ public class SettingController {
 	@ResponseBody
 	public String updateBannerOrder(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		
-		List<Banner> list = (List<Banner>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<Banner>>(){});
+
 		
 		BeanResponseBody responseBody  = new BeanResponseBody();
+		AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if (tokenBean != null) {
+			List<Banner> list = (List<Banner>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<Banner>>(){});
+			bannerService.updateBannerList(list);
+			responseBody.setCode(Constants.INT_SUCCESS);
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+
+		}
+		
+		return responseBody.getJacksonString(View.Banner.class);
+	}
 	
+	
+	@RequestMapping(value="/api/getsearchfield", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String getSearchField(HttpServletRequest request) {
+		ListResponseBody responseBody  = new ListResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			List<PatentField>  list  = fieldService.getSearableFields();
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setList(list);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
 		
-		bannerService.updateBannerList(list);
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setMessage(Constants.MSG_SUCCESS);
-		//responseBody.setBean(reminder);
+		return responseBody.getJacksonString(View.Public.class);
+	}
+	
+	@RequestMapping(value="/api/getallfield", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String getAllField(HttpServletRequest request) {
+		ListResponseBody responseBody  = new ListResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			List<PatentField>  list  = fieldService.getAllFields();
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setList(list);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
 		
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Banner.class);
-		log.info("result :"+result);
-		return result;
+		
+		
+		return responseBody.getJacksonString(View.Public.class);
 	}
 }

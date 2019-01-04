@@ -25,7 +25,7 @@ public class PatentFamily extends BaseBean{
 	private String patent_family_id;
 	
 	
-	@JsonView(View.PatentDetail.class)
+	@JsonView({View.PatentDetail.class,View.PatentFamily.class})
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY,mappedBy ="family")
 	private List<Patent> listPatent;
 

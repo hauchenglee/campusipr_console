@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 public class PatentExtension extends BaseBean {
 	
 	@Id
-	@JsonView(View.Patent.class)
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String extension_id;
 	
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -27,12 +27,12 @@ public class PatentExtension extends BaseBean {
 	private String business_id;
 	
 	//檔號
-	@JsonView(View.Patent.class)
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String extension_file_num;
 	
 	
 	//校內編號
-	@JsonView(View.Patent.class)
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String business_num;
 	
 	//申請年度

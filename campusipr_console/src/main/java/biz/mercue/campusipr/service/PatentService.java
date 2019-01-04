@@ -10,6 +10,7 @@ import biz.mercue.campusipr.model.Patent;
 public interface PatentService {
 
 	int addPatent(Patent patent);
+	
 	int addPatentByApplNo(Patent patent);
 
 	int updatePatent(Patent patent);
@@ -31,5 +32,7 @@ public interface PatentService {
 	Patent getById(String businessId,String id);
 	
 	Patent getById(String id);
+	
+	int combinePatentFamily(List<String> ids,String businessId); 
 
 }

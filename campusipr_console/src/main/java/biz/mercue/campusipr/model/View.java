@@ -7,6 +7,7 @@ public class View {
 	public interface Admin extends Public {}
 	public interface Role extends Public {}
 	public interface Permission extends Public {}
+	public interface PermissionId extends Public {}
 
 	public interface Business extends Public {}
 	public interface BusinessDetail extends Business {}
@@ -14,6 +15,7 @@ public class View {
 	public interface Patent extends Public {}
 	
 	public interface PatentDetail extends Patent {}
+	public interface PatentFamily extends Patent {}
 	public interface PatentHistory extends Public {}
 	
 	public interface Portfolio extends Public {}

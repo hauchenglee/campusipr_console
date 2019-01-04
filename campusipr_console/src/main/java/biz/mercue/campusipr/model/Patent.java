@@ -1,5 +1,6 @@
 package biz.mercue.campusipr.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -22,21 +23,24 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
+@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="patent_id")
 @Table(name="patent")
 public class Patent extends BaseBean{
 	
 	
 	@Id
-	@JsonView(View.Patent.class)
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_id;
 	
-	@JsonView(View.Patent.class)
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_name;
 	
-	@JsonView(View.Patent.class)
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_name_en;
 	
 	@JsonView(View.Patent.class)
@@ -83,7 +87,7 @@ public class Patent extends BaseBean{
 	@JsonView(View.Patent.class)
 	private int patent_charge_duration_year;
 	
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_business", 
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
 		inverseJoinColumns = { @JoinColumn(name = "business_id") })
@@ -136,7 +140,7 @@ public class Patent extends BaseBean{
 	private PatentContext patentContext;
 	
 	
-	@JsonView(View.Patent.class)
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private PatentExtension patent_extension;
 	
@@ -297,6 +301,13 @@ public class Patent extends BaseBean{
 	public void setListIPC(List<IPCClass> listIPC) {
 		this.listIPC = listIPC;
 	}
+	
+	public void addIPCClass(IPCClass ipc) {
+		if(this.listIPC == null) {
+			this.listIPC = new ArrayList<IPCClass>();
+		}
+		listIPC.add(ipc);
+	}
 
 	public List<Applicant> getListApplicant() {
 		return listApplicant;
@@ -305,9 +316,22 @@ public class Patent extends BaseBean{
 	public void setListApplicant(List<Applicant> listApplicant) {
 		this.listApplicant = listApplicant;
 	}
+	public void addApplicant(Applicant applicant) {
+		if(this.listApplicant == null) {
+			this.listApplicant = new ArrayList<Applicant>();
+		}
+		listApplicant.add(applicant);
+	}
 
 	public List<Inventor> getListInventor() {
 		return listInventor;
+	}
+	
+	public void addInventor(Inventor inventor) {
+		if(this.listInventor == null) {
+			this.listInventor = new ArrayList<Inventor>();
+		}
+		listInventor.add(inventor);
 	}
 
 	public void setListInventor(List<Inventor> listInventor) {
@@ -316,6 +340,13 @@ public class Patent extends BaseBean{
 
 	public List<PatentContact> getListContact() {
 		return listContact;
+	}
+	
+	public void addContact(PatentContact contact) {
+		if(this.listContact == null) {
+			this.listContact = new ArrayList<PatentContact>();
+		}
+		listContact.add(contact);
 	}
 
 	public void setListContact(List<PatentContact> listContact) {
@@ -337,6 +368,14 @@ public class Patent extends BaseBean{
 	public void setListHistory(List<PatentEditHistory> listHistory) {
 		this.listHistory = listHistory;
 	}
+	
+	public void addHistory(PatentEditHistory history) {
+		if(this.listHistory == null) {
+			this.listHistory = new ArrayList<PatentEditHistory>();
+		}
+		listHistory.add(history);
+	}
+	
 
 	public PatentFamily getFamily() {
 		return family;
@@ -361,6 +400,13 @@ public class Patent extends BaseBean{
 	public void setListCost(List<PatentCost> listCost) {
 		this.listCost = listCost;
 	}
+	
+	public void addCost(PatentCost cost) {
+		if(this.listCost == null) {
+			this.listCost = new ArrayList<PatentCost>();
+		}
+		listCost.add(cost);
+	}
 
 	public List<Assignee> getListAssignee() {
 		return listAssignee;
@@ -370,6 +416,13 @@ public class Patent extends BaseBean{
 		this.listAssignee = listAssignee;
 	}
 
+	
+	public void addAssignee(Assignee assignee) {
+		if(this.listAssignee == null) {
+			this.listAssignee = new ArrayList<Assignee>();
+		}
+		listAssignee.add(assignee);
+	}
 	public List<Agent> getListAgent() {
 		return listAgent;
 	}
@@ -378,12 +431,26 @@ public class Patent extends BaseBean{
 		this.listAgent = listAgent;
 	}
 
+	
+	public void addAgent(Agent agent) {
+		if(this.listAgent == null) {
+			this.listAgent = new ArrayList<Agent>();
+		}
+		listAgent.add(agent);
+	}
 	public List<Business> getListBusiness() {
 		return listBusiness;
 	}
 
 	public void setListBusiness(List<Business> listBusiness) {
 		this.listBusiness = listBusiness;
+	}
+	
+	public void addBusiness(Business business) {
+		if(this.listBusiness == null) {
+			this.listBusiness = new ArrayList<Business>();
+		}
+		listBusiness.add(business);
 	}
 
 	public PatentExtension getPatent_extension() {
@@ -402,46 +469,7 @@ public class Patent extends BaseBean{
 		this.business = business;
 	}
 
-//	public List<PatentContact> getListContact() {
-//		return listContact;
-//	}
-//
-//	public void setListContact(List<PatentContact> listContact) {
-//		this.listContact = listContact;
-//	}
-//
-//	public PatentContext getPatentContext() {
-//		return patentContext;
-//	}
-//
-//	public void setPatentContext(PatentContext patentContext) {
-//		this.patentContext = patentContext;
-//	}
-//
-//	public List<PatentEditHistory> getListHistory() {
-//		return listHistory;
-//	}
-//
-//	public void setListHistory(List<PatentEditHistory> listHistory) {
-//		this.listHistory = listHistory;
-//	}
-//
-//	public PatentFamily getFamily() {
-//		return family;
-//	}
-//
-//	public void setFamily(PatentFamily family) {
-//		this.family = family;
-//	}
-//
-//	public List<PatentPortfolio> getListPortfolio() {
-//		return listPortfolio;
-//	}
-//
-//	public void setListPortfolio(List<PatentPortfolio> listPortfolio) {
-//		this.listPortfolio = listPortfolio;
-//	}
-//	
+
 	
 
 }

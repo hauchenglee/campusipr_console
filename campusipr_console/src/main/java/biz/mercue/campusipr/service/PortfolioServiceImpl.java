@@ -37,6 +37,9 @@ public class PortfolioServiceImpl implements PortfolioService{
 	public Portfolio getById(String businessId,String id) {
 		log.info("get by id: " + id);
 		Portfolio portfolio = portfolioDao.getById(businessId, id);
+		if(portfolio.getListPatent()!=null) {
+			log.info(portfolio.getListPatent().size());
+		}
 		return portfolio;
 	}
 	
@@ -44,9 +47,13 @@ public class PortfolioServiceImpl implements PortfolioService{
 	@Override
 	public Portfolio getById(String id) {
 		log.info("get by id: " + id);
-		Portfolio patent = portfolioDao.getById(id);
+		Portfolio portfolio = portfolioDao.getById(id);
+		
+		if(portfolio.getListPatent()!=null) {
+			log.info(portfolio.getListPatent().size());
+		}
 
-		return patent;
+		return portfolio;
 	}
 
 	@Override
