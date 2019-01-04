@@ -132,7 +132,12 @@ public class TestController {
 				if (abstractLength + claimLength + descLength > 32767) {
 					patent.setPatentContext(null);
 				}
-				patent = patentService.addPatentByApplNo(patent);
+				int taskResult = patentService.addPatentByApplNo(patent);
+				if (patent != null) {
+					newPatentList.add(patent);
+				}
+			} else {
+				int taskResult = patentService.addPatentByApplNo(patent);
 				if (patent != null) {
 					newPatentList.add(patent);
 				}
@@ -176,7 +181,12 @@ public class TestController {
 				if (abstractLength + claimLength + descLength > 32767) {
 					patent.setPatentContext(null);
 				}
-				patent = patentService.addPatentByApplNo(patent);
+				int taskResult = patentService.addPatentByApplNo(patent);
+				if (patent != null) {
+					newPatentList.add(patent);
+				}
+			} else {
+				int taskResult = patentService.addPatentByApplNo(patent);
 				if (patent != null) {
 					newPatentList.add(patent);
 				}
@@ -220,7 +230,12 @@ public class TestController {
 				if (abstractLength + claimLength + descLength > 32767) {
 					patent.setPatentContext(null);
 				}
-				patent = patentService.addPatentByApplNo(patent);
+				int taskResult = patentService.addPatentByApplNo(patent);
+				if (patent != null) {
+					newPatentList.add(patent);
+				}
+			} else {
+				int taskResult = patentService.addPatentByApplNo(patent);
 				if (patent != null) {
 					newPatentList.add(patent);
 				}

@@ -19,6 +19,7 @@ import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentContext;
+import biz.mercue.campusipr.model.PatentEditHistory;
 import biz.mercue.campusipr.model.PatentExtension;
 import biz.mercue.campusipr.model.PatentFamily;
 import biz.mercue.campusipr.util.Constants;
@@ -35,6 +36,7 @@ public class PatentServiceImpl implements PatentService{
 
 	@Autowired
 	private PatentDao patentDao;
+	
 
 	@Override
 	public Patent getById(String businessId,String id) {
@@ -120,7 +122,7 @@ public class PatentServiceImpl implements PatentService{
 	
 	
 	@Override
-	public Patent addPatentByApplNo(Patent patent) {
+	public int addPatentByApplNo(Patent patent) {
 		int taskResult= -1;
 		
 		String applNo =  patent.getPatent_appl_no();
@@ -144,39 +146,37 @@ public class PatentServiceImpl implements PatentService{
 						assignee.setAssignee_id(KeyGeneratorUtils.generateRandomString());
 					}
 				}
+				
+				
 				patentDao.create(patent);
-				return patent;
+				return Constants.INT_SUCCESS;
 			} else {
-				appNoPatent.setPatent_name(patent.getPatent_name());
-				appNoPatent.setPatent_name_en(patent.getPatent_name_en());
-				appNoPatent.setPatent_appl_country(patent.getPatent_appl_country());
-
-				appNoPatent.setPatent_notice_no(patent.getPatent_notice_no());
-				appNoPatent.setPatent_notice_date(patent.getPatent_notice_date());
 				
-				appNoPatent.setPatent_publish_no(patent.getPatent_publish_no());
-				appNoPatent.setPatent_publish_date(patent.getPatent_publish_date());
-				
-				appNoPatent.setPatent_no(patent.getPatent_no());
-				appNoPatent.setPatent_bdate(patent.getPatent_bdate());
-				appNoPatent.setPatent_edate(patent.getPatent_edate());
-				
-				appNoPatent.setPatent_cancel_date(patent.getPatent_cancel_date());
-				appNoPatent.setPatent_charge_expire_date(patent.getPatent_charge_expire_date());
-				
-				appNoPatent.setPatent_charge_duration_year(patent.getPatent_charge_duration_year());
-				
-				if (appNoPatent.getPatentContext() != null) {
-					appNoPatent.getPatentContext().setContext_claim(patent.getPatentContext().getContext_claim());
-					appNoPatent.getPatentContext().setContext_abstract(patent.getPatentContext().getContext_abstract());
-					appNoPatent.getPatentContext().setContext_desc(patent.getPatentContext().getContext_desc());
+				if(StringUtils.isNULL(patent.getPatent_id())) {
+					patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
 				}
-				updatePatent(appNoPatent);
-				return appNoPatent;
+				if (patent.getPatentContext() != null) {
+					patent.getPatentContext().setPatent_context_id(KeyGeneratorUtils.generateRandomString());
+				}
+				if (patent.getListInventor() != null) {
+					for (Inventor inventor:patent.getListInventor()) {
+						inventor.setInventor_id(KeyGeneratorUtils.generateRandomString());
+					}
+				}
+				if (patent.getListAssignee() != null) {
+					for (Assignee assignee:patent.getListAssignee()) {
+						assignee.setAssignee_id(KeyGeneratorUtils.generateRandomString());
+					}
+				}
+				
+				
+				patentDao.create(patent);
+				patentDao.delete(appNoPatent.getPatent_id());
+				return Constants.INT_SUCCESS;
 			}
 		} else {
 		
-			return null;
+			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
 
@@ -277,7 +277,7 @@ public class PatentServiceImpl implements PatentService{
 	public ListQueryForm searchPatent(String text, String businessId, int page) {
 		
 		//TODO no finish yet
-		List list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE);
+		List<Patent> list = patentDao.searchPatent(text, businessId, page, Constants.SYSTEM_PAGE_SIZE);
 		int count = patentDao.getCountByBusinessId(businessId);
 		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,list);
 		
