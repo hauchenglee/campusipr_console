@@ -140,14 +140,16 @@ public class AdminServiceImpl implements AdminService{
 		Admin dbBean = dao.getByEmail(admin.getAdmin_email());
 		try{
 			if(dbBean == null){
+	
 				admin.setAdmin_id(KeyGeneratorUtils.generateRandomString());
-				admin.setAdmin_password(encoder.encode(admin.getAdmin_password()));
+				if(!StringUtils.isNULL(admin.getAdmin_password())) {
+					admin.setAdmin_password(encoder.encode(admin.getAdmin_password()));
+				}
+
 				admin.setCreate_date(new Date());
 				admin.setUpdate_date(new Date());
-				
-				
+			
 				dao.createAdmin(admin);
-				
 				return Constants.INT_SUCCESS;
 			}else{
 				log.info("e-mail:"+dbBean.getAdmin_email()+",business_id:"+dbBean.getBusiness().getBusiness_id());

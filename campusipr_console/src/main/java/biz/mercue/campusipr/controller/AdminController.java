@@ -152,8 +152,6 @@ public class AdminController {
 				List<Role> listRole = new ArrayList<Role>();
 				Role platformRole = roleService.getById(Constants.ROLE_PLATFORM_MANAGER);
 				ListQueryForm platformForm = adminService.getRoleBusinessAdminList(platformRole.getRole_id(), token.getBusiness().getBusiness_id(),page);
-				platformRole.setCanAdd(true);
-				platformRole.setCanUpdate(false);
 				platformRole.setListAdmin(platformForm.getList());
 				platformRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
 				platformRole.setTotal_count(platformForm.getTotal_count());
@@ -161,8 +159,6 @@ public class AdminController {
 				
 				Role patentRole = roleService.getById(Constants.ROLE_PLATFORM_PATENT);
 				ListQueryForm patentForm = adminService.getRoleBusinessAdminList(Constants.ROLE_PLATFORM_PATENT, token.getBusiness().getBusiness_id(),page);
-				patentRole.setCanAdd(true);
-				patentRole.setCanUpdate(true);
 				patentRole.setListAdmin(patentForm.getList());
 				patentRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
 				patentRole.setTotal_count(patentForm.getTotal_count());
@@ -213,27 +209,30 @@ public class AdminController {
 			
 				List<Role> listRole = new ArrayList<Role>();
 				Role businessManagerRole = roleService.getById(Constants.ROLE_BUSINESS_MANAGER);
+				//TODO check login user permission
+				List<Permission> listBusinessManagerPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_BUSINESS_MANAGER);
+				businessManagerRole.setListRolePermission(listBusinessManagerPermission);
 				ListQueryForm businessManagerForm  = adminService.getRoleAdminList(businessManagerRole.getRole_id(),page);
-				businessManagerRole.setCanAdd(true);
-				businessManagerRole.setCanUpdate(false);
 				businessManagerRole.setTotal_count(businessManagerForm.getTotal_count());
 				businessManagerRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
 				businessManagerRole.setListAdmin(businessManagerForm.getList());
 				
 				
 				Role businessPatentRole = roleService.getById(Constants.ROLE_BUSINESS_PATENT);
+				//TODO check login user permission
+				List<Permission> listBusinessPatentPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_BUSINESS_PATENT);
+				businessPatentRole.setListRolePermission(listBusinessPatentPermission);
 				ListQueryForm businessPatentForm = adminService.getRoleAdminList(businessPatentRole.getRole_id(),page);
-				businessPatentRole.setCanAdd(true);
-				businessPatentRole.setCanUpdate(true);
 				businessManagerRole.setTotal_count(businessManagerForm.getTotal_count());
 				businessManagerRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
 				businessManagerRole.setListAdmin(businessManagerForm.getList());
 				
 				
 				Role userRole = roleService.getById(Constants.ROLE_COMMON_USER);
+				//TODO check login user permission
+				List<Permission> listUserPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_COMMON_USER);
+				userRole.setListRolePermission(listUserPermission);
 				ListQueryForm userForm = adminService.getRoleAdminList(Constants.ROLE_COMMON_USER,page);
-				userRole.setCanAdd(true);
-				userRole.setCanUpdate(true);
 				userRole.setListAdmin(userForm.getList());
 				userRole.setTotal_count(userForm.getTotal_count());
 				userRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
@@ -270,8 +269,6 @@ public class AdminController {
 				if(role!=null) {
 					log.info("role is not null");
 					ListQueryForm listForm = adminService.getRoleAdminList(role.getRole_id(),page);
-					role.setCanAdd(true);
-					role.setCanUpdate(false);
 					role.setListAdmin(listForm.getList());
 					role.setTotal_count(listForm.getTotal_count());
 					role.setPage_size(Constants.SYSTEM_PAGE_SIZE);
@@ -321,7 +318,7 @@ public class AdminController {
 	
 		return responseBody.getJacksonString(View.Public.class);
 	}
-	
+		
 	
 	@RequestMapping(value="/api/getadmininfo", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
@@ -510,7 +507,7 @@ public class AdminController {
 	
 	private boolean checkRolePermission(Role role,AdminToken token,String operation) {
 		boolean hasPermission = false;
-		Permission permission = permissionService.getPermissionByRole(role.getRole_id(), operation);
+		Permission permission = permissionService.getSettingPermissionByRoleAndModule(role.getRole_id(), operation);
 		log.info("permission:"+ permission);
 		if(permission!=null) {
 			hasPermission = checkPermission(permission.getPermission_id(),token);

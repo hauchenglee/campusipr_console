@@ -33,6 +33,8 @@ public class Portfolio extends  BaseBean{
 	@JsonView(View.PortfolioDetail.class)
 	private String portfolio_memo;
 	
+	
+	@JsonView(View.PortfolioDetail.class)
 	@ManyToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_portfolio", 
 		joinColumns = { @JoinColumn(name = "portfolio_id") }, 
@@ -40,7 +42,7 @@ public class Portfolio extends  BaseBean{
 	private List<Patent> listPatent;
 	
 	
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
 	@JoinColumn(name="business_id")
 	private Business business;
 	

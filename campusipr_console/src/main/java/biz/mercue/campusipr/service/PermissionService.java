@@ -10,9 +10,11 @@ import biz.mercue.campusipr.model.Role;
 public interface PermissionService {
 	List<Permission> getAllPermission();
 	
-	
-	
 	List<Permission> getPermissionListByRole(String roleId);
 	
-	Permission getPermissionByRole(String roleId, String module);
+	List<Permission> getSettingPermissionByRole(String roleId);
+	
+	Permission getSettingPermissionByRoleAndModule(String roleId, String module);
+	
+	List<Permission> getPermissionListByAdmin(String adminId);
 }

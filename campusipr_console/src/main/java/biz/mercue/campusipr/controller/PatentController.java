@@ -66,6 +66,7 @@ public class PatentController {
 			
 		if(tokenBean!=null) {
 			patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
+			patent.setBusiness(tokenBean.getBusiness());
 			int taskResult = patentService.addPatent(patent);
 			responseBody.setCode(taskResult);
 
@@ -172,14 +173,15 @@ public class PatentController {
 	}
 	
 	
-	@RequestMapping(value="/api/combinepatentfamily", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/combinepatentfamily", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String combinePatentFamily(HttpServletRequest request,@RequestBody String receiveJSONString){
 		log.info("combinePatentFamily ");
-		ListResponseBody responseBody  = new ListResponseBody();
+		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-			//TODO
+			List<String> ids = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});	
+			int taskResult = patentService.combinePatentFamily(ids, tokenBean.getBusiness().getBusiness_id());
 			responseBody.setCode(Constants.INT_SUCCESS);
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
@@ -208,7 +210,7 @@ public class PatentController {
 	@RequestMapping(value="/api/importpatentexcel", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String importPatentexcel(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("exportpatent ");
+		log.info("importPatentexcel ");
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {

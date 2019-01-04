@@ -11,8 +11,17 @@ import biz.mercue.campusipr.model.PatentEditHistory;
 public interface PatentService {
 
 	int addPatent(Patent patent);
+<<<<<<< HEAD
 	
 	int addPatentByApplNo(Patent patent);
+=======
+
+	
+	//int addPatentByApplNo(Patent patent);
+	//TODO
+	Patent addPatentByApplNo(Patent patent);
+>>>>>>> branch 'master' of http://charles@192.168.2.21:7070/gitblit/r/campusipr_console.git
+
 
 	int updatePatent(Patent patent);
 
@@ -34,6 +43,10 @@ public interface PatentService {
 	
 	Patent getById(String id);
 	
+
+	int combinePatentFamily(List<String> ids,String businessId); 
+
 	Patent getByPatentNo(String patentNo);
+
 
 }

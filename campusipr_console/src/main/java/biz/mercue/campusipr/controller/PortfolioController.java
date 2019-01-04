@@ -83,10 +83,13 @@ public class PortfolioController {
 	public String addPortfolio(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("addPortfolio ");
 		
-		Portfolio portfolio = (Portfolio) JacksonJSONUtils.readValue(receiveJSONString, Portfolio.class);
+		
 		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
+			
+			Portfolio portfolio = (Portfolio) JacksonJSONUtils.readValue(receiveJSONString, Portfolio.class);
+			portfolio.setBusiness(tokenBean.getBusiness());
 			int taskResult = portfolioService.addPortfolio(portfolio);
 
 			responseBody.setCode(taskResult);
@@ -108,6 +111,7 @@ public class PortfolioController {
 		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
+			
 			int taskResult = portfolioService.updatePortfolio(portfolio);
 			responseBody.setCode(taskResult);
 		}else {
@@ -122,11 +126,12 @@ public class PortfolioController {
 	@ResponseBody
 	public String removePortfolio(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("removePortfolio ");
-		Portfolio portfolio = (Portfolio) JacksonJSONUtils.readValue(receiveJSONString, Portfolio.class);
+		
 		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-
+			Portfolio portfolio = (Portfolio) JacksonJSONUtils.readValue(receiveJSONString, Portfolio.class);
+			log.info("portfolio:"+portfolio.getPortfolio_id());
 			int taskResult = portfolioService.deletePortfolio(portfolio);
 			responseBody.setCode(taskResult);
 
