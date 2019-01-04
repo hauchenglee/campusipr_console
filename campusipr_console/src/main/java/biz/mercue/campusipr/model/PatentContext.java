@@ -1,12 +1,16 @@
 package biz.mercue.campusipr.model;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -24,12 +28,15 @@ public class PatentContext {
 	private Patent patent;
 	
 	@JsonView(View.PatentDetail.class)
+	@Lob
 	private String context_abstract;
 	
 	@JsonView(View.PatentDetail.class)
+	@Lob
 	private String context_desc;
 	
 	@JsonView(View.PatentDetail.class)
+	@Lob
 	private String context_claim;
 
 	public String getPatent_context_id() {

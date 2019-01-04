@@ -67,6 +67,13 @@ public class MercueConfiguration implements WebMvcConfigurer{
 		//set patent key in here
 		Constants.PATENT_WEB_SERVICE_TW = yamlConfig.getConfig().getPatent_api().get("patent_webservice_tw");
 		Constants.PATENT_KEY_TW = yamlConfig.getConfig().getPatent_api().get("patent_key_tw");
+		
+		Constants.PATENT_WEB_SERVICE_US = yamlConfig.getConfig().getPatent_api().get("patent_webservice_us");
+		Constants.PATENT_INVENTOR_WEB_SERVICE_US = yamlConfig.getConfig().getPatent_api().get("patent_inventor_webservice_us");
+		Constants.PATENT_CONTEXT_WEB_SERVICE_US = yamlConfig.getConfig().getPatent_api().get("patent_context_webservice_us");
+		
+		Constants.PATENT_WEB_SERVICE_EU = yamlConfig.getConfig().getPatent_api().get("patent_webservice_eu");
+		Constants.PATENT_TOKEN_EU = yamlConfig.getConfig().getPatent_api().get("patent_token_eu");
 
 	}
 	
