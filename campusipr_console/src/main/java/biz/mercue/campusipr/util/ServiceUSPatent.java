@@ -32,7 +32,7 @@ public class ServiceUSPatent {
 	private static  Logger log = Logger.getLogger(ServiceUSPatent.class.getName());
 	
 	
-	public static List<Patent> getPatentRightByapplNo(String applNo) {
+	public static Patent getPatentRightByapplNo(String applNo) {
 		String url = Constants.PATENT_WEB_SERVICE_US+"?applicationNumber=%s";
 		url = String.format(url, applNo);
 		
@@ -48,7 +48,11 @@ public class ServiceUSPatent {
 			e.printStackTrace();
 		}
 		
-		return patentList;
+		if (patentList.size() > 0) {
+			return patentList.get(patentList.size()-1);
+		} else {
+			return null;
+		}
 	}
 	
 	public static List<Patent> getPatentRightByAssigneeName(String assigneeName, int row) {

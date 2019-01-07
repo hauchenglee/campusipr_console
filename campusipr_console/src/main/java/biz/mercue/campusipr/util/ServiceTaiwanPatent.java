@@ -35,7 +35,7 @@ public class ServiceTaiwanPatent {
 		
 	private static  Logger log = Logger.getLogger(ServiceTaiwanPatent.class.getName());
 	
-	public static List<Patent> getPatentRightByApplNo(String applNo) {
+	public static Patent getPatentRightByApplNo(String applNo) {
 		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s";
 		url = String.format(url, Constants.PATENT_KEY_TW ,applNo);
 		
@@ -55,8 +55,12 @@ public class ServiceTaiwanPatent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if (patentList.size() > 0) {
+			return patentList.get(patentList.size()-1);
+		} else {
+			return null;
+		}
 		
-		return patentList;
 	}
 	
 	public static List<Patent> getPatentRightByAssigneeNameEn(String assigneeName, int row) {

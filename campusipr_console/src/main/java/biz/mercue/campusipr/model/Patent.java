@@ -160,6 +160,10 @@ public class Patent extends BaseBean{
 	@JsonView(View.PatentDetail.class)
 	private Business business;
 	
+	@Transient
+	@JsonView(View.PatentDetail.class)
+	private Admin admin;
+	
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_portfolio", 
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
@@ -467,6 +471,14 @@ public class Patent extends BaseBean{
 
 	public void setBusiness(Business business) {
 		this.business = business;
+	}
+
+	public Admin getAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(Admin admin) {
+		this.admin = admin;
 	}
 
 

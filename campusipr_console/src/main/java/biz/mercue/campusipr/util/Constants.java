@@ -263,7 +263,15 @@ public class Constants {
 	public static final String EDIT_ADMIN_USER  = "54dcc500a45d746605abbe4df85a07b0";
 	public static final String VIEW_ADMIN_USER  = "400eacc099896a08be66393c32804f40";
 	
+	public static final String PATENT_NAME_FIELD = "edad617ccdc004f37cac8f8710c6e965";
+	public static final String PATENT_NAME_EN_FIELD = "4e765c02d8a5afc000eaa77ba419ff53";
+	public static final String ASSIGNEE_FIELD = "614191c8ec65d0e6429801429794ebcd";
+	public static final String APPLIANT_FIELD = "6c761184252dd9f0148a361ed9c4c8c2";
+	public static final String IVENTOR_FIELD = "f08b87006f899e74c0b570f76349f49d";
 	
+	public static final String APPL_COUNTRY_TW = "TW";
+	public static final String APPL_COUNTRY_US = "US";
+	public static final String APPL_COUNTRY_CN = "CN";
 	
 	public static final String VIEW  = "view";
 	public static final String EDIT  = "edit";

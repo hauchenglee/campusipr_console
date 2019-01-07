@@ -29,10 +29,10 @@ public class ServiceChinaPatent {
 	
 private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName());
 	
-	public static List<Patent> getPatentRightByApplicantNo(String applNo) {
+	public static Patent getPatentRightByApplicantNo(String applNo) {
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/search?q=%s";
 		try {
-			url = String.format(url,URLEncoder.encode("ap=CN"+applNo, "UTF-8"));
+			url = String.format(url,URLEncoder.encode("ap="+applNo, "UTF-8"));
 		} catch (UnsupportedEncodingException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -52,7 +52,11 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 			e.printStackTrace();
 		}
 		
-		return patentList;
+		if (patentList.size() > 0) {
+			return patentList.get(patentList.size()-1);
+		} else {
+			return null;
+		}
 	}
 	
 	public static List<Patent> getPatentRightByAssigneeName(String assigneeName) {
