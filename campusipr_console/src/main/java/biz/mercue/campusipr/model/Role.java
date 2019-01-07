@@ -36,6 +36,9 @@ public class Role  extends BaseBean{
 	@JsonView(View.Public.class)
 	private String role_name_en;
 	
+	
+	private int role_level;
+	
 
 	
     @JsonView(View.Permission.class)
@@ -128,6 +131,14 @@ public class Role  extends BaseBean{
 
 	public void setListRolePermission(List<Permission> listRolePermission) {
 		this.listRolePermission = listRolePermission;
+	}
+
+	public int getRole_level() {
+		return role_level;
+	}
+
+	public void setRole_level(int role_level) {
+		this.role_level = role_level;
 	}
 
 

@@ -177,23 +177,22 @@ public class AdminController {
 		return responseBody.getJacksonString(View.Role.class);
 	}
 	
-//	@RequestMapping(value="/api/getbusinessadminlist/{businessId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public String getBusinessAdminList(HttpServletRequest request,@PathVariable String businessId ) {
-//		ListResponseBody responseBody = new ListResponseBody();
-//		AdminToken token =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-//		
-//		if(token !=null) {
-//				List<Admin> list = adminService.getListByBusinessId(businessId);
-//				responseBody.setCode(Constants.INT_SUCCESS);
-//				responseBody.setList(list);
-//			
-//		}else {
-//			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-//		}
-//		
-//		return responseBody.getJacksonString( View.Public.class);
-//	}
+	@RequestMapping(value="/api/getrolelist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String getRoleList(HttpServletRequest request) {
+		ListResponseBody responseBody = new ListResponseBody();
+		AdminToken token =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(token !=null) {
+			List<Role> list = roleService.getAllRole();
+			responseBody.setList(list);
+			responseBody.setCode(Constants.INT_SUCCESS);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+
+		return responseBody.getJacksonString(View.Role.class);
+		
+	}
 	
 	
 	@RequestMapping(value="/api/getcustomerbusinessadminlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)

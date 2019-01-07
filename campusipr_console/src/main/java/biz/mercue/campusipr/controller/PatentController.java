@@ -140,7 +140,7 @@ public class PatentController {
 		if(tokenBean!=null) {
 			ListQueryForm form = patentService.getByBusinessId(tokenBean.getBusiness().getBusiness_id(), page);
 			responseBody.setCode(Constants.INT_SUCCESS);
-			responseBody.setListQuery(form);;
+			responseBody.setListQuery(form);
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
@@ -177,7 +177,7 @@ public class PatentController {
 		if(tokenBean!=null) {
 			List<String> ids = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});	
 			int taskResult = patentService.combinePatentFamily(ids, tokenBean.getBusiness().getBusiness_id());
-			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setCode(taskResult);
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}

@@ -15,6 +15,8 @@ public interface RoleDao {
 	
 	Role getByName(String businessId,String name);
 	
+	List<Role> getAll();
+	
 	List<Role> getAllBusinessRole(String businessId);
 	
 	void addRole(Role role);

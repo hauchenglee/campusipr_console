@@ -3,6 +3,7 @@ package biz.mercue.campusipr.dao;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -35,6 +36,13 @@ public class RoleDaoImpl extends AbstractDao<String,  Role> implements RoleDao {
 		crit.add(Restrictions.eq("business.business_id", businessId));
 		crit.add(Restrictions.eq("role_name", name));
 		return (Role) crit.uniqueResult();
+	}
+	
+	@Override
+	public List<Role> getAll(){
+		Criteria crit = createEntityCriteria();  
+		crit.addOrder(Order.desc("role_level"));
+		return crit.list();
 	}
 
 	@Override
