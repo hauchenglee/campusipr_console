@@ -214,8 +214,9 @@ public class PatentController {
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-		
-			List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});		
+			List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});	
+			
+			
 			responseBody.setCode(Constants.INT_SUCCESS);
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
