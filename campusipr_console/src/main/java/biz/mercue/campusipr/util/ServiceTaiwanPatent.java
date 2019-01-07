@@ -203,8 +203,12 @@ public class ServiceTaiwanPatent {
 					String contextUrl = patentObj.optJSONObject("link").optString("patentpubxml-url");
 					if (StringUtils.isNULL(contextUrl)==false) {
 						PatentContext patentContext = getContext(contextUrl);
-						patentContext.setPatent(patent);
-						patent.setPatentContext(patentContext);
+						if (!StringUtils.isNULL(patentContext.getContext_claim()) 
+								|| !StringUtils.isNULL(patentContext.getContext_abstract())
+								|| !StringUtils.isNULL(patentContext.getContext_desc())) {
+							patentContext.setPatent(patent);
+							patent.setPatentContext(patentContext);
+						}
 					}
 					
 					List<Inventor> listInventor = new ArrayList<Inventor>();

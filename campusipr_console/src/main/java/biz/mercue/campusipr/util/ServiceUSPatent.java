@@ -151,37 +151,39 @@ public class ServiceUSPatent {
 	private static void getPatentInventors(Patent patent) {
 		String url = Constants.PATENT_INVENTOR_WEB_SERVICE_US;
 		JSONObject obj = new JSONObject();
-		obj.put("searchText", "applId:"+patent.getPatent_appl_no().substring(2));
-		obj.put("mm", "100%");
-		obj.put("qf", "applId");
-		log.info(obj.toString());
-		try {
-			JSONObject getObject = new JSONObject(HttpRequestUtils.sendPost(url, obj.toString()));
-			JSONArray patentDocsObj = getObject.optJSONObject("queryResults").optJSONObject("searchResponse")
-												.optJSONObject("response").optJSONArray("docs");
-			for (int index = 0; index < patentDocsObj.length(); index++) {
-				JSONObject patentObj = patentDocsObj.optJSONObject(index);
-				JSONArray patentInventors = patentObj.optJSONArray("inventors");
-				List<Inventor> listInventor = new ArrayList<Inventor>();
-				for (int indexInventors = 0; indexInventors < patentInventors.length(); indexInventors++) {
-					JSONObject inventorObj = patentInventors.optJSONObject(indexInventors);
-					Inventor inv = new Inventor();
-					if (StringUtils.isNULL(inventorObj.optString("nameLineTwo"))) {
-						inv.setInventor_name_en(inventorObj.optString("nameLineOne"));
-					} else {
-						inv.setInventor_name_en(inventorObj.optString("nameLineOne") + " " +
-								inventorObj.optString("nameLineTwo"));
+		if (patent.getPatent_appl_no() != null) {
+			obj.put("searchText", "applId:"+patent.getPatent_appl_no().substring(2));
+			obj.put("mm", "100%");
+			obj.put("qf", "applId");
+			log.info(obj.toString());
+			try {
+				JSONObject getObject = new JSONObject(HttpRequestUtils.sendPost(url, obj.toString()));
+				JSONArray patentDocsObj = getObject.optJSONObject("queryResults").optJSONObject("searchResponse")
+													.optJSONObject("response").optJSONArray("docs");
+				for (int index = 0; index < patentDocsObj.length(); index++) {
+					JSONObject patentObj = patentDocsObj.optJSONObject(index);
+					JSONArray patentInventors = patentObj.optJSONArray("inventors");
+					List<Inventor> listInventor = new ArrayList<Inventor>();
+					for (int indexInventors = 0; indexInventors < patentInventors.length(); indexInventors++) {
+						JSONObject inventorObj = patentInventors.optJSONObject(indexInventors);
+						Inventor inv = new Inventor();
+						if (StringUtils.isNULL(inventorObj.optString("nameLineTwo"))) {
+							inv.setInventor_name_en(inventorObj.optString("nameLineOne"));
+						} else {
+							inv.setInventor_name_en(inventorObj.optString("nameLineOne") + " " +
+									inventorObj.optString("nameLineTwo"));
+						}
+						inv.setCountry_id(inventorObj.optString("country"));
+						inv.setInventor_order(Integer.parseInt(inventorObj.optString("rankNo")));
+						inv.setPatent(patent);
+						listInventor.add(inv);
 					}
-					inv.setCountry_id(inventorObj.optString("country"));
-					inv.setInventor_order(Integer.parseInt(inventorObj.optString("rankNo")));
-					inv.setPatent(patent);
-					listInventor.add(inv);
+					patent.setListInventor(listInventor);
 				}
-				patent.setListInventor(listInventor);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		
 	}
@@ -337,11 +339,15 @@ public class ServiceUSPatent {
 			}
 		}
 		
-		
 		patentContext.setContext_claim(claimStr);
 		patentContext.setContext_desc(descStr);
-		patentContext.setPatent(patent);
-		patent.setPatentContext(patentContext);
+		
+		if (!StringUtils.isNULL(patentContext.getContext_claim()) 
+				|| !StringUtils.isNULL(patentContext.getContext_abstract())
+				|| !StringUtils.isNULL(patentContext.getContext_desc())) {
+			patentContext.setPatent(patent);
+			patent.setPatentContext(patentContext);
+		}
 	}
 
 }

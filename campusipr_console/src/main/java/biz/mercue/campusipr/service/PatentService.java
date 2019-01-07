@@ -4,17 +4,15 @@ import java.util.List;
 
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentEditHistory;
 
 
 
 public interface PatentService {
 
 	int addPatent(Patent patent);
-
 	
-	//int addPatentByApplNo(Patent patent);
-	//TODO
-	Patent addPatentByApplNo(Patent patent);
+	int addPatentByApplNo(Patent patent);
 
 
 	int updatePatent(Patent patent);

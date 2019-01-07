@@ -34,7 +34,7 @@ public class PatentEditHistory {
 	
 	
 	@JsonView(View.PatentHistory.class)
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
 	@JoinColumn(name="admin_id", referencedColumnName="admin_id")
 	private Admin admin;
 	

@@ -288,8 +288,12 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 				Node nNode = abstractList.item(temp);
 				patentContext.setContext_abstract(nNode.getTextContent());
 			}
-			patentContext.setPatent(patent);
-			patent.setPatentContext(patentContext);
+			if (!StringUtils.isNULL(patentContext.getContext_claim()) 
+					|| !StringUtils.isNULL(patentContext.getContext_abstract())
+					|| !StringUtils.isNULL(patentContext.getContext_desc())) {
+				patentContext.setPatent(patent);
+				patent.setPatentContext(patentContext);
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
