@@ -15,5 +15,7 @@ public interface PatentStatusDao {
 	
 	PatentStatus getByStatusAndPatent(String patentId, String StatusId, Date createTime);
 	
+	List<PatentStatus> getByPatent(String patentId);
+	
 	void create(PatentStatus ps);
 }

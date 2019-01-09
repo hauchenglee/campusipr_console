@@ -186,11 +186,14 @@ public class PatentServiceImpl implements PatentService{
 		
 		if (!patent.getPatentStatusList().isEmpty()) {
 			for (PatentStatus patentStatus:patent.getPatentStatusList()) {
-				Status status = statusDao.getByEventCode(patentStatus.getStatus().getEvent_code());
+				Status status = statusDao.getByEventCode(patentStatus.getStatus().getEvent_code(), patentStatus.getStatus().getCountry_id());
+				log.info("0");
 				if (status != null) {
 					patentStatus.setStatus_id(status.getStatus_id());
 					PatentStatus dBean = patentStatusDao.getByStatusAndPatent(patentStatus.getPatent_id(), patentStatus.getStatus_id(), patentStatus.getCreate_date());
+					log.info("1");
 					if (dBean == null) {
+						log.info("2");
 						patentStatusDao.create(patentStatus);
 					}
 				} else {
@@ -567,6 +570,15 @@ public class PatentServiceImpl implements PatentService{
 			patent.setListAssignee(listAssign);
 			List<Inventor> listInventor = inventorDao.getByPatentId(patent.getPatent_id());
 			patent.setListInventor(listInventor);
+			List<PatentStatus> list = patentStatusDao.getByPatent(patent.getPatent_id());
+			for (PatentStatus ps:list) {
+				ps.setPatent_id(ps.getPatent_id());
+				Status status = statusDao.getById(ps.getStatus_id());
+				ps.setStatus(status);
+			}
+			if (list.size() > 0) {
+				patent.setPatentStatusList(list);
+			}
 		}
 		return patentList;
 	}

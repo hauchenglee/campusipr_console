@@ -178,7 +178,7 @@ public class Patent extends BaseBean{
 	private List<Portfolio> listPortfolio;
 	
 	
-	@JsonView(View.PatentDetail.class)
+	@Transient
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
 	private List<PatentStatus> patentStatusList;

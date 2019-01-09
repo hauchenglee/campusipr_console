@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 public class PatentStatus extends BaseBean {
 	
 	@Id
-	@JsonView(View.PatentDetail.class)
 	private String patent_id;
 	
 	@Id

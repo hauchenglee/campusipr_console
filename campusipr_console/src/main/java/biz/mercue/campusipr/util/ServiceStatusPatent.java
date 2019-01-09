@@ -90,7 +90,7 @@ public class ServiceStatusPatent {
 				PatentStatus ps = new PatentStatus();
 				ps.setPatent_id(patent.getPatent_id());
 				Status status = new Status();
-				status.setCountry_id("US");
+				status.setCountry_id("us");
 				status.setEvent_code(transactionObj.optString("code"));
 				status.setEvent_code_desc(transactionObj.optString("description"));
 				try {
@@ -135,8 +135,8 @@ public class ServiceStatusPatent {
 				Node nNode = documentList.item(temp);
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
 					Element eElement = (Element) nNode;
-					String countryId = eElement.getElementsByTagName("ops:L001EP").item(0).getTextContent();
-					if (countryId.equals(patent.getPatent_appl_country())) {
+					String countryId = eElement.getElementsByTagName("ops:L001EP").item(0).getTextContent().toLowerCase();
+					if (countryId.equals(patent.getPatent_appl_country().toLowerCase())) {
 						status.setCountry_id(countryId);
 						String eventCode = eElement.getAttribute("code");
 						status.setEvent_code(eventCode);

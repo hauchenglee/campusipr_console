@@ -42,6 +42,14 @@ public class PatentStatusDaoImpl extends AbstractDao<String,  PatentStatus> impl
 	}
 	
 	@Override
+	public List<PatentStatus> getByPatent(String patentId) {
+		// TODO Auto-generated method stub
+		Criteria criteria =  createEntityCriteria();
+		criteria.add(Restrictions.eq("patent_id", patentId));
+		return criteria.list();
+	}
+	
+	@Override
 	public void create(PatentStatus ps) {
 		persist(ps);
 	}

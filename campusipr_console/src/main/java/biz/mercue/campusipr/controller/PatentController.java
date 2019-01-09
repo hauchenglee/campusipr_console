@@ -27,7 +27,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import biz.mercue.campusipr.model.AdminToken;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentStatus;
 import biz.mercue.campusipr.model.Permission;
+import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.PatentService;
@@ -223,7 +225,7 @@ public class PatentController {
 			
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.add( "Content-disposition", "attachment; filename=myfile.xls" );
+			headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
 			
 			return ResponseEntity
 		                .ok()
