@@ -23,7 +23,7 @@ public class PatentContext {
 	@JsonView(View.PatentDetail.class)
 	private String patent_context_id;
 	
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
 	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
 	private Patent patent;
 	

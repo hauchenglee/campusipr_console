@@ -12,12 +12,16 @@ public interface PatentService {
 
 	int addPatent(Patent patent);
 	
+	int syncPatentStatus(Patent patent);
+	
 	int addPatentByApplNo(Patent patent);
 
 
 	int updatePatent(Patent patent);
 
 	int deletePatent(Patent patent);
+	
+	List<Patent> getAllByBussinessId(String businessId);
 
 	ListQueryForm getByBusinessId(String businessId,int page);
 	

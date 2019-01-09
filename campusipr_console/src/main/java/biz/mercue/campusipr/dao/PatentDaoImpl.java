@@ -65,6 +65,14 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		return criteria.list();
 	}
 	
+	@Override
+	public List<Patent> getAllByBusinessId(String businessId){
+		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("listBusiness","bs");
+		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		return criteria.list();
+	}
+	
 	
 	@Override
 	public int  getCountByBusinessId(String businessId) {
@@ -87,6 +95,8 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	@Override
 	public List<Patent> searchPatent(String  searchText,String businessId,int page,int pageSize){
 		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("listBusiness","bs");
+		criteria.add(Restrictions.eq("bs.business_id", businessId));
 		Criterion re1 = Restrictions.like("patent_name", searchText);
 		Criterion re2 = Restrictions.like("patent_name_en", searchText);
 		Criterion re3 = Restrictions.like("patent_appl_country", searchText);
@@ -99,6 +109,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		Criterion re15 = Restrictions.like("pc.context_desc", searchText);
 		Criterion re16 = Restrictions.like("pc.context_claim", searchText);
 		criteria.add(Restrictions.or(re1,re2,re3,re4,re5,re6,re7,re14,re15,re16));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
 		return criteria.list();
@@ -118,6 +129,29 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		Criteria criteria =  createEntityCriteria();
 		criteria.add(Restrictions.eq("patent_no", patentNo));
 		return (Patent) criteria.uniqueResult();
+	}
+
+	@Override
+	public int searchCountPatent(String searchText, String businessId) {
+		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("listBusiness","bs");
+		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		Criterion re1 = Restrictions.like("patent_name", searchText);
+		Criterion re2 = Restrictions.like("patent_name_en", searchText);
+		Criterion re3 = Restrictions.like("patent_appl_country", searchText);
+		Criterion re4 = Restrictions.like("patent_appl_no", searchText);
+		Criterion re5 = Restrictions.like("patent_notice_no", searchText);
+		Criterion re6 = Restrictions.like("patent_publish_no", searchText);
+		Criterion re7 = Restrictions.like("patent_no", searchText);
+		criteria.createAlias("patentContext", "pc", CriteriaSpecification.LEFT_JOIN);
+		Criterion re14 = Restrictions.like("pc.context_abstract", searchText);
+		Criterion re15 = Restrictions.like("pc.context_desc", searchText);
+		Criterion re16 = Restrictions.like("pc.context_claim", searchText);
+		criteria.add(Restrictions.or(re1,re2,re3,re4,re5,re6,re7,re14,re15,re16));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		criteria.setProjection(Projections.rowCount());
+		long count = (long)criteria.uniqueResult();
+		return (int)count;
 	}
 
 	

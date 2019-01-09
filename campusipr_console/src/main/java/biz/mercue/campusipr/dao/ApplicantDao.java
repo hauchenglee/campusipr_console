@@ -10,6 +10,8 @@ public interface ApplicantDao {
 
 	Applicant getById(String id);
 	
+	List<Applicant> getByPatentId(String patentId);
+	
 	void create(Applicant appl);
 	
 }

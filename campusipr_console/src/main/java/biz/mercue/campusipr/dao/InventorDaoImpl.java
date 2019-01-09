@@ -31,5 +31,14 @@ public class InventorDaoImpl extends AbstractDao<String,  Inventor> implements I
 	public void create(Inventor inventor) {
 		persist(inventor);
 	}
+	
+	@Override
+	public List<Inventor> getByPatentId(String patentId) {
+		// TODO Auto-generated method stub
+		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("patent","patent");
+		criteria.add(Restrictions.eq("patent.patent_id", patentId));
+		return criteria.list();
+	}
 
 }

@@ -11,33 +11,23 @@ import org.springframework.stereotype.Repository;
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Country;
+import biz.mercue.campusipr.model.Inventor;
+import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentStatus;
+import biz.mercue.campusipr.model.Status;
 
 
 
 
-@Repository("assigneeDao")
-public class AssigneeDaoImpl extends AbstractDao<String,  Assignee> implements AssigneeDao {
+@Repository("patentStatusDao")
+public class PatentStatusDaoImpl extends AbstractDao<String,  PatentStatus> implements PatentStatusDao {
 
 	private Logger log = Logger.getLogger(this.getClass().getName());
 
 	@Override
-	public Assignee getById(String id) {
+	public PatentStatus getById(String id) {
 		// TODO Auto-generated method stub
 		return getByKey(id);
 	}
 	
-	@Override
-	public void create(Assignee assignee) {
-		persist(assignee);
-	}
-	
-	@Override
-	public List<Assignee> getByPatentId(String patentId) {
-		// TODO Auto-generated method stub
-		Criteria criteria =  createEntityCriteria();
-		criteria.createAlias("patent","patent");
-		criteria.add(Restrictions.eq("patent.patent_id", patentId));
-		return criteria.list();
-	}
-
 }

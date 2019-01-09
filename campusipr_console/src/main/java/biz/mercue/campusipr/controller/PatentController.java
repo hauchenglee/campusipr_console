@@ -1,14 +1,24 @@
 package biz.mercue.campusipr.controller;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -32,6 +43,7 @@ import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.PatentService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
+import biz.mercue.campusipr.util.ExcelUtils;
 import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
@@ -87,6 +99,7 @@ public class PatentController {
 			
 		if(tokenBean!=null) {
 			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
+			patent.setBusiness(tokenBean.getBusiness());
 			
 			int taskResult = patentService.addPatentByApplNo(patent);
 			responseBody.setCode(taskResult);
@@ -107,6 +120,7 @@ public class PatentController {
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
+			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin(tokenBean.getAdmin());
 			int taskResult =  patentService.updatePatent(patent);
 			responseBody.setCode(taskResult);
@@ -173,19 +187,29 @@ public class PatentController {
 	
 	@RequestMapping(value="/api/exportpatentexcel", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String exportPatentexcel(HttpServletRequest request,@RequestBody String receiveJSONString){
+	public ResponseEntity<InputStreamResource> exportPatentexcel(HttpServletRequest request,@RequestBody String receiveJSONString){
 		log.info("exportpatent ");
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
 			//TODO 
+			List<Patent> listPatent = patentService.getAllByBussinessId(tokenBean.getBusiness().getBusiness_id());
+			
+			String fileName = "test";
+			ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, tokenBean.getBusiness().getBusiness_id());
 			
 			
-			responseBody.setCode(Constants.INT_SUCCESS);
-		}else {
-			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			HttpHeaders headers = new HttpHeaders();
+			headers.add( "Content-disposition", "attachment; filename=myfile.xls" );
+			
+			return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+		} else {
+			return null;
 		}
-		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
 	

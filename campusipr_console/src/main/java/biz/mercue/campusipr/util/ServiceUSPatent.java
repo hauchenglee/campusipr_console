@@ -21,6 +21,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
+import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
@@ -120,24 +121,7 @@ public class ServiceUSPatent {
 				
 				getPatentNoticeAndPublish(patent);
 				
-				getPatentInventors(patent);
-				
-				List<Assignee> listAssignee = new ArrayList<Assignee>();
-				JSONArray assignee = patentObj.optJSONArray("assignee");
-				int orderA = 1;
-				if (assignee != null) {
-					for (int assigneeIndex = 0; assigneeIndex < assignee.length(); assigneeIndex++) {
-						String assigneeName = assignee.optString(assigneeIndex);
-						Assignee assign = new Assignee();
-						assign.setAssignee_name_en(assigneeName);
-						assign.setAssignee_order(orderA);
-						assign.setPatent(patent);
-						listAssignee.add(assign);
-						orderA++;
-					}
-				}
-				
-				patent.setListAssignee(listAssignee);
+				getPatentInventorsApplcant(patent);
 				
 				String patentNo = patentObj.optString("patentNumber");
 				if (StringUtils.isNULL(patentNo)==false) {
@@ -152,7 +136,7 @@ public class ServiceUSPatent {
 		return patentList;
 	}
 	
-	private static void getPatentInventors(Patent patent) {
+	private static void getPatentInventorsApplcant(Patent patent) {
 		String url = Constants.PATENT_INVENTOR_WEB_SERVICE_US;
 		JSONObject obj = new JSONObject();
 		if (patent.getPatent_appl_no() != null) {
@@ -183,6 +167,40 @@ public class ServiceUSPatent {
 						listInventor.add(inv);
 					}
 					patent.setListInventor(listInventor);
+					
+					JSONArray patentApplicants = patentObj.optJSONArray("applicants");
+					List<Assignee> listAssignee = new ArrayList<Assignee>();
+					List<Applicant> listAppl = new ArrayList<Applicant>();
+					for (int applIndex = 0; applIndex < patentApplicants.length(); applIndex++) {
+						JSONObject applObj = patentApplicants.optJSONObject(applIndex);
+						Assignee assign = new Assignee();
+						Applicant applicant = new Applicant();
+						if (StringUtils.isNULL(applObj.optString("nameLineTwo"))) {
+							assign.setAssignee_name_en(applObj.optString("nameLineOne"));
+						} else {
+							assign.setAssignee_name_en(applObj.optString("nameLineOne") + " " +
+									applObj.optString("nameLineTwo"));
+						}
+						assign.setCountry_id(applObj.optString("country"));
+						assign.setAssignee_order(Integer.parseInt(applObj.optString("rankNo")));
+						assign.setPatent(patent);
+						listAssignee.add(assign);
+						if (StringUtils.isNULL(applObj.optString("nameLineTwo"))) {
+							applicant.setApplicant_name_en(applObj.optString("nameLineOne"));
+						} else {
+							applicant.setApplicant_name_en(applObj.optString("nameLineOne") + " " +
+									applObj.optString("nameLineTwo"));
+						}
+						applicant.setCountry_id(applObj.optString("country"));
+						applicant.setApplicant_address_en(applObj.optString("streetOne") +
+									applObj.optString("streetTwo")+applObj.optString("city") +
+									applObj.optString("geoCode"));
+						applicant.setApplicant_order(Integer.parseInt(applObj.optString("rankNo")));
+						applicant.setPatent(patent);
+						listAppl.add(applicant);
+					}
+					patent.setListAssignee(listAssignee);
+					patent.setListApplicant(listAppl);
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

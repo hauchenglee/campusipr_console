@@ -31,5 +31,14 @@ public class ApplicantDaoImpl extends AbstractDao<String,  Applicant> implements
 	public void create(Applicant appl) {
 		persist(appl);
 	}
+	
+	@Override
+	public List<Applicant> getByPatentId(String patentId) {
+		// TODO Auto-generated method stub
+		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("patent","patent");
+		criteria.add(Restrictions.eq("patent.patent_id", patentId));
+		return criteria.list();
+	}
 
 }

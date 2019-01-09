@@ -170,6 +170,12 @@ public class Patent extends BaseBean{
 		inverseJoinColumns = { @JoinColumn(name = "portfolio_id") })
 	private List<Portfolio> listPortfolio;
 	
+	
+	@JsonView(View.PatentDetail.class)
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
+	private List<PatentStatus> patentStatusList;
+	
 	public String getPatent_id() {
 		return patent_id;
 	}
@@ -481,7 +487,13 @@ public class Patent extends BaseBean{
 		this.admin = admin;
 	}
 
+	public List<PatentStatus> getPatentStatusList() {
+		return patentStatusList;
+	}
 
-	
+	public void setPatentStatusList(List<PatentStatus> patentStatusList) {
+		this.patentStatusList = patentStatusList;
+	}
+
 
 }

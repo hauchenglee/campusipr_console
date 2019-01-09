@@ -14,20 +14,23 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentContext;
+import biz.mercue.campusipr.service.PatentService;
 
 public class ServiceChinaPatent {
 	
-private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName());
+	private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName());
 	
 	public static Patent getPatentRightByApplicantNo(String applNo) {
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/search?q=%s";
@@ -188,7 +191,7 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 							if ("docdb".equals(cElement.getAttribute("document-id-type"))) {
 								Node pubNode = cElement.getElementsByTagName("doc-number").item(0);
 								Node pubDateNode = cElement.getElementsByTagName("date").item(0);
-								String publicateNo = pubNode.getTextContent().substring(2, pubNode.getTextContent().length());
+								String publicateNo = pubNode.getTextContent().substring(0, pubNode.getTextContent().length());
 								if (publicateNo.length() > 9) {
 									publicateNo = publicateNo.substring(0, publicateNo.length()-1);
 								}
@@ -223,7 +226,7 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 							if ("epodoc".equals(cElement.getAttribute("document-id-type"))) {
 								Node applNode = cElement.getElementsByTagName("doc-number").item(0);
 								Node applDateNode = cElement.getElementsByTagName("date").item(0);
-								String applNo = applNode.getTextContent().substring(2, applNode.getTextContent().length());
+								String applNo = applNode.getTextContent().substring(0, applNode.getTextContent().length());
 								if (applNo.length() > 12) {
 									applNo = applNo.substring(0, applNo.length()-1);
 								}
@@ -269,6 +272,7 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 			NodeList applicantsList = doc.getElementsByTagName("applicants");
 			for (int temp = 0; temp < applicantsList.getLength(); temp++) {
 				List<Assignee> listAssignee = new ArrayList<Assignee>();
+				List<Applicant> listAppl = new ArrayList<Applicant>();
 				Node nNode = applicantsList.item(temp);
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
 					Element nElement = (Element) nNode;
@@ -277,12 +281,18 @@ private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName()
 						Element applicant = (Element) applicantList.item(temp1);
 						NodeList nameList = applicant.getElementsByTagName("name");
 						Assignee assign = new Assignee();
+						Applicant appl = new Applicant();
 						assign.setAssignee_name(nameList.item(0).getTextContent());
 						assign.setAssignee_order(Integer.parseInt(applicant.getAttribute("sequence")));
 						assign.setPatent(patent);
+						appl.setApplicant_name_en(nameList.item(0).getTextContent());
+						appl.setApplicant_order(Integer.parseInt(applicant.getAttribute("sequence")));
+						appl.setPatent(patent);
 						listAssignee.add(assign);
+						listAppl.add(appl);
 					}
 				}
+				patent.setListApplicant(listAppl);
 				patent.setListAssignee(listAssignee);
 			}
 			

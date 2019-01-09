@@ -19,6 +19,7 @@ import biz.mercue.campusipr.dao.InventorDao;
 import biz.mercue.campusipr.dao.PatentContextDao;
 import biz.mercue.campusipr.dao.PatentDao;
 import biz.mercue.campusipr.dao.PatentFamilyDao;
+import biz.mercue.campusipr.dao.StatusDao;
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
@@ -31,11 +32,14 @@ import biz.mercue.campusipr.model.PatentContext;
 import biz.mercue.campusipr.model.PatentEditHistory;
 import biz.mercue.campusipr.model.PatentExtension;
 import biz.mercue.campusipr.model.PatentFamily;
+import biz.mercue.campusipr.model.PatentStatus;
+import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ServiceChinaPatent;
+import biz.mercue.campusipr.util.ServiceStatusPatent;
 import biz.mercue.campusipr.util.ServiceTaiwanPatent;
 import biz.mercue.campusipr.util.ServiceUSPatent;
 import biz.mercue.campusipr.util.StringUtils;
@@ -59,6 +63,9 @@ public class PatentServiceImpl implements PatentService{
 	
 	@Autowired
 	private InventorDao inventorDao;
+	
+	@Autowired
+	private StatusDao statusDao;
 	
 	@Autowired
 	private PatentContextDao patentContextDao;
@@ -170,6 +177,33 @@ public class PatentServiceImpl implements PatentService{
 		return Constants.INT_SUCCESS;
 	}
 	
+	@Override
+	public int syncPatentStatus(Patent patent) {
+		int taskResult= -1;
+		ServiceStatusPatent.getPatentStatus(patent);
+		
+		if (!patent.getPatentStatusList().isEmpty()) {
+			for (PatentStatus patentStatus:patent.getPatentStatusList()) {
+				Status status = statusDao.getByEventCode(patentStatus.getStatus().getEvent_code());
+				if (status != null) {
+					patentStatus.setStatus_id(status.getStatus_id());
+				} else {
+					Status createStatus = patentStatus.getStatus();
+					if(StringUtils.isNULL(createStatus.getStatus_id())) {
+						createStatus.setStatus_id(KeyGeneratorUtils.generateRandomString());
+					}
+					statusDao.create(createStatus);
+					patentStatus.setStatus_id(status.getStatus_id());
+				}
+			}
+			taskResult = Constants.INT_SUCCESS;
+		}else {
+			taskResult = Constants.INT_CANNOT_FIND_DATA;
+		}
+		
+		return taskResult;
+	}
+	
 	
 	@Override
 	public int addPatentByApplNo(Patent patent) {
@@ -239,6 +273,7 @@ public class PatentServiceImpl implements PatentService{
 						}
 					}
 					
+					patent.addBusiness(patent.getBusiness());
 					
 					patentDao.create(patent);
 					taskResult = Constants.INT_SUCCESS;
@@ -247,7 +282,12 @@ public class PatentServiceImpl implements PatentService{
 						patent.setPatent_id(appNoPatent.getPatent_id());
 					}
 					if (patent.getPatentContext() != null) {
-						patent.getPatentContext().setPatent_context_id(appNoPatent.getPatentContext().getPatent_context_id());
+						if (appNoPatent.getPatentContext() != null) {
+							patent.getPatentContext().setPatent_context_id(appNoPatent.getPatentContext().getPatent_context_id());
+						} else {
+							patent.getPatentContext().setPatent_context_id(KeyGeneratorUtils.generateRandomString());
+							patent.getPatentContext().setPatent(patent);
+						}
 					} 
 					if (patent.getListInventor() != null) {
 						for (Inventor inventor:patent.getListInventor()) {
@@ -268,6 +308,7 @@ public class PatentServiceImpl implements PatentService{
 						}
 					}
 					
+					
 					taskResult = updatePatent(patent);
 				}
 			} else {
@@ -286,12 +327,28 @@ public class PatentServiceImpl implements PatentService{
 
 		if(dbBean!=null){
 			//TODO save edit history
-			if (!dbBean.getPatent_name().equals(patent.getPatent_name())) {
-				addEditHistory(patent, patent.getAdmin(), Constants.PATENT_NAME_FIELD);
+			String patentNameDb = "";
+			if (dbBean.getPatent_name() != null) {
+				patentNameDb = dbBean.getPatent_name();
+			}
+			String patentName = "";
+			if (patent.getPatent_name() != null) {
+				patentName = patent.getPatent_name();
+			}
+			if (!patentNameDb.equals(patentName)) {
+					addEditHistory(patent, patent.getAdmin(), Constants.PATENT_NAME_FIELD);
 			}
 			
-			if (!dbBean.getPatent_name_en().equals(patent.getPatent_name_en())) {
-				addEditHistory(patent, patent.getAdmin(), Constants.PATENT_NAME_EN_FIELD);
+			String patentNameEnDb = "";
+			if (dbBean.getPatent_name_en() != null) {
+				patentNameEnDb = dbBean.getPatent_name_en();
+			}
+			String patentNameEn = "";
+			if (patent.getPatent_name_en() != null) {
+				patentNameEn = patent.getPatent_name_en();
+			}
+			if (!patentNameEnDb.equals(patentNameEn)) {
+					addEditHistory(patent, patent.getAdmin(), Constants.PATENT_NAME_EN_FIELD);
 			}
 			addEditHistory(patent, patent.getAdmin(), Constants.ASSIGNEE_FIELD);
 			addEditHistory(patent, patent.getAdmin(), Constants.APPLIANT_FIELD);
@@ -328,6 +385,8 @@ public class PatentServiceImpl implements PatentService{
 					pcDb.setContext_abstract(patent.getPatentContext().getContext_abstract());
 					pcDb.setContext_claim(patent.getPatentContext().getContext_claim());
 					pcDb.setContext_desc(patent.getPatentContext().getContext_desc());
+				} else {
+					dbBean.setPatentContext(patent.getPatentContext());
 				}
 			}
 			
@@ -392,6 +451,16 @@ public class PatentServiceImpl implements PatentService{
 			dbBean.setListPortfolio(patent.getListPortfolio());
 			dbBean.setListHistory(patent.getListHistory());
 			
+			boolean isDuplicate = false;
+			List<Business> listBusiness = dbBean.getListBusiness();
+			for(Business business : listBusiness) {
+				if(patent.getBusiness().getBusiness_id().equals(business.getBusiness_id())) {
+					isDuplicate = true;
+				}
+			}
+			if (isDuplicate == false) {
+				dbBean.addBusiness(patent.getBusiness());
+			}
 			return Constants.INT_SUCCESS;
 		}else {
 			return Constants.INT_CANNOT_FIND_DATA;
@@ -465,6 +534,19 @@ public class PatentServiceImpl implements PatentService{
 		return form;
 	}
 	
+	@Override
+	public List<Patent> getAllByBussinessId(String businessId){
+		List<Patent> patentList = patentDao.getAllByBusinessId(businessId);
+		for (Patent patent:patentList) {
+			List<Applicant> listAppl = applicantDao.getByPatentId(patent.getPatent_id());
+			patent.setListApplicant(listAppl);
+			List<Assignee> listAssign = assigneeDao.getByPatentId(patent.getPatent_id());
+			patent.setListAssignee(listAssign);
+			List<Inventor> listInventor = inventorDao.getByPatentId(patent.getPatent_id());
+			patent.setListInventor(listInventor);
+		}
+		return patentList;
+	}
 	
 	@Override
 	public List<Patent> getByPatentIds(List<String> idList,String businessId){
@@ -484,14 +566,9 @@ public class PatentServiceImpl implements PatentService{
 		
 		//TODO no finish yet
 		List<Patent> list = patentDao.searchPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
-		List<Patent> newList = new ArrayList<>();
-		for (Patent patent:list) {
-			if (!newList.contains(patent)) {
-				newList.add(patent);
-			}
-		}
-		int count = newList.size();
-		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,newList);
+		
+		int count = patentDao.searchCountPatent('%'+text+'%', businessId);
+		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,list);
 		
 		return form;
 	}
@@ -542,8 +619,24 @@ public class PatentServiceImpl implements PatentService{
 						assigneeStr += JacksonJSONUtils.mapObjectWithView(assignee,  View.PatentDetail.class) + ",";
 					}
 				} else {
-					if (!assigneeDb.getAssignee_name().equals(assignee.getAssignee_name()) ||
-							!assigneeDb.getAssignee_name_en().equals(assignee.getAssignee_name_en())) {
+					String assigneeNameDb = "";
+					if (assigneeDb.getAssignee_name() != null) {
+						assigneeNameDb = assigneeDb.getAssignee_name();
+					}
+					String assigneeName = "";
+					if (assignee.getAssignee_name() != null) {
+						assigneeName = assignee.getAssignee_name();
+					}
+					String assigneeNameEnDb = "";
+					if (assigneeDb.getAssignee_name_en() != null) {
+						assigneeNameEnDb = assigneeDb.getAssignee_name_en();
+					}
+					String assigneeNameEn = "";
+					if (assignee.getAssignee_name_en() != null) {
+						assigneeNameEn = assignee.getAssignee_name_en();
+					}
+					if (!assigneeNameDb.equals(assigneeName) ||
+							!assigneeNameEnDb.equals(assigneeNameEn)) {
 						if (assignee.getAssignee_id().equals(patent.getListAssignee().get(lastIndex).getAssignee_id())) {
 							assigneeStr += JacksonJSONUtils.mapObjectWithView(assignee,  View.PatentDetail.class);
 						} else {
@@ -571,10 +664,42 @@ public class PatentServiceImpl implements PatentService{
 						applicantStr += JacksonJSONUtils.mapObjectWithView(appl,  View.PatentDetail.class)+ ",";
 					}
 				} else {
-					if (!applDb.getApplicant_name().equals(appl.getApplicant_name()) ||
-							!applDb.getApplicant_name_en().equals(appl.getApplicant_name_en()) ||
-								!applDb.getApplicant_address().equals(appl.getApplicant_address()) ||
-									!applDb.getApplicant_address_en().equals(appl.getApplicant_address_en())) {
+					String applNameDb = "";
+					if (applDb.getApplicant_name() != null) {
+						applNameDb = applDb.getApplicant_name();
+					}
+					String applName = "";
+					if (appl.getApplicant_name() != null) {
+						applName = appl.getApplicant_name();
+					}
+					String applNameEnDb = "";
+					if (applDb.getApplicant_name_en() != null) {
+						applNameEnDb = applDb.getApplicant_name_en();
+					}
+					String applNameEn = "";
+					if (appl.getApplicant_name_en() != null) {
+						applNameEn = appl.getApplicant_name_en();
+					}
+					String applAddressDb = "";
+					if (applDb.getApplicant_address() != null) {
+						applAddressDb = applDb.getApplicant_address();
+					}
+					String applAddress = "";
+					if (appl.getApplicant_address() != null) {
+						applAddress = appl.getApplicant_address();
+					}
+					String applAddressEnDb = "";
+					if (applDb.getApplicant_address_en() != null) {
+						applAddressEnDb = applDb.getApplicant_address_en();
+					}
+					String applAddressEn = "";
+					if (appl.getApplicant_address_en() != null) {
+						applAddressEn = appl.getApplicant_address_en();
+					}
+					if (!applNameDb.equals(applName) ||
+							!applNameEnDb.equals(applNameEn) ||
+								!applAddressDb.equals(applAddress) ||
+									!applAddressEnDb.equals(applAddressEn)) {
 						if (appl.getApplicant_id().equals(patent.getListApplicant().get(lastIndex).getApplicant_id())) {
 							applicantStr += JacksonJSONUtils.mapObjectWithView(appl,  View.PatentDetail.class);
 						} else {
@@ -602,8 +727,24 @@ public class PatentServiceImpl implements PatentService{
 						inventorStr += JacksonJSONUtils.mapObjectWithView(inventor,  View.PatentDetail.class)+ ",";
 					}
 				} else {
-					if (!inventorDb.getInventor_name().equals(inventor.getInventor_name()) ||
-							!inventorDb.getInventor_name_en().equals(inventor.getInventor_name_en())) {
+					String inventorNameDb = "";
+					if (inventorDb.getInventor_name() != null) {
+						inventorNameDb = inventorDb.getInventor_name();
+					}
+					String inventorName = "";
+					if (inventor.getInventor_name() != null) {
+						inventorName = inventor.getInventor_name();
+					}
+					String inventorNameEnDb = "";
+					if (inventorDb.getInventor_name_en() != null) {
+						inventorNameEnDb = inventorDb.getInventor_name_en();
+					}
+					String inventorNameEn = "";
+					if (inventor.getInventor_name_en() != null) {
+						inventorNameEn = inventor.getInventor_name_en();
+					}
+					if (!inventorNameDb.equals(inventorName) ||
+							!inventorNameEnDb.equals(inventorNameEn)) {
 						if (inventor.getInventor_id().equals(patent.getListInventor().get(lastIndex).getInventor_id())) {
 							inventorStr += JacksonJSONUtils.mapObjectWithView(inventor,  View.PatentDetail.class);
 						} else {
