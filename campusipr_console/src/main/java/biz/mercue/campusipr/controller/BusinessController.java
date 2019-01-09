@@ -75,6 +75,25 @@ public class BusinessController {
 	}
 	
 	
+	@RequestMapping(value="/api/searchbusiness", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String searchBusiness(HttpServletRequest request,
+			@RequestParam(value ="text",required=true,defaultValue ="") String text,
+			@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
+		
+		ListResponseBody responseBody  = new ListResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			ListQueryForm form = businessService.search(text, page);
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setListQuery(form);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString(View.Business.class);
+	}
+	
+	
 	
 	@RequestMapping(value="/api/safeaddbusiness", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody

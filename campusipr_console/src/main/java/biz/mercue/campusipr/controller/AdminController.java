@@ -262,7 +262,7 @@ public class AdminController {
 	@ResponseBody
 	public String searchRoleList(HttpServletRequest request,
 			@RequestParam(value ="role",required=true,defaultValue ="") String roleId,
-			@RequestParam(value ="text",required=true,defaultValue ="1") String text,
+			@RequestParam(value ="text",required=true,defaultValue ="") String text,
 			@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
 		BeanResponseBody responseBody = new BeanResponseBody();
 		AdminToken token =  adminTokenService.getById(JWTUtils.getJwtToken(request));
