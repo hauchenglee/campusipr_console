@@ -3,11 +3,13 @@ package biz.mercue.campusipr.dao;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import biz.mercue.campusipr.model.Admin;
+import biz.mercue.campusipr.util.StringUtils;
 
 
 @Repository("adminDao")
@@ -33,8 +35,10 @@ public class AdminDaoImpl extends AbstractDao<String,  Admin> implements AdminDa
 		Criteria crit = createEntityCriteria();	
 		crit.createAlias("role", "role");
 		crit.add(Restrictions.eq("role.role_id", roleId));
-		crit.createAlias("business", "business");
-		crit.add(Restrictions.eq("business.business_id", businessId));
+		if(!StringUtils.isNULL(businessId)) {
+			crit.createAlias("business", "business");
+			crit.add(Restrictions.eq("business.business_id", businessId));
+		}
 		crit.setFirstResult((page - 1) * pageSize);
 		crit.setMaxResults(pageSize);
 		return crit.list();
@@ -45,31 +49,70 @@ public class AdminDaoImpl extends AbstractDao<String,  Admin> implements AdminDa
 		Criteria crit = createEntityCriteria();	
 		crit.createAlias("role", "role");
 		crit.add(Restrictions.eq("role.role_id", roleId));
-		crit.createAlias("business", "business");
-		crit.add(Restrictions.eq("business.business_id", businessId));
+		if(!StringUtils.isNULL(businessId)) {
+			crit.createAlias("business", "business");
+			crit.add(Restrictions.eq("business.business_id", businessId));
+		}
 		crit.setProjection(Projections.rowCount());
 		long count = (long)crit.uniqueResult();
 		return (int)count;
 	}
 	
+	
 	@Override
-	public List<Admin> getRoleAdminList(String roleId,int page,int pageSize){
+	public List<Admin> searchRoleAdminList(String roleId,String businessId,String text,int page,int pageSize){
 		Criteria crit = createEntityCriteria();	
 		crit.createAlias("role", "role");
 		crit.add(Restrictions.eq("role.role_id", roleId));
+		if(!StringUtils.isNULL(businessId)) {
+			crit.createAlias("business", "business");
+			crit.add(Restrictions.eq("business.business_id", businessId));
+		}
+		Criterion field1 = Restrictions.like("admin_name", "%"+text+"%");
+		Criterion field2 = Restrictions.like("admin_email", "%"+text+"%");
+		crit.add(Restrictions.or(field1, field2));
 		crit.setFirstResult((page - 1) * pageSize);
 		crit.setMaxResults(pageSize);
 		return crit.list();
 	}
+	
 	@Override
-	public int getRoleAdminCount(String roleId) {
+	public int searchRoleAdminListCount(String roleId,String businessId,String text) {
 		Criteria crit = createEntityCriteria();	
 		crit.createAlias("role", "role");
 		crit.add(Restrictions.eq("role.role_id", roleId));
+		if(!StringUtils.isNULL(businessId)) {
+			crit.createAlias("business", "business");
+			crit.add(Restrictions.eq("business.business_id", businessId));
+		}
+		
+		Criterion field1 = Restrictions.like("admin_name", "%"+text+"%");
+		Criterion field2 = Restrictions.like("admin_email", "%"+text+"%");
+		crit.add(Restrictions.or(field1, field2));
 		crit.setProjection(Projections.rowCount());
 		long count = (long)crit.uniqueResult();
 		return (int)count;
 	}
+
+	
+//	@Override
+//	public List<Admin> getRoleAdminList(String roleId,int page,int pageSize){
+//		Criteria crit = createEntityCriteria();	
+//		crit.createAlias("role", "role");
+//		crit.add(Restrictions.eq("role.role_id", roleId));
+//		crit.setFirstResult((page - 1) * pageSize);
+//		crit.setMaxResults(pageSize);
+//		return crit.list();
+//	}
+//	@Override
+//	public int getRoleAdminCount(String roleId) {
+//		Criteria crit = createEntityCriteria();	
+//		crit.createAlias("role", "role");
+//		crit.add(Restrictions.eq("role.role_id", roleId));
+//		crit.setProjection(Projections.rowCount());
+//		long count = (long)crit.uniqueResult();
+//		return (int)count;
+//	}
 	
 	@Override
 	public Admin getByEmail(String email) {

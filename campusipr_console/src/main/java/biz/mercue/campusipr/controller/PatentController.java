@@ -1,5 +1,6 @@
 package biz.mercue.campusipr.controller;
 
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -27,15 +30,18 @@ import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentEditHistory;
+import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.PatentService;
+import biz.mercue.campusipr.service.PermissionService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
+import biz.mercue.campusipr.util.MapResponseBody;
 import biz.mercue.campusipr.util.ServiceChinaPatent;
 import biz.mercue.campusipr.util.ServiceTaiwanPatent;
 import biz.mercue.campusipr.util.ServiceUSPatent;
@@ -49,6 +55,10 @@ public class PatentController {
 	
 	@Autowired
 	PatentService patentService;
+	
+	
+	@Autowired
+	PermissionService permissionService;
 	
 	
 	@Autowired
@@ -143,9 +153,28 @@ public class PatentController {
 		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-			ListQueryForm form = patentService.getByBusinessId(tokenBean.getBusiness().getBusiness_id(), page);
-			responseBody.setCode(Constants.INT_SUCCESS);
-			responseBody.setListQuery(form);
+			ListQueryForm form =null;
+			
+			log.info("token :"+tokenBean.getAdmin_token_id());
+			
+			
+			//TODO
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+					log.info("1");
+					form = patentService.getByBusinessId(null, page);
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setListQuery(form);
+				}else {
+					log.info("2");
+					form = patentService.getByBusinessId(tokenBean.getBusiness().getBusiness_id(), page);
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setListQuery(form);
+				}
+			}else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
@@ -161,10 +190,21 @@ public class PatentController {
 		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-			Patent patent = patentService.getById(tokenBean.getBusiness().getBusiness_id(), patentId);
-		
-			responseBody.setCode(Constants.INT_SUCCESS);
-			responseBody.setBean(patent);
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+					Patent patent = patentService.getById(null, patentId);
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setBean(patent);
+				}else {
+					Patent patent = patentService.getById(tokenBean.getBusiness().getBusiness_id(), patentId);
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setBean(patent);
+				}
+			}else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
@@ -207,22 +247,59 @@ public class PatentController {
 	}
 	
 	
-	@RequestMapping(value="/api/importpatentexcel", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@RequestMapping(value="/api/importpatentexcel", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public String importPatentexcel(HttpServletRequest request,@RequestBody String receiveJSONString){
+//		log.info("importPatentexcel ");
+//		StringResponseBody responseBody  = new StringResponseBody();
+//		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+//		if(tokenBean!=null) {
+//			List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});	
+//			
+//			
+//			responseBody.setCode(Constants.INT_SUCCESS);
+//		}else {
+//			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+//		}
+//
+//		return responseBody.getJacksonString(View.Patent.class);
+//	}
+	
+	
+	
+	@RequestMapping(value = "/api/importpatentexcel", method = {RequestMethod.POST },
+			produces = Constants.CONTENT_TYPE_JSON, 
+			consumes = { "multipart/mixed","multipart/form-data" })
 	@ResponseBody
-	public String importPatentexcel(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("importPatentexcel ");
-		StringResponseBody responseBody  = new StringResponseBody();
-		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		if(tokenBean!=null) {
-			List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});	
-			
-			
-			responseBody.setCode(Constants.INT_SUCCESS);
-		}else {
-			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-		}
+	public String importPatentExcel(HttpServletRequest request, 
+			@RequestPart("file") MultipartFile[] files) {
+		log.info("importPatentStatus");
+		MapResponseBody responseBody = new MapResponseBody();
+			try {
+				AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+				if(tokenBean!=null) {
+					log.info("files.length :" + files.length);
+					for (int fileIndex = 0; fileIndex < files.length; fileIndex++) {
+	
+						MultipartFile file = files[fileIndex];
+						if (file != null && !file.getOriginalFilename().isEmpty()) {
+							
+							
+	
+						}
+					}
+				}else {
+					responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+				}
 
-		return responseBody.getJacksonString(View.Patent.class);
+				
+				responseBody.setCode(Constants.INT_SUCCESS);
+			} catch (Exception e) {
+				log.error("Exception :" + e.getMessage());
+				responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+			}
+
+		return responseBody.getJacksonString(View.Public.class);
 	}
 	
 	
@@ -267,9 +344,7 @@ public class PatentController {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
 
-		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.Patent.class);
-		log.info("result :"+result);
-		return result;
+		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
 	private void addEditHistory(Patent patent, Admin admin, String addField) {

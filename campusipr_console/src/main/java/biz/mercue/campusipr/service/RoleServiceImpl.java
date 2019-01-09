@@ -62,8 +62,10 @@ public class RoleServiceImpl implements RoleService{
 		if(dbBean != null){
 			dbBean.setRole_name(role.getRole_name());
 			dbBean.setPermissionList(role.getPermissionList());
+			return Constants.INT_SUCCESS;
+		}else {
+			return Constants.INT_CANNOT_FIND_DATA;
 		}
-		return 0;
 	}
 	
 	

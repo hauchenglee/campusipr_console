@@ -121,16 +121,24 @@ public class AdminServiceImpl implements AdminService{
 	
 	@Override
 	public ListQueryForm getRoleBusinessAdminList(String roleId,String businessId,int page){
-		List list = dao.getRoleBusinessAdminList(roleId, businessId,page,Constants.SYSTEM_PAGE_SIZE);
 		int cout = dao.getRoleBusinessAdminCount(roleId, businessId);
+		List list = dao.getRoleBusinessAdminList(roleId, businessId,page,Constants.SYSTEM_PAGE_SIZE);
 		ListQueryForm form = new ListQueryForm(cout, Constants.SYSTEM_PAGE_SIZE, list);
 		
 		return form;
 	}
 	@Override
 	public ListQueryForm getRoleAdminList(String roleId,int page){
-		List list = dao.getRoleAdminList(roleId,page,Constants.SYSTEM_PAGE_SIZE);
-		int cout = dao.getRoleAdminCount(roleId);
+		int cout = dao.getRoleBusinessAdminCount(roleId,null);
+		List list = dao.getRoleBusinessAdminList(roleId,null,page,Constants.SYSTEM_PAGE_SIZE);
+		ListQueryForm form = new ListQueryForm(cout, Constants.SYSTEM_PAGE_SIZE, list);
+		return form;
+	}
+	
+	@Override
+	public ListQueryForm searchRoleAdminList(String roleId,String businessId,String text,int page) {
+		int cout = dao.searchRoleAdminListCount(roleId,businessId,text);
+		List list = dao.searchRoleAdminList(roleId, businessId, text, page, Constants.SYSTEM_PAGE_SIZE);
 		ListQueryForm form = new ListQueryForm(cout, Constants.SYSTEM_PAGE_SIZE, list);
 		return form;
 	}

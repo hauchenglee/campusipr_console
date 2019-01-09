@@ -27,8 +27,11 @@ public interface AdminDao {
 	List<Admin> getRoleBusinessAdminList(String roleId,String businessId,int page,int pageSize);
 	int getRoleBusinessAdminCount(String roleId,String businessId);
 	
-	List<Admin> getRoleAdminList(String roleId,int page,int pageSize);
-	int getRoleAdminCount(String roleId);
+//	List<Admin> getRoleAdminList(String roleId,int page,int pageSize);
+//	int getRoleAdminCount(String roleId);
+	
+	List<Admin> searchRoleAdminList(String roleId,String businessId,String text,int page,int pageSize);
+	int searchRoleAdminListCount(String roleId,String businessId,String text);
 	
 
 

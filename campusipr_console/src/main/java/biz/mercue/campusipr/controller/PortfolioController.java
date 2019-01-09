@@ -91,9 +91,9 @@ public class PortfolioController {
 			Portfolio portfolio = (Portfolio) JacksonJSONUtils.readValue(receiveJSONString, Portfolio.class);
 			portfolio.setBusiness(tokenBean.getBusiness());
 			int taskResult = portfolioService.addPortfolio(portfolio);
-
+			log.info("id :"+portfolio.getPortfolio_id());
 			responseBody.setCode(taskResult);
-		
+			responseBody.setBean(portfolio);
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}

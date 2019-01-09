@@ -33,6 +33,14 @@ public class PermissionDaoImpl extends AbstractDao<String,  Permission> implemen
 		criteria.add(Restrictions.eq("permission_name", module));
 		return (Permission) criteria.uniqueResult();
 	}
+	
+	
+	public Permission getByModule(String code,String module) {
+		Criteria criteria = createEntityCriteria();	
+		criteria.add(Restrictions.eq("permission_model_code", code));
+		criteria.add(Restrictions.eq("permission_name", module));
+		return (Permission) criteria.uniqueResult();
+	}
 
 	
 	public List<Permission> getRolePermission(String roleId) {

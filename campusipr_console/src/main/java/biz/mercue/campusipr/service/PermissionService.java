@@ -11,10 +11,16 @@ public interface PermissionService {
 	List<Permission> getAllPermission();
 	
 	List<Permission> getPermissionListByRole(String roleId);
-	
+
 	List<Permission> getSettingPermissionByRole(String roleId);
+	
+	List<Permission> getPermissionListByAdmin(String adminId);
 	
 	Permission getSettingPermissionByRoleAndModule(String roleId, String module);
 	
-	List<Permission> getPermissionListByAdmin(String adminId);
+	Permission getSettingPermissionByModule(String code, String module);
+	
+	Role getByRole(String roleId);
+	
+	int updateRolePermission(Role role);
 }

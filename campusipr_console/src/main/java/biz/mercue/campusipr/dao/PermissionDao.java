@@ -13,5 +13,7 @@ public interface PermissionDao {
 	List<Permission> getRolePermission(String roleId);
 	
 	Permission getByRoleIdAndModule(String roleId,String module);
+	
+	Permission getByModule(String code,String module);
 
 }

@@ -28,7 +28,6 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="patent_id")
 @Table(name="patent")
 public class Patent extends BaseBean{
 	
@@ -102,6 +101,14 @@ public class Patent extends BaseBean{
 	private List<IPCClass> listIPC;
 	
 	
+	@JsonView(View.Patent.class)
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinTable(name = "patent_status", 
+		joinColumns = { @JoinColumn(name = "patent_id") }, 
+		inverseJoinColumns = { @JoinColumn(name = "status_id") })
+	private List<Status> listStatus;
+	
+	
 	@JsonView(View.PatentDetail.class)
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@OrderBy("agent_order")
@@ -151,7 +158,7 @@ public class Patent extends BaseBean{
 	private List<PatentEditHistory> listHistory;
 	
 	@ManyToOne
-	@JsonView(View.PatentDetail.class)
+	@JsonView(View.Patent.class)
 	@JoinColumn(name="patent_family_id")
 	private PatentFamily family;
 	
@@ -467,6 +474,14 @@ public class Patent extends BaseBean{
 
 	public void setBusiness(Business business) {
 		this.business = business;
+	}
+
+	public List<Status> getListStatus() {
+		return listStatus;
+	}
+
+	public void setListStatus(List<Status> listStatus) {
+		this.listStatus = listStatus;
 	}
 
 

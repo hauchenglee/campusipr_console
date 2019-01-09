@@ -1,10 +1,14 @@
 package biz.mercue.campusipr.util;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -15,6 +19,9 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import biz.mercue.campusipr.model.Patent;
 
@@ -96,6 +103,28 @@ public class ExcelUtils {
     
 		
 		return "";
+	}
+	
+	public static final Workbook file2Workbook(MultipartFile mpFile) throws IOException {
+		CommonsMultipartFile cFile = (CommonsMultipartFile) mpFile;  
+		DiskFileItem fileItem = (DiskFileItem) cFile.getFileItem();
+		InputStream inputStream = fileItem.getInputStream();
+		String extensionName = FilenameUtils.getExtension(mpFile.getOriginalFilename());
+		Workbook workbook = null;
+        boolean is_support = false;
+		if(!StringUtils.isNULL(extensionName)) {
+			if("xlsx".equalsIgnoreCase(extensionName)) {
+				workbook = new XSSFWorkbook(inputStream);
+				is_support =true;
+			}else if("xls".equalsIgnoreCase(extensionName)) {
+				workbook = new HSSFWorkbook(inputStream);
+				is_support =true;
+			}else {
+				
+			}
+		}
+		
+		return workbook;
 	}
 	
 	

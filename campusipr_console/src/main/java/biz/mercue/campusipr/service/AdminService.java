@@ -1,12 +1,9 @@
 package biz.mercue.campusipr.service;
 
 
-import java.util.List;
-import java.util.Map;
-
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.ListQueryForm;
-import biz.mercue.campusipr.model.Permission;
+
 
 
 
@@ -43,6 +40,9 @@ public interface AdminService {
 
 	
 	public ListQueryForm getRoleAdminList(String roleId,int page);
+	
+	
+	public ListQueryForm searchRoleAdminList(String roleId,String businessId,String text,int page);
 	
 	//public List<Permission> getPermissionById(String adminId);
 }

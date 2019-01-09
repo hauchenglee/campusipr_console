@@ -70,6 +70,7 @@ public class Constants {
 	public static final String CONTENT_TYPE_PNG = "image/png";
 	
 	public static final int SHORT_IMAGE_NAME_LENGTH = 8;
+
 	
 	public static final String  JSON_CODE = "code";
 	public static final String  JSON_MESSAGE = "message";
@@ -231,37 +232,24 @@ public class Constants {
 	public static final String MEDIA_TYPE_MP3 = "mp3";
 	public static final String MEDIA_TYPE_M4A = "m4a";
 	
+	//model code
+	public static final String MODEL_CODE_PATENT_CONTENT = "patent_content";
 	
-	public static final String ROLE_PLATFORM_MANAGER = "a45e5e977721ed92dd3b914e3efd8dcf";
-	public static final String ADD_ADMIN_PLATFORM_MANAGER = "d8492b4ec0b23574cdc4cfc9407ed4f0";
-	public static final String EDIT_ADMIN_PLATFORM_MANAGER = "63f5ce8ac07727e82044a8ac09979fd4";
-	public static final String VIEW_ADMIN_PLATFORM_MANAGER = "55a3d1e1e26ea93e51f7de262a2c4c48";
+	
+	public static final String PERMISSION_CROSS_BUSINESS = "59277fabb99ee27bc42012750f5e87c3";
 	
 
 	
+	
+	public static final String ROLE_PLATFORM_MANAGER = "a45e5e977721ed92dd3b914e3efd8dcf";
+
 	public static final String ROLE_PLATFORM_PATENT = "ed9f24e7998c679c3932161880327984";
-	public static final String ADD_ADMIN_PLATFORM_PATENT = "4a1c7dae9894c686d984ed431db79514";
-	public static final String EDIT_ADMIN_PLATFORM_PATENT  = "269ab3f26085ad2a18796f704fe3a187";
-	public static final String VIEW_ADMIN_PLATFORM_PATENT  = "93112edc7d5c9a2a628a6d45b87ebb04";
-	
-	
-	
+
 	public static final String ROLE_BUSINESS_MANAGER = "ab9baaedd20c3a62e89891df8ef38365";
-	public static final String ADD_BUSINESS_MANAGER  = "3bdc558b3004cadb5820db7fc47b512d";
-	public static final String EDIT_BUSINESS_MANAGER  = "ff7acd10470d4b3b72b637da7e904d76";
-	public static final String VIEW_BUSINESS_MANAGER  = "b1ab967b591ed32bec1f9256594c8493";
-	
-	
+
 	public static final String ROLE_BUSINESS_PATENT = "a19c8c01d3cea53cf0722509100d1754";
-	public static final String ADD_ADMIN_BUSINESS_PATENT = "ed9f24e7998c679c3932161880327984";
-	public static final String EDIT_ADMIN_BUSINESS_PATENT  = "269ab3f26085ad2a18796f704fe3a187";
-	public static final String VIEW_ADMIN_BUSINESS_PATENT  = "93112edc7d5c9a2a628a6d45b87ebb04";
-	
 	
 	public static final String ROLE_COMMON_USER = "f950f7d5be2cff1d20228e1c9a3adf0d";
-	public static final String ADD_ADMIN_USER = "86206d55203397ff7103b07244049f89";
-	public static final String EDIT_ADMIN_USER  = "54dcc500a45d746605abbe4df85a07b0";
-	public static final String VIEW_ADMIN_USER  = "400eacc099896a08be66393c32804f40";
 	
 	
 	

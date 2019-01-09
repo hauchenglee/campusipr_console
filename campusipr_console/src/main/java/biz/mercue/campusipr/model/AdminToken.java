@@ -136,6 +136,9 @@ public class AdminToken  extends BaseBean{
 	}
 
 	public List<String> getPermissionIds() {
+		if(permissionIds == null) {
+			permissionIds = new ArrayList<String>();
+		}
 		return permissionIds;
 	}
 
@@ -145,7 +148,8 @@ public class AdminToken  extends BaseBean{
 	}
 	
 	public boolean checkPermission(String permissionId) {
-		return true;
+
+		return this.getPermissionIds().contains(permissionId);
 	}
 
 	public String getBusiness_id() {

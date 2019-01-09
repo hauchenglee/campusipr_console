@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,6 +108,7 @@ public class PortfolioServiceImpl implements PortfolioService{
 				dbBean.setPortfolio_patent_num(0);
 				dbBean.setPortfolio_family_num(0);
 			}
+			dbBean.setPortfolio_tech(portfolio.getPortfolio_tech());
 			
 			//TODO check patent 
 			dbBean.setListPatent(portfolio.getListPatent());

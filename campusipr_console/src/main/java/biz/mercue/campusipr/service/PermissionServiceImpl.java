@@ -15,6 +15,7 @@ import biz.mercue.campusipr.dao.RoleDao;
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Role;
+import biz.mercue.campusipr.util.Constants;
 
 
 @Service("permissionService")
@@ -80,19 +81,44 @@ public class PermissionServiceImpl implements PermissionService{
 		return dao.getRolePermission(roleId);
 	}
 	
+
+
 	
 	
 	@Override
 	public Permission getSettingPermissionByRoleAndModule(String roleId, String module) {
 		
-		log.info("getPermissionByRoleAndModule");
-		
-		log.info("roleId "+roleId);
-		log.info("module "+module);
-		
 		return dao.getByRoleIdAndModule(roleId, module);
 	}
 	
+	@Override
+	public Permission getSettingPermissionByModule(String code, String module) {
+		return dao.getByModule(code, module);
+	}
+	
+	@Override
+	public Role getByRole(String roleId) {
+		
+		Role role = roledao.getById(roleId);
+		
+		if(role!=null) {
+			role.getPermissionList().size();
+		}
+		
+		return role;
+	}
+	
+	@Override
+	public int updateRolePermission(Role role) {
+		
+		Role dbRole = roledao.getById(role.getRole_id());
+		if(dbRole!=null) {
+			dbRole.setPermissionList(role.getPermissionList());
+			return Constants.INT_SUCCESS;
+		}else {
+			return Constants.INT_CANNOT_FIND_DATA;
+		}
+	}
 	
 
 }

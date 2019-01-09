@@ -10,6 +10,7 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.util.StringUtils;
 
 
 
@@ -27,8 +28,10 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	@Override
 	public Patent getById(String businessId,String id) {
 		Criteria criteria =  createEntityCriteria();
-		criteria.createAlias("listBusiness","bs");
-		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
 		criteria.add(Restrictions.eq("patent_id", id));
 		return (Patent) criteria.uniqueResult();
 	}
@@ -57,8 +60,10 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	@Override
 	public List<Patent> getByBusinessId(String businessId,int page,int pageSize){
 		Criteria criteria =  createEntityCriteria();
-		criteria.createAlias("listBusiness","bs");
-		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
 		return criteria.list();
@@ -68,8 +73,10 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	@Override
 	public int  getCountByBusinessId(String businessId) {
 		Criteria criteria =  createEntityCriteria();
-		criteria.createAlias("listBusiness","bs");
-		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
 		criteria.setProjection(Projections.rowCount());
 		long count = (long)criteria.uniqueResult();
 		return (int)count;
@@ -78,6 +85,10 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	@Override
 	public List<Patent> getByPatentIds(List<String> ids,String businessId){
 		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
 		criteria.add(Restrictions.in("patent_id", ids));
 		return criteria.list();
 	}
@@ -85,6 +96,10 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	@Override
 	public List<Patent> searchPatent(String  searchText,String businessId,int page,int pageSize){
 		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
 		Criterion re1 = Restrictions.like("patent_name", searchText);
 		Criterion re2 = Restrictions.like("patent_name_en", searchText);
 		Criterion re3 = Restrictions.like("patent_appl_country", searchText);
@@ -115,6 +130,10 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	@Override
 	public List<Patent> fieldSearchPatent(Patent patent,String businessId,int page,int pageSize){
 		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
 		return criteria.list();

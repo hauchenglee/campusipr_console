@@ -2,12 +2,10 @@ package biz.mercue.campusipr.service;
 
 
 
-import java.awt.print.Pageable;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.formula.functions.Count;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,12 +15,10 @@ import biz.mercue.campusipr.dao.PatentFamilyDao;
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Business;
-import biz.mercue.campusipr.model.Country;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentContext;
-import biz.mercue.campusipr.model.PatentEditHistory;
 import biz.mercue.campusipr.model.PatentExtension;
 import biz.mercue.campusipr.model.PatentFamily;
 import biz.mercue.campusipr.util.Constants;
@@ -73,6 +69,7 @@ public class PatentServiceImpl implements PatentService{
 
 			patent.getListBusiness().size();
 			//TODO change eger
+			patent.getListStatus().size();
 			patent.getListIPC().size();
 			patent.getListAgent().size();
 			patent.getListApplicant().size();
@@ -265,11 +262,14 @@ public class PatentServiceImpl implements PatentService{
 	
 	@Override
 	public int combinePatentFamily(List<String> ids,String businessId) {
+		log.info("businessId :"+businessId);
 		List<Patent> list = patentDao.getByPatentIds(ids, businessId);
+		log.info("list :"+list.size());
 		PatentFamily family = null;
 		for(Patent patent : list) {
+			log.info("patent :"+patent.getPatent_id());
 			if(patent.getFamily()!=null) {
-				if(family ==null) {
+				if(family == null) {
 					family = patent.getFamily();
 				}else {
 					if(!family.getPatent_family_id().equals(patent.getFamily().getPatent_family_id())) {
@@ -278,7 +278,8 @@ public class PatentServiceImpl implements PatentService{
 				}
 			}else {
 				if(family!=null) {
-					patent.setFamily(family);
+					family.addPatent(patent);
+					//patent.setFamily(family);
 				}
 			}	
 		}
@@ -291,13 +292,17 @@ public class PatentServiceImpl implements PatentService{
 			family.setUpdate_date(new Date());
 			familyDao.create(family);
 			for(Patent patent : list) {
-				patent.setFamily(family);
+				family.addPatent(patent);
+				//patent.setFamily(family);
 			}
 			return Constants.INT_SUCCESS;
 		}else {
+			log.info("set family");
 			for(Patent patent : list) {
+				log.info("patent :"+patent.getPatent_id());
 				if(patent.getFamily() == null) {
-					patent.setFamily(family);
+					family.addPatent(patent);
+					
 				}
 			}
 		}
@@ -321,8 +326,11 @@ public class PatentServiceImpl implements PatentService{
 	
 	@Override
 	public 	ListQueryForm getByBusinessId(String businessId,int page){
-		
-		List list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE);
+		log.info("businessId:"+businessId);
+		List<Patent> list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE);
+		for(Patent patent : list) {
+			patent.getListStatus().size();
+		}
 		int count = patentDao.getCountByBusinessId(businessId);
 		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,list);
 		
@@ -332,8 +340,10 @@ public class PatentServiceImpl implements PatentService{
 	
 	@Override
 	public List<Patent> getByPatentIds(List<String> idList,String businessId){
-		List list = patentDao.getByPatentIds(idList,businessId);
-
+		List<Patent> list = patentDao.getByPatentIds(idList,businessId);
+		for(Patent patent : list) {
+			patent.getListStatus().size();
+		}
 		return list;
 	}
 	
@@ -358,7 +368,10 @@ public class PatentServiceImpl implements PatentService{
 	public ListQueryForm fieldSearchPatent(String text, String businessId, int page) {
 		
 		//TODO no finish yet
-		List list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE);
+		List<Patent> list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE);
+		for(Patent patent : list) {
+			patent.getListStatus().size();
+		}
 		int count = patentDao.getCountByBusinessId(businessId);
 		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,list);
 		

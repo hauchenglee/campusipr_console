@@ -16,14 +16,14 @@ hibernate:
 path:
     image: /Users/leo/Desktop/Project/nfs/image/campusipr
     video: /Users/leo/Desktop/Project/nfs/image/campusipr
-    file:  /Users/leo/Desktop/Project/nfs
+    file:  /Users/leo/Desktop/Project/nfs/image/campusipr/file
     imagemagick: /usr/local/Cellar/imagemagick/7.0.7-25/bin
     graphicsmagick: /usr/local/Cellar/graphicsmagick/1.3.28_1/bin
    
 url:
     image: "https://api.mercue.biz:663/imageservice/campusipr/"
     video: "https://api.mercue.biz:663/imageservice/campusipr/"
-    file: "https://api.mercue.biz:663/imageservice/campusipr/"
+    file: "https://api.mercue.biz:663/imageservice/campusipr/file/"
 
     
     
