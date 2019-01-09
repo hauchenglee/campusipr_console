@@ -49,5 +49,13 @@ public class StatusDaoImpl extends AbstractDao<String,  Status> implements Statu
 		criteria.add(Restrictions.eq("country_id", countryId));
 		return criteria.list();
 	}
+	
+	@Override
+	public Status getByEventCode(String eventCode) {
+		// TODO Auto-generated method stub
+		Criteria criteria =  createEntityCriteria();
+		criteria.add(Restrictions.eq("event_code", eventCode));
+		return (Status) criteria.uniqueResult();
+	}
 
 }

@@ -25,7 +25,7 @@ public class PatentEditHistory {
 	private String history_id;
 	
 	@JsonView(View.PatentDetail.class)
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
 	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
 	private Patent patent;
 	

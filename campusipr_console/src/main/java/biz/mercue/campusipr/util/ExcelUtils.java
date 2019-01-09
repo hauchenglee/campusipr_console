@@ -1,5 +1,7 @@
 package biz.mercue.campusipr.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,16 +25,38 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
+import biz.mercue.campusipr.model.Applicant;
+import biz.mercue.campusipr.model.Assignee;
+import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
 
 public class ExcelUtils {
 	
 	private static Logger log = Logger.getLogger(ExcelUtils.class.getName());
 	
-	private static String[] columns = {"Name", "Email", "Date Of Birth", "Salary"};
+	private static String[] school_columns = {Constants.EXCEL_COLUMN_PATENT_ID, 
+			Constants.EXCEL_COLUMN_PATENT_NAME, Constants.EXCEL_COLUMN_PATENT_NAME_EN, 
+			Constants.EXCEL_COLUMN_APPLICANT_COUNTRY, Constants.EXCEL_COLUMN_PATENT_STATUS,
+			Constants.EXCEL_COLUMN_APPLICANT, Constants.EXCEL_COLUMN_ASSIGNEE,
+			Constants.EXCEL_COLUMN_INVENTOR, Constants.EXCEL_COLUMN_APPLICATION_DATE,
+			Constants.EXCEL_COLUMN_APPLICATION_NO, Constants.EXCEL_COLUMN_NOTICE_DATE,
+			Constants.EXCEL_COLUMN_NOTICE_NO, Constants.EXCEL_COLUMN_PUBLIC_DATE,
+			Constants.EXCEL_COLUMN_PUBLIC_NO, Constants.EXCEL_COLUMN_PATENT_NO,
+			Constants.EXCEL_COLUMN_PATENT_GET_DATE};
 	
-	public static final String Patent2Excel(List<Patent> list) {
-		
+	private static String[] plateform_columns = {Constants.EXCEL_COLUMN_FILE_NO,
+			Constants.EXCEL_COLUMN_PATENT_ID, 
+			Constants.EXCEL_COLUMN_PATENT_NAME, Constants.EXCEL_COLUMN_PATENT_NAME_EN, 
+			Constants.EXCEL_COLUMN_APPLICANT_COUNTRY, Constants.EXCEL_COLUMN_PATENT_STATUS,
+			Constants.EXCEL_COLUMN_APPLICANT, Constants.EXCEL_COLUMN_ASSIGNEE,
+			Constants.EXCEL_COLUMN_INVENTOR, Constants.EXCEL_COLUMN_APPLICATION_DATE,
+			Constants.EXCEL_COLUMN_APPLICATION_NO, Constants.EXCEL_COLUMN_NOTICE_DATE,
+			Constants.EXCEL_COLUMN_NOTICE_NO, Constants.EXCEL_COLUMN_PUBLIC_DATE,
+			Constants.EXCEL_COLUMN_PUBLIC_NO, Constants.EXCEL_COLUMN_PATENT_NO,
+			Constants.EXCEL_COLUMN_PATENT_GET_DATE};
+	
+	public static final ByteArrayInputStream Patent2Excel(List<Patent> list, String BussinessId) {
+		ByteArrayOutputStream fileOut = null;
 		
 		try {
 			// Create a Workbook
@@ -59,10 +83,19 @@ public class ExcelUtils {
 	        Row headerRow = sheet.createRow(0);
 	
 	        // Create cells
-	        for(int i = 0; i < columns.length; i++) {
-	            Cell cell = headerRow.createCell(i);
-	            cell.setCellValue(columns[i]);
-	            cell.setCellStyle(headerCellStyle);
+	        if (!BussinessId.equals(
+	        		Constants.BUSSINESS_PLATFORM)) {
+		        for(int i = 0; i < school_columns.length; i++) {
+		            Cell cell = headerRow.createCell(i);
+		            cell.setCellValue(school_columns[i]);
+		            cell.setCellStyle(headerCellStyle);
+		        }
+	        } else {
+	        	for(int i = 0; i < plateform_columns.length; i++) {
+		            Cell cell = headerRow.createCell(i);
+		            cell.setCellValue(plateform_columns[i]);
+		            cell.setCellStyle(headerCellStyle);
+		        }
 	        }
 	
 	        // Create Cell Style for formatting Date
@@ -73,25 +106,261 @@ public class ExcelUtils {
 	        int rowNum = 1;
 	        for(Patent patent: list) {
 	            Row row = sheet.createRow(rowNum++);
-	
-	            row.createCell(0).setCellValue(patent.getPatent_name());
-	
-	            row.createCell(1).setCellValue(patent.getPatent_name());
-	
-	            Cell dateOfBirthCell = row.createCell(2);
-	            dateOfBirthCell.setCellValue(patent.getPatent_name());
-	            dateOfBirthCell.setCellStyle(dateCellStyle);
-	
-	            row.createCell(3).setCellValue(patent.getPatent_name());
+	            if (!BussinessId.equals(
+		        		Constants.BUSSINESS_PLATFORM)) {
+		
+		            row.createCell(0).setCellValue(patent.getPatent_id());
+		            
+		            row.createCell(1).setCellValue(patent.getPatent_name());
+		            
+		            row.createCell(2).setCellValue(patent.getPatent_name_en());
+		            
+		            row.createCell(3).setCellValue(patent.getPatent_appl_country());
+		            
+		            if (patent.getListApplicant() != null) {
+		            	String applicantStr = "";
+			            int lastIndex = patent.getListApplicant().size() - 1;
+			            for (Applicant appl:patent.getListApplicant()) {
+			            	if (appl.getApplicant_id().equals(
+			            			patent.getListApplicant().get(lastIndex).getApplicant_id())) {
+			            		if (!StringUtils.isNULL(appl.getApplicant_name())) {
+			            			applicantStr += appl.getApplicant_name();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_name_en())) {
+			            			applicantStr += "_"+appl.getApplicant_name_en();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_address())) {
+			            			applicantStr += "_"+appl.getApplicant_address();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_address_en())) {
+			            			applicantStr += "_"+appl.getApplicant_address_en();
+			            		}
+			            	} else {
+			            		if (!StringUtils.isNULL(appl.getApplicant_name())) {
+			            			applicantStr += appl.getApplicant_name();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_name_en())) {
+			            			applicantStr += "_"+appl.getApplicant_name_en();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_address())) {
+			            			applicantStr += "_"+appl.getApplicant_address();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_address_en())) {
+			            			applicantStr += "_"+appl.getApplicant_address_en();
+			            		}
+			            		applicantStr += "\n";
+			            	}
+			            }
+			            row.createCell(5).setCellValue(applicantStr);
+		            }
+		            
+		            if (patent.getListAssignee() != null) {
+		            	String assigneeStr = "";
+			            int lastIndexAs = patent.getListAssignee().size() - 1;
+			            for (Assignee assignee:patent.getListAssignee()) {
+			            	if (assignee.getAssignee_id().equals(
+			            			patent.getListAssignee().get(lastIndexAs).getAssignee_id())) {
+			            		if (!StringUtils.isNULL(assignee.getAssignee_name())) {
+			            			assigneeStr += assignee.getAssignee_name();
+			            		}
+			            		if (!StringUtils.isNULL(assignee.getAssignee_name_en())) {
+			            			assigneeStr += "_"+assignee.getAssignee_name_en();
+			            		}
+			            	} else {
+			            		if (!StringUtils.isNULL(assignee.getAssignee_name())) {
+			            			assigneeStr += assignee.getAssignee_name();
+			            		}
+			            		if (!StringUtils.isNULL(assignee.getAssignee_name_en())) {
+			            			assigneeStr += "_"+assignee.getAssignee_name_en();
+			            		}
+			            		assigneeStr += "\n";
+			            	}
+			            }
+
+			            row.createCell(6).setCellValue(assigneeStr);
+		            }
+		           
+		            if (patent.getListAssignee() != null) {
+		            	String inventorStr = "";
+				        int lastIndexIv = patent.getListInventor().size() - 1;
+			            for (Inventor inv:patent.getListInventor()) {
+			            	if (inv.getInventor_id().equals(
+			            			patent.getListInventor().get(lastIndexIv).getInventor_id())) {
+			            		if (!StringUtils.isNULL(inv.getInventor_name())) {
+			            			inventorStr += inv.getInventor_name();
+			            		}
+			            		if (!StringUtils.isNULL(inv.getInventor_name_en())) {
+			            			inventorStr += "_"+inv.getInventor_name_en();
+			            		}
+			            	} else {
+			            		if (!StringUtils.isNULL(inv.getInventor_name())) {
+			            			inventorStr += inv.getInventor_name();
+			            		}
+			            		if (!StringUtils.isNULL(inv.getInventor_name_en())) {
+			            			inventorStr += "_"+inv.getInventor_name_en();
+			            		}
+			            		inventorStr += "\n";
+			            	}
+			            }
+
+			            row.createCell(7).setCellValue(inventorStr);
+		            }
+		            
+		            Cell dateOfApplCell = row.createCell(8);
+		            dateOfApplCell.setCellValue(patent.getPatent_appl_date());
+		            dateOfApplCell.setCellStyle(dateCellStyle);
+		            
+		            row.createCell(9).setCellValue(patent.getPatent_appl_no());
+		            
+		            Cell dateOfNoticeCell = row.createCell(10);
+		            dateOfNoticeCell.setCellValue(patent.getPatent_notice_date());
+		            dateOfNoticeCell.setCellStyle(dateCellStyle);
+		            
+		            row.createCell(11).setCellValue(patent.getPatent_notice_no());
+		
+		            Cell dateOfPublishCell = row.createCell(12);
+		            dateOfPublishCell.setCellValue(patent.getPatent_publish_date());
+		            dateOfPublishCell.setCellStyle(dateCellStyle);
+		            
+		            row.createCell(13).setCellValue(patent.getPatent_notice_no());
+		            
+		            row.createCell(14).setCellValue(patent.getPatent_no());
+	            } else {
+	            	row.createCell(1).setCellValue(patent.getPatent_id());
+		            
+		            row.createCell(2).setCellValue(patent.getPatent_name());
+		            
+		            row.createCell(3).setCellValue(patent.getPatent_name_en());
+		            
+		            row.createCell(4).setCellValue(patent.getPatent_appl_country());
+		            
+		            if (patent.getListApplicant() != null) {
+		            	String applicantStr = "";
+			            int lastIndex = patent.getListApplicant().size() - 1;
+			            for (Applicant appl:patent.getListApplicant()) {
+			            	if (appl.getApplicant_id().equals(
+			            			patent.getListApplicant().get(lastIndex).getApplicant_id())) {
+			            		if (!StringUtils.isNULL(appl.getApplicant_name())) {
+			            			applicantStr += appl.getApplicant_name();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_name_en())) {
+			            			applicantStr += "_"+appl.getApplicant_name_en();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_address())) {
+			            			applicantStr += "_"+appl.getApplicant_address();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_address_en())) {
+			            			applicantStr += "_"+appl.getApplicant_address_en();
+			            		}
+			            	} else {
+			            		if (!StringUtils.isNULL(appl.getApplicant_name())) {
+			            			applicantStr += appl.getApplicant_name();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_name_en())) {
+			            			applicantStr += "_"+appl.getApplicant_name_en();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_address())) {
+			            			applicantStr += "_"+appl.getApplicant_address();
+			            		}
+			            		if (!StringUtils.isNULL(appl.getApplicant_address_en())) {
+			            			applicantStr += "_"+appl.getApplicant_address_en();
+			            		}
+			            		applicantStr += "\n";
+			            	}
+			            }
+
+			            row.createCell(6).setCellValue(applicantStr);
+		            }
+		            
+		            if (patent.getListAssignee() != null) {
+			            String assigneeStr = "";
+			            int lastIndexAs = patent.getListAssignee().size() - 1;
+			            for (Assignee assignee:patent.getListAssignee()) {
+			            	if (assignee.getAssignee_id().equals(
+			            			patent.getListAssignee().get(lastIndexAs).getAssignee_id())) {
+			            		if (!StringUtils.isNULL(assignee.getAssignee_name())) {
+			            			assigneeStr += assignee.getAssignee_name();
+			            		}
+			            		if (!StringUtils.isNULL(assignee.getAssignee_name_en())) {
+			            			assigneeStr += "_"+assignee.getAssignee_name_en();
+			            		}
+			            	} else {
+			            		if (!StringUtils.isNULL(assignee.getAssignee_name())) {
+			            			assigneeStr += assignee.getAssignee_name();
+			            		}
+			            		if (!StringUtils.isNULL(assignee.getAssignee_name_en())) {
+			            			assigneeStr += "_"+assignee.getAssignee_name_en();
+			            		}
+			            		assigneeStr += "\n";
+			            	}
+			            }
+
+			            row.createCell(7).setCellValue(assigneeStr);
+		            }
+		            
+		            if (patent.getListAssignee() != null) {
+		            	String inventorStr = "";
+			            int lastIndexIv = patent.getListInventor().size() - 1;
+			            for (Inventor inv:patent.getListInventor()) {
+			            	if (inv.getInventor_id().equals(
+			            			patent.getListInventor().get(lastIndexIv).getInventor_id())) {
+			            		if (!StringUtils.isNULL(inv.getInventor_name())) {
+			            			inventorStr += inv.getInventor_name();
+			            		}
+			            		if (!StringUtils.isNULL(inv.getInventor_name_en())) {
+			            			inventorStr += "_"+inv.getInventor_name_en();
+			            		}
+			            	} else {
+			            		if (!StringUtils.isNULL(inv.getInventor_name())) {
+			            			inventorStr += inv.getInventor_name();
+			            		}
+			            		if (!StringUtils.isNULL(inv.getInventor_name_en())) {
+			            			inventorStr += "_"+inv.getInventor_name_en();
+			            		}
+			            		inventorStr += "\n";
+			            	}
+			            }
+
+			            row.createCell(8).setCellValue(inventorStr);
+		            }
+		            
+		            Cell dateOfApplCell = row.createCell(9);
+		            dateOfApplCell.setCellValue(patent.getPatent_appl_date());
+		            dateOfApplCell.setCellStyle(dateCellStyle);
+		            
+		            row.createCell(10).setCellValue(patent.getPatent_appl_no());
+		            
+		            Cell dateOfNoticeCell = row.createCell(11);
+		            dateOfNoticeCell.setCellValue(patent.getPatent_notice_date());
+		            dateOfNoticeCell.setCellStyle(dateCellStyle);
+		            
+		            row.createCell(12).setCellValue(patent.getPatent_notice_no());
+		
+		            Cell dateOfPublishCell = row.createCell(13);
+		            dateOfPublishCell.setCellValue(patent.getPatent_publish_date());
+		            dateOfPublishCell.setCellStyle(dateCellStyle);
+		            
+		            row.createCell(14).setCellValue(patent.getPatent_notice_no());
+		            
+		            row.createCell(15).setCellValue(patent.getPatent_no());
+	            }
 	        }
 	
-			// Resize all columns to fit the content size
-	        for(int i = 0; i < columns.length; i++) {
-	            sheet.autoSizeColumn(i);
+	        if (!BussinessId.equals(
+	        		Constants.BUSSINESS_PLATFORM)) {
+				// Resize all columns to fit the content size
+		        for(int i = 0; i < school_columns.length; i++) {
+		            sheet.autoSizeColumn(i);
+		        }
+	        } else {
+	        	// Resize all columns to fit the content size
+		        for(int i = 0; i < plateform_columns.length; i++) {
+		            sheet.autoSizeColumn(i);
+		        }
 	        }
 	
 	        // Write the output to a file
-	        FileOutputStream fileOut = new FileOutputStream("poi-generated-file.xlsx");
+	        fileOut = new ByteArrayOutputStream();
 	        workbook.write(fileOut);
 	        fileOut.close();
 	
@@ -102,7 +371,7 @@ public class ExcelUtils {
 		}
     
 		
-		return "";
+		return new ByteArrayInputStream(fileOut.toByteArray());
 	}
 	
 	public static final Workbook file2Workbook(MultipartFile mpFile) throws IOException {

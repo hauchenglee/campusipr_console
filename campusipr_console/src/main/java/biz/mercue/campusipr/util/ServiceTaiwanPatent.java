@@ -26,6 +26,7 @@ import org.xml.sax.InputSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
@@ -35,7 +36,7 @@ public class ServiceTaiwanPatent {
 		
 	private static  Logger log = Logger.getLogger(ServiceTaiwanPatent.class.getName());
 	
-	public static List<Patent> getPatentRightByApplNo(String applNo) {
+	public static Patent getPatentRightByApplNo(String applNo) {
 		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s";
 		url = String.format(url, Constants.PATENT_KEY_TW ,applNo);
 		
@@ -55,8 +56,12 @@ public class ServiceTaiwanPatent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if (patentList.size() > 0) {
+			return patentList.get(patentList.size()-1);
+		} else {
+			return null;
+		}
 		
-		return patentList;
 	}
 	
 	public static List<Patent> getPatentRightByAssigneeNameEn(String assigneeName, int row) {
@@ -244,6 +249,25 @@ public class ServiceTaiwanPatent {
 					}
 					
 					patent.setListAssignee(listAssignee);
+					
+					List<Applicant> listAppl = new ArrayList<Applicant>();
+					JSONArray appl = patentObj.optJSONObject("parties").optJSONArray("applicants");
+					
+					for (int applIndex = 0; applIndex < appl.length(); applIndex++) {
+						JSONObject applObj = appl.optJSONObject(applIndex);
+						Applicant applicant = new Applicant();
+						applicant.setApplicant_name(applObj.optString("chinese-name"));
+						applicant.setApplicant_name_en(applObj.optString("english-name"));
+						applicant.setCountry_id(applObj.optString("english-country"));
+						applicant.setCountry_name(applObj.optString("chinese-country"));
+						applicant.setApplicant_address(applObj.optString("address"));
+						applicant.setApplicant_address_en(applObj.optString("english-address"));
+						applicant.setApplicant_order(applObj.optInt("-sequence"));
+						applicant.setPatent(patent);
+						listAppl.add(applicant);
+					}
+					
+					patent.setListApplicant(listAppl);
 					
 					patentList.add(patent);
 				}

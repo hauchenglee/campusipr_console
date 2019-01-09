@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -69,6 +70,14 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		return criteria.list();
 	}
 	
+	@Override
+	public List<Patent> getAllByBusinessId(String businessId){
+		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("listBusiness","bs");
+		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		return criteria.list();
+	}
+	
 	
 	@Override
 	public int  getCountByBusinessId(String businessId) {
@@ -93,6 +102,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		return criteria.list();
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public List<Patent> searchPatent(String  searchText,String businessId,int page,int pageSize){
 		Criteria criteria =  createEntityCriteria();
@@ -107,20 +117,12 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		Criterion re5 = Restrictions.like("patent_notice_no", searchText);
 		Criterion re6 = Restrictions.like("patent_publish_no", searchText);
 		Criterion re7 = Restrictions.like("patent_no", searchText);
-		criteria.createAlias("listAssignee","assign");
-		criteria.createAlias("listApplicant","appl");
-		criteria.createAlias("listInventor","inventor");
-		criteria.createAlias("patentContext","pc");
-		Criterion re8 = Restrictions.like("assign.assignee_name", searchText);
-		Criterion re9 = Restrictions.like("assign.assignee_name_en", searchText);
-		Criterion re10 = Restrictions.like("appl.applicant_name", searchText);
-		Criterion re11 = Restrictions.like("appl.applicant_name_en", searchText);
-		Criterion re12 = Restrictions.like("inventor.inventor_name", searchText);
-		Criterion re13 = Restrictions.like("inventor.inventor_name_en", searchText);
+		criteria.createAlias("patentContext", "pc", CriteriaSpecification.LEFT_JOIN);
 		Criterion re14 = Restrictions.like("pc.context_abstract", searchText);
 		Criterion re15 = Restrictions.like("pc.context_desc", searchText);
 		Criterion re16 = Restrictions.like("pc.context_claim", searchText);
-		criteria.add(Restrictions.or(re1,re2,re3,re4,re5,re6,re7,re8,re9,re10,re11,re12,re13,re14,re15,re16));
+		criteria.add(Restrictions.or(re1,re2,re3,re4,re5,re6,re7,re14,re15,re16));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
 		return criteria.list();
@@ -144,6 +146,29 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		Criteria criteria =  createEntityCriteria();
 		criteria.add(Restrictions.eq("patent_no", patentNo));
 		return (Patent) criteria.uniqueResult();
+	}
+
+	@Override
+	public int searchCountPatent(String searchText, String businessId) {
+		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("listBusiness","bs");
+		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		Criterion re1 = Restrictions.like("patent_name", searchText);
+		Criterion re2 = Restrictions.like("patent_name_en", searchText);
+		Criterion re3 = Restrictions.like("patent_appl_country", searchText);
+		Criterion re4 = Restrictions.like("patent_appl_no", searchText);
+		Criterion re5 = Restrictions.like("patent_notice_no", searchText);
+		Criterion re6 = Restrictions.like("patent_publish_no", searchText);
+		Criterion re7 = Restrictions.like("patent_no", searchText);
+		criteria.createAlias("patentContext", "pc", CriteriaSpecification.LEFT_JOIN);
+		Criterion re14 = Restrictions.like("pc.context_abstract", searchText);
+		Criterion re15 = Restrictions.like("pc.context_desc", searchText);
+		Criterion re16 = Restrictions.like("pc.context_claim", searchText);
+		criteria.add(Restrictions.or(re1,re2,re3,re4,re5,re6,re7,re14,re15,re16));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		criteria.setProjection(Projections.rowCount());
+		long count = (long)criteria.uniqueResult();
+		return (int)count;
 	}
 
 	

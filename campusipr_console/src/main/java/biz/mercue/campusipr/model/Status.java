@@ -1,5 +1,6 @@
 package biz.mercue.campusipr.model;
 
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -23,20 +24,19 @@ public class Status extends BaseBean{
 	
 	private String event_code_desc;
 	
-	
-	
 	private String event_class;
 	
 	@JsonView({View.Patent.class})
 	private String status_desc;
 	
-
 	@JsonView({View.Patent.class})
 	private String status_desc_en;
-	
-	
+
 	@JsonView({View.Patent.class})
 	private String status_color;
+	
+
+	private String status_from;
 
 
 	public String getStatus_id() {
@@ -116,8 +116,17 @@ public class Status extends BaseBean{
 	public void setEvent_code_desc(String event_code_desc) {
 		this.event_code_desc = event_code_desc;
 	}
-	
-	
-	
 
+
+	public String getStatus_from() {
+		return status_from;
+	}
+
+
+	public void setStatus_from(String status_from) {
+		this.status_from = status_from;
+	}
+	
+	
+	
 }
