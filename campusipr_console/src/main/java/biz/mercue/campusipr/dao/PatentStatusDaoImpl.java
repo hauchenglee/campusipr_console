@@ -1,5 +1,6 @@
 package biz.mercue.campusipr.dao;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -28,6 +29,21 @@ public class PatentStatusDaoImpl extends AbstractDao<String,  PatentStatus> impl
 	public PatentStatus getById(String id) {
 		// TODO Auto-generated method stub
 		return getByKey(id);
+	}
+	
+	@Override
+	public PatentStatus getByStatusAndPatent(String patentId, String StatusId, Date createTime) {
+		// TODO Auto-generated method stub
+		Criteria criteria =  createEntityCriteria();
+		criteria.add(Restrictions.eq("patent_id", patentId));
+		criteria.add(Restrictions.eq("status_id", StatusId));
+		criteria.add(Restrictions.eq("create_date", createTime));
+		return (PatentStatus) criteria.uniqueResult();
+	}
+	
+	@Override
+	public void create(PatentStatus ps) {
+		persist(ps);
 	}
 	
 }

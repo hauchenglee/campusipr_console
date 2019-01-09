@@ -25,6 +25,7 @@ public class PatentStatus extends BaseBean {
 	@Id
 	private String status_id;
 	
+	@Id
 	private Date create_date;
 	
 

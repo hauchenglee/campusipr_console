@@ -19,6 +19,7 @@ import biz.mercue.campusipr.dao.InventorDao;
 import biz.mercue.campusipr.dao.PatentContextDao;
 import biz.mercue.campusipr.dao.PatentDao;
 import biz.mercue.campusipr.dao.PatentFamilyDao;
+import biz.mercue.campusipr.dao.PatentStatusDao;
 import biz.mercue.campusipr.dao.StatusDao;
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Applicant;
@@ -66,6 +67,9 @@ public class PatentServiceImpl implements PatentService{
 	
 	@Autowired
 	private StatusDao statusDao;
+	
+	@Autowired
+	private PatentStatusDao patentStatusDao;
 	
 	@Autowired
 	private PatentContextDao patentContextDao;
@@ -187,16 +191,23 @@ public class PatentServiceImpl implements PatentService{
 				Status status = statusDao.getByEventCode(patentStatus.getStatus().getEvent_code());
 				if (status != null) {
 					patentStatus.setStatus_id(status.getStatus_id());
+					PatentStatus dBean = patentStatusDao.getByStatusAndPatent(patentStatus.getPatent_id(), patentStatus.getStatus_id(), patentStatus.getCreate_date());
+					if (dBean == null) {
+						patentStatusDao.create(patentStatus);
+					}
 				} else {
 					Status createStatus = patentStatus.getStatus();
 					if(StringUtils.isNULL(createStatus.getStatus_id())) {
 						createStatus.setStatus_id(KeyGeneratorUtils.generateRandomString());
 					}
 					statusDao.create(createStatus);
-					patentStatus.setStatus_id(status.getStatus_id());
+					patentStatus.setStatus_id(createStatus.getStatus_id());
+					PatentStatus dBean = patentStatusDao.getByStatusAndPatent(patentStatus.getPatent_id(), patentStatus.getStatus_id(), patentStatus.getCreate_date());
+					if (dBean == null) {
+						patentStatusDao.create(patentStatus);
+					}
 				}
 			}
-			taskResult = Constants.INT_SUCCESS;
 		}else {
 			taskResult = Constants.INT_CANNOT_FIND_DATA;
 		}
@@ -250,6 +261,7 @@ public class PatentServiceImpl implements PatentService{
 				patent.setListAssignee(syncPatent.getListAssignee());
 				patent.setListInventor(syncPatent.getListInventor());
 				patent.setPatentContext(syncPatent.getPatentContext());
+				
 				Patent appNoPatent = patentDao.getByApplNo(applNo);
 				if(appNoPatent==null) {
 					log.info("2");
@@ -310,6 +322,8 @@ public class PatentServiceImpl implements PatentService{
 					
 					
 					taskResult = updatePatent(patent);
+					
+					syncPatentStatus(patent);
 				}
 			} else {
 				taskResult = Constants.INT_CANNOT_FIND_DATA;
