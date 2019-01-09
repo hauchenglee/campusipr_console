@@ -18,6 +18,8 @@ public interface BusinessService {
 	void deleteBusiness(Business business);
 	
 	ListQueryForm getAll(int page);
+	
+	ListQueryForm search(String text,int page);
 
 	List<Business> getAvailable(int page,int pageSize);
 	

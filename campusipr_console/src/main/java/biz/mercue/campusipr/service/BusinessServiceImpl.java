@@ -100,6 +100,16 @@ public class BusinessServiceImpl implements BusinessService{
 	}
 	
 	
+	@Override
+	public ListQueryForm search(String text,int page) {
+		int count = businessDao.searchCount(text);
+		List<Business> businessesList = businessDao.search(text, page, Constants.SYSTEM_PAGE_SIZE);
+		log.info("count:"+count);
+		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,businessesList);
+		return form;
+	}
+	
+	
 	
 
 	
