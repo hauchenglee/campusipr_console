@@ -43,6 +43,9 @@ public class PatentEditHistory {
 	private String history_data;
 	
 	@JsonView(View.PatentDetail.class)
+	private String admin_ip;
+	
+	@JsonView(View.PatentDetail.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date create_date;
 
@@ -92,6 +95,14 @@ public class PatentEditHistory {
 
 	public void setCreate_date(Date create_date) {
 		this.create_date = create_date;
+	}
+
+	public String getAdmin_ip() {
+		return admin_ip;
+	}
+
+	public void setAdmin_ip(String admin_ip) {
+		this.admin_ip = admin_ip;
 	}
 	
 	

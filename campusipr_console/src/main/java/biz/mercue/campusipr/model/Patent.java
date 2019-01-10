@@ -171,6 +171,9 @@ public class Patent extends BaseBean{
 	@JsonView(View.PatentDetail.class)
 	private Admin admin;
 	
+	@Transient
+	private String admin_ip;
+	
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_portfolio", 
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
@@ -511,6 +514,14 @@ public class Patent extends BaseBean{
 
 	public void setPatentStatusList(List<PatentStatus> patentStatusList) {
 		this.patentStatusList = patentStatusList;
+	}
+
+	public String getAdmin_ip() {
+		return admin_ip;
+	}
+
+	public void setAdmin_ip(String admin_ip) {
+		this.admin_ip = admin_ip;
 	}
 
 

@@ -72,8 +72,11 @@ public class PatentController {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 			
 		if(tokenBean!=null) {
+			String ip = request.getRemoteAddr();
 			patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
 			patent.setBusiness(tokenBean.getBusiness());
+			patent.setAdmin(tokenBean.getAdmin());
+			patent.setAdmin_ip(ip);
 			int taskResult = patentService.addPatent(patent);
 			responseBody.setCode(taskResult);
 
@@ -93,9 +96,11 @@ public class PatentController {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 			
 		if(tokenBean!=null) {
+			String ip = request.getRemoteAddr();
 			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
+			patent.setAdmin(tokenBean.getAdmin());
 			patent.setBusiness(tokenBean.getBusiness());
-			
+			patent.setAdmin_ip(ip);
 			int taskResult = patentService.addPatentByApplNo(patent);
 			responseBody.setCode(taskResult);
 			responseBody.setBean(patent);
@@ -115,8 +120,10 @@ public class PatentController {
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
+			String ip = request.getRemoteAddr();
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin(tokenBean.getAdmin());
+			patent.setAdmin_ip(ip);
 			int taskResult =  patentService.updatePatent(patent);
 			responseBody.setCode(taskResult);
 		}else {

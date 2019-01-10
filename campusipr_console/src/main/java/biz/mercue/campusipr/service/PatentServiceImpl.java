@@ -173,6 +173,33 @@ public class PatentServiceImpl implements PatentService{
 				mInventor.setInventor_id(KeyGeneratorUtils.generateRandomString());
 			}
 		}
+		
+		//create history
+		Date now = new Date();
+		PatentEditHistory peh = new PatentEditHistory();
+		peh.setHistory_id(KeyGeneratorUtils.generateRandomString());
+		peh.setField_id(Constants.PATENT_NAME_FIELD);
+		peh.setPatent(patent);
+		peh.setAdmin(patent.getAdmin());
+		peh.setHistory_data("create");
+		peh.setAdmin_ip(patent.getAdmin_ip());
+		peh.setCreate_date(now);
+		
+		if (peh != null) {
+			
+			if (patent.getListHistory() != null) {
+				if (StringUtils.isNULL(peh.getHistory_data()) == false) {
+					patent.getListHistory().add(peh);
+				}
+			} else {
+				if (StringUtils.isNULL(peh.getHistory_data()) == false) {
+					
+					List<PatentEditHistory> pehList = new ArrayList<PatentEditHistory>();
+					pehList.add(peh);
+					patent.setListHistory(pehList);
+				}
+			}
+		}
  		
 
 		patentDao.create(patent);
@@ -287,6 +314,32 @@ public class PatentServiceImpl implements PatentService{
 					}
 					
 					patent.addBusiness(patent.getBusiness());
+					
+					Date now = new Date();
+					PatentEditHistory peh = new PatentEditHistory();
+					peh.setHistory_id(KeyGeneratorUtils.generateRandomString());
+					peh.setField_id(Constants.PATENT_NAME_FIELD);
+					peh.setPatent(patent);
+					peh.setAdmin(patent.getAdmin());
+					peh.setAdmin_ip(patent.getAdmin_ip());
+					peh.setHistory_data("create");
+					peh.setCreate_date(now);
+					
+					if (peh != null) {
+						
+						if (patent.getListHistory() != null) {
+							if (StringUtils.isNULL(peh.getHistory_data()) == false) {
+								patent.getListHistory().add(peh);
+							}
+						} else {
+							if (StringUtils.isNULL(peh.getHistory_data()) == false) {
+								
+								List<PatentEditHistory> pehList = new ArrayList<PatentEditHistory>();
+								pehList.add(peh);
+								patent.setListHistory(pehList);
+							}
+						}
+					}
 					
 					patentDao.create(patent);
 					taskResult = Constants.INT_SUCCESS;
@@ -633,6 +686,7 @@ public class PatentServiceImpl implements PatentService{
 			peh.setPatent(patent);
 			peh.setAdmin(admin);
 			peh.setHistory_data(patent.getPatent_name());
+			peh.setAdmin_ip(patent.getAdmin_ip());
 			peh.setCreate_date(now);
 		}
 		if (Constants.PATENT_NAME_EN_FIELD.equals(addField) && patent.getPatent_name_en() != null) {
@@ -641,6 +695,7 @@ public class PatentServiceImpl implements PatentService{
 			peh.setPatent(patent);
 			peh.setAdmin(admin);
 			peh.setHistory_data(patent.getPatent_name_en());
+			peh.setAdmin_ip(patent.getAdmin_ip());
 			peh.setCreate_date(now);
 		}
 		if (Constants.ASSIGNEE_FIELD.equals(addField) && patent.getListAssignee() != null) {
@@ -686,6 +741,7 @@ public class PatentServiceImpl implements PatentService{
 				}
 			}
 			peh.setHistory_data(assigneeStr);
+			peh.setAdmin_ip(patent.getAdmin_ip());
 			peh.setCreate_date(now);
 		}
 		if (Constants.APPLIANT_FIELD.equals(addField) && patent.getListApplicant() != null) {
@@ -749,6 +805,7 @@ public class PatentServiceImpl implements PatentService{
 				}
 			}
 			peh.setHistory_data(applicantStr);
+			peh.setAdmin_ip(patent.getAdmin_ip());
 			peh.setCreate_date(now);
 		}
 		if (Constants.IVENTOR_FIELD.equals(addField) && patent.getListInventor() != null) {
@@ -794,6 +851,7 @@ public class PatentServiceImpl implements PatentService{
 				}
 			}
 			peh.setHistory_data(inventorStr);
+			peh.setAdmin_ip(patent.getAdmin_ip());
 			peh.setCreate_date(now);
 		}
 		if (peh != null) {
