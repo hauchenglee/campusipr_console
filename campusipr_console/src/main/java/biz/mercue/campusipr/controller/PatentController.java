@@ -27,7 +27,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import biz.mercue.campusipr.model.AdminToken;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentStatus;
 import biz.mercue.campusipr.model.Permission;
+import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.PatentService;
@@ -70,8 +72,11 @@ public class PatentController {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 			
 		if(tokenBean!=null) {
+			String ip = request.getRemoteAddr();
 			patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
 			patent.setBusiness(tokenBean.getBusiness());
+			patent.setAdmin(tokenBean.getAdmin());
+			patent.setAdmin_ip(ip);
 			int taskResult = patentService.addPatent(patent);
 			responseBody.setCode(taskResult);
 
@@ -91,9 +96,11 @@ public class PatentController {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 			
 		if(tokenBean!=null) {
+			String ip = request.getRemoteAddr();
 			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
+			patent.setAdmin(tokenBean.getAdmin());
 			patent.setBusiness(tokenBean.getBusiness());
-			
+			patent.setAdmin_ip(ip);
 			int taskResult = patentService.addPatentByApplNo(patent);
 			responseBody.setCode(taskResult);
 			responseBody.setBean(patent);
@@ -113,8 +120,10 @@ public class PatentController {
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
+			String ip = request.getRemoteAddr();
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin(tokenBean.getAdmin());
+			patent.setAdmin_ip(ip);
 			int taskResult =  patentService.updatePatent(patent);
 			responseBody.setCode(taskResult);
 		}else {
@@ -253,7 +262,7 @@ public class PatentController {
 			
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.add( "Content-disposition", "attachment; filename=myfile.xls" );
+			headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
 			
 			return ResponseEntity
 		                .ok()

@@ -176,6 +176,9 @@ public class Patent extends BaseBean{
 	@JsonView(View.PatentDetail.class)
 	private Admin admin;
 	
+	@Transient
+	private String admin_ip;
+	
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_portfolio", 
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
@@ -183,6 +186,7 @@ public class Patent extends BaseBean{
 	private List<Portfolio> listPortfolio;
 	
 	
+	@Transient
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
 	private List<PatentStatus> patentStatusList;
@@ -509,12 +513,21 @@ public class Patent extends BaseBean{
 		this.patentStatusList = patentStatusList;
 	}
 
+<<<<<<< HEAD
 	public List<PatentExtension> getListExtension() {
 		return listExtension;
 	}
 
 	public void setListExtension(List<PatentExtension> listExtension) {
 		this.listExtension = listExtension;
+=======
+	public String getAdmin_ip() {
+		return admin_ip;
+	}
+
+	public void setAdmin_ip(String admin_ip) {
+		this.admin_ip = admin_ip;
+>>>>>>> branch 'master' of http://admin@192.168.2.21:7070/gitblit/r/campusipr_console.git
 	}
 
 

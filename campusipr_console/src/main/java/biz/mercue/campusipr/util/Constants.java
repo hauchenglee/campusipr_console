@@ -279,7 +279,6 @@ public class Constants {
 	public static final String EXCEL_COLUMN_PUBLIC_DATE = "專利公開日期";
 	public static final String EXCEL_COLUMN_PUBLIC_NO = "專利公開號";
 	public static final String EXCEL_COLUMN_PATENT_NO = "專利號";
-	public static final String EXCEL_COLUMN_PATENT_GET_DATE = "獲證日";
 	
 	public static final String EXCEL_COLUMN_PAY_VAILD_DATE = "年費有效日期";
 	public static final String EXCEL_COLUMN_PAY_EXPIRE_YEAR = "年費有效年次";
@@ -294,8 +293,6 @@ public class Constants {
 	public static final String EXCEL_COLUMN_PATENT_DESC = "專利描述";
 	public static final String EXCEL_COLUMN_PATENT_BUILD_DATE = "建檔時間";
 	public static final String EXCEL_COLUMN_PATENT_BUILD_PERSON = "建檔人員";
-	
-	public static final String EXCEL_COLUMN_PATENT_DATE = "立案日";
 
 	public static final String EXCEL_COLUMN_SCHOOL_NO = "學校編號";
 	public static final String EXCEL_COLUMN_SCHOOL_APPL_YEAR = "申請年度";

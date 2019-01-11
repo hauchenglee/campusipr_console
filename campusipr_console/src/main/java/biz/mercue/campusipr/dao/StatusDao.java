@@ -14,7 +14,7 @@ public interface StatusDao {
 	
 	Status getByEventClass(String countryId,String eventClass);
 	
-	Status getByEventCode(String eventCode);
+	Status getByEventCode(String eventCode,String countryId);
 
 	void create(Status bean);
 	
