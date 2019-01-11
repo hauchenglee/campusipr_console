@@ -513,21 +513,20 @@ public class Patent extends BaseBean{
 		this.patentStatusList = patentStatusList;
 	}
 
-<<<<<<< HEAD
+
 	public List<PatentExtension> getListExtension() {
 		return listExtension;
 	}
 
 	public void setListExtension(List<PatentExtension> listExtension) {
 		this.listExtension = listExtension;
-=======
+	}
 	public String getAdmin_ip() {
 		return admin_ip;
 	}
 
 	public void setAdmin_ip(String admin_ip) {
 		this.admin_ip = admin_ip;
->>>>>>> branch 'master' of http://admin@192.168.2.21:7070/gitblit/r/campusipr_console.git
 	}
 
 
