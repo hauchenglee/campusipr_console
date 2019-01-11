@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
+import org.hibernate.Filter;
+import org.hibernate.Session;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
+
 
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.util.StringUtils;
@@ -28,10 +31,16 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	
 	@Override
 	public Patent getById(String businessId,String id) {
-		Criteria criteria =  createEntityCriteria();
+		Criteria criteria =null;
 		if(!StringUtils.isNULL(businessId)) {
+			Session session = getSession();
+			Filter filter = session.enableFilter("businessFilter");
+			filter.setParameter("business_id",businessId);
+			criteria = session.createCriteria(Patent.class);
 			criteria.createAlias("listBusiness","bs");
 			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}else {
+			criteria = createEntityCriteria();
 		}
 		criteria.add(Restrictions.eq("patent_id", id));
 		return (Patent) criteria.uniqueResult();
@@ -44,6 +53,15 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.add(Restrictions.eq("patent_appl_no", applNo));
 		return (Patent) criteria.uniqueResult();
 	}
+	
+	@Override
+	public List<Patent> getByFamily(String familyId){
+		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("family","family");
+		criteria.add(Restrictions.eq("family.patent_family_id", familyId));
+		return criteria.list();
+	}
+
 
 	@Override
 	public void create(Patent patent) {
@@ -60,10 +78,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 
 	@Override
 	public List<Patent> getByBusinessId(String businessId,int page,int pageSize){
-		Criteria criteria =  createEntityCriteria();
+		log.info("businessId:"+businessId);
+		Criteria criteria =null;
 		if(!StringUtils.isNULL(businessId)) {
+			Session session = getSession();
+			Filter filter = session.enableFilter("businessFilter");
+			filter.setParameter("business_id",businessId);
+			criteria = session.createCriteria(Patent.class);
 			criteria.createAlias("listBusiness","bs");
 			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}else {
+			criteria = createEntityCriteria();
 		}
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);

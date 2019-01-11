@@ -33,6 +33,9 @@ public interface PatentService {
 	ListQueryForm fieldSearchPatent(String text,String businessId,int page);
 	
 	
+	List<Patent> getByFamily(String family);
+	
+	
 	//Patent getByApplNo(String applNo,String businessId);
 		
 	Patent getById(String businessId,String id);

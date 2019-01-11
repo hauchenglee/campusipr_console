@@ -75,6 +75,7 @@ public class PatentServiceImpl implements PatentService{
 	@Override
 	public Patent getById(String businessId,String id) {
 		log.info("get by id: " + id);
+		log.info("businessId: " + businessId);
 		Patent patent = patentDao.getById(businessId, id);
 		if(patent!= null) {
 			PatentFamily family = patent.getFamily();
@@ -105,17 +106,11 @@ public class PatentServiceImpl implements PatentService{
 				log.info("desc is null");
 			}
 			
-			PatentExtension extension = patent.getPatent_extension();
-			if(extension!=null) {
-				log.info("extension id :"+extension.getExtension_id());
-			}else {
-				log.info("extension is null");
-			}
+			patent.getListExtension().size();
 			
 			
 
 			patent.getListBusiness().size();
-			//TODO change eger
 			patent.getListStatus().size();
 			patent.getListIPC().size();
 			patent.getListAgent().size();
@@ -690,6 +685,8 @@ public class PatentServiceImpl implements PatentService{
 		List<Patent> list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE);
 		for(Patent patent : list) {
 			patent.getListStatus().size();
+			patent.getListExtension().size();
+			patent.getListBusiness().size();
 		}
 		int count = patentDao.getCountByBusinessId(businessId);
 		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,list);
@@ -725,6 +722,8 @@ public class PatentServiceImpl implements PatentService{
 		List<Patent> list = patentDao.getByPatentIds(idList,businessId);
 		for(Patent patent : list) {
 			patent.getListStatus().size();
+			patent.getListExtension().size();
+			patent.getListBusiness().size();
 		}
 		return list;
 	}
@@ -734,6 +733,15 @@ public class PatentServiceImpl implements PatentService{
 		return patentDao.getByPatentNo(patentNo);
 	}
 
+	
+	@Override
+	public List<Patent> getByFamily(String familyId){
+		List<Patent> list = patentDao.getByFamily(familyId);
+		for(Patent patent : list) {
+			patent.getListStatus().size();
+		}
+		return list;
+	}
 
 	@Override
 	public ListQueryForm searchPatent(String text, String businessId, int page) {

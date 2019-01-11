@@ -18,6 +18,8 @@ public interface AdminService {
 	
 	public int logout(String adminId);
 	
+	public int checkPassword(String adminId,String password);
+	
 
 	
 	//public Map<String,Admin> getMapByBusinessId(String businessId);

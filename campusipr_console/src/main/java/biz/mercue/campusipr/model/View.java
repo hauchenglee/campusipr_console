@@ -15,6 +15,7 @@ public class View {
 	public interface Patent extends Public {}
 	
 	public interface PatentDetail extends Patent {}
+	public interface PatentEnhance extends PatentDetail {}
 	public interface PatentFamily extends Patent {}
 	public interface PatentHistory extends Public {}
 	

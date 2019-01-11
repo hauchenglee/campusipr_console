@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -18,7 +19,7 @@ public class PatentExtension extends BaseBean {
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String extension_id;
 	
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
 	private Patent patent;
 	
@@ -36,33 +37,33 @@ public class PatentExtension extends BaseBean {
 	private String business_num;
 	
 	//申請年度
-	@JsonView(View.PatentDetail.class)
+	@JsonView(View.PatentEnhance.class)
 	private String extension_appl_year;
 	
 	
 	//備註
-	@JsonView(View.PatentDetail.class)
+	@JsonView(View.PatentEnhance.class)
 	private String extension_memo;
 	
 	//補助單位
-	@JsonView(View.Patent.class)
+	@JsonView(View.PatentEnhance.class)
 	private String extension_subsidy_unit;
 	
 	//補助編號
-	@JsonView(View.Patent.class)
+	@JsonView(View.PatentEnhance.class)
 	private String extension_subsidy_num;
 	
 	//補助計畫名稱
-	@JsonView(View.PatentDetail.class)
+	@JsonView(View.PatentEnhance.class)
 	private String extension_subsidy_plan;
 	
 	//事務所
-	@JsonView(View.PatentDetail.class)
+	@JsonView(View.PatentEnhance.class)
 	private String extension_agent;
 	
 	
 	//事務所編號
-	@JsonView(View.PatentDetail.class)
+	@JsonView(View.PatentEnhance.class)
 	private String extension_agent_num;
 
 
