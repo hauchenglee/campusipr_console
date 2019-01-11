@@ -25,7 +25,6 @@ import org.xml.sax.InputSource;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
-import biz.mercue.campusipr.model.PatentContext;
 import biz.mercue.campusipr.model.PatentStatus;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
@@ -81,7 +80,7 @@ public class ServiceStatusPatent {
 	private static void convertPatentStatusInfoUSTPOXml(Patent patent, JSONObject getObject) {
 		JSONArray patentDocsObj = getObject.optJSONObject("queryResults").optJSONObject("searchResponse")
 				.optJSONObject("response").optJSONArray("docs");
-		List<PatentStatus> patntStatusList = new ArrayList<>();
+		List<Status> statusList = new ArrayList<>();
 		for (int index = 0; index < patentDocsObj.length(); index++) {
 			JSONObject patentObj = patentDocsObj.optJSONObject(index);
 			JSONArray patentTransaction = patentObj.optJSONArray("transactions");
@@ -104,11 +103,11 @@ public class ServiceStatusPatent {
 					e.printStackTrace();
 				}
 				status.setStatus_from(Constants.STATUS_FROM_USPTO);
-				ps.setStatus(status);
-				patntStatusList.add(ps);
+				status.setPatentStatus(ps);
+				statusList.add(status);
 			}
 		}
-		patent.setPatentStatusList(patntStatusList);
+		patent.setListStatus(statusList);
 	}
 	
 	private static void convertPatentStatusInfoEPOXml(Patent patent, String content) {
@@ -126,7 +125,7 @@ public class ServiceStatusPatent {
 			is.setCharacterStream(new StringReader(content));
 			Document doc = db.parse(is);
 			doc.getDocumentElement().normalize();
-			List<PatentStatus> patntStatusList = new ArrayList<>();
+			List<Status> statusList = new ArrayList<>();
 			NodeList documentList = doc.getElementsByTagName("ops:legal");
 			for (int temp = 0; temp < documentList.getLength(); temp++) {
 				PatentStatus ps = new PatentStatus();
@@ -155,12 +154,12 @@ public class ServiceStatusPatent {
 							e.printStackTrace();
 						}
 						status.setStatus_from(Constants.STATUS_FROM_EPO);
-						ps.setStatus(status);
-						patntStatusList.add(ps);
+						status.setPatentStatus(ps);
+						statusList.add(status);
 					}
 				}
 			}
-			patent.setPatentStatusList(patntStatusList);
+			patent.setListStatus(statusList);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

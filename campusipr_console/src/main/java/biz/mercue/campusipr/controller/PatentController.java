@@ -196,7 +196,7 @@ public class PatentController {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
 
-		return responseBody.getJacksonString(View.PatentDetail.class);
+		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
 	

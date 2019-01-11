@@ -105,7 +105,7 @@ public class Patent extends BaseBean{
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_status", 
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
-		inverseJoinColumns = { @JoinColumn(name = "status_id") })
+		inverseJoinColumns = { @JoinColumn(name = "status_id")})
 	private List<Status> listStatus;
 	
 	
@@ -144,7 +144,15 @@ public class Patent extends BaseBean{
 	
 	@JsonView(View.PatentDetail.class)
 	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private PatentContext patentContext;
+	private PatentAbstract patentAbstract;
+	
+	@JsonView(View.PatentDetail.class)
+	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private PatentClaim patentClaim;
+	
+	@JsonView(View.PatentDetail.class)
+	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private PatentDescription patentDesc;
 	
 	
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
@@ -179,12 +187,6 @@ public class Patent extends BaseBean{
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
 		inverseJoinColumns = { @JoinColumn(name = "portfolio_id") })
 	private List<Portfolio> listPortfolio;
-	
-	
-	@Transient
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
-	private List<PatentStatus> patentStatusList;
 	
 	public String getPatent_id() {
 		return patent_id;
@@ -372,15 +374,7 @@ public class Patent extends BaseBean{
 	public void setListContact(List<PatentContact> listContact) {
 		this.listContact = listContact;
 	}
-
-	public PatentContext getPatentContext() {
-		return patentContext;
-	}
-
-	public void setPatentContext(PatentContext patentContext) {
-		this.patentContext = patentContext;
-	}
-
+	
 	public List<PatentEditHistory> getListHistory() {
 		return listHistory;
 	}
@@ -508,20 +502,36 @@ public class Patent extends BaseBean{
 		this.admin = admin;
 	}
 
-	public List<PatentStatus> getPatentStatusList() {
-		return patentStatusList;
-	}
-
-	public void setPatentStatusList(List<PatentStatus> patentStatusList) {
-		this.patentStatusList = patentStatusList;
-	}
-
 	public String getAdmin_ip() {
 		return admin_ip;
 	}
 
 	public void setAdmin_ip(String admin_ip) {
 		this.admin_ip = admin_ip;
+	}
+
+	public PatentAbstract getPatentAbstract() {
+		return patentAbstract;
+	}
+
+	public void setPatentAbstract(PatentAbstract patentAbstract) {
+		this.patentAbstract = patentAbstract;
+	}
+
+	public PatentClaim getPatentClaim() {
+		return patentClaim;
+	}
+
+	public void setPatentClaim(PatentClaim patentClaim) {
+		this.patentClaim = patentClaim;
+	}
+
+	public PatentDescription getPatentDesc() {
+		return patentDesc;
+	}
+
+	public void setPatentDesc(PatentDescription patentDesc) {
+		this.patentDesc = patentDesc;
 	}
 
 

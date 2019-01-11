@@ -25,21 +25,8 @@ public class PatentStatus extends BaseBean {
 	private String status_id;
 	
 	@Id
+	@JsonView(View.Patent.class)
 	private Date create_date;
-	
-
-	
-	@Transient
-	@JsonView(View.PatentDetail.class)
-	private Status status;
-
-	public Status getStatus() {
-		return status;
-	}
-
-	public void setStatus(Status status) {
-		this.status = status;
-	}
 
 	public String getStatus_id() {
 		return status_id;

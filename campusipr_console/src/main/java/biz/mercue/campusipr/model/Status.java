@@ -1,9 +1,12 @@
 package biz.mercue.campusipr.model;
 
 
+import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -35,6 +38,9 @@ public class Status extends BaseBean{
 	@JsonView({View.Patent.class})
 	private String status_color;
 	
+	@Transient
+	@JsonView({View.Patent.class})
+	private PatentStatus patentStatus;
 
 	private String status_from;
 
@@ -125,6 +131,16 @@ public class Status extends BaseBean{
 
 	public void setStatus_from(String status_from) {
 		this.status_from = status_from;
+	}
+
+
+	public PatentStatus getPatentStatus() {
+		return patentStatus;
+	}
+
+
+	public void setPatentStatus(PatentStatus patentStatus) {
+		this.patentStatus = patentStatus;
 	}
 	
 	

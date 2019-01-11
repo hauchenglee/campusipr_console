@@ -30,58 +30,23 @@ import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
-import biz.mercue.campusipr.model.PatentContext;
+import biz.mercue.campusipr.model.PatentAbstract;
+import biz.mercue.campusipr.model.PatentClaim;
+import biz.mercue.campusipr.model.PatentDescription;
 
 public class ServiceTaiwanPatent {
 		
 	private static  Logger log = Logger.getLogger(ServiceTaiwanPatent.class.getName());
 	
-	public static Patent getPatentRightByApplNo(String applNo) {
+	public static void getPatentRightByApplNo(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s";
-		url = String.format(url, Constants.PATENT_KEY_TW ,applNo);
+		url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no());
 		
-		List<Patent> patentList = new ArrayList<Patent>();
 		try {
 			JSONObject getObject = new JSONObject(HttpRequestUtils.sendGet(url));
-			List<Patent> patentListI = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsI"));
-			List<Patent> patentListM = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsM"));
-			List<Patent> patentListD = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsD"));
-			patentList.addAll(patentListI);
-			patentList.addAll(patentListM);
-			patentList.addAll(patentListD);
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (patentList.size() > 0) {
-			return patentList.get(patentList.size()-1);
-		} else {
-			return null;
-		}
-		
-	}
-	
-	public static List<Patent> getPatentRightByAssigneeNameEn(String assigneeName, int row) {
-		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&top=%s&applnamee=%s";
-		try {
-			url = String.format(url, Constants.PATENT_KEY_TW, row, URLEncoder.encode(assigneeName, "UTF-8"));
-		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		List<Patent> patentList = new ArrayList<Patent>();
-		try {
-			JSONObject getObject = new JSONObject(HttpRequestUtils.sendGet(url));
-			List<Patent> patentListI = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsI"));
-			List<Patent> patentListM = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsM"));
-			List<Patent> patentListD = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsD"));
-			patentList.addAll(patentListI);
-			patentList.addAll(patentListM);
-			patentList.addAll(patentListD);
+			convertPatentInfoChS(patent, getObject.optJSONObject("tw-patent-rightsI"));
+			convertPatentInfoChS(patent, getObject.optJSONObject("tw-patent-rightsM"));
+			convertPatentInfoChS(patent, getObject.optJSONObject("tw-patent-rightsD"));
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -90,48 +55,15 @@ public class ServiceTaiwanPatent {
 			e.printStackTrace();
 		}
 		
-		return patentList;
 	}
 	
-	public static List<Patent> getPatentRightByAssigneeNameCh(String assigneeName, int row) {
-		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&top=%s&applnamec=%s";
-		try {
-			url = String.format(url, Constants.PATENT_KEY_TW, row, URLEncoder.encode(assigneeName, "UTF-8"));
-		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		List<Patent> patentList = new ArrayList<Patent>();
-		try {
-			JSONObject getObject = new JSONObject(HttpRequestUtils.sendGet(url));
-			List<Patent> patentListI = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsI"));
-			List<Patent> patentListM = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsM"));
-			List<Patent> patentListD = convertPatentInfoCh(getObject.optJSONObject("tw-patent-rightsD"));
-			patentList.addAll(patentListI);
-			patentList.addAll(patentListM);
-			patentList.addAll(patentListD);
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return patentList;
-	}
-	
-	private static List<Patent> convertPatentInfoCh(JSONObject obj) {
-		
-		List<Patent> patentList = new ArrayList<Patent>();
+	private static void convertPatentInfoChS(Patent patent, JSONObject obj) {
 		
 		if (obj != null) {
 			JSONArray patentContentObj = obj.optJSONArray("patentcontent");
 			if (patentContentObj != null) {
 				for (int index = 0; index < patentContentObj.length(); index++) {
 					JSONObject patentObj = patentContentObj.optJSONObject(index);
-					Patent patent = new Patent();
 					patent.setPatent_name(patentObj.optJSONObject("patent-title").optString("patent-name-chinese"));
 					patent.setPatent_name_en(patentObj.optJSONObject("patent-title").optString("patent-name-english"));
 					patent.setPatent_appl_country("TW");
@@ -207,13 +139,7 @@ public class ServiceTaiwanPatent {
 					
 					String contextUrl = patentObj.optJSONObject("link").optString("patentpubxml-url");
 					if (StringUtils.isNULL(contextUrl)==false) {
-						PatentContext patentContext = getContext(contextUrl);
-						if (!StringUtils.isNULL(patentContext.getContext_claim()) 
-								|| !StringUtils.isNULL(patentContext.getContext_abstract())
-								|| !StringUtils.isNULL(patentContext.getContext_desc())) {
-							patentContext.setPatent(patent);
-							patent.setPatentContext(patentContext);
-						}
+						getContext(patent, contextUrl);
 					}
 					
 					List<Inventor> listInventor = new ArrayList<Inventor>();
@@ -268,18 +194,16 @@ public class ServiceTaiwanPatent {
 					}
 					
 					patent.setListApplicant(listAppl);
-					
-					patentList.add(patent);
 				}
 			}
 		}
 		
-		return patentList;
-		
 	}
 	
-	private static PatentContext convertPatentContextXmlCh(String content) {
-		PatentContext patentContext = new PatentContext();
+	private static void convertPatentContextXmlCh(Patent patent, String content) {
+		PatentAbstract pa = new PatentAbstract();
+		PatentClaim pc = new PatentClaim();
+		PatentDescription pd = new PatentDescription();
 		try{
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setValidating(false);
@@ -307,7 +231,7 @@ public class ServiceTaiwanPatent {
 					}
 				}
 			}
-			patentContext.setContext_abstract(abstractStr);
+			pa.setContext_abstract(abstractStr);
 			
 			String descStr = "";
 			NodeList technicalList = doc.getElementsByTagName("technical-field");
@@ -361,7 +285,7 @@ public class ServiceTaiwanPatent {
 					}
 				}
 			}
-			patentContext.setContext_desc(descStr);
+			pd.setContext_desc(descStr);
 			
 			String claimStr = "";
 			NodeList claimList = doc.getElementsByTagName("claim");
@@ -377,22 +301,33 @@ public class ServiceTaiwanPatent {
 				}
 			}
 			
-			patentContext.setContext_claim(claimStr);
+			pc.setContext_claim(claimStr);
 			
+			if (!StringUtils.isNULL(pa.getContext_abstract())) {
+				pa.setPatent(patent);
+				patent.setPatentAbstract(pa);
+			}
+			
+			if (!StringUtils.isNULL(pc.getContext_claim())) {
+				pc.setPatent(patent);
+				patent.setPatentClaim(pc);
+			}
+			
+			if (!StringUtils.isNULL(pd.getContext_desc())) {
+				pd.setPatent(patent);
+				patent.setPatentDesc(pd);
+			}
 			
 		}catch(Exception e){
 			log.error(e.getMessage());
 		}
-		
-		return patentContext;
 	}
 	
-	private static PatentContext getContext(String link) {
-		PatentContext patentContext = new PatentContext();
+	private static void getContext(Patent patent, String link) {
 		try {
 			String content = FtpRequestUtils.sendGet(link);
 			if ("XML".equals(getCtxType(content))) {
-				patentContext = convertPatentContextXmlCh(content);
+				convertPatentContextXmlCh(patent, content);
 			}
 			
 		} catch (JSONException e) {
@@ -402,9 +337,6 @@ public class ServiceTaiwanPatent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
-		return patentContext;
 	}
 	
 	

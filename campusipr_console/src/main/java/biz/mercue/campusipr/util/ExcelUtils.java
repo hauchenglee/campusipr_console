@@ -31,7 +31,9 @@ import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Business;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentEditHistory;
 import biz.mercue.campusipr.model.PatentStatus;
+import biz.mercue.campusipr.model.Status;
 
 public class ExcelUtils {
 	
@@ -75,7 +77,7 @@ public class ExcelUtils {
 	public static final ByteArrayInputStream Patent2Excel(List<Patent> list, String BussinessId) {
 		ByteArrayOutputStream fileOut = null;
 		
-		try {
+//		try {
 			// Create a Workbook
 	        Workbook workbook = new HSSFWorkbook(); // new HSSFWorkbook() for generating `.xls` file
 	
@@ -117,7 +119,7 @@ public class ExcelUtils {
 	
 	        // Create Cell Style for formatting Date
 	        CellStyle dateCellStyle = workbook.createCellStyle();
-	        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+	        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
 	
 	        // Create Other rows and cells with employees data
 	        int rowNum = 1;
@@ -134,24 +136,25 @@ public class ExcelUtils {
 		            
 		            row.createCell(3).setCellValue(patent.getPatent_appl_country());
 		            
-		            if (patent.getPatentStatusList() != null) {
+		            if (patent.getListStatus() != null) {
 		            	String statusStr = "";
 		            	int index = 0;
-		            	for (PatentStatus ps:patent.getPatentStatusList()) {
-		            		if (ps.getCreate_date() != null) {
-	            				statusStr += DateUtils.getDashFormatDateTime(ps.getCreate_date());
-	            			}
-		            		if (ps.getStatus() != null) {
-		            			if (!StringUtils.isNULL(ps.getStatus().getStatus_desc())) {
-		            				statusStr += "_"+ps.getStatus().getStatus_desc();
-			            		}
-		            			if (!StringUtils.isNULL(ps.getStatus().getStatus_desc_en())) {
-		            				statusStr += "_"+ps.getStatus().getStatus_desc_en();
-			            		}
-			            		if (index < patent.getPatentStatusList().size() - 1) {
-				            		statusStr += "\n";
-			            		}
+		            	for (Status status:patent.getListStatus()) {
+		            		if (status.getPatentStatus() != null) {
+			            		if (status.getPatentStatus().getCreate_date() != null) {
+		            				statusStr += DateUtils.getDashFormatDateTime(status.getPatentStatus().getCreate_date());
+		            			}
 		            		}
+		            		if (!StringUtils.isNULL(status.getEvent_code())) {
+		            			statusStr += "_"+status.getEvent_code();
+			            	}
+		            		if (!StringUtils.isNULL(status.getEvent_code_desc())) {
+		            			statusStr += "_"+status.getEvent_code_desc();
+			            	}
+			            	if (index < patent.getListStatus().size() - 1) {
+				            	statusStr += "\n";
+			            	}
+		            		
 		            		index++;
 		            	}
 		            	row.createCell(4).setCellValue(statusStr);
@@ -246,21 +249,27 @@ public class ExcelUtils {
 			            row.createCell(7).setCellValue(inventorStr);
 		            }
 		            
-		            Cell dateOfApplCell = row.createCell(8);
-		            dateOfApplCell.setCellValue(patent.getPatent_appl_date());
-		            dateOfApplCell.setCellStyle(dateCellStyle);
+		            if (patent.getPatent_appl_date() != null) {
+			            Cell dateOfApplCell = row.createCell(8);
+			            dateOfApplCell.setCellValue(patent.getPatent_appl_date());
+			            dateOfApplCell.setCellStyle(dateCellStyle);
+		            }
 		            
 		            row.createCell(9).setCellValue(patent.getPatent_appl_no());
 		            
-		            Cell dateOfNoticeCell = row.createCell(10);
-		            dateOfNoticeCell.setCellValue(patent.getPatent_notice_date());
-		            dateOfNoticeCell.setCellStyle(dateCellStyle);
+		            if (patent.getPatent_notice_date() != null) {
+			            Cell dateOfNoticeCell = row.createCell(10);
+			            dateOfNoticeCell.setCellValue(patent.getPatent_notice_date());
+			            dateOfNoticeCell.setCellStyle(dateCellStyle);
+		            }
 		            
 		            row.createCell(11).setCellValue(patent.getPatent_notice_no());
 		
-		            Cell dateOfPublishCell = row.createCell(12);
-		            dateOfPublishCell.setCellValue(patent.getPatent_publish_date());
-		            dateOfPublishCell.setCellStyle(dateCellStyle);
+		            if (patent.getPatent_publish_date() != null) {
+			            Cell dateOfPublishCell = row.createCell(12);
+			            dateOfPublishCell.setCellValue(patent.getPatent_publish_date());
+			            dateOfPublishCell.setCellStyle(dateCellStyle);
+		            }
 		            
 		            row.createCell(13).setCellValue(patent.getPatent_notice_no());
 		            
@@ -292,22 +301,41 @@ public class ExcelUtils {
 			            dateOfCancelDateCell.setCellStyle(dateCellStyle);
 		            }
 		            
-//		            row.createCell(22).setCellValue(patent.getPatentContext().getContext_abstract());
-//		            row.createCell(23).setCellValue(patent.getPatentContext().getContext_claim());
-//		            
-//		            row.createCell(25).setCellValue(patent.getPatentContext().getContext_desc());
+		            if (patent.getPatentAbstract() != null) {
+			            String abs = patent.getPatentAbstract().getContext_abstract();
+			            if (abs.length() > 500) {
+			            	abs = abs.substring(0, 500) + "...";
+			            }
+			            row.createCell(22).setCellValue(abs);
+		            }
+		            
+		            if (patent.getPatentClaim() != null) {
+			            String claim = patent.getPatentClaim().getContext_claim();
+			            if (claim.length() > 500) {
+			            	claim = claim.substring(0, 500) + "...";
+			            }
+			            row.createCell(23).setCellValue(claim);
+		            }
+		            
+		            if (patent.getPatentDesc() != null) {
+			            String desc = patent.getPatentDesc().getContext_desc();
+			            if (desc.length() > 500) {
+			            	desc = desc.substring(0, 500) + "...";
+			            }
+			            row.createCell(25).setCellValue(desc);
+		            }
 		            
 		            Cell dateOfCreateDateCell = row.createCell(26);
 		            dateOfCreateDateCell.setCellValue(new Date());
 		            dateOfCreateDateCell.setCellStyle(dateCellStyle);
 		            
-//		            if (patent.getListBusiness() != null) {
-//		            	String bussinessStr = "";
-//		            	for (Business bussiness:patent.getListBusiness()) {
-//		            		bussinessStr += bussiness.getBusiness_name_en() + "\n";
-//		            	}
-//		            	row.createCell(27).setCellValue(bussinessStr);
-//		            }
+		            if (patent.getListHistory() != null) {
+		            	for (PatentEditHistory peh:patent.getListHistory()) {
+		            		if ("create".equals(peh.getHistory_data())) {
+		            			row.createCell(27).setCellValue(peh.getAdmin().getAdmin_name());
+		            		}
+		            	}
+		            }
 	            } else {
 	            	row.createCell(1).setCellValue(patent.getPatent_id());
 		            
@@ -317,24 +345,25 @@ public class ExcelUtils {
 		            
 		            row.createCell(4).setCellValue(patent.getPatent_appl_country());
 		            
-		            if (patent.getPatentStatusList() != null) {
+		            if (patent.getListStatus() != null) {
 		            	String statusStr = "";
 		            	int index = 0;
-		            	for (PatentStatus ps:patent.getPatentStatusList()) {
-		            		if (ps.getCreate_date() != null) {
-	            				statusStr += DateUtils.getDashFormatDateTime(ps.getCreate_date());
-	            			}
-		            		if (ps.getStatus() != null) {
-		            			if (!StringUtils.isNULL(ps.getStatus().getStatus_desc())) {
-		            				statusStr += "_"+ps.getStatus().getStatus_desc();
-			            		}
-		            			if (!StringUtils.isNULL(ps.getStatus().getStatus_desc_en())) {
-		            				statusStr += "_"+ps.getStatus().getStatus_desc_en();
-			            		}
-			            		if (index < patent.getPatentStatusList().size() - 1) {
-				            		statusStr += "\n";
-			            		}
+		            	for (Status status:patent.getListStatus()) {
+		            		if (status.getPatentStatus() != null) {
+			            		if (status.getPatentStatus().getCreate_date() != null) {
+		            				statusStr += DateUtils.getDashFormatDateTime(status.getPatentStatus().getCreate_date());
+		            			}
 		            		}
+		            		if (!StringUtils.isNULL(status.getEvent_code())) {
+		            			statusStr += "_"+status.getEvent_code();
+			            	}
+		            		if (!StringUtils.isNULL(status.getEvent_code_desc())) {
+		            			statusStr += "_"+status.getEvent_code_desc();
+			            	}
+			            	if (index < patent.getListStatus().size() - 1) {
+				            	statusStr += "\n";
+			            	}
+		            		
 		            		index++;
 		            	}
 		            	row.createCell(5).setCellValue(statusStr);
@@ -430,21 +459,27 @@ public class ExcelUtils {
 			            row.createCell(8).setCellValue(inventorStr);
 		            }
 		            
-		            Cell dateOfApplCell = row.createCell(9);
-		            dateOfApplCell.setCellValue(patent.getPatent_appl_date());
-		            dateOfApplCell.setCellStyle(dateCellStyle);
+		            if (patent.getPatent_appl_date() != null) {
+			            Cell dateOfApplCell = row.createCell(9);
+			            dateOfApplCell.setCellValue(patent.getPatent_appl_date());
+			            dateOfApplCell.setCellStyle(dateCellStyle);
+		            }
 		            
 		            row.createCell(10).setCellValue(patent.getPatent_appl_no());
 		            
-		            Cell dateOfNoticeCell = row.createCell(11);
-		            dateOfNoticeCell.setCellValue(patent.getPatent_notice_date());
-		            dateOfNoticeCell.setCellStyle(dateCellStyle);
+		            if (patent.getPatent_notice_date() != null) {
+			            Cell dateOfNoticeCell = row.createCell(11);
+			            dateOfNoticeCell.setCellValue(patent.getPatent_notice_date());
+			            dateOfNoticeCell.setCellStyle(dateCellStyle);
+		            }
 		            
 		            row.createCell(12).setCellValue(patent.getPatent_notice_no());
-		
-		            Cell dateOfPublishCell = row.createCell(13);
-		            dateOfPublishCell.setCellValue(patent.getPatent_publish_date());
-		            dateOfPublishCell.setCellStyle(dateCellStyle);
+		            
+		            if (patent.getPatent_publish_date() != null) {
+			            Cell dateOfPublishCell = row.createCell(13);
+			            dateOfPublishCell.setCellValue(patent.getPatent_publish_date());
+			            dateOfPublishCell.setCellStyle(dateCellStyle);
+		            }
 		            
 		            row.createCell(14).setCellValue(patent.getPatent_notice_no());
 		            
@@ -475,22 +510,41 @@ public class ExcelUtils {
 			            dateOfCancelDateCell.setCellStyle(dateCellStyle);
 		            }
 		            
-//		            row.createCell(23).setCellValue(patent.getPatentContext().getContext_abstract());
-//		            row.createCell(24).setCellValue(patent.getPatentContext().getContext_claim());
-//		            
-//		            row.createCell(26).setCellValue(patent.getPatentContext().getContext_desc());
+		            if (patent.getPatentAbstract() != null) {
+			            String abs = patent.getPatentAbstract().getContext_abstract();
+			            if (abs.length() > 500) {
+			            	abs = abs.substring(0, 500) + "...";
+			            }
+			            row.createCell(23).setCellValue(abs);
+		            }
+		            
+		            if (patent.getPatentClaim() != null) {
+			            String claim = patent.getPatentClaim().getContext_claim();
+			            if (claim.length() > 500) {
+			            	claim = claim.substring(0, 500) + "...";
+			            }
+			            row.createCell(24).setCellValue(claim);
+		            }
+		            
+		            if (patent.getPatentDesc() != null) {
+			            String desc = patent.getPatentDesc().getContext_desc();
+			            if (desc.length() > 500) {
+			            	desc = desc.substring(0, 500) + "...";
+			            }
+			            row.createCell(26).setCellValue(desc);
+		            }
 		            
 		            Cell dateOfCreateDateCell = row.createCell(27);
 		            dateOfCreateDateCell.setCellValue(new Date());
 		            dateOfCreateDateCell.setCellStyle(dateCellStyle);
 		            
-//		            if (patent.getListBusiness() != null) {
-//		            	String bussinessStr = "";
-//		            	for (Business bussiness:patent.getListBusiness()) {
-//		            		bussinessStr += bussiness.getBusiness_name_en() + "\n";
-//		            	}
-//		            	row.createCell(28).setCellValue(bussinessStr);
-//		            }
+		            if (patent.getListHistory() != null) {
+		            	for (PatentEditHistory peh:patent.getListHistory()) {
+		            		if ("create".equals(peh.getHistory_data())) {
+		            			row.createCell(28).setCellValue(peh.getAdmin().getAdmin_name());
+		            		}
+		            	}
+		            }
 	            }
 	        }
 	
@@ -506,7 +560,7 @@ public class ExcelUtils {
 		            sheet.autoSizeColumn(i);
 		        }
 	        }
-	
+	    try {
 	        // Write the output to a file
 	        fileOut = new ByteArrayOutputStream();
 	        workbook.write(fileOut);

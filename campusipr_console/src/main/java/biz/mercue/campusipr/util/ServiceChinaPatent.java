@@ -25,27 +25,26 @@ import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
-import biz.mercue.campusipr.model.PatentContext;
+import biz.mercue.campusipr.model.PatentAbstract;
 import biz.mercue.campusipr.service.PatentService;
 
 public class ServiceChinaPatent {
 	
 	private static  Logger log = Logger.getLogger(ServiceChinaPatent.class.getName());
 	
-	public static Patent getPatentRightByApplicantNo(String applNo) {
+	public static void getPatentRightByApplicantNo(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/search?q=%s";
 		try {
-			url = String.format(url,URLEncoder.encode("ap="+applNo, "UTF-8"));
+			url = String.format(url,URLEncoder.encode("ap="+patent.getPatent_appl_no(), "UTF-8"));
 		} catch (UnsupportedEncodingException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
-		List<Patent> patentList = new ArrayList<Patent>();
 		try {
 			String content = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));
 			if (StringUtils.isNULL(content) == false) {
-				patentList = convertPatentIdXml(content);
+				convertPatentIdXml(patent, content);
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -54,42 +53,9 @@ public class ServiceChinaPatent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		if (patentList.size() > 0) {
-			return patentList.get(patentList.size()-1);
-		} else {
-			return null;
-		}
 	}
 	
-	public static List<Patent> getPatentRightByAssigneeName(String assigneeName) {
-		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/search?q=%s";
-		try {
-			url = String.format(url,URLEncoder.encode("pa="+assigneeName, "UTF-8"));
-		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-		List<Patent> patentList = new ArrayList<Patent>();
-		try {
-			String content = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));
-			if (StringUtils.isNULL(content) == false) {
-				patentList = convertPatentIdXml(content);
-			}
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return patentList;
-	}
-	
-	private static List<Patent> convertPatentIdXml(String content) {
-		List<Patent> patentList = new ArrayList<Patent>();
+	private static void convertPatentIdXml(Patent patent, String content) {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setValidating(false);
@@ -125,25 +91,25 @@ public class ServiceChinaPatent {
 							}
 						}
 					}
-					Patent patent = parserBilbo(countryId+docId, formatType);
-					patentList.add(patent);
+					patent.setPatent_publish_no(countryId+docId);
+					parserBilbo(patent, formatType);
 				}
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return patentList;
 	}
 	
-	private static Patent parserBilbo(String patentNo, String formatType) {
+	private static void parserBilbo(Patent patent, String formatType) {
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/publication/%s/%s/biblio";
-		url = String.format(url, formatType, patentNo);
+		url = String.format(url, formatType, patent.getPatent_publish_no());
 		
-		Patent patent = new Patent();
 		try {
 			String content = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));
-			patent = convertPatentInfoXml(content);
+			if (!StringUtils.isNULL(content)) {
+				convertPatentInfoXml(patent ,content);
+			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -151,11 +117,9 @@ public class ServiceChinaPatent {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return patent;
 	}
 	
-	private static Patent convertPatentInfoXml(String content) {
-		Patent patent = new Patent();
+	private static void convertPatentInfoXml(Patent patent, String content) {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setValidating(false);
@@ -296,24 +260,21 @@ public class ServiceChinaPatent {
 				patent.setListAssignee(listAssignee);
 			}
 			
-			PatentContext patentContext = new PatentContext();
+			PatentAbstract patentAbstract = new PatentAbstract();
 			NodeList abstractList = doc.getElementsByTagName("abstract");
 			for (int temp = 0; temp < abstractList.getLength(); temp++) {
 				Node nNode = abstractList.item(temp);
-				patentContext.setContext_abstract(nNode.getTextContent());
+				patentAbstract.setContext_abstract(nNode.getTextContent());
 			}
-			if (!StringUtils.isNULL(patentContext.getContext_claim()) 
-					|| !StringUtils.isNULL(patentContext.getContext_abstract())
-					|| !StringUtils.isNULL(patentContext.getContext_desc())) {
-				patentContext.setPatent(patent);
-				patent.setPatentContext(patentContext);
+			if (!StringUtils.isNULL(patentAbstract.getContext_abstract())) {
+				patentAbstract.setPatent(patent);
+				patent.setPatentAbstract(patentAbstract);
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		return patent;
 	}
 	
 	private static String generateToken(String token) {

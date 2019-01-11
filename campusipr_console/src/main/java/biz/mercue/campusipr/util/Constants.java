@@ -300,6 +300,7 @@ public class Constants {
 	
 	public static final String STATUS_FROM_USPTO = "uspto";
 	public static final String STATUS_FROM_EPO = "epo";
+	public static final String STATUS_FROM_SYSTM = "sys";
 	
 	public static final String VIEW  = "view";
 	public static final String EDIT  = "edit";
