@@ -45,7 +45,7 @@ public class Admin extends BaseBean {
 	private boolean available;
 	
 	
-	@JsonView(View.Role.class)
+	@JsonView(View.Public.class)
 	@OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
 	@JoinColumn(name="business_id")
 	private Business business;

@@ -257,6 +257,22 @@ public class AdminController {
 	}
 	
 	
+	@RequestMapping(value="/api/checkpassword", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String checkPassword(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		AdminToken token =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		BeanResponseBody responseBody = new BeanResponseBody();
+		if(token !=null) {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			String password = jsonObject.getString("password");
+			int taskResult = adminService.checkPassword(token.getAdmin().getAdmin_id(), password);
+			responseBody.setCode(taskResult);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString(View.Public.class);
+	}
+	
 	
 	@RequestMapping(value="/api/searchrolelist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody

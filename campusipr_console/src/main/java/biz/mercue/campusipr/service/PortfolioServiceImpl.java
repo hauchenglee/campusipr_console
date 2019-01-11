@@ -39,7 +39,12 @@ public class PortfolioServiceImpl implements PortfolioService{
 		log.info("get by id: " + id);
 		Portfolio portfolio = portfolioDao.getById(businessId, id);
 		if(portfolio.getListPatent()!=null) {
-			log.info(portfolio.getListPatent().size());
+			List<Patent> listPatent = portfolio.getListPatent();
+			for(Patent patent : listPatent) {
+				patent.getListBusiness().size();
+				patent.getListStatus().size();
+				patent.getListExtension().size();
+			}
 		}
 		return portfolio;
 	}

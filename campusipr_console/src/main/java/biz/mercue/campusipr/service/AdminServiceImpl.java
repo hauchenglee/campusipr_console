@@ -107,6 +107,27 @@ public class AdminServiceImpl implements AdminService{
 		return Constants.INT_SUCCESS;
 	}
 
+	
+	@Override
+	public int checkPassword(String adminId, String password) {
+
+		Admin dbBean = dao.getById(adminId);
+
+		if (dbBean != null) {
+			try {
+				if (encoder.matches(password, dbBean.getAdmin_password())) {
+					return Constants.INT_SUCCESS;
+				} else {
+					log.info("login fail, password error");
+					return Constants.INT_PASSWORD_ERROR;
+				}
+			} catch (Exception e) {
+				return Constants.INT_SYSTEM_PROBLEM;
+			}
+		} else {
+			return Constants.INT_CANNOT_FIND_DATA;
+		}
+	}
 //	@Override
 //	public List<Admin> getListByBusinessId(String businessId) {
 //		List<Admin> list = dao.getByBusinessId(businessId);
@@ -181,6 +202,7 @@ public class AdminServiceImpl implements AdminService{
 				dbBean.setAdmin_unit_name(admin.getAdmin_unit_name());
 				dbBean.setRole(admin.getRole());
 				dbBean.setUpdate_date(new Date());
+				dbBean.setAvailable(admin.isAvailable());
 				
 				if(!StringUtils.isNULL(admin.getAdmin_password())){
 					dbBean.setAdmin_password(encoder.encode(admin.getAdmin_password()));

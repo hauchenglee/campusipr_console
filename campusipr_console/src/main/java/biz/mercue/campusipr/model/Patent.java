@@ -21,12 +21,14 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+
+@FilterDef(name = "businessFilter",  parameters = @ParamDef(name = "business_id", type ="string"))
 @Entity
 @Table(name="patent")
 public class Patent extends BaseBean{
@@ -42,14 +44,14 @@ public class Patent extends BaseBean{
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_name_en;
 	
-	@JsonView(View.Patent.class)
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_appl_country;
 	
 	
 	@JsonView(View.Patent.class)
 	private Date patent_appl_date;
 	
-	@JsonView(View.Patent.class)
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_appl_no;
 	
 	@JsonView(View.Patent.class)
@@ -86,6 +88,8 @@ public class Patent extends BaseBean{
 	@JsonView(View.Patent.class)
 	private int patent_charge_duration_year;
 	
+	
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	@ManyToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_business", 
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
@@ -101,7 +105,7 @@ public class Patent extends BaseBean{
 	private List<IPCClass> listIPC;
 	
 	
-	@JsonView(View.Patent.class)
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_status", 
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
@@ -148,8 +152,9 @@ public class Patent extends BaseBean{
 	
 	
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
-	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private PatentExtension patent_extension;
+	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@Filter(name = "businessFilter",condition=" business_id= :business_id")
+	private List<PatentExtension> listExtension;
 	
 	
 	@JsonView(View.PatentHistory.class)
@@ -158,7 +163,7 @@ public class Patent extends BaseBean{
 	private List<PatentEditHistory> listHistory;
 	
 	@ManyToOne
-	@JsonView(View.Patent.class)
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	@JoinColumn(name="patent_family_id")
 	private PatentFamily family;
 	
@@ -178,7 +183,6 @@ public class Patent extends BaseBean{
 	private List<Portfolio> listPortfolio;
 	
 	
-	@JsonView(View.PatentDetail.class)
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
 	private List<PatentStatus> patentStatusList;
@@ -470,14 +474,6 @@ public class Patent extends BaseBean{
 		listBusiness.add(business);
 	}
 
-	public PatentExtension getPatent_extension() {
-		return patent_extension;
-	}
-
-	public void setPatent_extension(PatentExtension patent_extension) {
-		this.patent_extension = patent_extension;
-	}
-
 	public Business getBusiness() {
 		return business;
 	}
@@ -511,6 +507,14 @@ public class Patent extends BaseBean{
 
 	public void setPatentStatusList(List<PatentStatus> patentStatusList) {
 		this.patentStatusList = patentStatusList;
+	}
+
+	public List<PatentExtension> getListExtension() {
+		return listExtension;
+	}
+
+	public void setListExtension(List<PatentExtension> listExtension) {
+		this.listExtension = listExtension;
 	}
 
 

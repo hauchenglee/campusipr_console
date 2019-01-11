@@ -28,6 +28,8 @@ public interface PatentDao {
 	
 	List<Patent> getByPatentIds(List<String> ids,String businessId);
 	
+	List<Patent> getByFamily(String familyId);
+	
 	
 	List<Patent> searchPatent(String  searchText,String businessId,int page,int pageSize);
 	

@@ -30,10 +30,10 @@ public class PatentFamily extends BaseBean{
 	Gson gson = new Gson();
 	
 	@Id
-	@JsonView({View.Patent.class,View.PatentDetail.class,View.PatentFamily.class})
+	@JsonView({View.Patent.class,View.PatentDetail.class,View.PatentFamily.class,View.PortfolioDetail.class})
 	private String patent_family_id;
 	
-	@JsonView({View.Patent.class})
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String country_list;
 	
 	@Transient

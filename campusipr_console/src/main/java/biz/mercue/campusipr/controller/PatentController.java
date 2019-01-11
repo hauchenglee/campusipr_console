@@ -186,8 +186,14 @@ public class PatentController {
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
-
-		return responseBody.getJacksonString(View.PatentDetail.class);
+		if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+			log.info("1 ");
+			return responseBody.getJacksonString(View.PatentDetail.class);
+		}else {
+			log.info("2 ");
+			return responseBody.getJacksonString(View.PatentEnhance.class);
+		}
+		
 	}
 	
 	
@@ -204,6 +210,30 @@ public class PatentController {
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
+		return responseBody.getJacksonString(View.Patent.class);
+	}
+	
+	
+	@RequestMapping(value="/api/getpatentbyfamily/{familyId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String gePatentbyFamily(HttpServletRequest request,@PathVariable String familyId) {
+		log.info("getPatentbyId ");
+		ListResponseBody responseBody  = new ListResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				List<Patent> list = patentService.getByFamily(familyId);
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setList(list);
+			}else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+
 		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
