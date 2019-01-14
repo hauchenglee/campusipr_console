@@ -8,6 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Formula;
+
 import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity
@@ -43,7 +45,6 @@ public class Status extends BaseBean{
 	private PatentStatus patentStatus;
 
 	private String status_from;
-
 
 	public String getStatus_id() {
 		return status_id;

@@ -46,6 +46,8 @@ public interface PatentService {
 	int combinePatentFamily(List<String> ids,String businessId); 
 
 	Patent getByPatentNo(String patentNo);
+	
+	List<PatentEditHistory> getHistoryBypatentId(String businessId,String patentId);
 
 
 }

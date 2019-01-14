@@ -264,7 +264,8 @@ public class Constants {
 	public static final String BUSSINESS_PLATFORM = "04ea692278889b6621409d68c88aab17";
 	
 	public static final String EXCEL_COLUMN_FILE_NO = "檔號";
-	public static final String EXCEL_COLUMN_PATENT_ID = "案件編號";
+	public static final String EXCEL_COLUMN_BUSSINESS = "單位";
+	public static final String EXCEL_COLUMN_SCHOOL_NO = "校內編號";
 	public static final String EXCEL_COLUMN_PATENT_NAME = "專利名稱";
 	public static final String EXCEL_COLUMN_PATENT_NAME_EN = "專利英文名稱";
 	public static final String EXCEL_COLUMN_APPLICANT_COUNTRY = "申請國家";
@@ -294,7 +295,6 @@ public class Constants {
 	public static final String EXCEL_COLUMN_PATENT_BUILD_DATE = "建檔時間";
 	public static final String EXCEL_COLUMN_PATENT_BUILD_PERSON = "建檔人員";
 
-	public static final String EXCEL_COLUMN_SCHOOL_NO = "學校編號";
 	public static final String EXCEL_COLUMN_SCHOOL_APPL_YEAR = "申請年度";
 	public static final String EXCEL_COLUMN_SCHOOL_NOTE = "學校備註";
 	

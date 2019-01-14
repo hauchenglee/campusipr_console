@@ -135,6 +135,19 @@ public class PatentServiceImpl implements PatentService{
 		return patent;
 	}
 	
+	@Override
+	public List<PatentEditHistory> getHistoryBypatentId(String businessId,String patentId) {
+		Patent patent = patentDao.getById(businessId, patentId);
+		List<PatentEditHistory> newList = new ArrayList<>();
+		for (PatentEditHistory history:patent.getListHistory()) {
+			String historyBussinessId = history.getAdmin().getBusiness().getBusiness_id();
+			if (businessId.equals(historyBussinessId)) {
+				newList.add(history);
+			}
+		}
+		return newList;
+	}
+	
 	
 	@Override
 	public Patent getById(String id) {
@@ -232,6 +245,10 @@ public class PatentServiceImpl implements PatentService{
 				Status statusDb = statusDao.getByEventCode(status.getEvent_code(), status.getCountry_id());
 				if (statusDb != null) {
 					status.setStatus_id(statusDb.getStatus_id());
+					status.setStatus_desc(statusDb.getStatus_desc());
+					status.setStatus_desc_en(statusDb.getStatus_desc_en());
+					status.setStatus_color(statusDb.getStatus_color());
+					status.setEvent_class(statusDb.getEvent_class());
 					status.getPatentStatus().setStatus_id(status.getStatus_id());
 					PatentStatus dBean = patentStatusDao.getByStatusAndPatent(status.getPatentStatus().getPatent_id(), status.getPatentStatus().getStatus_id(), status.getPatentStatus().getCreate_date());
 					
@@ -262,6 +279,21 @@ public class PatentServiceImpl implements PatentService{
 	@Override
 	public int addPatentByApplNo(Patent patent) {
 		int taskResult= -1;
+		
+		if (patent.getPatent_appl_no().length() == 10 && 
+				Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country())) {
+			patent.setPatent_appl_no(patent.getPatent_appl_no().substring(2));
+		}
+		
+		if (patent.getPatent_appl_no().length() == 8 && 
+				Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country())) {
+			patent.setPatent_appl_no("0"+patent.getPatent_appl_no());
+		}
+		
+		if (patent.getPatent_appl_no().length() == 11 && 
+				Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country())) {
+			patent.setPatent_appl_no(patent.getPatent_appl_no().substring(2));
+		}
 		
 		//查詢台灣專利
 		if (patent.getPatent_appl_no().length() == 9 && 

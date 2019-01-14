@@ -39,7 +39,8 @@ public class ExcelUtils {
 	
 	private static Logger log = Logger.getLogger(ExcelUtils.class.getName());
 	
-	private static String[] school_columns = {Constants.EXCEL_COLUMN_PATENT_ID, 
+	private static String[] school_columns = {Constants.EXCEL_COLUMN_BUSSINESS,
+			Constants.EXCEL_COLUMN_SCHOOL_NO,
 			Constants.EXCEL_COLUMN_PATENT_NAME, Constants.EXCEL_COLUMN_PATENT_NAME_EN, 
 			Constants.EXCEL_COLUMN_APPLICANT_COUNTRY, Constants.EXCEL_COLUMN_PATENT_STATUS,
 			Constants.EXCEL_COLUMN_APPLICANT, Constants.EXCEL_COLUMN_ASSIGNEE,
@@ -54,11 +55,10 @@ public class ExcelUtils {
 			Constants.EXCEL_COLUMN_PATENT_ABSTRACT, Constants.EXCEL_COLUMN_PATENT_CLAIM,
 			Constants.EXCEL_COLUMN_PATENT_CLASSIFICATION, Constants.EXCEL_COLUMN_PATENT_DESC,
 			Constants.EXCEL_COLUMN_PATENT_BUILD_DATE, Constants.EXCEL_COLUMN_PATENT_BUILD_PERSON,
-			Constants.EXCEL_COLUMN_SCHOOL_NO,
 			Constants.EXCEL_COLUMN_SCHOOL_APPL_YEAR, Constants.EXCEL_COLUMN_SCHOOL_NOTE};
 	
 	private static String[] plateform_columns = {Constants.EXCEL_COLUMN_FILE_NO,
-			Constants.EXCEL_COLUMN_PATENT_ID, 
+			Constants.EXCEL_COLUMN_BUSSINESS, Constants.EXCEL_COLUMN_SCHOOL_NO, 
 			Constants.EXCEL_COLUMN_PATENT_NAME, Constants.EXCEL_COLUMN_PATENT_NAME_EN, 
 			Constants.EXCEL_COLUMN_APPLICANT_COUNTRY, Constants.EXCEL_COLUMN_PATENT_STATUS,
 			Constants.EXCEL_COLUMN_APPLICANT, Constants.EXCEL_COLUMN_ASSIGNEE,
@@ -146,9 +146,15 @@ public class ExcelUtils {
 		            			}
 		            		}
 		            		if (!StringUtils.isNULL(status.getEvent_code())) {
-		            			statusStr += "_"+status.getEvent_code();
+		            			if (!StringUtils.isNULL(statusStr)) {
+		            				statusStr += "_";
+		            			}
+		            			statusStr += status.getEvent_code();
 			            	}
 		            		if (!StringUtils.isNULL(status.getEvent_code_desc())) {
+		            			if (!StringUtils.isNULL(statusStr)) {
+		            				statusStr += "_";
+		            			}
 		            			statusStr += "_"+status.getEvent_code_desc();
 			            	}
 			            	if (index < patent.getListStatus().size() - 1) {
@@ -170,26 +176,44 @@ public class ExcelUtils {
 			            			applicantStr += appl.getApplicant_name();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_name_en())) {
-			            			applicantStr += "_"+appl.getApplicant_name_en();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_name_en();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_address())) {
-			            			applicantStr += "_"+appl.getApplicant_address();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_address();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_address_en())) {
-			            			applicantStr += "_"+appl.getApplicant_address_en();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_address_en();
 			            		}
 			            	} else {
 			            		if (!StringUtils.isNULL(appl.getApplicant_name())) {
 			            			applicantStr += appl.getApplicant_name();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_name_en())) {
-			            			applicantStr += "_"+appl.getApplicant_name_en();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_name_en();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_address())) {
-			            			applicantStr += "_"+appl.getApplicant_address();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_address();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_address_en())) {
-			            			applicantStr += "_"+appl.getApplicant_address_en();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_address_en();
 			            		}
 			            		applicantStr += "\n";
 			            	}
@@ -207,14 +231,20 @@ public class ExcelUtils {
 			            			assigneeStr += assignee.getAssignee_name();
 			            		}
 			            		if (!StringUtils.isNULL(assignee.getAssignee_name_en())) {
-			            			assigneeStr += "_"+assignee.getAssignee_name_en();
+			            			if (!StringUtils.isNULL(assigneeStr)) {
+			            				assigneeStr += "_";
+			            			}
+			            			assigneeStr += assignee.getAssignee_name_en();
 			            		}
 			            	} else {
 			            		if (!StringUtils.isNULL(assignee.getAssignee_name())) {
 			            			assigneeStr += assignee.getAssignee_name();
 			            		}
 			            		if (!StringUtils.isNULL(assignee.getAssignee_name_en())) {
-			            			assigneeStr += "_"+assignee.getAssignee_name_en();
+			            			if (!StringUtils.isNULL(assigneeStr)) {
+			            				assigneeStr += "_";
+			            			}
+			            			assigneeStr += assignee.getAssignee_name_en();
 			            		}
 			            		assigneeStr += "\n";
 			            	}
@@ -233,14 +263,20 @@ public class ExcelUtils {
 			            			inventorStr += inv.getInventor_name();
 			            		}
 			            		if (!StringUtils.isNULL(inv.getInventor_name_en())) {
-			            			inventorStr += "_"+inv.getInventor_name_en();
+			            			if (!StringUtils.isNULL(inventorStr)) {
+			            				inventorStr += "_";
+			            			}
+			            			inventorStr += inv.getInventor_name_en();
 			            		}
 			            	} else {
 			            		if (!StringUtils.isNULL(inv.getInventor_name())) {
 			            			inventorStr += inv.getInventor_name();
 			            		}
 			            		if (!StringUtils.isNULL(inv.getInventor_name_en())) {
-			            			inventorStr += "_"+inv.getInventor_name_en();
+			            			if (!StringUtils.isNULL(inventorStr)) {
+			            				inventorStr += "_";
+			            			}
+			            			inventorStr += inv.getInventor_name_en();
 			            		}
 			            		inventorStr += "\n";
 			            	}
@@ -355,10 +391,16 @@ public class ExcelUtils {
 		            			}
 		            		}
 		            		if (!StringUtils.isNULL(status.getEvent_code())) {
-		            			statusStr += "_"+status.getEvent_code();
+		            			if (!StringUtils.isNULL(statusStr)) {
+		            				statusStr += "_";
+		            			}
+		            			statusStr += status.getEvent_code();
 			            	}
 		            		if (!StringUtils.isNULL(status.getEvent_code_desc())) {
-		            			statusStr += "_"+status.getEvent_code_desc();
+		            			if (!StringUtils.isNULL(statusStr)) {
+		            				statusStr += "_";
+		            			}
+		            			statusStr += status.getEvent_code_desc();
 			            	}
 			            	if (index < patent.getListStatus().size() - 1) {
 				            	statusStr += "\n";
@@ -379,26 +421,44 @@ public class ExcelUtils {
 			            			applicantStr += appl.getApplicant_name();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_name_en())) {
-			            			applicantStr += "_"+appl.getApplicant_name_en();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_name_en();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_address())) {
-			            			applicantStr += "_"+appl.getApplicant_address();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_address();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_address_en())) {
-			            			applicantStr += "_"+appl.getApplicant_address_en();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_address_en();
 			            		}
 			            	} else {
 			            		if (!StringUtils.isNULL(appl.getApplicant_name())) {
 			            			applicantStr += appl.getApplicant_name();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_name_en())) {
-			            			applicantStr += "_"+appl.getApplicant_name_en();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_name_en();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_address())) {
-			            			applicantStr += "_"+appl.getApplicant_address();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_address();
 			            		}
 			            		if (!StringUtils.isNULL(appl.getApplicant_address_en())) {
-			            			applicantStr += "_"+appl.getApplicant_address_en();
+			            			if (!StringUtils.isNULL(applicantStr)) {
+			            				applicantStr += "_";
+			            			}
+			            			applicantStr += appl.getApplicant_address_en();
 			            		}
 			            		applicantStr += "\n";
 			            	}
@@ -417,14 +477,20 @@ public class ExcelUtils {
 			            			assigneeStr += assignee.getAssignee_name();
 			            		}
 			            		if (!StringUtils.isNULL(assignee.getAssignee_name_en())) {
-			            			assigneeStr += "_"+assignee.getAssignee_name_en();
+			            			if (!StringUtils.isNULL(assigneeStr)) {
+			            				assigneeStr += "_";
+			            			}
+			            			assigneeStr += assignee.getAssignee_name_en();
 			            		}
 			            	} else {
 			            		if (!StringUtils.isNULL(assignee.getAssignee_name())) {
 			            			assigneeStr += assignee.getAssignee_name();
 			            		}
 			            		if (!StringUtils.isNULL(assignee.getAssignee_name_en())) {
-			            			assigneeStr += "_"+assignee.getAssignee_name_en();
+			            			if (!StringUtils.isNULL(assigneeStr)) {
+			            				assigneeStr += "_";
+			            			}
+			            			assigneeStr += assignee.getAssignee_name_en();
 			            		}
 			            		assigneeStr += "\n";
 			            	}
@@ -443,14 +509,20 @@ public class ExcelUtils {
 			            			inventorStr += inv.getInventor_name();
 			            		}
 			            		if (!StringUtils.isNULL(inv.getInventor_name_en())) {
-			            			inventorStr += "_"+inv.getInventor_name_en();
+			            			if (!StringUtils.isNULL(inventorStr)) {
+			            				inventorStr += "_";
+			            			}
+			            			inventorStr += inv.getInventor_name_en();
 			            		}
 			            	} else {
 			            		if (!StringUtils.isNULL(inv.getInventor_name())) {
 			            			inventorStr += inv.getInventor_name();
 			            		}
 			            		if (!StringUtils.isNULL(inv.getInventor_name_en())) {
-			            			inventorStr += "_"+inv.getInventor_name_en();
+			            			if (!StringUtils.isNULL(inventorStr)) {
+			            				inventorStr += "_";
+			            			}
+			            			inventorStr += inv.getInventor_name_en();
 			            		}
 			            		inventorStr += "\n";
 			            	}
