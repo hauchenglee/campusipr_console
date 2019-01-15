@@ -33,11 +33,11 @@ import com.fasterxml.classmate.util.ResolvedTypeCache.Key;
 
 import biz.mercue.campusipr.model.AdminToken;
 import biz.mercue.campusipr.model.Patent;
-import biz.mercue.campusipr.model.PatentContext;
 import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Role;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
+import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.PatentService;
 import biz.mercue.campusipr.service.PermissionService;
 import biz.mercue.campusipr.service.RoleService;
@@ -69,6 +69,9 @@ public class TestController {
 	
 	@Autowired
 	StatusService statusService;
+	
+	@Autowired
+	AdminTokenService adminTokenService;
 	
 	@Autowired
 	RoleService roleService;
@@ -126,154 +129,6 @@ public class TestController {
 		return "";
 	}
 
-	@RequestMapping(value="/matasyncpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public String mataSyncPatent(HttpServletRequest request,@RequestBody String receiveJSONString) {
-		log.info("sync Patent ");
-		JSONObject receiveJSONObj = new JSONObject(receiveJSONString);
-		String assignee = receiveJSONObj.optString("assignee");
-		ListResponseBody listResponseBody  = new ListResponseBody();
-		
-		List<Patent> patentList = ServiceTaiwanPatent.getPatentRightByAssigneeNameCh(assignee, 1000);
-		
-		List<Patent> newPatentList = new ArrayList<>();
-		for (Patent patent:patentList) {
-			PatentContext patentContext = patent.getPatentContext();
-			if (patentContext != null) {
-				int abstractLength = 0; 
-				int claimLength = 0;
-				int descLength = 0;
-				if (patentContext.getContext_abstract() != null) {
-					abstractLength = patentContext.getContext_abstract().length();
-				}
-				if (patentContext.getContext_claim() != null) {
-					claimLength = patentContext.getContext_claim().length();
-				}
-				if (patentContext.getContext_desc() != null) {
-					descLength = patentContext.getContext_desc().length();
-				}
-				if (abstractLength + claimLength + descLength > 32767) {
-					patent.setPatentContext(null);
-				}
-				int taskResult = patentService.addPatentByApplNo(patent);
-				if (patent != null) {
-					newPatentList.add(patent);
-				}
-			} else {
-				int taskResult = patentService.addPatentByApplNo(patent);
-				if (patent != null) {
-					newPatentList.add(patent);
-				}
-			}
-		}
-		
-		listResponseBody.setCode(Constants.INT_SUCCESS);
-		listResponseBody.setMessage(Constants.MSG_SUCCESS);
-		listResponseBody.setList(newPatentList);
-		String result = listResponseBody.getJacksonString( View.Patent.class);
-		log.info("result :"+result);
-		return result;
-	}
-	
-	@RequestMapping(value="/matasyncpatentus", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public String mataSyncPatentUS(HttpServletRequest request,@RequestBody String receiveJSONString) {
-		log.info("sync Patent ");
-		JSONObject receiveJSONObj = new JSONObject(receiveJSONString);
-		String assignee = receiveJSONObj.optString("assignee");
-		ListResponseBody listResponseBody  = new ListResponseBody();
-		
-		List<Patent> patentList = ServiceUSPatent.getPatentRightByAssigneeName(assignee, 1000);
-		
-		List<Patent> newPatentList = new ArrayList<>();
-		for (Patent patent:patentList) {
-			PatentContext patentContext = patent.getPatentContext();
-			if (patentContext != null) {
-				int abstractLength = 0; 
-				int claimLength = 0;
-				int descLength = 0;
-				if (patentContext.getContext_abstract() != null) {
-					abstractLength = patentContext.getContext_abstract().length();
-				}
-				if (patentContext.getContext_claim() != null) {
-					claimLength = patentContext.getContext_claim().length();
-				}
-				if (patentContext.getContext_desc() != null) {
-					descLength = patentContext.getContext_desc().length();
-				}
-				if (abstractLength + claimLength + descLength > 32767) {
-					patent.setPatentContext(null);
-				}
-				int taskResult = patentService.addPatentByApplNo(patent);
-				if (patent != null) {
-					newPatentList.add(patent);
-				}
-			} else {
-				int taskResult = patentService.addPatentByApplNo(patent);
-				if (patent != null) {
-					newPatentList.add(patent);
-				}
-			}
-		}
-		
-		listResponseBody.setCode(Constants.INT_SUCCESS);
-		listResponseBody.setMessage(Constants.MSG_SUCCESS);
-		listResponseBody.setList(newPatentList);
-		String result = listResponseBody.getJacksonString( View.Patent.class);
-		log.info("result :"+result);
-		return result;
-	}
-	
-	@RequestMapping(value="/matasyncpatentcn", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public String mataSyncPatentCN(HttpServletRequest request,@RequestBody String receiveJSONString) {
-		log.info("sync Patent ");
-		JSONObject receiveJSONObj = new JSONObject(receiveJSONString);
-		String assignee = receiveJSONObj.optString("assignee");
-		ListResponseBody listResponseBody  = new ListResponseBody();
-		
-		List<Patent> patentList = ServiceChinaPatent.getPatentRightByAssigneeName(assignee);
-		
-		List<Patent> newPatentList = new ArrayList<>();
-		for (Patent patent:patentList) {
-			PatentContext patentContext = patent.getPatentContext();
-			if (patentContext != null) {
-				int abstractLength = 0; 
-				int claimLength = 0;
-				int descLength = 0;
-				if (patentContext.getContext_abstract() != null) {
-					abstractLength = patentContext.getContext_abstract().length();
-				}
-				if (patentContext.getContext_claim() != null) {
-					claimLength = patentContext.getContext_claim().length();
-				}
-				if (patentContext.getContext_desc() != null) {
-					descLength = patentContext.getContext_desc().length();
-				}
-				if (abstractLength + claimLength + descLength > 32767) {
-					patent.setPatentContext(null);
-				}
-				int taskResult = patentService.addPatentByApplNo(patent);
-				if (patent != null) {
-					newPatentList.add(patent);
-				}
-			} else {
-				int taskResult = patentService.addPatentByApplNo(patent);
-				if (patent != null) {
-					newPatentList.add(patent);
-				}
-			}
-		}
-		
-		listResponseBody.setCode(Constants.INT_SUCCESS);
-		listResponseBody.setMessage(Constants.MSG_SUCCESS);
-		listResponseBody.setList(newPatentList);
-		String result = listResponseBody.getJacksonString( View.Patent.class);
-		log.info("result :"+result);
-		return result;
-	}
-	
-	
 	@RequestMapping(value="/setupsysrolepermission", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String setupSysRolePermission(HttpServletRequest request) {

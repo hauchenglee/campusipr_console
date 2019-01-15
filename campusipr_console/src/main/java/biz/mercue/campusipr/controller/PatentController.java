@@ -28,6 +28,7 @@ import biz.mercue.campusipr.model.AdminToken;
 import biz.mercue.campusipr.model.ExcelTask;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentEditHistory;
 import biz.mercue.campusipr.model.PatentStatus;
 import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Status;
@@ -101,6 +102,7 @@ public class PatentController {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 			
 		if(tokenBean!=null) {
+			log.info(receiveJSONString);
 			String ip = request.getRemoteAddr();
 			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
 			patent.setAdmin(tokenBean.getAdmin());
@@ -205,7 +207,37 @@ public class PatentController {
 		}else {
 			return responseBody.getJacksonString(View.PatentEnhance.class);
 		}
+	}
+	
+	@RequestMapping(value="/api/getpatenthistorybyid", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String getPatentHistorybyId(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		log.info("getPatenthistorybyId ");
+		ListResponseBody responseBody  = new ListResponseBody();
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		String patentId = jsonObject.getString("patent_id");
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+					List<PatentEditHistory> listHis = patentService.getHistoryBypatentId(null, patentId);
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setList(listHis);
+				}else {
+					List<PatentEditHistory> listHis = patentService.getHistoryBypatentId(tokenBean.getBusiness().getBusiness_id(), patentId);
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setList(listHis);
+				}
+			}else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
 		
+		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
 	
