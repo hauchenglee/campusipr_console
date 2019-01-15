@@ -24,7 +24,7 @@ public class PatentExtension extends BaseBean {
 	private Patent patent;
 	
 
-	@JsonView(View.PatentDetail.class)
+	@JsonView({View.Patent.class})
 	private String business_id;
 	
 	//檔號

@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import biz.mercue.campusipr.model.AdminToken;
+import biz.mercue.campusipr.model.ExcelTask;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentStatus;
@@ -32,6 +33,7 @@ import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.AdminTokenService;
+import biz.mercue.campusipr.service.ExcelTaskService;
 import biz.mercue.campusipr.service.PatentService;
 import biz.mercue.campusipr.service.PermissionService;
 import biz.mercue.campusipr.util.BeanResponseBody;
@@ -60,6 +62,9 @@ public class PatentController {
 	
 	@Autowired
 	AdminTokenService adminTokenService;
+	
+	@Autowired
+	ExcelTaskService excelTaskService;
 	
 	
 	
@@ -121,7 +126,7 @@ public class PatentController {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
 			String ip = request.getRemoteAddr();
-			patent.setBusiness(tokenBean.getBusiness());
+
 			patent.setAdmin(tokenBean.getAdmin());
 			patent.setAdmin_ip(ip);
 			int taskResult =  patentService.updatePatent(patent);
@@ -196,10 +201,8 @@ public class PatentController {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
 		if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-			log.info("1 ");
 			return responseBody.getJacksonString(View.PatentDetail.class);
 		}else {
-			log.info("2 ");
 			return responseBody.getJacksonString(View.PatentEnhance.class);
 		}
 		
@@ -273,61 +276,53 @@ public class PatentController {
 			return null;
 		}
 	}
-	
-	
-//	@RequestMapping(value="/api/importpatentexcel", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public String importPatentexcel(HttpServletRequest request,@RequestBody String receiveJSONString){
-//		log.info("importPatentexcel ");
-//		StringResponseBody responseBody  = new StringResponseBody();
-//		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-//		if(tokenBean!=null) {
-//			List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});	
-//			
-//			
-//			responseBody.setCode(Constants.INT_SUCCESS);
-//		}else {
-//			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-//		}
-//
-//		return responseBody.getJacksonString(View.Patent.class);
-//	}
-	
-	
-	
+		
 	@RequestMapping(value = "/api/importpatentexcel", method = {RequestMethod.POST },
 			produces = Constants.CONTENT_TYPE_JSON, 
 			consumes = { "multipart/mixed","multipart/form-data" })
 	@ResponseBody
-	public String importPatentExcel(HttpServletRequest request, 
-			@RequestPart("file") MultipartFile[] files) {
-		log.info("importPatentStatus");
-		MapResponseBody responseBody = new MapResponseBody();
+	public String importPatentExcel(HttpServletRequest request, @RequestParam("file") MultipartFile file) {
+		log.info("importPatentExcel");
+		BeanResponseBody responseBody = new BeanResponseBody();
 			try {
 				AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 				if(tokenBean!=null) {
-					log.info("files.length :" + files.length);
-					for (int fileIndex = 0; fileIndex < files.length; fileIndex++) {
-	
-						MultipartFile file = files[fileIndex];
+
 						if (file != null && !file.getOriginalFilename().isEmpty()) {
-							
-							
-	
+							ExcelTask task =  excelTaskService.addTaskByFile(file, tokenBean.getAdmin());
+							responseBody.setCode(Constants.INT_SUCCESS);
+							responseBody.setBean(task);
 						}
-					}
+					
+					
 				}else {
 					responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 				}
-
-				
-				responseBody.setCode(Constants.INT_SUCCESS);
 			} catch (Exception e) {
 				log.error("Exception :" + e.getMessage());
 				responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
 			}
 
 		return responseBody.getJacksonString(View.Public.class);
+	}
+	
+	
+	
+	@RequestMapping(value="/api/gettaskfield/{taskId}", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String getTaskField(HttpServletRequest request,@PathVariable String taskId){
+		log.info("getTaskField ");
+		ListResponseBody responseBody  = new ListResponseBody();
+
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+
+			
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+
+		return responseBody.getJacksonString(View.Patent.class);
 	}
 	
 	

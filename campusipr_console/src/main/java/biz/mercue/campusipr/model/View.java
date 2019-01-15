@@ -26,6 +26,9 @@ public class View {
 	
 	public interface Banner extends Public {}
 	
+	public interface ExcelTask extends Public {}
+	public interface FieldMap extends Patent {}
+	
 
 	
 

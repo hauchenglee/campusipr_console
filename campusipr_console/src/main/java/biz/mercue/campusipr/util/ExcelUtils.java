@@ -2,11 +2,14 @@ package biz.mercue.campusipr.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +35,7 @@ import biz.mercue.campusipr.model.Business;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentStatus;
+import biz.mercue.campusipr.model.Status;
 
 public class ExcelUtils {
 	
@@ -522,33 +526,43 @@ public class ExcelUtils {
 		return new ByteArrayInputStream(fileOut.toByteArray());
 	}
 	
-	public static final Workbook file2Workbook(MultipartFile mpFile) throws IOException {
-		CommonsMultipartFile cFile = (CommonsMultipartFile) mpFile;  
-		DiskFileItem fileItem = (DiskFileItem) cFile.getFileItem();
-		InputStream inputStream = fileItem.getInputStream();
-		String extensionName = FilenameUtils.getExtension(mpFile.getOriginalFilename());
+	public static final Workbook file2Workbook(FileInputStream fileInStream,String fileName) throws IOException {
+
+	
+		String extensionName = FilenameUtils.getExtension(fileName);
 		Workbook workbook = null;
         boolean is_support = false;
 		if(!StringUtils.isNULL(extensionName)) {
 			if("xlsx".equalsIgnoreCase(extensionName)) {
-				workbook = new XSSFWorkbook(inputStream);
+				workbook = new XSSFWorkbook(fileInStream);
 				is_support =true;
 			}else if("xls".equalsIgnoreCase(extensionName)) {
-				workbook = new HSSFWorkbook(inputStream);
+				workbook = new HSSFWorkbook(fileInStream);
 				is_support =true;
 			}else {
 				
 			}
 		}
-		
 		return workbook;
 	}
 	
 	
-	public static final List<Patent> Excel2Patent(String path,Map<String, String> fieldMap) {
-		List<Patent> patentList = new ArrayList<Patent>();
-		
-		return patentList;
-	}
+	public static final Map<String, Integer> readExcelTitle(Workbook book) throws IOException {
+		Map<String, Integer> titleMap = new HashMap<String, Integer>();
 
+		Sheet sheet = book.getSheetAt(0);
+		Row row = sheet.getRow(0);
+
+		int cellIndex = 0;
+
+		for (Cell cell : row) {
+			log.info("cell :"+cellIndex+" /"+cell.getStringCellValue());
+			titleMap.put(cell.getStringCellValue(), cellIndex);
+
+
+			cellIndex++;
+		}
+
+		return titleMap;
+	}
 }
