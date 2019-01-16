@@ -123,10 +123,12 @@ public class PatentController {
 	@ResponseBody
 	public String updatePatent(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("updatePatent ");
-		Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
+	
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
+			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
+			patent.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
 			String ip = request.getRemoteAddr();
 
 			patent.setAdmin(tokenBean.getAdmin());

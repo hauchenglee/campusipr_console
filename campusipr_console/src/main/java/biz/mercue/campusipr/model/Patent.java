@@ -187,6 +187,15 @@ public class Patent extends BaseBean{
 	@Transient
 	private String admin_ip;
 	
+	@Transient
+	private int edit_source;
+	
+	@Transient
+	public static final int EDIT_SOURCE_HUMAN = 1;
+	
+	@Transient
+	public static final int EDIT_SOURCE_SERVICE =2;
+	
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_portfolio", 
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
@@ -395,6 +404,13 @@ public class Patent extends BaseBean{
 		listHistory.add(history);
 	}
 	
+	public void addHistory(List<PatentEditHistory> list) {
+		if(this.listHistory == null) {
+			this.listHistory = new ArrayList<PatentEditHistory>();
+		}
+		listHistory.addAll(list);
+	}
+	
 
 	public PatentFamily getFamily() {
 		return family;
@@ -537,6 +553,14 @@ public class Patent extends BaseBean{
 
 	public void setPatentDesc(PatentDescription patentDesc) {
 		this.patentDesc = patentDesc;
+	}
+
+	public int getEdit_source() {
+		return edit_source;
+	}
+
+	public void setEdit_source(int edit_source) {
+		this.edit_source = edit_source;
 	}
 
 

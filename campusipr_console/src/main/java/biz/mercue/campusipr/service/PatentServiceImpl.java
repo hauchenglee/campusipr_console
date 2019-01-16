@@ -454,6 +454,7 @@ public class PatentServiceImpl implements PatentService{
 
 	@Override
 	public int  updatePatent(Patent patent){
+		List<PatentEditHistory> editList = new ArrayList<PatentEditHistory>(); 
 		Patent dbBean = patentDao.getById(patent.getPatent_id());
 
 		if(dbBean!=null){
@@ -621,10 +622,14 @@ public class PatentServiceImpl implements PatentService{
 			}
 			
 			//TODO Leo edit
+			
+			log.info("contact :"+patent.getListContact().size());
 			dbBean.setListContact(patent.getListContact());
+			log.info("cost :"+patent.getListCost().size());
 			dbBean.setListCost(patent.getListCost());
 			dbBean.setListPortfolio(patent.getListPortfolio());
-			dbBean.setListHistory(patent.getListHistory());
+			///dbBean.setListHistory(patent.getListHistory());
+			
 			
 			addEditHistory(patent, patent.getAdmin(), Constants.ASSIGNEE_FIELD);
 			addEditHistory(patent, patent.getAdmin(), Constants.APPLIANT_FIELD);
@@ -995,6 +1000,11 @@ public class PatentServiceImpl implements PatentService{
 				}
 			}
 		}
+	}
+	
+	private  void handleCost(Patent dbPatent,Patent editPatent,List<PatentEditHistory> listHistory) {
+		
+		
 	}
 	
 	
