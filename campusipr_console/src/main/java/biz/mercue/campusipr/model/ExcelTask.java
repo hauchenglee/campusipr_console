@@ -2,6 +2,7 @@ package biz.mercue.campusipr.model;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -12,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -43,8 +45,13 @@ public class ExcelTask extends BaseBean {
 	
 	private boolean is_inform;
 	
+	@JsonView(View.ExcelTask.class)
 	@OneToMany(mappedBy = "task",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<FieldMap> listMap;
+	
+	@JsonView(View.ExcelTask.class)
+	@Transient
+	private Map<String, Integer> titleMap;
 
 	public String getExcel_task_id() {
 		return excel_task_id;
@@ -100,6 +107,22 @@ public class ExcelTask extends BaseBean {
 
 	public void setIs_inform(boolean is_inform) {
 		this.is_inform = is_inform;
+	}
+
+	public List<FieldMap> getListMap() {
+		return listMap;
+	}
+
+	public void setListMap(List<FieldMap> listMap) {
+		this.listMap = listMap;
+	}
+
+	public Map<String, Integer> getTitleMap() {
+		return titleMap;
+	}
+
+	public void setTitleMap(Map<String, Integer> titleMap) {
+		this.titleMap = titleMap;
 	}
 
 }

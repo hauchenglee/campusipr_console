@@ -309,51 +309,75 @@ public class PatentController {
 		}
 	}
 		
-	@RequestMapping(value = "/api/importpatentexcel", method = {RequestMethod.POST },
-			produces = Constants.CONTENT_TYPE_JSON, 
-			consumes = { "multipart/mixed","multipart/form-data" })
+	@RequestMapping(value = "/api/importpatentexcel", method = {
+			RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed",
+					"multipart/form-data" })
 	@ResponseBody
 	public String importPatentExcel(HttpServletRequest request, @RequestParam("file") MultipartFile file) {
 		log.info("importPatentExcel");
 		BeanResponseBody responseBody = new BeanResponseBody();
-			try {
-				AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-				if(tokenBean!=null) {
+		try {
+			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if (tokenBean != null) {
 
-						if (file != null && !file.getOriginalFilename().isEmpty()) {
-							ExcelTask task =  excelTaskService.addTaskByFile(file, tokenBean.getAdmin());
-							responseBody.setCode(Constants.INT_SUCCESS);
-							responseBody.setBean(task);
-						}
-					
-					
-				}else {
-					responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+				if (file != null && !file.getOriginalFilename().isEmpty()) {
+					ExcelTask task = excelTaskService.addTaskByFile(file, tokenBean.getAdmin());
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setBean(task);
 				}
-			} catch (Exception e) {
-				log.error("Exception :" + e.getMessage());
-				responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+
+			} else {
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			}
+		} catch (Exception e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		}
 
 		return responseBody.getJacksonString(View.Public.class);
 	}
 	
 	
 	
-	@RequestMapping(value="/api/gettaskfield/{taskId}", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/api/gettaskfield/{taskId}", method = {RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String getTaskField(HttpServletRequest request,@PathVariable String taskId){
+	public String getTaskField(HttpServletRequest request, @PathVariable String taskId) {
 		log.info("getTaskField ");
-		ListResponseBody responseBody  = new ListResponseBody();
+		BeanResponseBody responseBody = new BeanResponseBody();
+		try {
+			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if (tokenBean != null) {
+				ExcelTask task = excelTaskService.getTaskField(tokenBean.getAdmin(), taskId);
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setBean(task);
 
-		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		if(tokenBean!=null) {
-
-			
-		}else {
-			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			} else {
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			}
+		} catch (Exception e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
 		}
+		return responseBody.getJacksonString(View.Patent.class);
+	}
+	
+	@RequestMapping(value = "/api/submitexceltask", method = {RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String submitExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) {
+		log.info("getTaskField ");
+		BeanResponseBody responseBody = new BeanResponseBody();
+		try {
+			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if (tokenBean != null) {
+				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
 
+			} else {
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			}
+		} catch (Exception e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		}
 		return responseBody.getJacksonString(View.Patent.class);
 	}
 	

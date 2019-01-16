@@ -23,14 +23,17 @@ public class PatentField extends BaseBean{
 	@JsonView(View.Public.class)
 	private String field_code;
 	
-	
+	@JsonView(View.Public.class)
 	private int field_order;
 	
 	
 	private boolean searchable;
 	
-	
+	@JsonView(View.Public.class)
 	private String filed_search_code;
+	
+	@JsonView(View.Public.class)
+	private String field_format;
 	
 	
 
@@ -88,6 +91,14 @@ public class PatentField extends BaseBean{
 
 	public void setFiled_search_code(String filed_search_code) {
 		this.filed_search_code = filed_search_code;
+	}
+
+	public String getField_format() {
+		return field_format;
+	}
+
+	public void setField_format(String field_format) {
+		this.field_format = field_format;
 	}
 
 }

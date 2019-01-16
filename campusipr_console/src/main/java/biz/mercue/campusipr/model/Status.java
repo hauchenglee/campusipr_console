@@ -18,7 +18,7 @@ public class Status extends BaseBean{
 	
 	
 	@Id
-	@JsonView({View.Patent.class})
+	@JsonView({View.Patent.class,View.Portfolio.class})
 	private String status_id;
 	
 	
@@ -31,10 +31,10 @@ public class Status extends BaseBean{
 	
 	private String event_class;
 	
-	@JsonView({View.Patent.class})
+	@JsonView({View.Patent.class,View.Portfolio.class})
 	private String status_desc;
 	
-	@JsonView({View.Patent.class})
+	@JsonView({View.Patent.class,View.Portfolio.class})
 	private String status_desc_en;
 
 	@JsonView({View.Patent.class})

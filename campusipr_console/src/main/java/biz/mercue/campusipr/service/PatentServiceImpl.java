@@ -593,7 +593,7 @@ public class PatentServiceImpl implements PatentService{
 					}
 				}
 			}
-			
+			//TODO charles 
 			if (patent.getListInventor() != null) {
 				for (Inventor inventor:patent.getListInventor()) {
 					if (!StringUtils.isNULL(inventor.getInventor_id())) {
@@ -619,6 +619,8 @@ public class PatentServiceImpl implements PatentService{
 					}
 				}
 			}
+			
+			//TODO Leo edit
 			dbBean.setListContact(patent.getListContact());
 			dbBean.setListCost(patent.getListCost());
 			dbBean.setListPortfolio(patent.getListPortfolio());

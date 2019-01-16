@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 public class FieldMap {
 	
 	@Id
-	@JsonView(View.FieldMap.class)
+	@JsonView({View.FieldMap.class,View.ExcelTask.class})
 	private String field_map_id;
 	
 	@JsonView(View.FieldMap.class)
@@ -24,16 +24,16 @@ public class FieldMap {
 	@JoinColumn(name="excel_task_id")
 	private ExcelTask task;
 	
-	@JsonView(View.FieldMap.class)
+	@JsonView({View.FieldMap.class,View.ExcelTask.class})
 	@OneToOne
 	@JoinColumn(name="field_id")
 	private PatentField field;
 	
 	
-	@JsonView(View.FieldMap.class)
+	@JsonView({View.FieldMap.class,View.ExcelTask.class})
 	private String excel_field_name;
 	
-	@JsonView(View.FieldMap.class)
+	@JsonView({View.FieldMap.class,View.ExcelTask.class})
 	private int excel_field_index;
 	
 
