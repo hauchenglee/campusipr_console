@@ -234,6 +234,11 @@ public class Constants {
 	
 	//model code
 	public static final String MODEL_CODE_PATENT_CONTENT = "patent_content";
+	public static final String MODEL_CODE_PLATFORM_MANAGER = "platform_manager";
+	public static final String MODEL_CODE_PLATFORM_PATENT = "platform_patent";
+	public static final String MODEL_CODE_BUSINESS_MANAGER = "business_manager";
+	public static final String MODEL_CODE_BUSINESS_PATENT = "business_patent";
+	public static final String MODEL_CODE_COMMON_USER = "common_user";
 	
 	
 	public static final String PERMISSION_CROSS_BUSINESS = "59277fabb99ee27bc42012750f5e87c3";
@@ -275,10 +280,10 @@ public class Constants {
 	public static final String EXCEL_COLUMN_INVENTOR = "發明人";
 	public static final String EXCEL_COLUMN_APPLICATION_DATE = "專利申請日期";
 	public static final String EXCEL_COLUMN_APPLICATION_NO = "專利申請號";
-	public static final String EXCEL_COLUMN_NOTICE_DATE = "專利公告日期";
-	public static final String EXCEL_COLUMN_NOTICE_NO = "專利公告號";
-	public static final String EXCEL_COLUMN_PUBLIC_DATE = "專利公開日期";
-	public static final String EXCEL_COLUMN_PUBLIC_NO = "專利公開號";
+	public static final String EXCEL_COLUMN_NOTICE_DATE = "專利公開日期";
+	public static final String EXCEL_COLUMN_NOTICE_NO = "專利公開號";
+	public static final String EXCEL_COLUMN_PUBLIC_DATE = "專利公告日期";
+	public static final String EXCEL_COLUMN_PUBLIC_NO = "專利公告號";
 	public static final String EXCEL_COLUMN_PATENT_NO = "專利號";
 	
 	public static final String EXCEL_COLUMN_PAY_VAILD_DATE = "年費有效日期";
