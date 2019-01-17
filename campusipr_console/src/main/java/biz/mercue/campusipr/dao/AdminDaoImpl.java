@@ -2,11 +2,14 @@ package biz.mercue.campusipr.dao;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
+
+import com.mysql.cj.api.log.Log;
 
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.util.StringUtils;
@@ -15,6 +18,8 @@ import biz.mercue.campusipr.util.StringUtils;
 @Repository("adminDao")
 public class AdminDaoImpl extends AbstractDao<String,  Admin> implements AdminDao {
 
+	
+	private Logger log = Logger.getLogger(this.getClass().getName());
 	@Override
 	public Admin getById(String id) {
 
@@ -32,6 +37,8 @@ public class AdminDaoImpl extends AbstractDao<String,  Admin> implements AdminDa
 	
 	@Override
 	public List<Admin> getRoleBusinessAdminList(String roleId,String businessId,int page,int pageSize){
+		log.info("roleId:"+roleId);
+		log.info("businessId:"+businessId);
 		Criteria crit = createEntityCriteria();	
 		crit.createAlias("role", "role");
 		crit.add(Restrictions.eq("role.role_id", roleId));
@@ -46,6 +53,8 @@ public class AdminDaoImpl extends AbstractDao<String,  Admin> implements AdminDa
 	
 	@Override
 	public int getRoleBusinessAdminCount(String roleId,String businessId) {
+		log.info("roleId:"+roleId);
+		log.info("businessId:"+businessId);
 		Criteria crit = createEntityCriteria();	
 		crit.createAlias("role", "role");
 		crit.add(Restrictions.eq("role.role_id", roleId));
