@@ -152,36 +152,28 @@ public class AdminController {
 				List<Role> listRole = new ArrayList<Role>();
 				Role platformRole = roleService.getById(Constants.ROLE_PLATFORM_MANAGER);
 				//TODO check login user permission
-				if (platformRole.getRole_id().equals(token.getAdmin().getRole().getRole_id())) {
-					Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PLATFORM_MANAGER, Constants.VIEW);
-					if(token.checkPermission(permission.getPermission_id())) {
-						List<Permission> listplatformPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_PLATFORM_MANAGER);
-						platformRole.setListRolePermission(listplatformPermission);
-						ListQueryForm platformForm = adminService.getRoleBusinessAdminList(platformRole.getRole_id(), token.getBusiness().getBusiness_id(),page);
-						platformRole.setListAdmin(platformForm.getList());
-						platformRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
-						platformRole.setTotal_count(platformForm.getTotal_count());
-						
-						listRole.add(platformRole);
-					}
-				} else {
-					Role patentRole = roleService.getById(Constants.ROLE_PLATFORM_PATENT);
-					//TODO check login user permission
-					if (patentRole.getRole_id().equals(token.getAdmin().getRole().getRole_id())) {
-						Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PLATFORM_PATENT, Constants.VIEW);
-						if(token.checkPermission(permission.getPermission_id())) {
-							List<Permission> listpatentPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_PLATFORM_PATENT);
-							patentRole.setListRolePermission(listpatentPermission);
-							ListQueryForm patentForm = adminService.getRoleBusinessAdminList(Constants.ROLE_PLATFORM_PATENT, token.getBusiness().getBusiness_id(),page);
-							patentRole.setListAdmin(patentForm.getList());
-							patentRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
-							patentRole.setTotal_count(patentForm.getTotal_count());
-							
-							listRole.add(patentRole);
-						}
-					} else {
-						responseBody.setCode(Constants.INT_NO_PERMISSION);
-					}
+				Permission permission1 = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PLATFORM_MANAGER, Constants.VIEW);
+				if(token.checkPermission(permission1.getPermission_id())) {
+					List<Permission> listplatformPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_PLATFORM_MANAGER);
+					platformRole.setListRolePermission(listplatformPermission);
+					ListQueryForm platformForm = adminService.getRoleBusinessAdminList(Constants.ROLE_PLATFORM_MANAGER, token.getBusiness().getBusiness_id(),page);
+					platformRole.setTotal_count(platformForm.getTotal_count());
+					platformRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
+					platformRole.setListAdmin(platformForm.getList());
+					listRole.add(platformRole);
+				}
+				
+				Role patentRole = roleService.getById(Constants.ROLE_PLATFORM_PATENT);
+				//TODO check login user permission
+				Permission permission2 = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PLATFORM_PATENT, Constants.VIEW);
+				if(token.checkPermission(permission2.getPermission_id())) {
+					List<Permission> listpatentPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_PLATFORM_PATENT);
+					patentRole.setListRolePermission(listpatentPermission);
+					ListQueryForm patentForm = adminService.getRoleBusinessAdminList(Constants.ROLE_PLATFORM_PATENT, token.getBusiness().getBusiness_id(),page);
+					patentRole.setTotal_count(patentForm.getTotal_count());
+					patentRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
+					patentRole.setListAdmin(patentForm.getList());
+					listRole.add(patentRole);
 				}
 				
 				
@@ -232,40 +224,61 @@ public class AdminController {
 				if(token.checkPermission(permission1.getPermission_id())) {
 					List<Permission> listBusinessManagerPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_BUSINESS_MANAGER);
 					businessManagerRole.setListRolePermission(listBusinessManagerPermission);
-					ListQueryForm businessManagerForm  = adminService.getRoleAdminList(businessManagerRole.getRole_id(),page);
-					businessManagerRole.setTotal_count(businessManagerForm.getTotal_count());
-					businessManagerRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
-					businessManagerRole.setListAdmin(businessManagerForm.getList());
-					listRole.add(businessManagerRole);
+					if(token.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+						ListQueryForm businessManagerForm = adminService.getRoleBusinessAdminList(Constants.ROLE_BUSINESS_MANAGER, null,page);
+						businessManagerRole.setTotal_count(businessManagerForm.getTotal_count());
+						businessManagerRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
+						businessManagerRole.setListAdmin(businessManagerForm.getList());
+						listRole.add(businessManagerRole);
+					} else {
+						ListQueryForm businessManagerForm = adminService.getRoleBusinessAdminList(Constants.ROLE_BUSINESS_MANAGER, token.getBusiness().getBusiness_id(),page);
+						businessManagerRole.setTotal_count(businessManagerForm.getTotal_count());
+						businessManagerRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
+						businessManagerRole.setListAdmin(businessManagerForm.getList());
+						listRole.add(businessManagerRole);
+					}
 				}
 		
-					Role businessPatentRole = roleService.getById(Constants.ROLE_BUSINESS_PATENT);
-					Permission permission2 = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_BUSINESS_PATENT, Constants.VIEW);
-					if(token.checkPermission(permission2.getPermission_id())) {
-						List<Permission> listBusinessPatentPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_BUSINESS_PATENT);
-						businessPatentRole.setListRolePermission(listBusinessPatentPermission);
-						ListQueryForm businessPatentForm = adminService.getRoleAdminList(businessPatentRole.getRole_id(),page);
-						businessManagerRole.setTotal_count(businessPatentForm.getTotal_count());
-						businessManagerRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
-						businessManagerRole.setListAdmin(businessPatentForm.getList());
-						listRole.add(businessPatentRole);	
-					}
+				Role businessPatentRole = roleService.getById(Constants.ROLE_BUSINESS_PATENT);
+				Permission permission2 = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_BUSINESS_PATENT, Constants.VIEW);
+				if(token.checkPermission(permission2.getPermission_id())) {
+					List<Permission> listBusinessPatentPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_BUSINESS_PATENT);
+					businessPatentRole.setListRolePermission(listBusinessPatentPermission);
+					if(token.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+						ListQueryForm businessPatentForm = adminService.getRoleBusinessAdminList(Constants.ROLE_BUSINESS_PATENT, null,page);
+						businessPatentRole.setTotal_count(businessPatentForm.getTotal_count());
+						businessPatentRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
+						businessPatentRole.setListAdmin(businessPatentForm.getList());
+						listRole.add(businessPatentRole);
+					} else {
+						ListQueryForm businessPatentForm = adminService.getRoleBusinessAdminList(Constants.ROLE_BUSINESS_PATENT, token.getBusiness().getBusiness_id(),page);
+						businessPatentRole.setTotal_count(businessPatentForm.getTotal_count());
+						businessPatentRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
+						businessPatentRole.setListAdmin(businessPatentForm.getList());
+						listRole.add(businessPatentRole);
+					}	
+				}
 
-					Role userRole = roleService.getById(Constants.ROLE_COMMON_USER);
-					Permission permission3 = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_COMMON_USER, Constants.VIEW);
-					if(token.checkPermission(permission3.getPermission_id())) {
-						List<Permission> listUserPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_COMMON_USER);
-						userRole.setListRolePermission(listUserPermission);
-						ListQueryForm userForm = adminService.getRoleAdminList(Constants.ROLE_COMMON_USER,page);
-						userRole.setListAdmin(userForm.getList());
+				Role userRole = roleService.getById(Constants.ROLE_COMMON_USER);
+				Permission permission3 = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_COMMON_USER, Constants.VIEW);
+				if(token.checkPermission(permission3.getPermission_id())) {
+					List<Permission> listUserPermission = permissionService.getSettingPermissionByRole(Constants.ROLE_COMMON_USER);
+					userRole.setListRolePermission(listUserPermission);
+					if(token.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+						ListQueryForm userForm = adminService.getRoleBusinessAdminList(Constants.ROLE_COMMON_USER, null,page);
 						userRole.setTotal_count(userForm.getTotal_count());
 						userRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
+						userRole.setListAdmin(userForm.getList());
+						listRole.add(userRole);
+					} else {
+						ListQueryForm userForm = adminService.getRoleBusinessAdminList(Constants.ROLE_COMMON_USER, token.getBusiness().getBusiness_id(),page);
+						userRole.setTotal_count(userForm.getTotal_count());
+						userRole.setPage_size(Constants.SYSTEM_PAGE_SIZE);
+						userRole.setListAdmin(userForm.getList());
 						listRole.add(userRole);
 					}
+				}
 		
-			
-				
-				
 				responseBody.setCode(Constants.INT_SUCCESS);
 				responseBody.setList(listRole);
 			
@@ -317,22 +330,11 @@ public class AdminController {
 				}
 				
 				Role role = roleService.getById(roleId);
-				Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-				if(token.checkPermission(permission.getPermission_id())) {
-					if(token.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-						//TODO check login user permission
-						ListQueryForm searchForm  = adminService.searchRoleAdminList(roleId, null, text, page);
-						role.setTotal_count(searchForm.getTotal_count());
-						role.setPage_size(Constants.SYSTEM_PAGE_SIZE);
-						role.setListAdmin(searchForm.getList());
-					}else {
-						//TODO check login user permission
-						ListQueryForm searchForm  = adminService.searchRoleAdminList(roleId, businessId, text, page);
-						role.setTotal_count(searchForm.getTotal_count());
-						role.setPage_size(Constants.SYSTEM_PAGE_SIZE);
-						role.setListAdmin(searchForm.getList());
-					}
-				}
+				//TODO check login user permission
+				ListQueryForm searchForm  = adminService.searchRoleAdminList(roleId, businessId, text, page);
+				role.setTotal_count(searchForm.getTotal_count());
+				role.setPage_size(Constants.SYSTEM_PAGE_SIZE);
+				role.setListAdmin(searchForm.getList());
 			
 				responseBody.setCode(Constants.INT_SUCCESS);
 				responseBody.setBean(role);
@@ -360,12 +362,11 @@ public class AdminController {
 		
 		if(token !=null) {
 			//TODO check permission
-			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			if(token.checkPermission(permission.getPermission_id())) {
+			if(token.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 				Role role = roleService.getById(roleId);
 				if(role!=null) {
 					log.info("role is not null");
-					ListQueryForm listForm = adminService.getRoleAdminList(role.getRole_id(),page);
+					ListQueryForm listForm = adminService.getRoleBusinessAdminList(role.getRole_id(), null,page);
 					role.setListAdmin(listForm.getList());
 					role.setTotal_count(listForm.getTotal_count());
 					role.setPage_size(Constants.SYSTEM_PAGE_SIZE);
@@ -375,7 +376,18 @@ public class AdminController {
 					responseBody.setBean(role);
 				}
 			} else {
-				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				Role role = roleService.getById(roleId);
+				if(role!=null) {
+					log.info("role is not null");
+					ListQueryForm listForm = adminService.getRoleBusinessAdminList(role.getRole_id(), token.getBusiness().getBusiness_id(),page);
+					role.setListAdmin(listForm.getList());
+					role.setTotal_count(listForm.getTotal_count());
+					role.setPage_size(Constants.SYSTEM_PAGE_SIZE);
+
+				
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setBean(role);
+				}
 			}
 			
 		}else {
