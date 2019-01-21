@@ -26,15 +26,23 @@ public class Annuity extends BaseBean{
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date annuity_date;
 	
-	@JsonView(View.PatentDetail.class)
-	private int annuity_beg;
 	
 	@JsonView(View.PatentDetail.class)
-	private int  annuity_end;
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date annuity_end_date;
+	
+	@JsonView(View.PatentDetail.class)
+	private int annuity_charge_year;
+	
 	
 	@JsonView(View.PatentDetail.class)	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
 	private Patent patent;
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date create_date;
+	
+	private boolean is_paid;
 
 	public String getAnnuity() {
 		return annuity;
@@ -52,28 +60,44 @@ public class Annuity extends BaseBean{
 		this.annuity_date = annuity_date;
 	}
 
-	public int getAnnuity_beg() {
-		return annuity_beg;
-	}
-
-	public void setAnnuity_beg(int annuity_beg) {
-		this.annuity_beg = annuity_beg;
-	}
-
-	public int getAnnuity_end() {
-		return annuity_end;
-	}
-
-	public void setAnnuity_end(int annuity_end) {
-		this.annuity_end = annuity_end;
-	}
-
 	public Patent getPatent() {
 		return patent;
 	}
 
 	public void setPatent(Patent patent) {
 		this.patent = patent;
+	}
+
+	public Date getAnnuity_end_date() {
+		return annuity_end_date;
+	}
+
+	public void setAnnuity_end_date(Date annuity_end_date) {
+		this.annuity_end_date = annuity_end_date;
+	}
+
+	public int getAnnuity_charge_year() {
+		return annuity_charge_year;
+	}
+
+	public void setAnnuity_charge_year(int annuity_charge_year) {
+		this.annuity_charge_year = annuity_charge_year;
+	}
+
+	public Date getCreate_date() {
+		return create_date;
+	}
+
+	public void setCreate_date(Date create_date) {
+		this.create_date = create_date;
+	}
+
+	public boolean isIs_paid() {
+		return is_paid;
+	}
+
+	public void setIs_paid(boolean is_paid) {
+		this.is_paid = is_paid;
 	}
 	
 

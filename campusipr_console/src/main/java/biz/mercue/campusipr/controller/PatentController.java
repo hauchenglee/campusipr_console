@@ -378,7 +378,7 @@ public class PatentController {
 			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
 		}
 
-		return responseBody.getJacksonString(View.Public.class);
+		return responseBody.getJacksonString(View.ExcelTask.class);
 	}
 	
 	
@@ -402,7 +402,7 @@ public class PatentController {
 			log.error("Exception :" + e.getMessage());
 			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
 		}
-		return responseBody.getJacksonString(View.Patent.class);
+		return responseBody.getJacksonString(View.ExcelTask.class);
 	}
 	
 	@RequestMapping(value = "/api/submitexceltask", method = {RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
@@ -414,7 +414,7 @@ public class PatentController {
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
 			if (tokenBean != null) {
 				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
-
+				responseBody.setCode(Constants.INT_SUCCESS);
 			} else {
 				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			}
@@ -422,7 +422,7 @@ public class PatentController {
 			log.error("Exception :" + e.getMessage());
 			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
 		}
-		return responseBody.getJacksonString(View.Patent.class);
+		return responseBody.getJacksonString(View.ExcelTask.class);
 	}
 	
 	
