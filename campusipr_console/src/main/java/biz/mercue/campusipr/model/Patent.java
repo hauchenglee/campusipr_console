@@ -231,7 +231,7 @@ public class Patent extends BaseBean{
 	}
 
 	public void setPatent_appl_country(String patent_appl_country) {
-		this.patent_appl_country = patent_appl_country;
+		this.patent_appl_country = patent_appl_country.toLowerCase();
 	}
 
 	public Date getPatent_appl_date() {

@@ -246,7 +246,7 @@ public class ServiceUSPatent {
 							inv.setInventor_name_en(inventorObj.optString("nameLineTwo")+
 									inventorObj.optString("nameLineOne"));
 						}
-						inv.setCountry_id(inventorObj.optString("country"));
+						inv.setCountry_id(inventorObj.optString("country").replace("(", "").replace(")", ""));
 						inv.setInventor_order(Integer.parseInt(inventorObj.optString("rankNo")));
 						inv.setPatent(patent);
 						listInventor.add(inv);

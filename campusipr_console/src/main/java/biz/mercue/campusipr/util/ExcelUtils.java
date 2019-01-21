@@ -323,7 +323,7 @@ public class ExcelUtils {
 			            dateOfPublishCell.setCellStyle(dateCellStyle);
 		            }
 		            
-		            row.createCell(14).setCellValue(patent.getPatent_notice_no());
+		            row.createCell(14).setCellValue(patent.getPatent_publish_no());
 		            
 		            row.createCell(15).setCellValue(patent.getPatent_no());
 		            
@@ -636,7 +636,7 @@ public class ExcelUtils {
 			            dateOfPublishCell.setCellStyle(dateCellStyle);
 		            }
 		            
-		            row.createCell(15).setCellValue(patent.getPatent_notice_no());
+		            row.createCell(15).setCellValue(patent.getPatent_publish_no());
 		            
 		            row.createCell(16).setCellValue(patent.getPatent_no());
 		            

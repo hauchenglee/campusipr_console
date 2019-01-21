@@ -1,6 +1,7 @@
 package biz.mercue.campusipr.dao;
 
 
+import java.util.Date;
 import java.util.List;
 
 import biz.mercue.campusipr.model.Patent;
@@ -32,13 +33,35 @@ public interface PatentDao {
 	List<Patent> getByFamily(String familyId);
 	
 	
-	List<Patent> searchPatent(String  searchText,String businessId,int page,int pageSize);
+	List<Patent> searchAllFieldPatent(String  searchText,String businessId,int page,int pageSize);
+	int  countSearchAllFieldPatent(String searchText,String businessId);
 	
-	int  searchCountPatent(String searchText,String businessId);
+	List<Patent> searchFieldPatent(String  searchText, String fieldCode, String businessId,int page,int pageSize);
+	int  countSearchFieldPatent(String searchText, String fieldCode,String businessId);
 	
-	List<Patent> fieldSearchPatent(Patent patent,String businessId,int page,int pageSize);
+	List<Patent> searchFieldPatent(Date searchDate, String fieldCode, String businessId,int page,int pageSize);
+	int  countSearchFieldPatent(Date searchDate, String fieldCode,String businessId);
 	
+	List<Patent> searchFieldAssigneeListPatent(String searchText,String businessId, int page, int pageSize);
+	int  countSearchFieldAssigneePatent(String searchText, String businessId);
 	
+	List<Patent> searchFieldApplicantListPatent(String searchText,String businessId, int page, int pageSize);
+	int  countSearchFieldApplicantPatent(String searchText, String businessId);
+	
+	List<Patent> searchFieldInventorListPatent(String searchText,String businessId, int page, int pageSize);
+	int  countSearchFieldInventorPatent(String searchText, String businessId);
+	
+	List<Patent> searchFieldStatusListPatent(String searchText,String businessId, int page, int pageSize);
+	int  countSearchFieldStatusPatent(String searchText, String businessId);
+	
+	List<Patent> searchFieldCostListPatent(String searchText,String businessId, int page, int pageSize);
+	int  countSearchFieldCostPatent(String searchText, String businessId);
+	
+	List<Patent> searchFieldFamilyListPatent(String searchText,String businessId, int page, int pageSize);
+	int  countSearchFieldFamilyPatent(String searchText, String businessId);
+	
+	List<Patent> searchFieldExtensionListPatent(String searchText, String fieldCode, String businessId, int page, int pageSize);
+	int  countSearchFieldExtensionPatent(String searchText, String fieldCode, String businessId);
 	
 	Patent getByPatentNo(String patentNo);
 }

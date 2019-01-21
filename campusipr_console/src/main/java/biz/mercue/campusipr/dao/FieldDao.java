@@ -9,7 +9,8 @@ import biz.mercue.campusipr.model.PatentField;
 
 public interface FieldDao {
 
-
+	PatentField getById(String id);
+	
 	List<PatentField> getSearableFields();
 	
 	List<PatentField> getAllFields();

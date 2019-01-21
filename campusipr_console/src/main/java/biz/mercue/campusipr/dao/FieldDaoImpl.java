@@ -8,6 +8,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
+import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Country;
 import biz.mercue.campusipr.model.PatentField;
 
@@ -18,7 +19,12 @@ import biz.mercue.campusipr.model.PatentField;
 public class FieldDaoImpl extends AbstractDao<String,  PatentField> implements FieldDao {
 
 	private Logger log = Logger.getLogger(this.getClass().getName());
-		
+	
+	@Override
+	public PatentField getById(String id) {
+
+		return getByKey(id);
+	}
 	
 	@Override
 	public List<PatentField> getSearableFields(){
