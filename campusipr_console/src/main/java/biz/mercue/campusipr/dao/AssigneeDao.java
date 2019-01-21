@@ -13,4 +13,6 @@ public interface AssigneeDao {
 	List<Assignee> getByPatentId(String patentId);
 	
 	void create(Assignee assignee);
+	
+	void delete(String id);
 }

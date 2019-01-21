@@ -256,11 +256,26 @@ public class Constants {
 	
 	public static final String ROLE_COMMON_USER = "f950f7d5be2cff1d20228e1c9a3adf0d";
 	
+	public static final String PATENT_ALL_FIELD = "7c393e277483570943bd7290ecf8bfae";
 	public static final String PATENT_NAME_FIELD = "edad617ccdc004f37cac8f8710c6e965";
 	public static final String PATENT_NAME_EN_FIELD = "4e765c02d8a5afc000eaa77ba419ff53";
-	public static final String ASSIGNEE_FIELD = "614191c8ec65d0e6429801429794ebcd";
-	public static final String APPLIANT_FIELD = "6c761184252dd9f0148a361ed9c4c8c2";
-	public static final String IVENTOR_FIELD = "f08b87006f899e74c0b570f76349f49d";
+	public static final String PATENT_COUNTRY_FIELD = "11507a5a70670d1329e3a7effc24ca60";
+	public static final String PATENT_NO_FIELD = "0094b3bb46157502c406b50e899b0c19";
+	public static final String PATENT_APPL_NO_FIELD = "9de48893637f0c68664accdfe515f2ea";
+	public static final String PATENT_APPL_DATE_FIELD = "42437fd3b6fd38418a6d0e6068a32f2a";
+	public static final String PATENT_NOTICE_NO_FIELD = "76ab6a77047bd64250795aa9e1bc9e49";
+	public static final String PATENT_NOTICE_DATE_FIELD = "8cec5a2fbf128bca2cbf39059e0908d4";
+	public static final String PATENT_PUBLISH_NO_FIELD = "76ab6a77047bd64250795aa9e1bc9e49";
+	public static final String PATENT_PUBLISH_DATE_FIELD = "eb2f853e0fefd4af566cbd1fa8f5f744";
+	public static final String ASSIGNEE_NAME_FIELD = "614191c8ec65d0e6429801429794ebcd";
+	public static final String APPLIANT_NAME_FIELD = "6c761184252dd9f0148a361ed9c4c8c2";
+	public static final String IVENTOR_NAME_FIELD = "f08b87006f899e74c0b570f76349f49d";
+	public static final String PATENT_STATUS_FIELD = "bca0a0b8d0cc16e64758ad3a0fec31ee";
+	public static final String PATENT_COST_FIELD = "3892cf473179f665709031feccfc8ac8";
+	public static final String PATENT_FAMILY_FIELD = "ce47e85fa784fd2a4a681ccf572712c9";
+	public static final String SCHOOL_NO_FIELD = "71edfc0d2783857fefb360e574a90355";
+	public static final String SCHOOL_APPL_YEAR_FIELD = "78f94e6e1b246d9419faa044a1119cc7";
+	public static final String SCHOOL_MEMO_FIELD = "c53e8e4e240d9d7a0f1bcb956fbe7630";
 	
 	public static final String APPL_COUNTRY_TW = "TW";
 	public static final String APPL_COUNTRY_US = "US";

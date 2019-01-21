@@ -105,10 +105,11 @@ public class PatentController {
 			log.info(receiveJSONString);
 			String ip = request.getRemoteAddr();
 			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
-			patent.setAdmin(tokenBean.getAdmin());
+			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
 			int taskResult = patentService.addPatentByApplNo(patent);
+			patentService.syncPatentStatus(patent);
 			responseBody.setCode(taskResult);
 			responseBody.setBean(patent);
 			
@@ -186,9 +187,9 @@ public class PatentController {
 		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			
-			if(tokenBean.checkPermission(permission.getPermission_id())) {
+//			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+//			
+//			if(tokenBean.checkPermission(permission.getPermission_id())) {
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 					Patent patent = patentService.getById(null, patentId);
 					responseBody.setCode(Constants.INT_SUCCESS);
@@ -198,9 +199,9 @@ public class PatentController {
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setBean(patent);
 				}
-			}else {
-				responseBody.setCode(Constants.INT_NO_PERMISSION);
-			}
+//			}else {
+//				responseBody.setCode(Constants.INT_NO_PERMISSION);
+//			}
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
@@ -291,22 +292,48 @@ public class PatentController {
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-			//TODO 
-			List<Patent> listPatent = patentService.getAllByBussinessId(tokenBean.getBusiness().getBusiness_id());
+//			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
 			
-			String fileName = "test";
-			ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, tokenBean.getBusiness().getBusiness_id());
-			
-			
-			HttpHeaders headers = new HttpHeaders();
-			headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
-			
-			return ResponseEntity
-		                .ok()
-		                .headers(headers)
-		                .contentType(MediaType.parseMediaType("application/ms-excel"))
-		                .body(new InputStreamResource(fileOut));
+//			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+					List<Patent> listPatent = patentService.getAllByBussinessId(null);
+					
+					String fileName = "test";
+					ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, null);
+					
+					
+					HttpHeaders headers = new HttpHeaders();
+					headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+					
+
+					return ResponseEntity
+			                .ok()
+			                .headers(headers)
+			                .contentType(MediaType.parseMediaType("application/ms-excel"))
+			                .body(new InputStreamResource(fileOut));
+				} else {
+					List<Patent> listPatent = patentService.getAllByBussinessId(tokenBean.getBusiness().getBusiness_id());
+					
+					String fileName = "test";
+					ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, tokenBean.getBusiness().getBusiness_id());
+					
+					
+					HttpHeaders headers = new HttpHeaders();
+					headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+					
+
+					return ResponseEntity
+			                .ok()
+			                .headers(headers)
+			                .contentType(MediaType.parseMediaType("application/ms-excel"))
+			                .body(new InputStreamResource(fileOut));
+				}
+//			} else {
+//				responseBody.setCode(Constants.INT_NO_PERMISSION);
+//				return null;
+//			}
 		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			return null;
 		}
 	}

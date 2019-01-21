@@ -43,6 +43,9 @@ public class PatentEditHistory {
 	private String history_data;
 	
 	@JsonView(View.PatentDetail.class)
+	private String history_status;
+	
+	@JsonView(View.PatentDetail.class)
 	private String admin_ip;
 	
 	@JsonView(View.PatentDetail.class)
@@ -103,6 +106,14 @@ public class PatentEditHistory {
 
 	public void setAdmin_ip(String admin_ip) {
 		this.admin_ip = admin_ip;
+	}
+
+	public String getHistory_status() {
+		return history_status;
+	}
+
+	public void setHistory_status(String history_status) {
+		this.history_status = history_status;
 	}
 	
 	

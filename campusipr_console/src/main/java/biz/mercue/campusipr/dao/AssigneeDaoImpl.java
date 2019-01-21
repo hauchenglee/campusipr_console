@@ -32,6 +32,14 @@ public class AssigneeDaoImpl extends AbstractDao<String,  Assignee> implements A
 	}
 	
 	@Override
+	public void delete(String id) {
+		Assignee dbBean = getByKey(id);
+		if(dbBean!=null){
+			delete(dbBean);
+		}
+	}
+	
+	@Override
 	public List<Assignee> getByPatentId(String patentId) {
 		// TODO Auto-generated method stub
 		Criteria criteria =  createEntityCriteria();

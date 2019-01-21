@@ -15,4 +15,6 @@ public interface InventorDao {
 	
 	void create(Inventor inventor);
 	
+	void delete(String id);
+	
 }

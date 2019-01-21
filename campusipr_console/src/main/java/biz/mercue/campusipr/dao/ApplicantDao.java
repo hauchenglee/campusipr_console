@@ -14,4 +14,5 @@ public interface ApplicantDao {
 	
 	void create(Applicant appl);
 	
+	void delete(String id);
 }

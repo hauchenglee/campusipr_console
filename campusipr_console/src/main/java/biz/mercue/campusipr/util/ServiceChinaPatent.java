@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import org.xml.sax.InputSource;
 
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
+import biz.mercue.campusipr.model.IPCClass;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentAbstract;
@@ -212,6 +214,23 @@ public class ServiceChinaPatent {
 				}
 			}
 			
+			NodeList ipcrList = doc.getElementsByTagName("classification-ipcr");
+			List<IPCClass> listIPC = new ArrayList<IPCClass>();
+			for (int temp = 0; temp < ipcrList.getLength(); temp++) {
+				Node nNode = ipcrList.item(temp);
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
+					Element eElement = (Element) nNode;
+					IPCClass ipc = new IPCClass();
+					String ipcId = eElement.getTextContent().replaceAll("\\s+","")
+							.substring(0, eElement.getTextContent().replaceAll("\\s+","").length()-2);
+					ipcId = ipcId.substring(0,4)+" "+ipcId.substring(4,ipcId.length());
+					ipc.setIpc_class_id(ipcId);
+					int year = Calendar.getInstance().get(Calendar.YEAR);
+					ipc.setIpc_version(Integer.toString(year)+"01");
+					listIPC.add(ipc);
+				}
+			}
+			patent.setListIPC(listIPC);
 			
 			NodeList inventorsList = doc.getElementsByTagName("inventors");
 			for (int temp = 0; temp < inventorsList.getLength(); temp++) {

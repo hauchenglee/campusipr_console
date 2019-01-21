@@ -97,9 +97,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	
 	@Override
 	public List<Patent> getAllByBusinessId(String businessId){
-		Criteria criteria =  createEntityCriteria();
-		criteria.createAlias("listBusiness","bs");
-		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		Criteria criteria =null;
+		if(!StringUtils.isNULL(businessId)) {
+			Session session = getSession();
+			Filter filter = session.enableFilter("businessFilter");
+			filter.setParameter("business_id",businessId);
+			criteria = session.createCriteria(Patent.class);
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}else {
+			criteria = createEntityCriteria();
+		}
 		return criteria.list();
 	}
 	

@@ -33,6 +33,14 @@ public class InventorDaoImpl extends AbstractDao<String,  Inventor> implements I
 	}
 	
 	@Override
+	public void delete(String id) {
+		Inventor dbBean = getByKey(id);
+		if(dbBean!=null){
+			delete(dbBean);
+		}
+	}
+	
+	@Override
 	public List<Inventor> getByPatentId(String patentId) {
 		// TODO Auto-generated method stub
 		Criteria criteria =  createEntityCriteria();

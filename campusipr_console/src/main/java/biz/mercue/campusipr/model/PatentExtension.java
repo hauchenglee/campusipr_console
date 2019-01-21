@@ -175,6 +175,16 @@ public class PatentExtension extends BaseBean {
 	public void setExtension_agent_num(String extension_agent_num) {
 		this.extension_agent_num = extension_agent_num;
 	}
+
+
+	public String getExtension_file_num() {
+		return extension_file_num;
+	}
+
+
+	public void setExtension_file_num(String extension_file_num) {
+		this.extension_file_num = extension_file_num;
+	}
 	
 
 }

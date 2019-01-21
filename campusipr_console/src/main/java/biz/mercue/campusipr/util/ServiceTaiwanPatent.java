@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
+import biz.mercue.campusipr.model.IPCClass;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentAbstract;
@@ -39,14 +40,31 @@ public class ServiceTaiwanPatent {
 	private static  Logger log = Logger.getLogger(ServiceTaiwanPatent.class.getName());
 	
 	public static void getPatentRightByApplNo(Patent patent) {
-		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s";
+		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s&applclass=1";
 		url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no());
 		
 		try {
-			JSONObject getObject = new JSONObject(HttpRequestUtils.sendGet(url));
-			convertPatentInfoChS(patent, getObject.optJSONObject("tw-patent-rightsI"));
-			convertPatentInfoChS(patent, getObject.optJSONObject("tw-patent-rightsM"));
-			convertPatentInfoChS(patent, getObject.optJSONObject("tw-patent-rightsD"));
+			String context = HttpRequestUtils.sendGet(url);
+			if (!StringUtils.isNULL(context)) {
+				JSONObject getObject = new JSONObject(context);
+				convertPatentInfoChS(patent, getObject.optJSONObject("tw-patent-rightsI"));
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s&applclass=2";
+		url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no());
+		
+		try {
+			String context = HttpRequestUtils.sendGet(url);
+			if (!StringUtils.isNULL(context)) {
+				JSONObject getObject = new JSONObject(context);
+				convertPatentInfoChS(patent, getObject.optJSONObject("tw-patent-rightsM"));
+			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -55,6 +73,22 @@ public class ServiceTaiwanPatent {
 			e.printStackTrace();
 		}
 		
+		url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s&applclass=3";
+		url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no());
+		
+		try {
+			String context = HttpRequestUtils.sendGet(url);
+			if (!StringUtils.isNULL(context)) {
+				JSONObject getObject = new JSONObject(context);
+				convertPatentInfoChS(patent, getObject.optJSONObject("tw-patent-rightsD"));
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private static void convertPatentInfoChS(Patent patent, JSONObject obj) {
@@ -176,26 +210,83 @@ public class ServiceTaiwanPatent {
 					
 					patent.setListAssignee(listAssignee);
 					
-					List<Applicant> listAppl = new ArrayList<Applicant>();
-					JSONArray appl = patentObj.optJSONObject("parties").optJSONArray("applicants");
+					getPatentAlteration(patent);
 					
-					for (int applIndex = 0; applIndex < appl.length(); applIndex++) {
-						JSONObject applObj = appl.optJSONObject(applIndex);
+					if (patent.getListApplicant().isEmpty()) {
+						List<Applicant> listAppl = new ArrayList<Applicant>();
+						JSONArray appl = patentObj.optJSONObject("parties").optJSONArray("applicants");
+						
+						for (int applIndex = 0; applIndex < appl.length(); applIndex++) {
+							JSONObject applObj = appl.optJSONObject(applIndex);
+							Applicant applicant = new Applicant();
+							applicant.setApplicant_name(applObj.optString("chinese-name"));
+							applicant.setApplicant_name_en(applObj.optString("english-name"));
+							applicant.setCountry_id(applObj.optString("english-country"));
+							applicant.setCountry_name(applObj.optString("chinese-country"));
+							applicant.setApplicant_address(applObj.optString("address"));
+							applicant.setApplicant_address_en(applObj.optString("english-address"));
+							applicant.setApplicant_order(applObj.optInt("-sequence"));
+							applicant.setPatent(patent);
+							listAppl.add(applicant);
+						}
+						
+						patent.setListApplicant(listAppl);
+					}
+					
+					//get ipc
+					List<IPCClass> listIPCClass = new ArrayList<IPCClass>();
+					JSONArray ipcs = patentObj.optJSONArray("classification-ipc");
+					for (int ipcIndex = 0; ipcIndex < ipcs.length(); ipcIndex++) {
+						JSONObject ipcObj = ipcs.optJSONObject(ipcIndex);
+						IPCClass ipc = new IPCClass();
+						ipc.setIpc_class_id(ipcObj.optString("ipc-section")+
+								ipcObj.optString("ipc-class") + ipcObj.optString("ipc-subclass") +
+								" " + ipcObj.optString("ipc-main-group") + "/" + ipcObj.optString("ipc-group"));
+						if (ipcObj.optString("ipc-version").startsWith("0")) {
+							ipc.setIpc_version("20"+ipcObj.optString("ipc-version")+"01");
+						} else {
+							ipc.setIpc_version(ipcObj.optString("ipc-version"));
+						}
+						listIPCClass.add(ipc);
+					}
+					patent.setListIPC(listIPCClass);
+				}
+			}
+		}
+		
+	}
+	
+	public static void getPatentAlteration(Patent patent) {
+		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentAlteration?format=json&tk=%s&applno=%s";
+		url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no());
+		
+		try {
+			String context = HttpRequestUtils.sendGet(url);
+
+			List<Applicant> listAppl = new ArrayList<Applicant>();
+			if (!StringUtils.isNULL(context)) {
+				JSONObject getObject = new JSONObject(HttpRequestUtils.sendGet(url));
+				if (getObject.has("patentcontent")) {
+					JSONArray patentContent = getObject.optJSONArray("patentcontent");
+					JSONObject alterationObj = patentContent.optJSONObject(0);
+					JSONArray appls = alterationObj.optJSONArray("alteration-id1s");
+					for (int index = 0; index < appls.length(); index++) {
+						JSONObject appl = appls.optJSONObject(index);
 						Applicant applicant = new Applicant();
-						applicant.setApplicant_name(applObj.optString("chinese-name"));
-						applicant.setApplicant_name_en(applObj.optString("english-name"));
-						applicant.setCountry_id(applObj.optString("english-country"));
-						applicant.setCountry_name(applObj.optString("chinese-country"));
-						applicant.setApplicant_address(applObj.optString("address"));
-						applicant.setApplicant_address_en(applObj.optString("english-address"));
-						applicant.setApplicant_order(applObj.optInt("-sequence"));
+						applicant.setApplicant_name(appl.optString("alteration-name1"));
+						applicant.setApplicant_order(appl.optInt("-sequence"));
 						applicant.setPatent(patent);
 						listAppl.add(applicant);
 					}
-					
-					patent.setListApplicant(listAppl);
 				}
 			}
+			patent.setListApplicant(listAppl);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 	}

@@ -1,15 +1,20 @@
 package biz.mercue.campusipr.util;
 
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
@@ -20,9 +25,12 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
+import biz.mercue.campusipr.model.IPCClass;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentAbstract;
@@ -40,8 +48,65 @@ public class ServiceUSPatent {
 		url = String.format(url, patent.getPatent_appl_no());
 		
 		try {
-			JSONObject getObject = new JSONObject(HttpRequestUtils.sendGet(url));
-			convertPatentInfoUS(patent, getObject);
+			String context = HttpRequestUtils.sendGet(url);
+			if (!StringUtils.isNULL(context)) {
+				JSONObject getObject = new JSONObject(context);
+				convertPatentInfoUS(patent, getObject);
+				parserBilbo(patent);
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void parserBilbo(Patent patent) {
+		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/publication/DOCDB/%s/biblio";
+		url = String.format(url, patent.getPatent_publish_no());
+		
+		try {
+			String content = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));
+			if (!StringUtils.isNULL(content)) {
+				try {
+					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+					dbf.setValidating(false);
+					dbf.setNamespaceAware(true);
+					dbf.setFeature("http://xml.org/sax/features/namespaces", false);
+					dbf.setFeature("http://xml.org/sax/features/validation", false);
+					dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+					dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+					
+					DocumentBuilder db = dbf.newDocumentBuilder();
+					InputSource is = new InputSource();
+					is.setCharacterStream(new StringReader(content));
+					org.w3c.dom.Document doc = db.parse(is);
+					doc.getDocumentElement().normalize();
+					
+					NodeList ipcrList = doc.getElementsByTagName("classification-ipcr");
+					List<IPCClass> listIPC = new ArrayList<IPCClass>();
+					for (int temp = 0; temp < ipcrList.getLength(); temp++) {
+						org.w3c.dom.Node nNode = ipcrList.item(temp);
+						if (nNode.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) { 
+							org.w3c.dom.Element eElement = (org.w3c.dom.Element) nNode;
+							IPCClass ipc = new IPCClass();
+							String ipcId = eElement.getTextContent().replaceAll("\\s+","")
+									.substring(0, eElement.getTextContent().replaceAll("\\s+","").length()-2);
+							ipcId = ipcId.substring(0,4)+" "+ipcId.substring(4,ipcId.length());
+							ipc.setIpc_class_id(ipcId);
+							int year = Calendar.getInstance().get(Calendar.YEAR);
+							ipc.setIpc_version(Integer.toString(year)+"01");
+							listIPC.add(ipc);
+						}
+					}
+					patent.setListIPC(listIPC);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -56,10 +121,31 @@ public class ServiceUSPatent {
 		JSONArray patentDocsObj = obj.optJSONObject("response").optJSONArray("docs");
 		
 		List<String> detectDuplicateapplNoList = new ArrayList<>();
+		//check newer data
+		Date temp = null;
+		int indexPoint = 0;
 		for (int index = 0; index < patentDocsObj.length(); index++) {
 			JSONObject patentObj = patentDocsObj.optJSONObject(index);
-			if (!detectDuplicateapplNoList.contains(patentObj.optString("applicationNumber"))) {
-				patent.setPatent_name_en(patentObj.optString("title"));
+			try {
+				String compareDateStr = patentObj.optString("publicationDate");
+				if (StringUtils.isNULL(compareDateStr) == false) {
+					Date compareDate = DateUtils.parserDateTimeUTCString(compareDateStr);
+					if (compareDate != null && temp != null) {
+						if (temp.before(compareDate)) {
+							indexPoint = index;
+						}
+					}
+					temp = compareDate;
+				}
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		log.info("indexPoint:"+indexPoint);
+		JSONObject patentObj = patentDocsObj.optJSONObject(indexPoint);
+		if (!detectDuplicateapplNoList.contains(patentObj.optString("applicationNumber"))) {
+				patent.setPatent_name(patentObj.optString("title"));
 				patent.setPatent_appl_country("US");
 				
 				try {
@@ -130,7 +216,6 @@ public class ServiceUSPatent {
 				}
 				
 				detectDuplicateapplNoList.add(patentObj.optString("applicationNumber"));
-			}
 		}
 		
 	}
@@ -154,11 +239,12 @@ public class ServiceUSPatent {
 					for (int indexInventors = 0; indexInventors < patentInventors.length(); indexInventors++) {
 						JSONObject inventorObj = patentInventors.optJSONObject(indexInventors);
 						Inventor inv = new Inventor();
-						if (StringUtils.isNULL(inventorObj.optString("nameLineTwo"))) {
+						if (StringUtils.isNULL(inventorObj.optString("nameLineTwo"))||
+								" ".equals(inventorObj.optString("nameLineTwo"))) {
 							inv.setInventor_name_en(inventorObj.optString("nameLineOne"));
 						} else {
-							inv.setInventor_name_en(inventorObj.optString("nameLineOne") + " " +
-									inventorObj.optString("nameLineTwo"));
+							inv.setInventor_name_en(inventorObj.optString("nameLineTwo")+
+									inventorObj.optString("nameLineOne"));
 						}
 						inv.setCountry_id(inventorObj.optString("country"));
 						inv.setInventor_order(Integer.parseInt(inventorObj.optString("rankNo")));
@@ -192,7 +278,7 @@ public class ServiceUSPatent {
 					patent.setPatent_notice_no(patentObj.optString("documentId")
 							.substring(0, patentObj.optString("documentId").indexOf("A1")));
 					try {
-						String noticeDateStr = patentObj.optString("applicationDate");
+						String noticeDateStr = patentObj.optString("publicationDate");
 						if (StringUtils.isNULL(noticeDateStr) == false) {
 							Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
 							patent.setPatent_notice_date(noticeDate);
@@ -206,7 +292,21 @@ public class ServiceUSPatent {
 					patent.setPatent_notice_no(patentObj.optString("documentId")
 							.substring(0, patentObj.optString("documentId").indexOf("A2")));
 					try {
-						String noticeDateStr = patentObj.optString("applicationDate");
+						String noticeDateStr = patentObj.optString("publicationDate");
+						if (StringUtils.isNULL(noticeDateStr) == false) {
+							Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
+							patent.setPatent_notice_date(noticeDate);
+						}
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				if (patentObj.optString("documentId").endsWith("A9")) {
+					patent.setPatent_notice_no(patentObj.optString("documentId")
+							.substring(0, patentObj.optString("documentId").indexOf("A9")));
+					try {
+						String noticeDateStr = patentObj.optString("publicationDate");
 						if (StringUtils.isNULL(noticeDateStr) == false) {
 							Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
 							patent.setPatent_notice_date(noticeDate);
@@ -221,7 +321,7 @@ public class ServiceUSPatent {
 					patent.setPatent_publish_no(patentObj.optString("documentId")
 							.substring(0, patentObj.optString("documentId").indexOf("B1")));
 					try {
-						String publishDateStr = patentObj.optString("applicationDate");
+						String publishDateStr = patentObj.optString("publicationDate");
 						if (StringUtils.isNULL(publishDateStr) == false) {
 							Date publishDate = DateUtils.parserDateTimeUTCString(publishDateStr);
 							patent.setPatent_publish_date(publishDate);
@@ -236,7 +336,7 @@ public class ServiceUSPatent {
 					patent.setPatent_publish_no(patentObj.optString("documentId")
 							.substring(0, patentObj.optString("documentId").indexOf("B2")));
 					try {
-						String publishDateStr = patentObj.optString("applicationDate");
+						String publishDateStr = patentObj.optString("publicationDate");
 						if (StringUtils.isNULL(publishDateStr) == false) {
 							Date publishDate = DateUtils.parserDateTimeUTCString(publishDateStr);
 							patent.setPatent_publish_date(publishDate);
@@ -345,6 +445,22 @@ public class ServiceUSPatent {
 			pd.setPatent(patent);
 			patent.setPatentDesc(pd);
 		}
+	}
+	
+	private static String generateToken(String token) {
+		String url = Constants.PATENT_WEB_SERVICE_EU+"/auth/accesstoken";
+		String authToken = null;
+		try {
+			String param = "grant_type=client_credentials";
+			JSONObject contentObj = new JSONObject(HttpRequestUtils.sendPostByToken(url, param, token));
+			authToken = "Bearer "+contentObj.optString("access_token");
+			log.info("AuthTokn:"+authToken);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return authToken;
 	}
 
 }
