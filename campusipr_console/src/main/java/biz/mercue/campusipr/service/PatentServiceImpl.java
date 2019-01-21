@@ -393,6 +393,20 @@ public class PatentServiceImpl implements PatentService{
 		}
 		return taskResult;
 	}
+	
+	
+	
+	@Override
+	public int authorizedUpdatePatent(String businessId,Patent patent) {
+		
+		Patent dbBean = patentDao.getById(businessId,patent.getPatent_id());
+		if(dbBean != null) {
+			return updatePatent(patent);
+		}else {
+			return Constants.INT_CANNOT_FIND_DATA;
+		}
+	
+	}
 
 	@Override
 	public int  updatePatent(Patent patent){

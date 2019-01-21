@@ -18,6 +18,8 @@ public interface PatentService {
 
 
 	int updatePatent(Patent patent);
+	
+	int authorizedUpdatePatent(String businessId,Patent patent);
 
 	int deletePatent(Patent patent);
 	

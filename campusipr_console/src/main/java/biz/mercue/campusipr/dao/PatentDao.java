@@ -19,12 +19,13 @@ public interface PatentDao {
 	
 	
 	List<Patent> getByBusinessId(String businessId,int page,int pageSize);
+	int  getCountByBusinessId(String businessId);	
 	
 	List<Patent> getAllByBusinessId(String businessId);
 	
 	
 	
-	int  getCountByBusinessId(String businessId);	
+
 	
 	List<Patent> getByPatentIds(List<String> ids,String businessId);
 	

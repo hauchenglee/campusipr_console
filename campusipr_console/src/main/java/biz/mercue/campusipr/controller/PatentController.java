@@ -131,11 +131,25 @@ public class PatentController {
 			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
 			patent.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
 			String ip = request.getRemoteAddr();
-
 			patent.setAdmin(tokenBean.getAdmin());
 			patent.setAdmin_ip(ip);
-			int taskResult =  patentService.updatePatent(patent);
-			responseBody.setCode(taskResult);
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.EDIT);
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+					int taskResult =  patentService.authorizedUpdatePatent(null, patent);
+					responseBody.setCode(taskResult);
+				}else {
+					int taskResult =  patentService.authorizedUpdatePatent(tokenBean.getBusiness().getBusiness_id(), patent);
+					responseBody.setCode(taskResult);
+				}
+				
+			}else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
+			
+			
+			
+
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
@@ -154,17 +168,13 @@ public class PatentController {
 			
 			log.info("token :"+tokenBean.getAdmin_token_id());
 			
-			
-			//TODO
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
 			if(tokenBean.checkPermission(permission.getPermission_id())) {
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					log.info("1");
 					form = patentService.getByBusinessId(null, page);
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				}else {
-					log.info("2");
 					form = patentService.getByBusinessId(tokenBean.getBusiness().getBusiness_id(), page);
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
