@@ -187,9 +187,9 @@ public class PatentController {
 		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-//			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-//			
-//			if(tokenBean.checkPermission(permission.getPermission_id())) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 					Patent patent = patentService.getById(null, patentId);
 					responseBody.setCode(Constants.INT_SUCCESS);
@@ -199,9 +199,9 @@ public class PatentController {
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setBean(patent);
 				}
-//			}else {
-//				responseBody.setCode(Constants.INT_NO_PERMISSION);
-//			}
+			}else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
@@ -292,9 +292,9 @@ public class PatentController {
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-//			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
 			
-//			if(tokenBean.checkPermission(permission.getPermission_id())) {
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 					List<Patent> listPatent = patentService.getAllByBussinessId(null);
 					
@@ -328,10 +328,10 @@ public class PatentController {
 			                .contentType(MediaType.parseMediaType("application/ms-excel"))
 			                .body(new InputStreamResource(fileOut));
 				}
-//			} else {
-//				responseBody.setCode(Constants.INT_NO_PERMISSION);
-//				return null;
-//			}
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
 		} else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			return null;
