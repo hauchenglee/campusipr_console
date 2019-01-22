@@ -17,6 +17,7 @@ import biz.mercue.campusipr.model.AdminToken;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Portfolio;
 import biz.mercue.campusipr.model.View;
+import biz.mercue.campusipr.model.View.Public;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.PortfolioService;
 import biz.mercue.campusipr.util.BeanResponseBody;
@@ -107,11 +108,13 @@ public class PortfolioController {
 	public String updatePortfolio(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("updatePortfolio ");
 		
-		Portfolio portfolio = (Portfolio) JacksonJSONUtils.readValue(receiveJSONString, Portfolio.class);
-		ListResponseBody responseBody  = new ListResponseBody();
+		 
+		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-			
+			Portfolio portfolio = (Portfolio) JacksonJSONUtils.readValue(receiveJSONString, Portfolio.class);
+			log.info("portfolio"+portfolio.getPortfolio_id());
+			log.info("name"+portfolio.getPortfolio_name());
 			int taskResult = portfolioService.updatePortfolio(portfolio);
 			responseBody.setCode(taskResult);
 		}else {

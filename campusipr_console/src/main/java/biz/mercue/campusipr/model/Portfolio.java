@@ -24,13 +24,13 @@ import com.fasterxml.jackson.annotation.JsonView;
 public class Portfolio extends  BaseBean{
 	
 	@Id
-	@JsonView(View.Portfolio.class)
+	@JsonView({View.Portfolio.class,View.PatentDetail.class})
 	private String portfolio_id;
 	
-	@JsonView(View.Portfolio.class)
+	@JsonView({View.Portfolio.class,View.PatentDetail.class})
 	private String portfolio_name;
 	
-	@JsonView(View.PortfolioDetail.class)
+	@JsonView({View.Portfolio.class,View.PatentDetail.class})
 	private String portfolio_memo;
 	
 	

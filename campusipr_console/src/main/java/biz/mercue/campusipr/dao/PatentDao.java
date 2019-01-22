@@ -41,4 +41,7 @@ public interface PatentDao {
 	
 	
 	Patent getByPatentNo(String patentNo);
+	
+	
+	void deletePatentCost(String patentId);
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Filter;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Criterion;
@@ -202,6 +203,16 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.setProjection(Projections.rowCount());
 		long count = (long)criteria.uniqueResult();
 		return (int)count;
+	}
+	
+	
+	@Override
+	public void deletePatentCost(String patentId) {
+		String hql = "Delete From PatentCost where patent_id = :patent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
 	}
 
 	
