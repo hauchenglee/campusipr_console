@@ -39,8 +39,8 @@ public interface PatentDao {
 	List<Patent> searchFieldPatent(String  searchText, String fieldCode, String businessId,int page,int pageSize);
 	int  countSearchFieldPatent(String searchText, String fieldCode,String businessId);
 	
-	List<Patent> searchFieldPatent(Date searchDate, String fieldCode, String businessId,int page,int pageSize);
-	int  countSearchFieldPatent(Date searchDate, String fieldCode,String businessId);
+	List<Patent> searchFieldPatent(Date startDate, Date endDate, String fieldCode, String businessId,int page,int pageSize);
+	int  countSearchFieldPatent(Date startDate, Date endDate, String fieldCode,String businessId);
 	
 	List<Patent> searchFieldAssigneeListPatent(String searchText,String businessId, int page, int pageSize);
 	int  countSearchFieldAssigneePatent(String searchText, String businessId);
