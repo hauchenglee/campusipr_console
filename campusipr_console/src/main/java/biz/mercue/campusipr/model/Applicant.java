@@ -98,7 +98,7 @@ public class Applicant extends BaseBean{
 	}
 
 	public void setCountry_id(String country_id) {
-		this.country_id = country_id;
+		this.country_id = country_id.toLowerCase();
 	}
 
 	public String getCountry_name() {
@@ -106,7 +106,7 @@ public class Applicant extends BaseBean{
 	}
 
 	public void setCountry_name(String country_name) {
-		this.country_name = country_name;
+		this.country_name = country_name.toLowerCase();
 	}
 
 	public int getApplicant_order() {

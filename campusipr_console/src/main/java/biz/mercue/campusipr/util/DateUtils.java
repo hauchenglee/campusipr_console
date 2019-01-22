@@ -303,5 +303,16 @@ public class DateUtils {
 		long diffDay = diff / (24 * 60 * 60 * 1000); 
 		return diffDay;
 	}
+	
+	public static boolean isValidDate(String inDate) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false);
+        try {
+            dateFormat.parse(inDate.trim());
+        } catch (ParseException pe) {
+            return false;
+        }
+        return true;
+    }
 
 }

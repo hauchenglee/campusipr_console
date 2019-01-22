@@ -39,16 +39,16 @@ public class PatentEditHistory {
 	private Admin admin;
 	
 	
-	@JsonView(View.PatentDetail.class)
+	@JsonView(View.PatentHistory.class)
 	private String history_data;
 	
-	@JsonView(View.PatentDetail.class)
+	@JsonView(View.PatentHistory.class)
 	private String history_status;
 	
-	@JsonView(View.PatentDetail.class)
+	@JsonView(View.PatentHistory.class)
 	private String admin_ip;
 	
-	@JsonView(View.PatentDetail.class)
+	@JsonView(View.PatentHistory.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date create_date;
 

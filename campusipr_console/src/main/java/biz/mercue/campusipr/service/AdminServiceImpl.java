@@ -177,7 +177,7 @@ public class AdminServiceImpl implements AdminService{
 
 				admin.setCreate_date(new Date());
 				admin.setUpdate_date(new Date());
-			
+				
 				dao.createAdmin(admin);
 				return Constants.INT_SUCCESS;
 			}else{

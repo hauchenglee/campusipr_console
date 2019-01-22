@@ -30,9 +30,7 @@ public interface PatentService {
 	
 	List<Patent> getByPatentIds(List<String> idList,String businessId);
 	
-	ListQueryForm searchPatent(String text,String businessId,int page);
-	
-	ListQueryForm fieldSearchPatent(String text,String businessId,int page);
+	ListQueryForm fieldSearchPatent(Object searchObj, String fieldId, String businessId,int page);
 	
 	
 	List<Patent> getByFamily(String family);
@@ -49,7 +47,7 @@ public interface PatentService {
 
 	Patent getByPatentNo(String patentNo);
 	
-	List<PatentEditHistory> getHistoryBypatentId(String businessId,String patentId);
+	ListQueryForm getHistoryBypatentId(String businessId,String patentId,String fieldId,int page);
 
 
 }
