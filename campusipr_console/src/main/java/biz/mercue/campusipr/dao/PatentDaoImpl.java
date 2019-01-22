@@ -519,6 +519,39 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		query.setParameter("patent_id", patentId);
 		query.executeUpdate();
 	}
+	
+	
+	@Override
+	public void deleteInventor(String patentId) {
+		String hql = "Delete From Inventor where patent_id = :patent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+	
+	
+	@Override
+	public void deleteAssignee(String patentId) {
+		String hql = "Delete From Assignee where patent_id = :patent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+	
+	
+	
+	@Override
+	public void deleteApplicant(String patentId) {
+		String hql = "Delete From Applicant where patent_id = :patent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+	
+
 
 
 	

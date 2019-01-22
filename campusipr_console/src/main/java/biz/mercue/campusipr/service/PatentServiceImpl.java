@@ -70,14 +70,14 @@ public class PatentServiceImpl implements PatentService{
 	@Autowired
 	private StatusDao statusDao;
 	
-	@Autowired
-	private InventorDao inventorDao;
-	
-	@Autowired
-	private ApplicantDao applicantDao;
-	
-	@Autowired
-	private AssigneeDao assigneeDao;
+//	@Autowired
+//	private InventorDao inventorDao;
+//	
+//	@Autowired
+//	private ApplicantDao applicantDao;
+//	
+//	@Autowired
+//	private AssigneeDao assigneeDao;
 	
 	@Autowired
 	private PatentStatusDao patentStatusDao;
@@ -756,26 +756,20 @@ public class PatentServiceImpl implements PatentService{
 		}
 		if (!list.isEmpty()) {
 			for(Patent patent : list) {
-				patent.getListBusiness().size();
+
 				patent.getListStatus().size();
-				patent.getListIPC().size();
-				patent.getListAgent().size();
-				patent.getListApplicant().size();
-				patent.getListAssignee().size();
-				patent.getListContact().size();
-				patent.getListCost().size();
-				patent.getListInventor().size();
-				patent.getListPortfolio().size();
 				patent.getListExtension().size();
-				List<PatentStatus> listPatentStatus = patentStatusDao.getByPatent(patent.getPatent_id());
+				patent.getListBusiness().size();
 				
-				for (PatentStatus patentStatus:listPatentStatus) {
-					for (Status status:patent.getListStatus()) {
-						if (status.getStatus_id().equals(patentStatus.getStatus_id())) {
-							status.setPatentStatus(patentStatus);
-						}
-					}
-				}
+//				List<PatentStatus> listPatentStatus = patentStatusDao.getByPatent(patent.getPatent_id());
+//				
+//				for (PatentStatus patentStatus:listPatentStatus) {
+//					for (Status status:patent.getListStatus()) {
+//						if (status.getStatus_id().equals(patentStatus.getStatus_id())) {
+//							status.setPatentStatus(patentStatus);
+//						}
+//					}
+//				}
 			}
 		}
 		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,list);
@@ -786,10 +780,7 @@ public class PatentServiceImpl implements PatentService{
 	private void mappingInventor(Patent dbBean,Patent patent) {
 		List<Inventor> mapInventor = dbBean.getListInventor();
 		dbBean.setListInventor(null);
-		for (Inventor inventor:mapInventor) {
-			inventorDao.delete(inventor.getInventor_id());
-		}
-		
+		patentDao.deleteInventor(dbBean.getPatent_id());	
 		if (patent.getListInventor() != null) {
 			for (Inventor inventor:patent.getListInventor()) {
 				if (StringUtils.isNULL(inventor.getInventor_id())) {
@@ -804,9 +795,7 @@ public class PatentServiceImpl implements PatentService{
 	private void mappingApplicant(Patent dbBean,Patent patent) {
 		List<Applicant> mapApplicant = dbBean.getListApplicant();
 		dbBean.setListApplicant(null);
-		for (Applicant appl:mapApplicant) {
-			applicantDao.delete(appl.getApplicant_id());
-		}
+		patentDao.deleteApplicant(dbBean.getPatent_id());
 		if (patent.getListApplicant() != null) {
 			for (Applicant appl:patent.getListApplicant()) {
 				if (StringUtils.isNULL(appl.getApplicant_id())) {
@@ -821,9 +810,7 @@ public class PatentServiceImpl implements PatentService{
 	private void mappingAssignee(Patent dbBean,Patent patent) {
 		List<Assignee> mapAssignee = dbBean.getListAssignee();
 		dbBean.setListAssignee(null);
-		for (Assignee assign:mapAssignee) {
-			assigneeDao.delete(assign.getAssignee_id());
-		}
+		patentDao.deleteAssignee(dbBean.getPatent_id());
 		if (patent.getListAssignee() != null) {
 			for (Assignee assign:patent.getListAssignee()) {
 				if (StringUtils.isNULL(assign.getAssignee_id())) {

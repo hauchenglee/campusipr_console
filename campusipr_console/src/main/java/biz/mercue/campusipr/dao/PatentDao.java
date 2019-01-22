@@ -67,4 +67,8 @@ public interface PatentDao {
 	
 	
 	void deletePatentCost(String patentId);
+	void deleteInventor(String patentId);
+	void deleteAssignee(String patentId);
+	void deleteApplicant(String patentId);
+	
 }

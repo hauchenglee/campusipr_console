@@ -225,7 +225,7 @@ public class PatentController {
 		}
 	}
 	
-	@RequestMapping(value="/api/getpatenthistorybyid", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/getpatenthistorybyid", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getPatentHistorybyId(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
 		log.info("getPatenthistorybyId ");
@@ -428,7 +428,7 @@ public class PatentController {
 	
 	
 	
-	@RequestMapping(value="/api/searchpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/searchpatent", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String searchPatent(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page){
 		log.info("searchpatent ");
@@ -458,11 +458,7 @@ public class PatentController {
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
-		if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-			return responseBody.getJacksonString(View.PatentDetail.class);
-		}else {
-			return responseBody.getJacksonString(View.PatentEnhance.class);
-		}
+		return responseBody.getJacksonString(View.Patent.class);
 	}
 
 }
