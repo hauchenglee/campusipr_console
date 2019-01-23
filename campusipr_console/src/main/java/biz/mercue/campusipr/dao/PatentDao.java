@@ -64,4 +64,10 @@ public interface PatentDao {
 	int  countSearchFieldExtensionPatent(String searchText, String fieldCode, String businessId);
 	
 	Patent getByPatentNo(String patentNo);
+	
+	
+	void deletePatentCost(String patentId);
+	void deleteInventor(String patentId);
+	void deleteAssignee(String patentId);
+	void deleteApplicant(String patentId);
 }

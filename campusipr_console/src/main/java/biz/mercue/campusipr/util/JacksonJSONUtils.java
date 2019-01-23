@@ -25,7 +25,7 @@ public class JacksonJSONUtils {
 			mapper.disable(MapperFeature.DEFAULT_VIEW_INCLUSION);
 			jsonInString = mapper.writerWithView(view).writeValueAsString(obj);
 		} catch (JsonProcessingException e) {
-			log.info("JsonProcessingException :"+e.getMessage());
+			log.error("JsonProcessingException :"+e.getMessage());
 		}
 		
 		return jsonInString;
@@ -37,7 +37,7 @@ public class JacksonJSONUtils {
 			try {
 				object = mapper.readValue(strJson, mClass);
 			} catch (IOException e) {
-				log.info("IOException :"+e.getMessage());
+				log.error("IOException :"+e.getMessage());
 			}
 			return object;
 	}
@@ -48,7 +48,7 @@ public class JacksonJSONUtils {
 		try {
 			object = mapper.readValue(strJson, typeReference);
 		} catch (IOException e) {
-			log.info("IOException :"+e.getMessage());
+			log.error("IOException :"+e.getMessage());
 		}
 		return object;
 	}

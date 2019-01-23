@@ -12,6 +12,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -51,6 +52,22 @@ public class PatentEditHistory {
 	@JsonView(View.PatentHistory.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date create_date;
+	
+	@Transient
+	@JsonView(View.PatentHistory.class)
+	private String display_data;
+	
+	@Transient
+	@JsonView(View.PatentHistory.class)
+	private String display_data_en;
+	
+	@Transient
+	@JsonView(View.PatentHistory.class)
+	private String display_status;
+	
+	@Transient
+	@JsonView(View.PatentHistory.class)
+	private String display_status_en;
 
 	public String getHistory_id() {
 		return history_id;
@@ -114,6 +131,38 @@ public class PatentEditHistory {
 
 	public void setHistory_status(String history_status) {
 		this.history_status = history_status;
+	}
+
+	public String getDisplay_data() {
+		return display_data;
+	}
+
+	public void setDisplay_data(String display_data) {
+		this.display_data = display_data;
+	}
+
+	public String getDisplay_data_en() {
+		return display_data_en;
+	}
+
+	public void setDisplay_data_en(String display_data_en) {
+		this.display_data_en = display_data_en;
+	}
+
+	public String getDisplay_status() {
+		return display_status;
+	}
+
+	public void setDisplay_status(String display_status) {
+		this.display_status = display_status;
+	}
+
+	public String getDisplay_status_en() {
+		return display_status_en;
+	}
+
+	public void setDisplay_status_en(String display_status_en) {
+		this.display_status_en = display_status_en;
 	}
 	
 	

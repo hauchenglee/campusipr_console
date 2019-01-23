@@ -11,6 +11,7 @@ import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 
@@ -488,6 +489,47 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.add(Restrictions.eq("patent_no", patentNo));
 		return (Patent) criteria.uniqueResult();
 	}
+	
+	
+	   @Override
+	   public void deletePatentCost(String patentId) {
+	       String hql = "Delete From PatentCost where patent_id = :patent_id";
+	       Session session = getSession();
+	       Query query = session.createQuery(hql);
+	       query.setParameter("patent_id", patentId);
+	       query.executeUpdate();
+	   }
+	   
+	   
+	   @Override
+	   public void deleteInventor(String patentId) {
+	       String hql = "Delete From Inventor where patent_id = :patent_id";
+	       Session session = getSession();
+	       Query query = session.createQuery(hql);
+	       query.setParameter("patent_id", patentId);
+	       query.executeUpdate();
+	   }
+	   
+	   
+	   @Override
+	   public void deleteAssignee(String patentId) {
+	       String hql = "Delete From Assignee where patent_id = :patent_id";
+	       Session session = getSession();
+	       Query query = session.createQuery(hql);
+	       query.setParameter("patent_id", patentId);
+	       query.executeUpdate();
+	   }
+	   
+	   
+	   
+	   @Override
+	   public void deleteApplicant(String patentId) {
+	       String hql = "Delete From Applicant where patent_id = :patent_id";
+	       Session session = getSession();
+	       Query query = session.createQuery(hql);
+	       query.setParameter("patent_id", patentId);
+	       query.executeUpdate();
+	   }
 
 	
 

@@ -263,7 +263,7 @@ public class Constants {
 	public static final String PATENT_NO_FIELD = "0094b3bb46157502c406b50e899b0c19";
 	public static final String PATENT_APPL_NO_FIELD = "9de48893637f0c68664accdfe515f2ea";
 	public static final String PATENT_APPL_DATE_FIELD = "42437fd3b6fd38418a6d0e6068a32f2a";
-	public static final String PATENT_NOTICE_NO_FIELD = "76ab6a77047bd64250795aa9e1bc9e49";
+	public static final String PATENT_NOTICE_NO_FIELD = "d3fc8c21aa05c0c8e7c1c52a704d2f72";
 	public static final String PATENT_NOTICE_DATE_FIELD = "8cec5a2fbf128bca2cbf39059e0908d4";
 	public static final String PATENT_PUBLISH_NO_FIELD = "76ab6a77047bd64250795aa9e1bc9e49";
 	public static final String PATENT_PUBLISH_DATE_FIELD = "eb2f853e0fefd4af566cbd1fa8f5f744";
@@ -276,6 +276,7 @@ public class Constants {
 	public static final String SCHOOL_NO_FIELD = "71edfc0d2783857fefb360e574a90355";
 	public static final String SCHOOL_APPL_YEAR_FIELD = "78f94e6e1b246d9419faa044a1119cc7";
 	public static final String SCHOOL_MEMO_FIELD = "c53e8e4e240d9d7a0f1bcb956fbe7630";
+	public static final String PATENT_MEMO = "c53e8e4e240d9d7a0f1bcb956fbe7630";
 	
 	public static final String APPL_COUNTRY_TW = "TW";
 	public static final String APPL_COUNTRY_US = "US";

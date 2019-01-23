@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import biz.mercue.campusipr.dao.ApplicantDao;
 import biz.mercue.campusipr.dao.AssigneeDao;
 import biz.mercue.campusipr.dao.FieldDao;
@@ -157,7 +159,7 @@ public class PatentServiceImpl implements PatentService{
 	@Override
 	public ListQueryForm getHistoryBypatentId(String businessId,String patentId,String fieldId,int page) {
 		List<PatentEditHistory> listpeh = pehDao.getByPatentAndField(patentId, fieldId, businessId,page,Constants.SYSTEM_PAGE_SIZE);
-		
+		handleEditHistory(listpeh);
 		int count = pehDao.countByPatentAndField(patentId, fieldId, businessId);
 		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,listpeh);
 		
@@ -1223,6 +1225,84 @@ public class PatentServiceImpl implements PatentService{
 	private  void handleCost(Patent dbPatent,Patent editPatent,List<PatentEditHistory> listHistory) {
 		
 		
+	}
+	
+	
+	
+	private void handleEditHistory(List<PatentEditHistory> list) {
+		for(PatentEditHistory history : list) {
+			String fieldId = history.getField_id();
+			if(!StringUtils.isNULL(fieldId)) {
+				switch (fieldId) {
+				case Constants.PATENT_APPL_DATE_FIELD:
+				case Constants.PATENT_NOTICE_DATE_FIELD:
+				case Constants.PATENT_PUBLISH_DATE_FIELD:
+				case Constants.PATENT_NAME_EN_FIELD:
+				case Constants.PATENT_NAME_FIELD:
+				case Constants.PATENT_NO_FIELD:
+				case Constants.PATENT_NOTICE_NO_FIELD:
+				case Constants.PATENT_PUBLISH_NO_FIELD:
+				case Constants.SCHOOL_NO_FIELD:
+				case Constants.SCHOOL_APPL_YEAR_FIELD:
+				case Constants.PATENT_MEMO:
+					history.setDisplay_data(history.getHistory_data());
+					history.setDisplay_data_en(history.getHistory_data());
+					break;
+				case Constants.IVENTOR_NAME_FIELD:
+
+					List<Inventor> listInventor = (List<Inventor>) JacksonJSONUtils.readValue(history.getHistory_data(), new TypeReference<List<Inventor>>(){});
+					if(listInventor!=null && listInventor.size() > 0 ) {
+						List<String> name1 = new ArrayList<String>();
+						List<String> name2 = new ArrayList<String>();
+						for(Inventor inventor : listInventor) {
+							name1.add(inventor.getInventor_name());
+							name2.add(inventor.getInventor_name_en());
+						}
+						String result1 = String.join("\n", name1);
+						String result2 = String.join("\n", name2);
+						history.setDisplay_data(result1);
+						history.setDisplay_data_en(result2);
+					}
+					break;
+				case Constants.ASSIGNEE_NAME_FIELD:
+
+					List<Assignee> listAssignee = (List<Assignee>) JacksonJSONUtils.readValue(history.getHistory_data(), new TypeReference<List<Assignee>>(){});
+					if(listAssignee!=null && listAssignee.size() > 0 ) {
+						List<String> name1 = new ArrayList<String>();
+						List<String> name2 = new ArrayList<String>();
+						for(Assignee assignee : listAssignee) {
+							name1.add(assignee.getAssignee_name());
+							name2.add(assignee.getAssignee_name_en());
+						}
+						String result1 = String.join("\n", name1);
+						String result2 = String.join("\n", name2);
+						history.setDisplay_data(result1);
+						history.setDisplay_data_en(result2);
+					}
+					break;
+				case Constants.APPLIANT_NAME_FIELD:
+				
+					List<Applicant> listApplicant = (List<Applicant>) JacksonJSONUtils.readValue(history.getHistory_data(), new TypeReference<List<Applicant>>(){});
+					if(listApplicant!=null && listApplicant.size() > 0 ) {
+						List<String> name1 = new ArrayList<String>();
+						List<String> name2 = new ArrayList<String>();
+						for(Applicant applicant : listApplicant) {
+							name1.add(applicant.getApplicant_name());
+							name2.add(applicant.getApplicant_name_en());
+						}
+						String result1 = String.join("\n", name1);
+						String result2 = String.join("\n", name2);
+						history.setDisplay_data(result1);
+						history.setDisplay_data_en(result2);
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
+			
+		}
 	}
 	
 	
