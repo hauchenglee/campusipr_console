@@ -38,7 +38,7 @@ public interface ExcelTaskService {
 	List<ExcelTask> getNotFinishByAdmin(String adminId);
 	
 	List<ExcelTask> getNotInformByAdmin(String adminId);
-	
+		
 
 
 }

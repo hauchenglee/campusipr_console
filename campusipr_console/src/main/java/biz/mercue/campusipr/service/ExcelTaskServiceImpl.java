@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.mysql.cj.core.result.Field;
+
 import biz.mercue.campusipr.dao.ExcelTaskDao;
 import biz.mercue.campusipr.dao.FieldDao;
 import biz.mercue.campusipr.dao.FieldMapDao;
@@ -26,6 +28,7 @@ import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Business;
 import biz.mercue.campusipr.model.ExcelTask;
 import biz.mercue.campusipr.model.FieldMap;
+import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentField;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.ExcelUtils;
@@ -95,18 +98,19 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	
 	@Override
 	public ExcelTask addTaskByFile(MultipartFile mpFile, Admin admin) throws IOException {
-		ExcelTask task = null;
+		log.info("addTaskByFile");
+		ExcelTask task = new ExcelTask();
 		task.setExcel_task_id(KeyGeneratorUtils.generateRandomString());
 		//FileInputStream fileInputStream = null;
 		try {
 			File excel = FileUtils.MultipartFile2File(mpFile, task.getExcel_task_id());
 			if(excel != null) {
-				task = new ExcelTask();
 				log.info("file :"+excel.getName());
 				task.setBusiness(admin.getBusiness());
 				task.setAdmin(admin);
 				task.setIs_finish(false);
 				task.setIs_inform(false);
+				task.setCreate_date(new Date ());
 				task.setTask_file_name(excel.getName());
 				dao.create(task);
 			}
@@ -146,26 +150,26 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				
 				//title map index
 				Map<String, Integer> titleMap = ExcelUtils.readExcelTitle(book);
-				
-				List<PatentField> totalList = fieldDao.getAllFields();
-				//log.info("1");
-				List<FieldMap> list = mapDao.getByAdmin(admin.getAdmin_id());
-				if(list.size() > 0 ) {
+				//compare  title and filed name
+				List<FieldMap> fieldMaps = task.getListMap();
+				if(fieldMaps.size() > 0) {
 					
 				}else {
-					//compare  title and filed name
+					List<PatentField> totalList = fieldDao.getAllFields();
 					List<FieldMap> newMapList = new ArrayList<FieldMap>();
 					for(PatentField field : totalList) {
 						FieldMap map = new FieldMap();
 						map.setField_map_id(KeyGeneratorUtils.generateRandomString());
 						map.setField(field);
+						map.setTask(task);
 						map.setCreate_date(new Date());
 						map.setUpdate_date(new Date());
 						newMapList.add(map);
 					}
-					task.setTitleMap(titleMap);
 					task.setListMap(newMapList);
 				}
+				task.setTitleMap(titleMap);
+
 				book.close();
 			}
 		}
@@ -178,15 +182,29 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	@Override
 	public int submitTask(ExcelTask bean,Admin admin) {
 		ExcelTask dbBean = dao.getByBusinessId(admin.getBusiness().getBusiness_id(), bean.getExcel_task_id());
+		boolean is_continue = true;
 		if(dbBean !=null) {
 			List<FieldMap> filedList = bean.getListMap();
+			if(filedList.size() > 0) {
+				Map<String, FieldMap> maps = convertFieldList2Map(filedList);
+				if(checkRequiredField(maps)) {
+					for(FieldMap map : filedList) {
+						
+					}
+					return Constants.INT_SUCCESS;
+				}else {
+					return Constants.INT_DATA_ERROR;
+				}
+			}else {
+				return Constants.INT_DATA_ERROR;
+			}
 			
 			
 			
 			
 			
 			
-			return Constants.INT_SUCCESS;
+			
 		}else {
 			return Constants.INT_CANNOT_FIND_DATA;
 		}
@@ -219,13 +237,27 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		Map<String , FieldMap> map = new HashMap<String , FieldMap>();
 		
 		for(FieldMap fieldMap : list) {
-			PatentField field = fieldMap.getField();
-			if(field!=null) {
-				
-			}
+			map.put(fieldMap.getField_map_id(), fieldMap);
 			
 		}
 		return map;
+	}
+	
+	
+	
+	private boolean checkRequiredField(Map<String , FieldMap> maps) {
+		if(maps.containsKey(Constants.PATENT_APPL_NO_FIELD) && maps.containsKey(Constants.PATENT_COUNTRY_FIELD)) {
+			FieldMap map1 = maps.get(Constants.PATENT_APPL_NO_FIELD);
+			FieldMap map2 = maps.get(Constants.PATENT_COUNTRY_FIELD);
+			if(!StringUtils.isNULL(map1.getExcel_field_name()) && !StringUtils.isNULL(map2.getExcel_field_name()) ) {
+				return true;
+			}else {
+				return false;
+			}
+		}else {
+			return false;
+		}
+		
 	}
 
 	

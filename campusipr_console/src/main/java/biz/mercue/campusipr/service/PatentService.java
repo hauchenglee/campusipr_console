@@ -4,7 +4,7 @@ import java.util.List;
 
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
-import biz.mercue.campusipr.model.PatentEditHistory;
+import biz.mercue.campusipr.model.Status;
 
 
 
@@ -48,6 +48,9 @@ public interface PatentService {
 	Patent getByPatentNo(String patentNo);
 	
 	ListQueryForm getHistoryBypatentId(String businessId,String patentId,String fieldId,int page);
+	
+	
+	List<Status> getEditStatus();
 
 
 }

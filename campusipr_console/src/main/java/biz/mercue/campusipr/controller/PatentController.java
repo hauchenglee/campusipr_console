@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.AdminToken;
 import biz.mercue.campusipr.model.ExcelTask;
 import biz.mercue.campusipr.model.ListQueryForm;
@@ -77,7 +78,7 @@ public class PatentController {
 	public String addPatent(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("addPatent ");
 		Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
-		StringResponseBody responseBody  = new StringResponseBody();
+		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 			
 		if(tokenBean!=null) {
@@ -88,6 +89,9 @@ public class PatentController {
 			patent.setAdmin_ip(ip);
 			int taskResult = patentService.addPatent(patent);
 			responseBody.setCode(taskResult);
+			if(taskResult == Constants.INT_SUCCESS) {
+				responseBody.setBean(patent);
+			}
 
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
@@ -225,7 +229,7 @@ public class PatentController {
 		}
 	}
 	
-	@RequestMapping(value="/api/getpatenthistorybyid", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/getpatenthistorybyid", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getPatentHistorybyId(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
 		log.info("getPatenthistorybyId ");
@@ -363,7 +367,7 @@ public class PatentController {
 		try {
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
 			if (tokenBean != null) {
-
+				log.info("1");
 				if (file != null && !file.getOriginalFilename().isEmpty()) {
 					ExcelTask task = excelTaskService.addTaskByFile(file, tokenBean.getAdmin());
 					responseBody.setCode(Constants.INT_SUCCESS);
@@ -414,7 +418,8 @@ public class PatentController {
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
 			if (tokenBean != null) {
 				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
-				responseBody.setCode(Constants.INT_SUCCESS);
+				int result = excelTaskService.submitTask(task,tokenBean.getAdmin());
+				responseBody.setCode(result);
 			} else {
 				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			}
@@ -428,7 +433,7 @@ public class PatentController {
 	
 	
 	
-	@RequestMapping(value="/api/searchpatent", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/searchpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String searchPatent(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page){
 		log.info("searchpatent ");
@@ -452,6 +457,29 @@ public class PatentController {
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				}
+			}else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString(View.Patent.class);
+	}
+	
+	
+	@RequestMapping(value="/api/geteditpatentstatus", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String getEditPatentStatus(HttpServletRequest request){
+		ListResponseBody responseBody  = new ListResponseBody();
+
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				List<Status> list = patentService.getEditStatus();
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setList(list);
 			}else {
 				responseBody.setCode(Constants.INT_NO_PERMISSION);
 			}

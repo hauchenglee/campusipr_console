@@ -41,6 +41,16 @@ public class FieldDaoImpl extends AbstractDao<String,  PatentField> implements F
 		return criteria.list();
 	}
 	
+	
+	
+	@Override
+	public List<PatentField> getInputFields(){
+		Criteria criteria =  createEntityCriteria();
+		criteria.add(Restrictions.eq("is_input", true));
+		criteria.addOrder(Order.asc("field_order"));
+		return criteria.list();
+	}
+	
 	@Override
 	public PatentField getByFieldCode(String code) {
 		Criteria criteria =  createEntityCriteria();

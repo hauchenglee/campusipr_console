@@ -777,6 +777,11 @@ public class PatentServiceImpl implements PatentService{
 		return form;
 	}
 	
+	@Override
+	public List<Status> getEditStatus(){
+		return statusDao.getEditable();
+	}
+	
 	private void mappingInventor(Patent dbBean,Patent patent) {
 		List<Inventor> mapInventor = dbBean.getListInventor();
 		dbBean.setListInventor(null);

@@ -59,6 +59,17 @@ public class FieldMapDaoImpl extends AbstractDao<String,  FieldMap> implements F
 		return criteria.list();
 	}
 	
+	
+	
+	@Override
+	public List<FieldMap> getByTask(String taskId){
+		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("task","task");
+		criteria.add(Restrictions.eq("task.excel_task_id", taskId));
+		criteria.addOrder(Order.desc("create_date"));
+		return criteria.list();
+	}
+	
 
 
 	

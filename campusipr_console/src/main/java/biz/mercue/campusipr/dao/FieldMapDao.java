@@ -20,6 +20,9 @@ public interface FieldMapDao {
 	
 	List<FieldMap> getByAdmin(String adminId);
 	
+	
+	List<FieldMap> getByTask(String taskId);
+	
 
 
 

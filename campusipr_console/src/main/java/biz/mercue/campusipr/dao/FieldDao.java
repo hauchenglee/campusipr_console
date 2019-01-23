@@ -15,6 +15,8 @@ public interface FieldDao {
 	
 	List<PatentField> getAllFields();
 	
+	List<PatentField> getInputFields();
+	
 	PatentField getByFieldCode(String code);
 	
 	

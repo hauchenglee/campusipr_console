@@ -58,5 +58,13 @@ public class StatusDaoImpl extends AbstractDao<String,  Status> implements Statu
 		criteria.add(Restrictions.eq("country_id", countryId));
 		return (Status) criteria.uniqueResult();
 	}
+	
+	
+	@Override
+	public List<Status> getEditable(){
+		Criteria criteria =  createEntityCriteria();
+		criteria.add(Restrictions.eq("status_from", "sys"));
+		return criteria.list();
+	}
 
 }
