@@ -24,13 +24,13 @@ public class Admin extends BaseBean {
 	
 	
 	@Id
-	@JsonView({View.Admin.class,View.Role.class})
+	@JsonView(View.Public.class)
 	private String admin_id;
 	
-	@JsonView({View.Admin.class,View.Role.class})
+	@JsonView(View.Public.class)
 	private String admin_name;
 	
-	@JsonView({View.Admin.class,View.Role.class})
+	@JsonView(View.Public.class)
 	private String admin_email;
 	
 	private String admin_password;
@@ -38,14 +38,14 @@ public class Admin extends BaseBean {
 	@Transient
 	private String re_admin_password;
 	
-	@JsonView({View.Admin.class,View.Role.class})
+	@JsonView(View.Public.class)
 	private String admin_unit_name;
 	
-	@JsonView({View.Admin.class,View.Role.class})
+	@JsonView(View.Public.class)
 	private boolean available;
 	
 	
-	@JsonView({View.Admin.class,View.Role.class})
+	@JsonView(View.Public.class)
 	@OneToOne(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
 	@JoinColumn(name="business_id")
 	private Business business;

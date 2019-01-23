@@ -428,7 +428,7 @@ public class AdminController {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
 	
-		return responseBody.getJacksonString(View.Admin.class);
+		return responseBody.getJacksonString(View.Public.class);
 	}
 		
 	
@@ -447,7 +447,7 @@ public class AdminController {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
 		
-		return responseBody.getJacksonString(View.Admin.class);
+		return responseBody.getJacksonString(View.Public.class);
 	}
 	
 	@RequestMapping(value="/api/updateadmin", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
@@ -477,7 +477,7 @@ public class AdminController {
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
-		return responseBody.getJacksonString(View.Admin.class);
+		return responseBody.getJacksonString(View.Public.class);
 	}
 	
 	

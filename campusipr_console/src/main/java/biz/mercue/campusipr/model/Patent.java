@@ -21,12 +21,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
-
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
-
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -180,14 +177,6 @@ public class Patent extends BaseBean{
 	@OrderBy("annuity_date DESC")
 	private List<Annuity> listAnnuity;
 	
-	@JsonView(View.PatentDetail.class)
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinTable(name = "patent_portfolio", 
-		joinColumns = { @JoinColumn(name = "patent_id") }, 
-		inverseJoinColumns = { @JoinColumn(name = "portfolio_id") })
-	private List<Portfolio> listPortfolio;
-
-	
 	@ManyToOne
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	@JoinColumn(name="patent_family_id")
@@ -214,7 +203,11 @@ public class Patent extends BaseBean{
 	@Transient
 	public static final int EDIT_SOURCE_SERVICE =2;
 	
-
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinTable(name = "patent_portfolio", 
+		joinColumns = { @JoinColumn(name = "patent_id") }, 
+		inverseJoinColumns = { @JoinColumn(name = "portfolio_id") })
+	private List<Portfolio> listPortfolio;
 	
 	public String getPatent_id() {
 		return patent_id;

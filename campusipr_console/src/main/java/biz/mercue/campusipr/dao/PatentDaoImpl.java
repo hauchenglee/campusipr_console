@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Filter;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.CriteriaSpecification;
 import org.hibernate.criterion.Criterion;
@@ -218,13 +217,14 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 	
 	@Override
-	public List<Patent> searchFieldPatent(Date searchDate, String fieldCode, String businessId, int page, int pageSize){
+	public List<Patent> searchFieldPatent(Date startDate, Date endDate, String fieldCode, String businessId, int page, int pageSize){
 		Criteria criteria =  createEntityCriteria();
 		if(!StringUtils.isNULL(businessId)) {
 			criteria.createAlias("listBusiness","bs");
 			criteria.add(Restrictions.eq("bs.business_id", businessId));
 		}
-		criteria.add(Restrictions.eq(fieldCode, searchDate));
+		criteria.add(Restrictions.ge(fieldCode, startDate));
+		criteria.add(Restrictions.le(fieldCode, endDate));
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
@@ -232,13 +232,14 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 	
 	@Override
-	public int countSearchFieldPatent(Date searchDate, String fieldCode,String businessId){
+	public int countSearchFieldPatent(Date startDate, Date endDate, String fieldCode,String businessId){
 		Criteria criteria =  createEntityCriteria();
 		if(!StringUtils.isNULL(businessId)) {
 			criteria.createAlias("listBusiness","bs");
 			criteria.add(Restrictions.eq("bs.business_id", businessId));
 		}
-		criteria.add(Restrictions.eq(fieldCode, searchDate));
+		criteria.add(Restrictions.ge(fieldCode, startDate));
+		criteria.add(Restrictions.le(fieldCode, endDate));
 		criteria.setProjection(Projections.rowCount());
 		long count = (long)criteria.uniqueResult();
 		return (int)count;
@@ -367,9 +368,10 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			criteria.add(Restrictions.eq("bs.business_id", businessId));
 		}
 		criteria.createAlias("listStatus", "lS");
-		Criterion re1 = Restrictions.like("lS.status_desc", searchText);
-		Criterion re2 = Restrictions.like("lS.status_desc_en", searchText);
-		criteria.add(Restrictions.or(re1,re2));
+		Criterion re1 = Restrictions.like("lS.status_id", searchText);
+		Criterion re2 = Restrictions.like("lS.status_desc", searchText);
+		Criterion re3 = Restrictions.like("lS.status_desc_en", searchText);
+		criteria.add(Restrictions.or(re1, re2, re3));
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
@@ -384,9 +386,10 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			criteria.add(Restrictions.eq("bs.business_id", businessId));
 		}
 		criteria.createAlias("listStatus", "lS");
-		Criterion re1 = Restrictions.like("lS.status_desc", searchText);
-		Criterion re2 = Restrictions.like("lS.status_desc_en", searchText);
-		criteria.add(Restrictions.or(re1,re2));
+		Criterion re1 = Restrictions.like("lS.status_id", searchText);
+		Criterion re2 = Restrictions.like("lS.status_desc", searchText);
+		Criterion re3 = Restrictions.like("lS.status_desc_en", searchText);
+		criteria.add(Restrictions.or(re1, re2, re3));
 		criteria.setProjection(Projections.rowCount());
 		long count = (long)criteria.uniqueResult();
 		return (int)count;
@@ -485,74 +488,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.add(Restrictions.eq("patent_no", patentNo));
 		return (Patent) criteria.uniqueResult();
 	}
-
-
-//	@Override
-//	public int searchCountPatent(String searchText, String businessId) {
-//		Criteria criteria =  createEntityCriteria();
-//		criteria.createAlias("listBusiness","bs");
-//		criteria.add(Restrictions.eq("bs.business_id", businessId));
-//		Criterion re1 = Restrictions.like("patent_name", searchText);
-//		Criterion re2 = Restrictions.like("patent_name_en", searchText);
-//		Criterion re3 = Restrictions.like("patent_appl_country", searchText);
-//		Criterion re4 = Restrictions.like("patent_appl_no", searchText);
-//		Criterion re5 = Restrictions.like("patent_notice_no", searchText);
-//		Criterion re6 = Restrictions.like("patent_publish_no", searchText);
-//		Criterion re7 = Restrictions.like("patent_no", searchText);
-//		criteria.createAlias("patentContext", "pc", CriteriaSpecification.LEFT_JOIN);
-//		Criterion re14 = Restrictions.like("pc.context_abstract", searchText);
-//		Criterion re15 = Restrictions.like("pc.context_desc", searchText);
-//		Criterion re16 = Restrictions.like("pc.context_claim", searchText);
-//		criteria.add(Restrictions.or(re1,re2,re3,re4,re5,re6,re7,re14,re15,re16));
-//		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-//		criteria.setProjection(Projections.rowCount());
-//		long count = (long)criteria.uniqueResult();
-//		return (int)count;
-//	}
-	
-	
-	@Override
-	public void deletePatentCost(String patentId) {
-		String hql = "Delete From PatentCost where patent_id = :patent_id";
-		Session session = getSession();
-		Query query = session.createQuery(hql);
-		query.setParameter("patent_id", patentId);
-		query.executeUpdate();
-	}
-	
-	
-	@Override
-	public void deleteInventor(String patentId) {
-		String hql = "Delete From Inventor where patent_id = :patent_id";
-		Session session = getSession();
-		Query query = session.createQuery(hql);
-		query.setParameter("patent_id", patentId);
-		query.executeUpdate();
-	}
-	
-	
-	@Override
-	public void deleteAssignee(String patentId) {
-		String hql = "Delete From Assignee where patent_id = :patent_id";
-		Session session = getSession();
-		Query query = session.createQuery(hql);
-		query.setParameter("patent_id", patentId);
-		query.executeUpdate();
-	}
-	
-	
-	
-	@Override
-	public void deleteApplicant(String patentId) {
-		String hql = "Delete From Applicant where patent_id = :patent_id";
-		Session session = getSession();
-		Query query = session.createQuery(hql);
-		query.setParameter("patent_id", patentId);
-		query.executeUpdate();
-	}
-	
-
-
 
 	
 

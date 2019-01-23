@@ -7,7 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -21,7 +20,7 @@ public class Annuity extends BaseBean{
 	
 	@Id
 	@JsonView(View.PatentDetail.class)
-	private String annuity_id;
+	private String annuity;
 	
 	@JsonView(View.PatentDetail.class)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -36,8 +35,8 @@ public class Annuity extends BaseBean{
 	private int annuity_charge_year;
 	
 	
-	@ManyToOne
-	@JoinColumn(name="patent_id")
+	@JsonView(View.PatentDetail.class)	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
 	private Patent patent;
 	
 	@Temporal(TemporalType.TIMESTAMP)
@@ -45,12 +44,12 @@ public class Annuity extends BaseBean{
 	
 	private boolean is_paid;
 
-	public String getAnnuity_id() {
-		return annuity_id;
+	public String getAnnuity() {
+		return annuity;
 	}
 
-	public void setAnnuity_id(String annuity_id) {
-		this.annuity_id = annuity_id;
+	public void setAnnuity(String annuity) {
+		this.annuity = annuity;
 	}
 
 	public Date getAnnuity_date() {
@@ -100,8 +99,6 @@ public class Annuity extends BaseBean{
 	public void setIs_paid(boolean is_paid) {
 		this.is_paid = is_paid;
 	}
-
-
 	
 
 }

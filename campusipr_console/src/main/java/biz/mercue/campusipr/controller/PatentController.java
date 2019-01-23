@@ -314,39 +314,25 @@ public class PatentController {
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
 			
 			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				String bussinessId = tokenBean.getBusiness().getBusiness_id();
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					List<Patent> listPatent = patentService.getAllByBussinessId(null);
-					
-					String fileName = "test";
-					ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, null);
-					
-					
-					HttpHeaders headers = new HttpHeaders();
-					headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
-					
-
-					return ResponseEntity
-			                .ok()
-			                .headers(headers)
-			                .contentType(MediaType.parseMediaType("application/ms-excel"))
-			                .body(new InputStreamResource(fileOut));
-				} else {
-					List<Patent> listPatent = patentService.getAllByBussinessId(tokenBean.getBusiness().getBusiness_id());
-					
-					String fileName = "test";
-					ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, tokenBean.getBusiness().getBusiness_id());
-					
-					
-					HttpHeaders headers = new HttpHeaders();
-					headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
-					
-
-					return ResponseEntity
-			                .ok()
-			                .headers(headers)
-			                .contentType(MediaType.parseMediaType("application/ms-excel"))
-			                .body(new InputStreamResource(fileOut));
+					bussinessId = null;
 				}
+				
+				List<Patent> listPatent = patentService.getAllByBussinessId(bussinessId);
+				
+				String fileName = tokenBean.getBusiness().getBusiness_name();
+				ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, bussinessId);
+				
+				HttpHeaders headers = new HttpHeaders();
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				
+
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
 			} else {
 				responseBody.setCode(Constants.INT_NO_PERMISSION);
 				return null;
@@ -463,7 +449,11 @@ public class PatentController {
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
-		return responseBody.getJacksonString(View.Patent.class);
+		if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+			return responseBody.getJacksonString(View.Patent.class);
+		}else {
+			return responseBody.getJacksonString(View.PatentEnhance.class);
+		}
 	}
 	
 	

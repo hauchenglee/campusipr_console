@@ -70,14 +70,14 @@ public class PatentServiceImpl implements PatentService{
 	@Autowired
 	private StatusDao statusDao;
 	
-//	@Autowired
-//	private InventorDao inventorDao;
-//	
-//	@Autowired
-//	private ApplicantDao applicantDao;
-//	
-//	@Autowired
-//	private AssigneeDao assigneeDao;
+	@Autowired
+	private InventorDao inventorDao;
+	
+	@Autowired
+	private ApplicantDao applicantDao;
+	
+	@Autowired
+	private AssigneeDao assigneeDao;
 	
 	@Autowired
 	private PatentStatusDao patentStatusDao;
@@ -139,7 +139,6 @@ public class PatentServiceImpl implements PatentService{
 			patent.getListCost().size();
 			patent.getListInventor().size();
 			patent.getListPortfolio().size();
-			patent.getListAnnuity().size();
 			
 			List<PatentStatus> listPatentStatus = patentStatusDao.getByPatent(patent.getPatent_id());
 			
@@ -418,7 +417,7 @@ public class PatentServiceImpl implements PatentService{
 
 		if(dbBean!=null){
 			//TODO save edit history
-			//insertEditHistory(dbBean,patent);
+			insertEditHistory(dbBean,patent);
 
 			dbBean.setPatent_name(patent.getPatent_name());
 			dbBean.setPatent_name_en(patent.getPatent_name_en());
@@ -494,27 +493,14 @@ public class PatentServiceImpl implements PatentService{
 			}
 			
 			//TODO charles 
-
-			//mappingAssignee(dbBean,patent);
-			//mappingApplicant(dbBean,patent);
-			//mappingInventor(dbBean,patent);
-
 //			mappingAssignee(dbBean,patent);
 //			mappingApplicant(dbBean,patent);
 //			mappingInventor(dbBean,patent);
-
 			
 			//TODO Leo edit
 			
 //			log.info("contact :"+patent.getListContact().size());
-			
-			log.info("1");
-			handleCost(dbBean, patent);
-			//dbBean.getListCost().clear();
-			//log.info("db cost size :"+dbBean.getListCost().size());
-			//dbBean.getListCost().addAll(patent.getListCost());
-			//log.info("db cost size :"+dbBean.getListCost().size());
-			log.info("2");
+//			dbBean.setListContact(patent.getListContact());
 //			log.info("cost :"+patent.getListCost().size());
 //			dbBean.setListCost(patent.getListCost());
 //			dbBean.setListPortfolio(patent.getListPortfolio());
@@ -702,28 +688,31 @@ public class PatentServiceImpl implements PatentService{
 				list = patentDao.searchFieldPatent('%'+text+'%', "patent_appl_no", businessId, page, Constants.SYSTEM_PAGE_SIZE);
 				count = patentDao.countSearchFieldPatent('%'+text+'%', "patent_appl_no", businessId);
 			} else if (Constants.PATENT_APPL_DATE_FIELD.equals(field.getField_id())) {
-				Long longTimeStamp = (Long) searchObj;
-				Date d = new Date(longTimeStamp);
-				list = patentDao.searchFieldPatent(d, "patent_appl_date", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent(d, "patent_appl_date", businessId);
+				String[] searchDateObj = ((String) searchObj).split("-");
+				Date sd = new Date(Long.valueOf(searchDateObj[0]));
+				Date ed = new Date(Long.valueOf(searchDateObj[1]));
+				list = patentDao.searchFieldPatent(sd, ed, "patent_appl_date", businessId, page, Constants.SYSTEM_PAGE_SIZE);
+				count = patentDao.countSearchFieldPatent(sd, ed, "patent_appl_date", businessId);
 			} else if (Constants.PATENT_NOTICE_NO_FIELD.equals(field.getField_id())) {
 				String text = (String) searchObj;
 				list = patentDao.searchFieldPatent('%'+text+'%', "patent_notice_no", businessId, page, Constants.SYSTEM_PAGE_SIZE);
 				count = patentDao.countSearchFieldPatent('%'+text+'%', "patent_notice_no", businessId);
 			} else if (Constants.PATENT_NOTICE_DATE_FIELD.equals(field.getField_id())) {
-				Long longTimeStamp = (Long) searchObj;
-				Date d = new Date(longTimeStamp);
-				list = patentDao.searchFieldPatent(d, "patent_notice_date", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent(d, "patent_notice_date", businessId);
+				String[] searchDateObj = ((String) searchObj).split("-");
+				Date sd = new Date(Long.valueOf(searchDateObj[0]));
+				Date ed = new Date(Long.valueOf(searchDateObj[1]));
+				list = patentDao.searchFieldPatent(sd, ed, "patent_notice_date", businessId, page, Constants.SYSTEM_PAGE_SIZE);
+				count = patentDao.countSearchFieldPatent(sd, ed, "patent_notice_date", businessId);
 			} else if (Constants.PATENT_PUBLISH_NO_FIELD.equals(field.getField_id())) {
 				String text = (String) searchObj;
 				list = patentDao.searchFieldPatent('%'+text+'%', "patent_publish_no", businessId, page, Constants.SYSTEM_PAGE_SIZE);
 				count = patentDao.countSearchFieldPatent('%'+text+'%', "patent_publish_no", businessId);
 			} else if (Constants.PATENT_PUBLISH_DATE_FIELD.equals(field.getField_id())) {
-				Long longTimeStamp = (Long) searchObj;
-				Date d = new Date(longTimeStamp);
-				list = patentDao.searchFieldPatent(d, "patent_publish_date", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent(d, "patent_publish_date", businessId);
+				String[] searchDateObj = ((String) searchObj).split("-");
+				Date sd = new Date(Long.valueOf(searchDateObj[0]));
+				Date ed = new Date(Long.valueOf(searchDateObj[1]));
+				list = patentDao.searchFieldPatent(sd, ed, "patent_publish_date", businessId, page, Constants.SYSTEM_PAGE_SIZE);
+				count = patentDao.countSearchFieldPatent(sd, ed, "patent_publish_date", businessId);
 			} else if (Constants.ASSIGNEE_NAME_FIELD.equals(field.getField_id())) {
 				String text = (String) searchObj;
 				list = patentDao.searchFieldAssigneeListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
@@ -756,20 +745,9 @@ public class PatentServiceImpl implements PatentService{
 		}
 		if (!list.isEmpty()) {
 			for(Patent patent : list) {
-
 				patent.getListStatus().size();
 				patent.getListExtension().size();
 				patent.getListBusiness().size();
-				
-//				List<PatentStatus> listPatentStatus = patentStatusDao.getByPatent(patent.getPatent_id());
-//				
-//				for (PatentStatus patentStatus:listPatentStatus) {
-//					for (Status status:patent.getListStatus()) {
-//						if (status.getStatus_id().equals(patentStatus.getStatus_id())) {
-//							status.setPatentStatus(patentStatus);
-//						}
-//					}
-//				}
 			}
 		}
 		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,list);
@@ -785,7 +763,10 @@ public class PatentServiceImpl implements PatentService{
 	private void mappingInventor(Patent dbBean,Patent patent) {
 		List<Inventor> mapInventor = dbBean.getListInventor();
 		dbBean.setListInventor(null);
-		patentDao.deleteInventor(dbBean.getPatent_id());	
+		for (Inventor inventor:mapInventor) {
+			inventorDao.delete(inventor.getInventor_id());
+		}
+		
 		if (patent.getListInventor() != null) {
 			for (Inventor inventor:patent.getListInventor()) {
 				if (StringUtils.isNULL(inventor.getInventor_id())) {
@@ -800,7 +781,9 @@ public class PatentServiceImpl implements PatentService{
 	private void mappingApplicant(Patent dbBean,Patent patent) {
 		List<Applicant> mapApplicant = dbBean.getListApplicant();
 		dbBean.setListApplicant(null);
-		patentDao.deleteApplicant(dbBean.getPatent_id());
+		for (Applicant appl:mapApplicant) {
+			applicantDao.delete(appl.getApplicant_id());
+		}
 		if (patent.getListApplicant() != null) {
 			for (Applicant appl:patent.getListApplicant()) {
 				if (StringUtils.isNULL(appl.getApplicant_id())) {
@@ -815,7 +798,9 @@ public class PatentServiceImpl implements PatentService{
 	private void mappingAssignee(Patent dbBean,Patent patent) {
 		List<Assignee> mapAssignee = dbBean.getListAssignee();
 		dbBean.setListAssignee(null);
-		patentDao.deleteAssignee(dbBean.getPatent_id());
+		for (Assignee assign:mapAssignee) {
+			assigneeDao.delete(assign.getAssignee_id());
+		}
 		if (patent.getListAssignee() != null) {
 			for (Assignee assign:patent.getListAssignee()) {
 				if (StringUtils.isNULL(assign.getAssignee_id())) {
@@ -1235,16 +1220,13 @@ public class PatentServiceImpl implements PatentService{
 		return peh;
 	}
 	
-	private  void handleCost(Patent dbPatent,Patent editPatent) {
-		List<PatentCost> listCost = editPatent.getListCost();
-		for(PatentCost cost :listCost) {
-			if(StringUtils.isNULL(cost.getCost_id())) {
-				cost.setCost_id(KeyGeneratorUtils.generateRandomString());
-			}
-			cost.setPatent(dbPatent);
-		}
-		patentDao.deletePatentCost(dbPatent.getPatent_id());
-		dbPatent.setListCost(editPatent.getListCost());
+	private  void handleCost(Patent dbPatent,Patent editPatent,List<PatentEditHistory> listHistory) {
+		
+		
 	}
+	
+	
+
+
 	
 }
