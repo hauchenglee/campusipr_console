@@ -16,7 +16,7 @@ hibernate:
 path:
     image: /mnt/data1/image/campusipr
     video: /mnt/data1/image/campusipr
-    file:
+    file: /mnt/data1/image/campusipr/file
     imagemagick: 
     graphicsmagick: 
    

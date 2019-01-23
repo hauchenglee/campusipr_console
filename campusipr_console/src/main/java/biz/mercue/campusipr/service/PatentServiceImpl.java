@@ -2,7 +2,6 @@ package biz.mercue.campusipr.service;
 
 
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -141,6 +140,7 @@ public class PatentServiceImpl implements PatentService{
 			patent.getListCost().size();
 			patent.getListInventor().size();
 			patent.getListPortfolio().size();
+			patent.getListAnnuity().size();
 			
 			List<PatentStatus> listPatentStatus = patentStatusDao.getByPatent(patent.getPatent_id());
 			
@@ -500,7 +500,7 @@ public class PatentServiceImpl implements PatentService{
 //			mappingInventor(dbBean,patent);
 			
 			//TODO Leo edit
-			
+			handleCost(dbBean, patent);
 //			log.info("contact :"+patent.getListContact().size());
 //			dbBean.setListContact(patent.getListContact());
 //			log.info("cost :"+patent.getListCost().size());
@@ -606,6 +606,7 @@ public class PatentServiceImpl implements PatentService{
 			patent.getListIPC().size();
 			patent.getListExtension().size();
 			patent.getListBusiness().size();
+			patent.getListAnnuity().size();
 			List<PatentStatus> listPatentStatus = patentStatusDao.getByPatent(patent.getPatent_id());
 			
 			for (PatentStatus patentStatus:listPatentStatus) {
@@ -641,7 +642,9 @@ public class PatentServiceImpl implements PatentService{
 	public List<Patent> getByFamily(String familyId){
 		List<Patent> list = patentDao.getByFamily(familyId);
 		for(Patent patent : list) {
+			patent.getListBusiness().size();
 			patent.getListStatus().size();
+			patent.getListExtension().size();
 		}
 		return list;
 	}
@@ -1222,10 +1225,18 @@ public class PatentServiceImpl implements PatentService{
 		return peh;
 	}
 	
-	private  void handleCost(Patent dbPatent,Patent editPatent,List<PatentEditHistory> listHistory) {
-		
-		
-	}
+	 private  void handleCost(Patent dbPatent,Patent editPatent) {
+	       List<PatentCost> listCost = editPatent.getListCost();
+	       for(PatentCost cost :listCost) {
+	           if(StringUtils.isNULL(cost.getCost_id())) {
+	               cost.setCost_id(KeyGeneratorUtils.generateRandomString());
+	           }
+	           cost.setPatent(dbPatent);
+	       }
+	       patentDao.deletePatentCost(dbPatent.getPatent_id());
+	       dbPatent.setListCost(editPatent.getListCost());
+	   }
+	   
 	
 	
 	

@@ -20,7 +20,7 @@ public class Annuity extends BaseBean{
 	
 	@Id
 	@JsonView(View.PatentDetail.class)
-	private String annuity;
+	private String annuity_id;
 	
 	@JsonView(View.PatentDetail.class)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -35,7 +35,7 @@ public class Annuity extends BaseBean{
 	private int annuity_charge_year;
 	
 	
-	@JsonView(View.PatentDetail.class)	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name="patent_id", referencedColumnName="patent_id")
 	private Patent patent;
 	
@@ -44,13 +44,7 @@ public class Annuity extends BaseBean{
 	
 	private boolean is_paid;
 
-	public String getAnnuity() {
-		return annuity;
-	}
 
-	public void setAnnuity(String annuity) {
-		this.annuity = annuity;
-	}
 
 	public Date getAnnuity_date() {
 		return annuity_date;
@@ -98,6 +92,14 @@ public class Annuity extends BaseBean{
 
 	public void setIs_paid(boolean is_paid) {
 		this.is_paid = is_paid;
+	}
+
+	public String getAnnuity_id() {
+		return annuity_id;
+	}
+
+	public void setAnnuity_id(String annuity_id) {
+		this.annuity_id = annuity_id;
 	}
 	
 
