@@ -172,7 +172,7 @@ public class Patent extends BaseBean{
 	
 	
 	
-	@JsonView(View.PatentDetail.class)
+//	@JsonView(View.PatentDetail.class)
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@OrderBy("annuity_date DESC")
 	private List<Annuity> listAnnuity;

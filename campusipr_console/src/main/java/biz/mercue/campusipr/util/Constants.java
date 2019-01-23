@@ -277,11 +277,13 @@ public class Constants {
 	public static final String SCHOOL_APPL_YEAR_FIELD = "78f94e6e1b246d9419faa044a1119cc7";
 	public static final String SCHOOL_MEMO_FIELD = "c53e8e4e240d9d7a0f1bcb956fbe7630";
 	
-	public static final String APPL_COUNTRY_TW = "TW";
-	public static final String APPL_COUNTRY_US = "US";
-	public static final String APPL_COUNTRY_CN = "CN";
+	public static final String APPL_COUNTRY_TW = "tw";
+	public static final String APPL_COUNTRY_US = "us";
+	public static final String APPL_COUNTRY_CN = "cn";
 	
 	public static final String BUSSINESS_PLATFORM = "04ea692278889b6621409d68c88aab17";
+	
+	public static final String SYSTEM_ADMIN = "40w9dse0277455f634fw40439sd";
 	
 	public static final String EXCEL_COLUMN_FILE_NO = "檔號";
 	public static final String EXCEL_COLUMN_BUSSINESS = "單位";

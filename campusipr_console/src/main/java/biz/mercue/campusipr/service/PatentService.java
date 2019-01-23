@@ -23,7 +23,7 @@ public interface PatentService {
 
 	int deletePatent(Patent patent);
 	
-	List<Patent> getAllByBussinessId(String businessId);
+	List<Patent> getExcelByPatentIds(List<String> idList,String businessId);
 
 	ListQueryForm getByBusinessId(String businessId,int page);
 	

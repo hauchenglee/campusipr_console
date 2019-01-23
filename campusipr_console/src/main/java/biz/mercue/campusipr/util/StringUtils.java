@@ -172,7 +172,16 @@ public class StringUtils {
 		return null;
 	}
 	
-	
+	public static boolean hasChinese(String str) {
+		for (int i = 0; i < str.length(); ) {
+	        int codepoint = str.codePointAt(i);
+	        i += Character.charCount(codepoint);
+	        if (Character.UnicodeScript.of(codepoint) == Character.UnicodeScript.HAN) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
 
 
 
