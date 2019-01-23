@@ -1,6 +1,7 @@
 package biz.mercue.campusipr.util;
 
 import java.io.StringReader;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,36 +36,41 @@ public class ServiceTaiwanPatent {
 		
 	private static  Logger log = Logger.getLogger(ServiceTaiwanPatent.class.getName());
 	
-	public static List<Patent> getPatentRightByAssignee(List<String> applicantNames) {
-		//同義詞字串進入
+	public static List<Patent> getPatentRightByAssignee(List<String> assigneeNames, List<String> dupucateStr) {
+		//同義詞字串列表進入
 		List<Patent> list = new ArrayList<>();
-		for (String applicant:applicantNames) {
+		for (String assignee:assigneeNames) {
 			boolean isSync = false;
-			Patent patent = new Patent();
-			String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applnamee=%s&applclass=%s";
-			if (StringUtils.hasChinese(applicant)) {
-				url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applnamec=%s&applclass=%s";
+			String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?top=100format=json&tk=%s&applnamee=%s&applclass=%s";
+			if (StringUtils.hasChinese(assignee)) {
+				url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?top=100format=json&tk=%s&applnamec=%s&applclass=%s";
 			}
-			url = String.format(url, Constants.PATENT_KEY_TW ,applicant, 1);
+			url = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee), 1);
 			try {
 				String context = HttpRequestUtils.sendGet(url);
 				if (!StringUtils.isNULL(context)) {
 					JSONObject getObject = new JSONObject(context);
+					int totalCount = getObject.optInt("total-count");
 					JSONObject obj = getObject.optJSONObject("tw-patent-rightsI");
 					if (obj != null) {
 						JSONArray contentArray = obj.optJSONArray("patentcontent");
 						if (contentArray != null) {
 							for (int index = 0; index < contentArray.length(); index++) {
 								JSONObject contentObj = contentArray.getJSONObject(index);
-								convertPatentInfoChS(patent, contentObj);
-								list.add(patent);
+								if (!dupucateStr.contains(
+										contentObj.optJSONObject("application-reference").optString("appl-no"))) {
+									Patent patent = new Patent();
+									convertPatentInfoChS(patent, contentObj);
+									list.add(patent);
+									dupucateStr.add(patent.getPatent_appl_no());
+								}
 							}
 							isSync = true;
 						}
 					}
 				}
 				if (isSync == false) {
-					url = String.format(url, Constants.PATENT_KEY_TW ,applicant,2);
+					url = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee),2);
 					context = HttpRequestUtils.sendGet(url);
 					if (!StringUtils.isNULL(context)) {
 						JSONObject getObject = new JSONObject(context);
@@ -74,8 +80,13 @@ public class ServiceTaiwanPatent {
 							if (contentArray != null) {
 								for (int index = 0; index < contentArray.length(); index++) {
 									JSONObject contentObj = contentArray.getJSONObject(index);
-									convertPatentInfoChS(patent, contentObj);
-									list.add(patent);
+									if (!dupucateStr.contains(
+											contentObj.optJSONObject("application-reference").optString("appl-no"))) {
+										Patent patent = new Patent();
+										convertPatentInfoChS(patent, contentObj);
+										list.add(patent);
+										dupucateStr.add(patent.getPatent_appl_no());
+									}
 								}
 								isSync = true;
 							}
@@ -83,7 +94,7 @@ public class ServiceTaiwanPatent {
 					}
 				}
 				if (isSync == false) {
-					url = String.format(url, Constants.PATENT_KEY_TW ,applicant,3);
+					url = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee),3);
 					context = HttpRequestUtils.sendGet(url);
 					if (!StringUtils.isNULL(context)) {
 						JSONObject getObject = new JSONObject(context);
@@ -93,8 +104,13 @@ public class ServiceTaiwanPatent {
 							if (contentArray != null) {
 								for (int index = 0; index < contentArray.length(); index++) {
 									JSONObject contentObj = contentArray.getJSONObject(index);
-									convertPatentInfoChS(patent, contentObj);
-									list.add(patent);
+									if (!dupucateStr.contains(
+											contentObj.optJSONObject("application-reference").optString("appl-no"))) {
+										Patent patent = new Patent();
+										convertPatentInfoChS(patent, contentObj);
+										list.add(patent);
+										dupucateStr.add(patent.getPatent_appl_no());
+									}
 								}
 								isSync = true;
 							}
@@ -102,11 +118,11 @@ public class ServiceTaiwanPatent {
 					}
 				}
 				if (isSync == false) {
-					url = Constants.PATENT_WEB_SERVICE_TW+"/PatentPub?format=json&tk=%s&applnamee=%s";
-					if (StringUtils.hasChinese(applicant)) {
-						url = Constants.PATENT_WEB_SERVICE_TW+"/PatentPub?format=json&tk=%s&applnamec=%s";
+					url = Constants.PATENT_WEB_SERVICE_TW+"/PatentPub?top=100format=json&tk=%s&applnamee=%s";
+					if (StringUtils.hasChinese(assignee)) {
+						url = Constants.PATENT_WEB_SERVICE_TW+"/PatentPub?top=100format=json&tk=%s&applnamec=%s";
 					}
-					url = String.format(url, Constants.PATENT_KEY_TW ,applicant);
+					url = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee));
 					context = HttpRequestUtils.sendGet(url);
 					if (!StringUtils.isNULL(context)) {
 						JSONObject getObject = new JSONObject(context);
@@ -116,8 +132,13 @@ public class ServiceTaiwanPatent {
 							if (contentArray != null) {
 								for (int index = 0; index < contentArray.length(); index++) {
 									JSONObject contentObj = contentArray.getJSONObject(index);
-									convertPatentInfoChS(patent, contentObj);
-									list.add(patent);
+									if (!dupucateStr.contains(
+											contentObj.optJSONObject("application-reference").optString("appl-no"))) {
+										Patent patent = new Patent();
+										convertPatentInfoChS(patent, contentObj);
+										list.add(patent);
+										dupucateStr.add(patent.getPatent_appl_no());
+									}
 								}
 								isSync = true;
 							}

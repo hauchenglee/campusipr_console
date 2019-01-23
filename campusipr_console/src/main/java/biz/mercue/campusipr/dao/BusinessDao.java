@@ -19,7 +19,7 @@ public interface BusinessDao {
 
 	List<Business> getAvailable(int page,int pageSize);
 	
-	
+	List<Business> search(String searchText);
 	List<Business> search(String text,int page,int pageSize);
 	int searchCount(String text);
 		

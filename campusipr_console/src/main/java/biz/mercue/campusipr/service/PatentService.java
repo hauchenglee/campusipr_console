@@ -16,6 +16,7 @@ public interface PatentService {
 	
 	int addPatentByApplNo(Patent patent);
 
+	int addPatentByApplicant(List<Patent> list, String businessName, String adminId, String ip);
 
 	int updatePatent(Patent patent);
 	

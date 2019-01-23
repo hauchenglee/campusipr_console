@@ -18,8 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import biz.mercue.campusipr.dao.AdminDao;
 import biz.mercue.campusipr.dao.ApplicantDao;
 import biz.mercue.campusipr.dao.AssigneeDao;
+import biz.mercue.campusipr.dao.BusinessDao;
 import biz.mercue.campusipr.dao.FieldDao;
 import biz.mercue.campusipr.dao.IPCClassDao;
 import biz.mercue.campusipr.dao.InventorDao;
@@ -66,19 +68,16 @@ public class PatentServiceImpl implements PatentService{
 	private Logger log = Logger.getLogger(this.getClass().getName());
 
 	@Autowired
+	private AdminDao adminDao;
+	
+	@Autowired
+	private BusinessDao businessDao;
+	
+	@Autowired
 	private PatentDao patentDao;
 	
 	@Autowired
 	private StatusDao statusDao;
-	
-	@Autowired
-	private InventorDao inventorDao;
-	
-	@Autowired
-	private ApplicantDao applicantDao;
-	
-	@Autowired
-	private AssigneeDao assigneeDao;
 	
 	@Autowired
 	private PatentStatusDao patentStatusDao;
@@ -262,6 +261,183 @@ public class PatentServiceImpl implements PatentService{
 			taskResult = Constants.INT_CANNOT_FIND_DATA;
 		}
 		
+		return taskResult;
+	}
+	
+	@Override
+	public int addPatentByApplicant(List<Patent> list, String businessName, String adminId, String ip) {
+		int taskResult= -1;
+
+		List<Business> businesses = businessDao.search(businessName);
+		if (businesses.isEmpty()) {
+			List<String> dupucateStr = new ArrayList<>();
+			List<String> businessNames = new ArrayList<>();
+			businessNames.add(businessName);
+			if(StringUtils.hasChinese(businessName)) {
+				List<Patent> addlist = ServiceTaiwanPatent.getPatentRightByAssignee(businessNames, dupucateStr);
+				list.addAll(addlist);
+				addlist = ServiceChinaPatent.getPatentRightByAssignee(businessNames, dupucateStr);
+				list.addAll(addlist);
+			}else {
+				List<Patent> addlist = ServiceUSPatent.getPatentRightByAssignee(businessNames, dupucateStr);
+				list.addAll(addlist);
+				addlist = ServiceTaiwanPatent.getPatentRightByAssignee(businessNames, dupucateStr);
+				list.addAll(addlist);
+			}
+			
+			for (Patent patent:list) {
+				patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
+				patent.setAdmin(adminDao.getById(adminId));
+				if(!StringUtils.isNULL(patent.getPatent_name())
+						|| !StringUtils.isNULL(patent.getPatent_name_en())) {
+					String applNo =  patent.getPatent_appl_no();
+					if (StringUtils.isNULL(applNo) == false) {
+						Patent appNoPatent = patentDao.getByApplNo(applNo);
+						if(appNoPatent==null) {
+							
+							if(StringUtils.isNULL(patent.getPatent_id())) {
+								patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
+							}
+							if (patent.getPatentAbstract() != null) {
+								patent.getPatentAbstract().setPatent_abstract_id(KeyGeneratorUtils.generateRandomString());
+								patent.getPatentAbstract().setPatent(patent);
+							}
+							if (patent.getPatentClaim() != null) {
+								patent.getPatentClaim().setPatent_claim_id(KeyGeneratorUtils.generateRandomString());
+								patent.getPatentClaim().setPatent(patent);
+							}
+							if (patent.getPatentDesc() != null) {
+								patent.getPatentDesc().setPatent_desc_id(KeyGeneratorUtils.generateRandomString());
+								patent.getPatentDesc().setPatent(patent);
+							}
+							if (patent.getListApplicant() != null) {
+								for (Applicant appl:patent.getListApplicant()) {
+									appl.setApplicant_id(KeyGeneratorUtils.generateRandomString());
+									appl.setPatent(patent);
+								}
+							}
+							if (patent.getListInventor() != null) {
+								for (Inventor inventor:patent.getListInventor()) {
+									inventor.setInventor_id(KeyGeneratorUtils.generateRandomString());
+									inventor.setPatent(patent);
+								}
+							}
+							if (patent.getListAssignee() != null) {
+								for (Assignee assignee:patent.getListAssignee()) {
+									assignee.setAssignee_id(KeyGeneratorUtils.generateRandomString());
+									assignee.setPatent(patent);
+								}
+							}
+							
+							patentDao.create(patent);
+							taskResult = Constants.INT_SUCCESS;
+						} else {
+							if(StringUtils.isNULL(patent.getPatent_id())) {
+								patent.setPatent_id(appNoPatent.getPatent_id());
+							}
+							
+							taskResult = updatePatent(patent);
+						}
+					}
+				} else {
+					
+					taskResult = Constants.INT_CANNOT_FIND_DATA;
+				}
+			}
+		} else {
+			for (Business business:businesses) {
+				List<String> englishNames = new ArrayList<>();
+				englishNames.add(business.getBusiness_name_en());
+				String[] itemsEn = business.getBusiness_alias_en().replaceAll("\\[", "")
+								.replaceAll("\\]", "").split(",");
+				for (String item:itemsEn) {
+					englishNames.add(item);
+				}
+				
+				List<String> chineseNames = new ArrayList<>();
+				chineseNames.add(business.getBusiness_name());
+				String[] itemsCh = business.getBusiness_alias().replaceAll("\\[", "")
+								.replaceAll("\\]", "").split(",");
+				for (String item:itemsCh) {
+					chineseNames.add(item);
+				}
+				
+				List<String> dupucateStr = new ArrayList<>();
+				if (!englishNames.isEmpty()) {
+					List<Patent> addlist = ServiceUSPatent.getPatentRightByAssignee(englishNames, dupucateStr);
+					list.addAll(addlist);
+					addlist = ServiceTaiwanPatent.getPatentRightByAssignee(englishNames, dupucateStr);
+					list.addAll(addlist);
+				} 
+				if (!chineseNames.isEmpty()) {
+					List<Patent> addlist = ServiceTaiwanPatent.getPatentRightByAssignee(chineseNames, dupucateStr);
+					list.addAll(addlist);
+					addlist = ServiceChinaPatent.getPatentRightByAssignee(chineseNames, dupucateStr);
+					list.addAll(addlist);
+				}
+				
+				for (Patent patent:list) {
+					patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
+					patent.setAdmin(adminDao.getById(adminId));
+					patent.addBusiness(business);
+					if(!StringUtils.isNULL(patent.getPatent_name())
+							|| !StringUtils.isNULL(patent.getPatent_name_en())) {
+						String applNo =  patent.getPatent_appl_no();
+						if (StringUtils.isNULL(applNo) == false) {
+							Patent appNoPatent = patentDao.getByApplNo(applNo);
+							if(appNoPatent==null) {
+								
+								if(StringUtils.isNULL(patent.getPatent_id())) {
+									patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
+								}
+								if (patent.getPatentAbstract() != null) {
+									patent.getPatentAbstract().setPatent_abstract_id(KeyGeneratorUtils.generateRandomString());
+									patent.getPatentAbstract().setPatent(patent);
+								}
+								if (patent.getPatentClaim() != null) {
+									patent.getPatentClaim().setPatent_claim_id(KeyGeneratorUtils.generateRandomString());
+									patent.getPatentClaim().setPatent(patent);
+								}
+								if (patent.getPatentDesc() != null) {
+									patent.getPatentDesc().setPatent_desc_id(KeyGeneratorUtils.generateRandomString());
+									patent.getPatentDesc().setPatent(patent);
+								}
+								if (patent.getListApplicant() != null) {
+									for (Applicant appl:patent.getListApplicant()) {
+										appl.setApplicant_id(KeyGeneratorUtils.generateRandomString());
+										appl.setPatent(patent);
+									}
+								}
+								if (patent.getListInventor() != null) {
+									for (Inventor inventor:patent.getListInventor()) {
+										inventor.setInventor_id(KeyGeneratorUtils.generateRandomString());
+										inventor.setPatent(patent);
+									}
+								}
+								if (patent.getListAssignee() != null) {
+									for (Assignee assignee:patent.getListAssignee()) {
+										assignee.setAssignee_id(KeyGeneratorUtils.generateRandomString());
+										assignee.setPatent(patent);
+									}
+								}
+								
+								patentDao.create(patent);
+								taskResult = Constants.INT_SUCCESS;
+							} else {
+								if(StringUtils.isNULL(patent.getPatent_id())) {
+									patent.setPatent_id(appNoPatent.getPatent_id());
+								}
+								
+								taskResult = updatePatent(patent);
+							}
+						}
+					} else {
+						
+						taskResult = Constants.INT_CANNOT_FIND_DATA;
+					}
+				}
+			}
+		}
 		return taskResult;
 	}
 	
@@ -764,10 +940,10 @@ public class PatentServiceImpl implements PatentService{
 				String sourceField = null;
 				String newField = null;
 				if (dbBean.getPatent_appl_date() != null) {
-					sourceField = DateUtils.getDashFormatDate(dbBean.getPatent_appl_date());
+					sourceField = DateUtils.getSimpleSlashFormatDate(dbBean.getPatent_appl_date());
 				}
 				if (dbBean.getPatent_appl_date() != null) {
-					newField = DateUtils.getDashFormatDate(patent.getPatent_appl_date());
+					newField = DateUtils.getSimpleSlashFormatDate(patent.getPatent_appl_date());
 				}
 				PatentEditHistory peh = checkFieldName(patent, sourceField, newField, field.getField_id());
 				if (peh != null) {dbBean.addHistory(peh);}
@@ -776,10 +952,10 @@ public class PatentServiceImpl implements PatentService{
 				String sourceField = null;
 				String newField = null;
 				if (dbBean.getPatent_notice_date() != null) {
-					sourceField = DateUtils.getDashFormatDate(dbBean.getPatent_notice_date());
+					sourceField = DateUtils.getSimpleSlashFormatDate(dbBean.getPatent_notice_date());
 				}
 				if (patent.getPatent_notice_date() != null) {
-					newField = DateUtils.getDashFormatDate(patent.getPatent_notice_date());
+					newField = DateUtils.getSimpleSlashFormatDate(patent.getPatent_notice_date());
 				}
 				PatentEditHistory peh = checkFieldName(patent, sourceField, newField, field.getField_id());
 				if (peh != null) {dbBean.addHistory(peh);}
@@ -788,10 +964,10 @@ public class PatentServiceImpl implements PatentService{
 				String sourceField = null;
 				String newField = null;
 				if (dbBean.getPatent_publish_date() != null) {
-					sourceField = DateUtils.getDashFormatDate(dbBean.getPatent_publish_date());
+					sourceField = DateUtils.getSimpleSlashFormatDate(dbBean.getPatent_publish_date());
 				}
 				if (dbBean.getPatent_publish_date() != null) {
-					newField = DateUtils.getDashFormatDate(patent.getPatent_publish_date());
+					newField = DateUtils.getSimpleSlashFormatDate(patent.getPatent_publish_date());
 				}
 				PatentEditHistory peh = checkFieldName(patent, sourceField, newField, field.getField_id());
 				if (peh != null) {dbBean.addHistory(peh);}

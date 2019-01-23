@@ -51,6 +51,7 @@ import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
 import biz.mercue.campusipr.util.MapResponseBody;
+import biz.mercue.campusipr.util.ServiceChinaPatent;
 import biz.mercue.campusipr.util.ServiceTaiwanPatent;
 import biz.mercue.campusipr.util.StringResponseBody;
 
@@ -331,7 +332,7 @@ public class PatentController {
 				ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, bussinessId);
 				
 				HttpHeaders headers = new HttpHeaders();
-				headers.add( "Content-disposition", "inline; filename="+fileName+".xls" );
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
 				
 
 				return ResponseEntity
@@ -464,19 +465,24 @@ public class PatentController {
 	@RequestMapping(value="/api/syncapplicant", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String syncApplicantData(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
-		log.info("getPatenthistorybyId ");
+		log.info("syncapplicant ");
 		ListResponseBody responseBody  = new ListResponseBody();
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		String applicantName = jsonObject.getString("applicant_name");
+		String businessName = jsonObject.getString("business_name");
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
 			
 			if(tokenBean.checkPermission(permission.getPermission_id())) {
-				List<String> applicantNames = new ArrayList<>();
-				applicantNames.add(applicantName);
-				List<Patent> list = ServiceTaiwanPatent.getPatentRightByAssignee(applicantNames);
-				responseBody.setCode(Constants.INT_SUCCESS);
+				String ip = request.getRemoteAddr();
+
+				List<Patent> list = new ArrayList<>();
+				int taskResult = patentService.addPatentByApplicant(list, businessName, Constants.SYSTEM_ADMIN, ip);
+				for (Patent patent:list) {
+					patentService.syncPatentStatus(patent);
+				}
+				responseBody.setCode(taskResult);
+				responseBody.setTotal_count(list.size());
 				responseBody.setList(list);
 			}else {
 				responseBody.setCode(Constants.INT_NO_PERMISSION);
