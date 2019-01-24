@@ -2,8 +2,10 @@ package biz.mercue.campusipr.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 
 public class DateUtils {
@@ -314,5 +316,19 @@ public class DateUtils {
         }
         return true;
     }
+	
+	public static Date parseMultipleFormat(String value) {
+		List<String> formatStrings = Arrays.asList("yyyy/MM/dd", "yyyy-MM-dd");
+		for (String formatString : formatStrings)
+	    {
+	        try
+	        {
+	            return new SimpleDateFormat(formatString).parse(value);
+	        }
+	        catch (ParseException e) {}
+	    }
+
+	    return null;
+	}
 
 }

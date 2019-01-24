@@ -1,24 +1,17 @@
 package biz.mercue.campusipr.controller;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.BaselineSessionEventsListenerBuilder;
-import org.json.JSONObject;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
+
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,19 +21,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 import biz.mercue.campusipr.model.AdminToken;
 import biz.mercue.campusipr.model.AnnuityReminder;
 import biz.mercue.campusipr.model.Banner;
 import biz.mercue.campusipr.model.Country;
-import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.Currency;
 import biz.mercue.campusipr.model.PatentField;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.AnnuityReminderService;
 import biz.mercue.campusipr.service.BannerService;
 import biz.mercue.campusipr.service.CountryService;
+import biz.mercue.campusipr.service.CurrencyService;
 import biz.mercue.campusipr.service.PermissionService;
 import biz.mercue.campusipr.service.FieldService;
 import biz.mercue.campusipr.util.BeanResponseBody;
@@ -60,6 +54,10 @@ public class SettingController {
 	
 	@Autowired
 	CountryService countryService;
+	
+	
+	@Autowired
+	CurrencyService currencyService;
 	
 	@Autowired
 	AnnuityReminderService annuityReminderService;
@@ -82,6 +80,19 @@ public class SettingController {
 
 
 		List<Country> list = countryService.getListByLanguage(lang);
+		listResponseBody.setCode(Constants.INT_SUCCESS);
+		listResponseBody.setList(list);
+		return listResponseBody.getJacksonString(View.Public.class);
+	}
+	
+	@RequestMapping(value="/api/currencylist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String getCurrencylist(HttpServletRequest request) {
+		log.info("getCurrencylist ");
+		ListResponseBody listResponseBody  = new ListResponseBody();
+
+
+		List<Currency> list = currencyService.getAll();
 		listResponseBody.setCode(Constants.INT_SUCCESS);
 		listResponseBody.setList(list);
 		return listResponseBody.getJacksonString(View.Public.class);

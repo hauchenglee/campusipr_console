@@ -22,6 +22,9 @@ public class Country {
 	
 	@JsonView(View.Public.class)
 	private int country_order;
+	
+	@JsonView(View.Public.class)
+	private String country_alias_name;
 
 	public String getCountry_id() {
 		return country_id;
@@ -53,6 +56,14 @@ public class Country {
 
 	public void setCountry_order(int country_order) {
 		this.country_order = country_order;
+	}
+
+	public String getCountry_alias_name() {
+		return country_alias_name;
+	}
+
+	public void setCountry_alias_name(String country_alias_name) {
+		this.country_alias_name = country_alias_name;
 	}
 	
 	

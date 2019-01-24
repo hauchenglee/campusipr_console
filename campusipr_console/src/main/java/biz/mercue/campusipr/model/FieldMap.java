@@ -34,7 +34,7 @@ public class FieldMap {
 	private String excel_field_name;
 	
 	@JsonView({View.FieldMap.class,View.ExcelTask.class})
-	private int excel_field_index;
+	private int excel_field_index = -1;
 	
 
 	@JsonView(View.FieldMap.class)

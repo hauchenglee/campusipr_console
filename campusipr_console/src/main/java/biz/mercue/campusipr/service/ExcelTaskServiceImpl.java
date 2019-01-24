@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,7 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.taglibs.standard.tag.common.fmt.ParseDateSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,16 +27,20 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.mysql.cj.core.result.Field;
 
+import biz.mercue.campusipr.dao.CountryDao;
 import biz.mercue.campusipr.dao.ExcelTaskDao;
 import biz.mercue.campusipr.dao.FieldDao;
 import biz.mercue.campusipr.dao.FieldMapDao;
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Business;
+import biz.mercue.campusipr.model.Country;
 import biz.mercue.campusipr.model.ExcelTask;
 import biz.mercue.campusipr.model.FieldMap;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentField;
+import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.util.Constants;
+import biz.mercue.campusipr.util.DateUtils;
 import biz.mercue.campusipr.util.ExcelUtils;
 import biz.mercue.campusipr.util.FileUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
@@ -53,6 +63,9 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	
 	@Autowired
 	private FieldMapDao mapDao;
+	
+	@Autowired
+	private CountryDao countryDao;
 
 	@Override
 	public ExcelTask getById(String id) {
@@ -114,67 +127,69 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				task.setTask_file_name(excel.getName());
 				dao.create(task);
 			}
-			//fileInputStream = new FileInputStream(excel);
-			//Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
-			//if (book != null) {
-				//handle excel task
-			//	Map<String, Integer> titleMap = ExcelUtils.readExcelTitle(book);
-				//log.info("1");
-				//List<FieldMap> list = mapDao.getByAdmin(adminId);
-			//	log.info("2");
-				
-				//handle task field map list
-			//} else {
-				//task = null;
-			//}
+
 		} catch (Exception e) {
 			log.error("Exception :"+e.getMessage());
 		}finally{
-//			if(fileInputStream!=null) {
-//				fileInputStream.close();
-//			}
+
 		}
 		return task;
 	}
 	
 	@Override
-	public ExcelTask getTaskField(Admin admin, String id)throws IOException{
-		ExcelTask task = dao.getByBusinessId(admin.getBusiness().getBusiness_id(), id);
+	public ExcelTask getTaskField(Admin admin, String id) throws IOException {
+		ExcelTask task = null;
 		FileInputStream fileInputStream = null;
-		if(task!=null) {
-			File excel = new File(Constants.FILE_UPLOAD_PATH+File.separator+task.getTask_file_name());
-			fileInputStream = new FileInputStream(excel);
-		    Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
-			if (book != null) {
-				//handle excel task
-				
-				//title map index
-				Map<String, Integer> titleMap = ExcelUtils.readExcelTitle(book);
-				//compare  title and filed name
-				List<FieldMap> fieldMaps = task.getListMap();
-				if(fieldMaps.size() > 0) {
-					
-				}else {
-					List<PatentField> totalList = fieldDao.getAllFields();
-					List<FieldMap> newMapList = new ArrayList<FieldMap>();
-					for(PatentField field : totalList) {
-						FieldMap map = new FieldMap();
-						map.setField_map_id(KeyGeneratorUtils.generateRandomString());
-						map.setField(field);
-						map.setTask(task);
-						map.setCreate_date(new Date());
-						map.setUpdate_date(new Date());
-						newMapList.add(map);
-					}
-					task.setListMap(newMapList);
-				}
-				task.setTitleMap(titleMap);
+		try {
+			task = dao.getByBusinessId(admin.getBusiness().getBusiness_id(), id);
+			
 
-				book.close();
+			if (task != null) {
+				File excel = new File(Constants.FILE_UPLOAD_PATH + File.separator + task.getTask_file_name());
+				fileInputStream = new FileInputStream(excel);
+				Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
+				if (book != null) {
+					// handle excel task
+
+					// title map index
+					Map<String, Integer> titleMap = ExcelUtils.readExcelTitle(book);
+					// compare title and filed name
+					List<FieldMap> fieldMaps = task.getListMap();
+					if (fieldMaps.size() > 0) {
+
+					} else {
+						List<PatentField> totalList = fieldDao.getAllFields();
+						List<FieldMap> newMapList = new ArrayList<FieldMap>();
+						for (PatentField field : totalList) {
+							FieldMap map = new FieldMap();
+							map.setField_map_id(KeyGeneratorUtils.generateRandomString());
+							map.setField(field);
+							map.setTask(task);
+							map.setCreate_date(new Date());
+							map.setUpdate_date(new Date());
+							newMapList.add(map);
+						}
+						task.setListMap(newMapList);
+					}
+					task.setTitleMap(titleMap);
+
+					book.close();
+				}
+			}
+		} catch (Exception e) {
+			task = null;
+			log.error("Exception:" + e.getMessage());
+		} finally {
+			if (fileInputStream != null) {
+				try {
+					fileInputStream.close();
+				} catch (Exception e) {
+					task = null;
+					log.error("Exception:" + e.getMessage());
+				}
 			}
 		}
-		
-		
+
 		return task;
 	}
 	
@@ -183,31 +198,39 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	public int submitTask(ExcelTask bean,Admin admin) {
 		ExcelTask dbBean = dao.getByBusinessId(admin.getBusiness().getBusiness_id(), bean.getExcel_task_id());
 		boolean is_continue = true;
-		if(dbBean !=null) {
-			List<FieldMap> filedList = bean.getListMap();
-			if(filedList.size() > 0) {
-				Map<String, FieldMap> maps = convertFieldList2Map(filedList);
-				if(checkRequiredField(maps)) {
-					for(FieldMap map : filedList) {
-						
+		FileInputStream fileInputStream = null;
+		try {
+			if(dbBean !=null) {
+				List<FieldMap> filedList = bean.getListMap();
+				if(filedList.size() > 0) {
+					Map<String, FieldMap> maps = convertFieldList2Map(filedList);
+					if(checkRequiredField(maps)) {
+						File excel = new File(Constants.FILE_UPLOAD_PATH+File.separator+dbBean.getTask_file_name());
+						fileInputStream = new FileInputStream(excel);
+					    Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
+						return Constants.INT_SUCCESS;
+					}else {
+						return Constants.INT_DATA_ERROR;
 					}
-					return Constants.INT_SUCCESS;
 				}else {
 					return Constants.INT_DATA_ERROR;
 				}
+	
 			}else {
-				return Constants.INT_DATA_ERROR;
+				return Constants.INT_CANNOT_FIND_DATA;
 			}
-			
-			
-			
-			
-			
-			
-			
-		}else {
-			return Constants.INT_CANNOT_FIND_DATA;
+		}catch (Exception e) {
+			log.error("Exception :"+e.getMessage());
+		}finally {
+			if(fileInputStream!=null) {
+				try {
+					fileInputStream.close();
+				}catch (Exception e) {
+					log.error("Exception:"+e.getMessage());
+				}
+			}
 		}
+		return Constants.INT_SYSTEM_PROBLEM;
 		
 	}
 
@@ -237,8 +260,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		Map<String , FieldMap> map = new HashMap<String , FieldMap>();
 		
 		for(FieldMap fieldMap : list) {
-			map.put(fieldMap.getField_map_id(), fieldMap);
-			
+			map.put(fieldMap.getField().getField_id(), fieldMap);
 		}
 		return map;
 	}
@@ -259,6 +281,94 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		}
 		
 	}
+	
+	
+	private List<Patent> readBook2Patent(Workbook book, List<FieldMap> listField, int size) {
+		List<Patent> listPatent = new ArrayList<Patent>();
+		Sheet sheet = book.getSheetAt(0);
+		int rowIndex = 0;
+		int cellIndex = 0;
+		List<Country> listCountry = countryDao.getAll();
+		for (Row row : sheet) {
+			log.info("Row");
+			cellIndex = 0;
+			if (rowIndex == 0) {
+				log.info("Title Row");
+			} else {
+				Patent patent = new Patent();
+				for (FieldMap fieldMap : listField) {
+					if (fieldMap.getExcel_field_index() != -1) {
+						switch (fieldMap.getField().getField_id()) {
+						case Constants.PATENT_NAME_FIELD:
+							patent.setPatent_name(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
+							break;
+						case Constants.PATENT_NAME_EN_FIELD:
+							patent.setPatent_name_en(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
+							break;
+
+						case Constants.PATENT_COUNTRY_FIELD:
+							String countyName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue();
+							for (Country country : listCountry) {
+								if (country.getCountry_name().contains(countyName)
+										|| country.getCountry_alias_name().contains(countyName)) {
+									patent.setPatent_appl_country(country.getCountry_id());
+								}
+							}
+							break;
+						case Constants.PATENT_APPL_NO_FIELD:
+							patent.setPatent_appl_no(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
+							break;
+						case Constants.PATENT_APPL_DATE_FIELD:
+
+							Cell cell = row.getCell(fieldMap.getExcel_field_index());
+							
+							// patent.setPatent_name(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
+							break;
+
+						default:
+							break;
+						}
+					}
+
+				}
+				listPatent.add(patent);
+			}
+			rowIndex++;
+		}
+		return listPatent;
+		
+
+	}
+	
+	private Date ParseDateCell(Cell cell) {
+		Date date= null;
+//		DecimalFormat df = new DecimalFormat("0");
+//		switch (cell.getCellTypeEnum()) {
+//        case STRING:
+//        	date = DateUtils.parseMultipleFormat(cell.getRichStringCellValue().getString());
+//            break;
+//        case NUMERIC:
+//            if("General".equals(cell.getCellStyle().getDataFormatString())){
+//            	date = df.format(cell.getNumericCellValue());
+//            }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
+//            	date = cell.getDateCellValue();
+//            }else{
+//            	date = df.format(cell.getNumericCellValue());
+//            }
+//            break;
+//
+//        default:
+//            value = cell.toString();
+//            break;
+//		}
+		return  new Date ();
+    }
+
+	
+	
+
+
+	
 
 	
 
