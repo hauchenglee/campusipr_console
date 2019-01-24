@@ -265,9 +265,9 @@ public class PatentServiceImpl implements PatentService{
 	}
 	
 	@Override
-	public int addPatentByApplicant(List<Patent> list, String businessName, String adminId, String ip) {
+	public int addPatentByApplicant(List<Patent> list, String businessName, String adminId, String businessId, String ip) {
 		int taskResult= -1;
-
+		Business ownBusiness = businessDao.getById(businessId);
 		List<Business> businesses = businessDao.search(businessName);
 		if (businesses.isEmpty()) {
 			List<String> dupucateStr = new ArrayList<>();
@@ -278,7 +278,7 @@ public class PatentServiceImpl implements PatentService{
 				list.addAll(addlist);
 				addlist = ServiceChinaPatent.getPatentRightByAssignee(businessNames, dupucateStr);
 				list.addAll(addlist);
-			}else {
+			} else {
 				List<Patent> addlist = ServiceUSPatent.getPatentRightByAssignee(businessNames, dupucateStr);
 				list.addAll(addlist);
 				addlist = ServiceTaiwanPatent.getPatentRightByAssignee(businessNames, dupucateStr);
@@ -288,8 +288,9 @@ public class PatentServiceImpl implements PatentService{
 			for (Patent patent:list) {
 				patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 				patent.setAdmin(adminDao.getById(adminId));
-				if(!StringUtils.isNULL(patent.getPatent_name())
-						|| !StringUtils.isNULL(patent.getPatent_name_en())) {
+				patent.addBusiness(ownBusiness);
+				if(!StringUtils.isNULL(patent.getPatent_name())	|| 
+						!StringUtils.isNULL(patent.getPatent_name_en())) {
 					String applNo =  patent.getPatent_appl_no();
 					if (StringUtils.isNULL(applNo) == false) {
 						Patent appNoPatent = patentDao.getByApplNo(applNo);
@@ -308,6 +309,11 @@ public class PatentServiceImpl implements PatentService{
 							}
 							if (patent.getPatentDesc() != null) {
 								patent.getPatentDesc().setPatent_desc_id(KeyGeneratorUtils.generateRandomString());
+								String descStr = patent.getPatentDesc().getContext_desc();
+								if (patent.getPatentDesc().getContext_desc().length() > 65000) {
+									descStr = descStr.substring(0, 65000)+"....";
+								}
+								patent.getPatentDesc().setContext_desc(descStr);
 								patent.getPatentDesc().setPatent(patent);
 							}
 							if (patent.getListApplicant() != null) {
@@ -379,7 +385,7 @@ public class PatentServiceImpl implements PatentService{
 				for (Patent patent:list) {
 					patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 					patent.setAdmin(adminDao.getById(adminId));
-					patent.addBusiness(business);
+					patent.addBusiness(ownBusiness);
 					if(!StringUtils.isNULL(patent.getPatent_name())
 							|| !StringUtils.isNULL(patent.getPatent_name_en())) {
 						String applNo =  patent.getPatent_appl_no();
@@ -400,6 +406,11 @@ public class PatentServiceImpl implements PatentService{
 								}
 								if (patent.getPatentDesc() != null) {
 									patent.getPatentDesc().setPatent_desc_id(KeyGeneratorUtils.generateRandomString());
+									String descStr = patent.getPatentDesc().getContext_desc();
+									if (patent.getPatentDesc().getContext_desc().length() > 65000) {
+										descStr = descStr.substring(0, 65000)+"....";
+									}
+									patent.getPatentDesc().setContext_desc(descStr);
 									patent.getPatentDesc().setPatent(patent);
 								}
 								if (patent.getListApplicant() != null) {
@@ -492,6 +503,11 @@ public class PatentServiceImpl implements PatentService{
 					}
 					if (patent.getPatentDesc() != null) {
 						patent.getPatentDesc().setPatent_desc_id(KeyGeneratorUtils.generateRandomString());
+						String descStr = patent.getPatentDesc().getContext_desc();
+						if (patent.getPatentDesc().getContext_desc().length() > 65000) {
+							descStr = descStr.substring(0, 65000)+"....";
+						}
+						patent.getPatentDesc().setContext_desc(descStr);
 						patent.getPatentDesc().setPatent(patent);
 					}
 					if (patent.getListApplicant() != null) {

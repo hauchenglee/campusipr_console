@@ -42,13 +42,13 @@ public class ServiceUSPatent {
 	
 	private static  Logger log = Logger.getLogger(ServiceUSPatent.class.getName());
 	
-	public static List<Patent> getPatentRightByAssignee(List<String> assigneeNames, List<String> dupucateStr) {
+	public static List<Patent> getPatentRightByAssignee(List<String> applicantNames, List<String> dupucateStr) {
 		//同義詞字串列表進入
 		List<Patent> list = new ArrayList<>();
-		for (String assignee:assigneeNames) {
-			if (!StringUtils.hasChinese(assignee)) {
-				String url = Constants.PATENT_WEB_SERVICE_US+"?assignee=%s";
-				url = String.format(url, URLEncoder.encode(assignee));
+		for (String applicant:applicantNames) {
+			if (!StringUtils.hasChinese(applicant)) {
+				String url = Constants.PATENT_WEB_SERVICE_US+"?applicant=%s";
+				url = String.format(url, URLEncoder.encode(applicant));
 				try {
 					String context = HttpRequestUtils.sendGet(url);
 					if (!StringUtils.isNULL(context)) {
@@ -57,12 +57,25 @@ public class ServiceUSPatent {
 						if (patentDocsObj.length() != 0) {
 							for (int index = 0; index < patentDocsObj.length(); index++) {
 								JSONObject patentObj = patentDocsObj.optJSONObject(index);
-								if (!dupucateStr.contains(patentObj.optString("applicationNumber"))) {
-									Patent patent = new Patent();
-									convertPatentInfoUS(patent, patentObj);
-									parserBilbo(patent);
-									list.add(patent);
-									dupucateStr.add(patent.getPatent_appl_no());
+								//check applicant is right
+								boolean checkApplicant = false;
+								JSONArray patentApplicants = patentObj.optJSONArray("applicant");
+								if (patentApplicants != null) {
+									for (int applIndex = 0; applIndex < patentApplicants.length(); applIndex++) {
+										String appl = patentApplicants.optString(applIndex);
+										if (appl.contains(applicant)) {
+											checkApplicant = true;
+										}
+									}
+								}
+								if (checkApplicant) {
+									if (!dupucateStr.contains(patentObj.optString("applicationNumber"))) {
+										Patent patent = new Patent();
+										convertPatentInfoUS(patent, patentObj);
+										parserBilbo(patent);
+										list.add(patent);
+										dupucateStr.add(patent.getPatent_appl_no());
+									}
 								}
 							}
 						}
@@ -181,6 +194,10 @@ public class ServiceUSPatent {
 		
 			patent.setPatent_name(patentObj.optString("title"));
 			patent.setPatent_appl_country("US");
+			
+			if (patentObj.has("applicationNumber")) {
+				patent.setPatent_appl_no(patentObj.optString("applicationNumber"));
+			}
 				
 			try {
 				String applDateStr = patentObj.optString("applicationDate");
@@ -290,6 +307,7 @@ public class ServiceUSPatent {
 				if (patentObj.has("patentNumber")) {
 					patent.setPatent_no(patentObj.optString("patentNumber"));
 				}
+				
 				if (patentObj.optString("documentId").endsWith("A1")) {
 					patent.setPatent_notice_no(patentObj.optString("documentId")
 							.substring(0, patentObj.optString("documentId").indexOf("A1")));
@@ -361,9 +379,6 @@ public class ServiceUSPatent {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				}
-				if (!StringUtils.isNULL(patentObj.optString("applicationNumber"))) {
-					patent.setPatent_appl_no(patentObj.optString("applicationNumber"));
 				}
 			}
 		} catch (JSONException e) {

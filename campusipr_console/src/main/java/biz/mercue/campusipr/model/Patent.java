@@ -97,7 +97,7 @@ public class Patent extends BaseBean{
 	private List<Business> listBusiness;
 	
 	@JsonView(View.PatentDetail.class)
-	@ManyToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_ipc", 
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
 		inverseJoinColumns = { @JoinColumn(name = "ipc_class_id") })

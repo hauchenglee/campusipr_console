@@ -41,9 +41,9 @@ public class ServiceTaiwanPatent {
 		List<Patent> list = new ArrayList<>();
 		for (String assignee:assigneeNames) {
 			boolean isSync = false;
-			String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?top=100format=json&tk=%s&applnamee=%s&applclass=%s";
+			String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?top=100&format=json&tk=%s&applnamee=%s&applclass=%s";
 			if (StringUtils.hasChinese(assignee)) {
-				url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?top=100format=json&tk=%s&applnamec=%s&applclass=%s";
+				url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?top=100&format=json&tk=%s&applnamec=%s&applclass=%s";
 			}
 			url = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee), 1);
 			try {
@@ -118,9 +118,9 @@ public class ServiceTaiwanPatent {
 					}
 				}
 				if (isSync == false) {
-					url = Constants.PATENT_WEB_SERVICE_TW+"/PatentPub?top=100format=json&tk=%s&applnamee=%s";
+					url = Constants.PATENT_WEB_SERVICE_TW+"/PatentPub?top=100&format=json&tk=%s&applnamee=%s";
 					if (StringUtils.hasChinese(assignee)) {
-						url = Constants.PATENT_WEB_SERVICE_TW+"/PatentPub?top=100format=json&tk=%s&applnamec=%s";
+						url = Constants.PATENT_WEB_SERVICE_TW+"/PatentPub?top=100&format=json&tk=%s&applnamec=%s";
 					}
 					url = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee));
 					context = HttpRequestUtils.sendGet(url);
