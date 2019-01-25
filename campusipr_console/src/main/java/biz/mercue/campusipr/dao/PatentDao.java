@@ -19,7 +19,7 @@ public interface PatentDao {
 	void delete(String id);
 	
 	
-	List<Patent> getByBusinessId(String businessId,int page,int pageSize);
+	List<Patent> getByBusinessId(String businessId,int page,int pageSize,String orderFieldId,int is_asc);
 	int  getCountByBusinessId(String businessId);	
 	
 	List<Patent> getAllByBusinessId(String businessId);
@@ -33,34 +33,34 @@ public interface PatentDao {
 	List<Patent> getByFamily(String familyId);
 	
 	
-	List<Patent> searchAllFieldPatent(String  searchText,String businessId,int page,int pageSize);
+	List<Patent> searchAllFieldPatent(String  searchText,String businessId,int page,int pageSize,String orderFieldCode,int is_asc);
 	int  countSearchAllFieldPatent(String searchText,String businessId);
 	
-	List<Patent> searchFieldPatent(String  searchText, String fieldCode, String businessId,int page,int pageSize);
+	List<Patent> searchFieldPatent(String  searchText, String fieldCode, String businessId,int page,int pageSize,String orderFieldCode,int is_asc);
 	int  countSearchFieldPatent(String searchText, String fieldCode,String businessId);
 	
-	List<Patent> searchFieldPatent(Date startDate, Date endDate, String fieldCode, String businessId,int page,int pageSize);
+	List<Patent> searchFieldPatent(Date startDate, Date endDate, String fieldCode, String businessId,int page,int pageSize,String orderFieldCode,int is_asc);
 	int  countSearchFieldPatent(Date startDate, Date endDate, String fieldCode,String businessId);
 	
-	List<Patent> searchFieldAssigneeListPatent(String searchText,String businessId, int page, int pageSize);
-	int  countSearchFieldAssigneePatent(String searchText, String businessId);
+	List<Patent> searchFieldHumanListPatent(String searchText, String fieldCode,String businessId, int page, int pageSize,String orderFieldCode,int is_asc);
+	int  countSearchFieldHumanListPatent(String searchText, String fieldCode, String businessId);
 	
-	List<Patent> searchFieldApplicantListPatent(String searchText,String businessId, int page, int pageSize);
-	int  countSearchFieldApplicantPatent(String searchText, String businessId);
+//	List<Patent> searchFieldApplicantListPatent(String searchText,String businessId, int page, int pageSize,String orderFieldId,int is_asc);
+//	int  countSearchFieldApplicantPatent(String searchText, String businessId);
+//	
+//	List<Patent> searchFieldInventorListPatent(String searchText,String businessId, int page, int pageSize,String orderFieldId,int is_asc);
+//	int  countSearchFieldInventorPatent(String searchText, String businessId);
 	
-	List<Patent> searchFieldInventorListPatent(String searchText,String businessId, int page, int pageSize);
-	int  countSearchFieldInventorPatent(String searchText, String businessId);
-	
-	List<Patent> searchFieldStatusListPatent(String searchText,String businessId, int page, int pageSize);
+	List<Patent> searchFieldStatusListPatent(String searchText,String businessId, int page, int pageSize,String orderFieldCode,int is_asc);
 	int  countSearchFieldStatusPatent(String searchText, String businessId);
 	
-	List<Patent> searchFieldCostListPatent(String searchText,String businessId, int page, int pageSize);
-	int  countSearchFieldCostPatent(String searchText, String businessId);
+//	List<Patent> searchFieldCostListPatent(String searchText,String businessId, int page, int pageSize,String orderFieldId,int is_asc);
+//	int  countSearchFieldCostPatent(String searchText, String businessId);
+//	
+//	List<Patent> searchFieldFamilyListPatent(String searchText,String businessId, int page, int pageSize,String orderFieldId,int is_asc);
+//	int  countSearchFieldFamilyPatent(String searchText, String businessId);
 	
-	List<Patent> searchFieldFamilyListPatent(String searchText,String businessId, int page, int pageSize);
-	int  countSearchFieldFamilyPatent(String searchText, String businessId);
-	
-	List<Patent> searchFieldExtensionListPatent(String searchText, String fieldCode, String businessId, int page, int pageSize);
+	List<Patent> searchFieldExtensionListPatent(String searchText, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc);
 	int  countSearchFieldExtensionPatent(String searchText, String fieldCode, String businessId);
 	
 	Patent getByPatentNo(String patentNo);

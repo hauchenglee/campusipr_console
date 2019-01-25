@@ -733,9 +733,9 @@ public class PatentServiceImpl implements PatentService{
 
 	
 	@Override
-	public 	ListQueryForm getByBusinessId(String businessId,int page){
+	public 	ListQueryForm getByBusinessId(String businessId,int page,String orderFieldId,int is_asc) {
 		log.info("businessId:"+businessId);
-		List<Patent> list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE);
+		List<Patent> list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE,orderFieldId,is_asc);
 		for(Patent patent : list) {
 			patent.getListStatus().size();
 			patent.getListExtension().size();
@@ -803,103 +803,93 @@ public class PatentServiceImpl implements PatentService{
 	}
 
 	@Override
-	public ListQueryForm fieldSearchPatent(Object searchObj, String fieldId, String businessId, int page) {
+	public ListQueryForm fieldSearchPatent(Object searchObj, String fieldId, String businessId, int page,String orderFieldId,int is_asc) {
 		//check text is date or not
 		PatentField field = fieldDao.getById(fieldId);
+		PatentField searchField = null;
+		String orderFieldCode = null;
+		if(!StringUtils.isNULL(orderFieldId)) {
+			searchField = fieldDao.getById(orderFieldId);
+			if(searchField!=null) {
+				orderFieldCode = searchField.getField_code();
+			}
+		}
 		int count = 0;
 		List<Patent> list = new ArrayList<>();
 		if (Constants.PATENT_ALL_FIELD.equals(fieldId) || field == null) {
 			String text = (String) searchObj;
-			list = patentDao.searchAllFieldPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
+			list = patentDao.searchAllFieldPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
 			count = patentDao.countSearchAllFieldPatent('%'+text+'%', businessId);
-			if (list.isEmpty()) {
-				list = patentDao.searchFieldInventorListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldInventorPatent('%'+text+'%', businessId);
-			}
-			if (list.isEmpty()) {
-				list = patentDao.searchFieldApplicantListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldApplicantPatent('%'+text+'%', businessId);
-			}
-			if (list.isEmpty()) {
-				list = patentDao.searchFieldAssigneeListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldAssigneePatent('%'+text+'%', businessId);
-			}
+			//TODO
+//			if (list.isEmpty()) {
+//				list = patentDao.searchFieldInventorListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
+//				count = patentDao.countSearchFieldInventorPatent('%'+text+'%', businessId);
+//			}
+//			if (list.isEmpty()) {
+//				list = patentDao.searchFieldApplicantListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
+//				count = patentDao.countSearchFieldApplicantPatent('%'+text+'%', businessId);
+//			}
+//			if (list.isEmpty()) {
+//				list = patentDao.searchFieldAssigneeListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
+//				count = patentDao.countSearchFieldAssigneePatent('%'+text+'%', businessId);
+//			}
 		}else {
-			if (Constants.PATENT_NAME_FIELD.equals(field.getField_id())) {
+			
+			switch (fieldId) {
+			case Constants.PATENT_NAME_FIELD:
+			case Constants.PATENT_NAME_EN_FIELD:
+			case Constants.PATENT_NO_FIELD:	
+			case Constants.PATENT_APPL_NO_FIELD:
+			case Constants.PATENT_NOTICE_NO_FIELD:
+			case Constants.PATENT_PUBLISH_NO_FIELD:
 				String text = (String) searchObj;
-				list = patentDao.searchFieldPatent('%'+text+'%', "patent_name", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent('%'+text+'%', "patent_name", businessId);
-			} else if (Constants.PATENT_NAME_EN_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldPatent('%'+text+'%', "patent_name_en", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent('%'+text+'%', "patent_name_en", businessId);
-			} else if (Constants.PATENT_COUNTRY_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldPatent('%'+text+'%', "patent_appl_country", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent('%'+text+'%', "patent_appl_country", businessId);
-			} else if (Constants.PATENT_NO_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldPatent('%'+text+'%', "patent_no", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent('%'+text+'%', "patent_no", businessId);
-			} else if (Constants.PATENT_APPL_NO_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldPatent('%'+text+'%', "patent_appl_no", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent('%'+text+'%', "patent_appl_no", businessId);
-			} else if (Constants.PATENT_APPL_DATE_FIELD.equals(field.getField_id())) {
+				list = patentDao.searchFieldPatent('%'+text+'%', field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
+				count = patentDao.countSearchFieldPatent('%'+text+'%', field.getField_code(), businessId);
+				break;
+			case Constants.PATENT_COUNTRY_FIELD:
+				break;
+				
+				
+			case Constants.PATENT_APPL_DATE_FIELD:
+			case Constants.PATENT_PUBLISH_DATE_FIELD:
+			case Constants.PATENT_NOTICE_DATE_FIELD:
 				String[] searchDateObj = ((String) searchObj).split("-");
 				Date sd = new Date(Long.valueOf(searchDateObj[0]));
 				Date ed = new Date(Long.valueOf(searchDateObj[1]));
-				list = patentDao.searchFieldPatent(sd, ed, "patent_appl_date", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent(sd, ed, "patent_appl_date", businessId);
-			} else if (Constants.PATENT_NOTICE_NO_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldPatent('%'+text+'%', "patent_notice_no", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent('%'+text+'%', "patent_notice_no", businessId);
-			} else if (Constants.PATENT_NOTICE_DATE_FIELD.equals(field.getField_id())) {
-				String[] searchDateObj = ((String) searchObj).split("-");
-				Date sd = new Date(Long.valueOf(searchDateObj[0]));
-				Date ed = new Date(Long.valueOf(searchDateObj[1]));
-				list = patentDao.searchFieldPatent(sd, ed, "patent_notice_date", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent(sd, ed, "patent_notice_date", businessId);
-			} else if (Constants.PATENT_PUBLISH_NO_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldPatent('%'+text+'%', "patent_publish_no", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent('%'+text+'%', "patent_publish_no", businessId);
-			} else if (Constants.PATENT_PUBLISH_DATE_FIELD.equals(field.getField_id())) {
-				String[] searchDateObj = ((String) searchObj).split("-");
-				Date sd = new Date(Long.valueOf(searchDateObj[0]));
-				Date ed = new Date(Long.valueOf(searchDateObj[1]));
-				list = patentDao.searchFieldPatent(sd, ed, "patent_publish_date", businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldPatent(sd, ed, "patent_publish_date", businessId);
-			} else if (Constants.ASSIGNEE_NAME_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldAssigneeListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldAssigneePatent('%'+text+'%', businessId);
-			} else if (Constants.APPLIANT_NAME_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldApplicantListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldApplicantPatent('%'+text+'%', businessId);
-			} else if (Constants.IVENTOR_NAME_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldInventorListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldInventorPatent('%'+text+'%', businessId);
-			} else if (Constants.PATENT_STATUS_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldStatusListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldStatusPatent('%'+text+'%', businessId);
-			} else if (Constants.PATENT_COST_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldCostListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldCostPatent('%'+text+'%', businessId);
-			} else if (Constants.PATENT_FAMILY_FIELD.equals(field.getField_id())) {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldFamilyListPatent('%'+text+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldFamilyPatent('%'+text+'%', businessId);
-			} else {
-				String text = (String) searchObj;
-				list = patentDao.searchFieldExtensionListPatent('%'+text+'%', field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE);
-				count = patentDao.countSearchFieldExtensionPatent('%'+text+'%', field.getField_code(), businessId);
+				list = patentDao.searchFieldPatent(sd, ed, field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
+				break;
+				
+			case Constants.ASSIGNEE_NAME_FIELD:
+			case Constants.APPLIANT_NAME_FIELD:
+			case Constants.IVENTOR_NAME_FIELD:
+				String name = (String) searchObj;
+				list = patentDao.searchFieldHumanListPatent('%'+name+'%',field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
+				count = patentDao.countSearchFieldHumanListPatent('%'+name+'%',field.getField_code(), businessId);
+				break;
+				
+			case Constants.PATENT_STATUS_FIELD:
+				String status = (String) searchObj;
+				list = patentDao.searchFieldHumanListPatent('%'+status+'%',field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
+				count = patentDao.countSearchFieldHumanListPatent('%'+status+'%',field.getField_code(), businessId);
+				break;
+				
+			case Constants.SCHOOL_NO_FIELD:
+				String num = (String) searchObj;
+				list = patentDao.searchFieldExtensionListPatent('%'+num+'%', field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
+				count = patentDao.countSearchFieldExtensionPatent('%'+num+'%', field.getField_code(), businessId);
+				break;
+
+				
+				
+
+			default:
+				list = new ArrayList<Patent>();
+				count = 0;
+				break;
 			}
+			
+			
+
 		}
 		if (!list.isEmpty()) {
 			for(Patent patent : list) {

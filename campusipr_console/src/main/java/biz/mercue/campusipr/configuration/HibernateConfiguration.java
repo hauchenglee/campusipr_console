@@ -54,6 +54,9 @@ public class HibernateConfiguration {
 	     dataSource.setIdleTimeout(30000);
 	     dataSource.setMaxLifetime(1800000);
 	     dataSource.setConnectionTestQuery("SELECT 1");
+	     
+	    
+	    
 //    	 dataSource.addDataSourceProperty("cachePrepStmts", true);
 //    	 dataSource.addDataSourceProperty("prepStmtCacheSize", 250);
 //    	 dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", 2048);
@@ -71,6 +74,7 @@ public class HibernateConfiguration {
         
         properties.put("hibernate.connection.CharSet", yamlConfig.getConfig().getHibernate().get("connection_charset"));
         properties.put("hibernate.connection.characterEncoding", yamlConfig.getConfig().getHibernate().get("connection_character_encoding"));
+       // properties.put("hibernate.connection.provider_class", "org.hibernate.hikaricp.internal.HikariCPConnectionProvider");
         return properties;        
     }
     

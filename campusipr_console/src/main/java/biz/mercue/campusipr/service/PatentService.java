@@ -26,12 +26,12 @@ public interface PatentService {
 	
 	List<Patent> getExcelByPatentIds(List<String> idList,String businessId);
 
-	ListQueryForm getByBusinessId(String businessId,int page);
+	ListQueryForm getByBusinessId(String businessId,int page,String orderFieldId,int is_asc);
 	
 	
 	List<Patent> getByPatentIds(List<String> idList,String businessId);
 	
-	ListQueryForm fieldSearchPatent(Object searchObj, String fieldId, String businessId,int page);
+	ListQueryForm fieldSearchPatent(Object searchObj, String fieldId, String businessId,int page,String orderFieldId,int is_asc);
 	
 	
 	List<Patent> getByFamily(String family);

@@ -1,7 +1,7 @@
 ip: localhost:8080
 jdbc:
     driverClassName : "com.mysql.cj.jdbc.MysqlConnectionPoolDataSource"
-    url: "jdbc:mysql://192.168.2.71:3306/campusipr_console?useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Taipei&characterEncoding=utf8"
+    url: "jdbc:mysql://192.168.2.71:3306/campusipr_console?useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Taipei&characterEncoding=utf8&maxAllowedPacket=33554432"
     username: root
     password: 54027890
   
@@ -23,7 +23,7 @@ path:
 url:
     image: "https://api.mercue.biz:663/imageservice/campusipr/"
     video: "https://api.mercue.biz:663/imageservice/campusipr/"
-    file:
+    file:  "https://api.mercue.biz:663/imageservice/campusipr/"
 
 
 jieba: 

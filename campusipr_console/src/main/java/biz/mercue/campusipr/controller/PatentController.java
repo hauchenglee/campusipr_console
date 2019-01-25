@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +51,6 @@ import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
-import biz.mercue.campusipr.util.MapResponseBody;
-import biz.mercue.campusipr.util.ServiceChinaPatent;
-import biz.mercue.campusipr.util.ServiceTaiwanPatent;
 import biz.mercue.campusipr.util.StringResponseBody;
 
 @Controller
@@ -174,7 +172,10 @@ public class PatentController {
 	
 	@RequestMapping(value="/api/patentlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String getPatentList(HttpServletRequest request,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
+	public String getPatentList(HttpServletRequest request,
+			@RequestParam(value ="page",required=false,defaultValue ="1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue ="") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue ="") int is_asc) {
 		log.info("getPatentList ");
 		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
@@ -186,11 +187,11 @@ public class PatentController {
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
 			if(tokenBean.checkPermission(permission.getPermission_id())) {
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					form = patentService.getByBusinessId(null, page);
+					form = patentService.getByBusinessId(null, page,fieldId,is_asc);
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				}else {
-					form = patentService.getByBusinessId(tokenBean.getBusiness().getBusiness_id(), page);
+					form = patentService.getByBusinessId(tokenBean.getBusiness().getBusiness_id(), page,fieldId,is_asc);
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				}
@@ -323,7 +324,7 @@ public class PatentController {
 			
 			if(tokenBean.checkPermission(permission.getPermission_id())) {
 				List<String> ids = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});	
-				
+
 				String bussinessId = tokenBean.getBusiness().getBusiness_id();
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 					bussinessId = null;
@@ -412,13 +413,15 @@ public class PatentController {
 		BeanResponseBody responseBody = new BeanResponseBody();
 		try {
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-			if (tokenBean != null) {
-				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
-				int result = excelTaskService.submitTask(task,tokenBean.getAdmin());
-				responseBody.setCode(result);
-			} else {
-				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-			}
+//			if (tokenBean != null) {
+//				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
+//				int result = excelTaskService.submitTask(task,tokenBean.getAdmin());
+//				responseBody.setCode(result);
+//			} else {
+//				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+//			}
+			
+			responseBody.setCode(Constants.INT_SUCCESS);
 		} catch (Exception e) {
 			log.error("Exception :" + e.getMessage());
 			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
@@ -431,7 +434,11 @@ public class PatentController {
 	
 	@RequestMapping(value="/api/searchpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String searchPatent(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page){
+	public String searchPatent(HttpServletRequest request,
+			@RequestBody String receiveJSONString,
+			@RequestParam(value ="page",required=false,defaultValue ="1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue ="") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue ="") int is_asc) {
 		log.info("searchpatent ");
 		ListResponseBody responseBody  = new ListResponseBody();
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
@@ -445,11 +452,11 @@ public class PatentController {
 			
 			if(tokenBean.checkPermission(permission.getPermission_id())) {
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					ListQueryForm form =  patentService.fieldSearchPatent(searchText, field.getField_id(), null, page);
+					ListQueryForm form =  patentService.fieldSearchPatent(searchText, field.getField_id(), null, page,fieldId,is_asc);
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				} else {
-					ListQueryForm form =  patentService.fieldSearchPatent(searchText, field.getField_id(), tokenBean.getBusiness().getBusiness_id(), page);
+					ListQueryForm form =  patentService.fieldSearchPatent(searchText, field.getField_id(), tokenBean.getBusiness().getBusiness_id(), page,fieldId,is_asc);
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				}
