@@ -685,22 +685,24 @@ public class ExcelUtils {
 		            	String ipcStr = "";
 				        int lastIndexIpc = patent.getListIPC().size() - 1;
 			            for (IPCClass ipc:patent.getListIPC()) {
-			            	if (ipc.getIpc_class_id().equals(
-			            			patent.getListIPC().get(lastIndexIpc).getIpc_class_id())) {
-			            		if (!StringUtils.isNULL(ipc.getIpc_class_id())) {
-			            			ipcStr += ipc.getIpc_class_id();
-			            		}
-			            		if (!StringUtils.isNULL(ipc.getIpc_version())) {
-			            			ipcStr += "("+ipc.getIpc_version()+")";
-			            		}
-			            	} else {
-			            		if (!StringUtils.isNULL(ipc.getIpc_class_id())) {
-			            			ipcStr += ipc.getIpc_class_id();
-			            		}
-			            		if (!StringUtils.isNULL(ipc.getIpc_version())) {
-			            			ipcStr += "("+ipc.getIpc_version()+")";
-			            		}
-			            		ipcStr += "\n";
+			            	if (ipc != null) {
+				            	if (ipc.getIpc_class_id().equals(
+				            			patent.getListIPC().get(lastIndexIpc).getIpc_class_id())) {
+				            		if (!StringUtils.isNULL(ipc.getIpc_class_id())) {
+				            			ipcStr += ipc.getIpc_class_id();
+				            		}
+				            		if (!StringUtils.isNULL(ipc.getIpc_version())) {
+				            			ipcStr += "("+ipc.getIpc_version()+")";
+				            		}
+				            	} else {
+				            		if (!StringUtils.isNULL(ipc.getIpc_class_id())) {
+				            			ipcStr += ipc.getIpc_class_id();
+				            		}
+				            		if (!StringUtils.isNULL(ipc.getIpc_version())) {
+				            			ipcStr += "("+ipc.getIpc_version()+")";
+				            		}
+				            		ipcStr += "\n";
+				            	}
 			            	}
 			            }
 			            row.createCell(26).setCellValue(ipcStr);

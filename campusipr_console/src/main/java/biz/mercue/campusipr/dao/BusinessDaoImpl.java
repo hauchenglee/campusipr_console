@@ -55,6 +55,19 @@ public class BusinessDaoImpl extends AbstractDao<String,  Business> implements B
 	}
 	
 	@Override
+	public List<Business> search(String searchText){
+		log.info("searchText:"+searchText);
+		searchText = "%"+searchText+"%";
+		Criteria criteria =  createEntityCriteria();
+		Criterion c1 = Restrictions.like("business_name", searchText);
+		Criterion c2 = Restrictions.like("business_name_en", searchText);
+		Criterion c3 = Restrictions.like("business_alias", searchText);
+		Criterion c4 = Restrictions.like("business_alias_en", searchText);
+		criteria.add(Restrictions.or(c1,c2,c3,c4));
+		return criteria.list();
+	}
+	
+	@Override
 	public int searchCount(String searchText) {
 		searchText = "%"+searchText+"%";
 		Criteria criteria =  createEntityCriteria();

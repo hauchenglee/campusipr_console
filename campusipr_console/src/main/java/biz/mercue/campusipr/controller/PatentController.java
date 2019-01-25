@@ -1,6 +1,7 @@
 package biz.mercue.campusipr.controller;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -36,6 +37,7 @@ import biz.mercue.campusipr.model.PatentStatus;
 import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
+import biz.mercue.campusipr.service.AdminService;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.ExcelTaskService;
 import biz.mercue.campusipr.service.PatentService;
@@ -49,6 +51,8 @@ import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
 import biz.mercue.campusipr.util.MapResponseBody;
+import biz.mercue.campusipr.util.ServiceChinaPatent;
+import biz.mercue.campusipr.util.ServiceTaiwanPatent;
 import biz.mercue.campusipr.util.StringResponseBody;
 
 @Controller
@@ -64,6 +68,8 @@ public class PatentController {
 	@Autowired
 	PermissionService permissionService;
 	
+	@Autowired
+	AdminService adminService;
 	
 	@Autowired
 	AdminTokenService adminTokenService;
@@ -112,6 +118,8 @@ public class PatentController {
 			log.info(receiveJSONString);
 			String ip = request.getRemoteAddr();
 			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
+			Admin admin = adminService.getById(Constants.SYSTEM_ADMIN);
+			patent.setAdmin(admin);
 			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
@@ -314,12 +322,14 @@ public class PatentController {
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
 			
 			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				List<String> ids = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});	
+				
 				String bussinessId = tokenBean.getBusiness().getBusiness_id();
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 					bussinessId = null;
 				}
 				
-				List<Patent> listPatent = patentService.getAllByBussinessId(bussinessId);
+				List<Patent> listPatent = patentService.getExcelByPatentIds(ids, bussinessId);
 				
 				String fileName = tokenBean.getBusiness().getBusiness_name();
 				ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, bussinessId);
@@ -456,6 +466,7 @@ public class PatentController {
 		}
 	}
 	
+
 	
 	@RequestMapping(value="/api/geteditpatentstatus", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
@@ -476,6 +487,40 @@ public class PatentController {
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
+		return responseBody.getJacksonString(View.Patent.class);
+		
+	}
+
+	@RequestMapping(value="/api/syncapplicant", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String syncApplicantData(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
+		log.info("syncapplicant ");
+		ListResponseBody responseBody  = new ListResponseBody();
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		String businessName = jsonObject.getString("business_name");
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				String ip = request.getRemoteAddr();
+
+				List<Patent> list = new ArrayList<>();
+				int taskResult = patentService.addPatentByApplicant(list, businessName, Constants.SYSTEM_ADMIN, tokenBean.getBusiness().getBusiness_id(), ip);
+				for (Patent patent:list) {
+					patentService.syncPatentStatus(patent);
+				}
+				responseBody.setCode(taskResult);
+				responseBody.setTotal_count(list.size());
+				responseBody.setList(list);
+			}else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		
+
 		return responseBody.getJacksonString(View.Patent.class);
 	}
 
