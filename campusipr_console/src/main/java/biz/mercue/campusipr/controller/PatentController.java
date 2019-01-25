@@ -175,7 +175,7 @@ public class PatentController {
 	public String getPatentList(HttpServletRequest request,
 			@RequestParam(value ="page",required=false,defaultValue ="1") int page,
 			@RequestParam(value ="order_field",required=false,defaultValue ="") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue ="") int is_asc) {
+			@RequestParam(value ="asc",required=false,defaultValue ="1") int is_asc) {
 		log.info("getPatentList ");
 		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));

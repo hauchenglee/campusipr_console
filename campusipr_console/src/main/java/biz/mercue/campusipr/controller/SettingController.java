@@ -102,14 +102,19 @@ public class SettingController {
 	
 	@RequestMapping(value="/api/getannuityreminder", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String getAnnuityReminder(HttpServletRequest request) {
-		log.info("Annuity ");
+	public String getAnnuityReminder(HttpServletRequest request,
+	  @RequestParam(value ="business",required=false,defaultValue ="") String businessId) {
+		log.info("getAnnuityReminder ");
 		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		
 		if(tokenBean!=null) {
-		
-			AnnuityReminder reminder = annuityReminderService.getByBusinessId(tokenBean.getBusiness().getBusiness_id());
+			AnnuityReminder reminder = null;
+			if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+				reminder = annuityReminderService.getByBusinessId(businessId);
+			}else {
+				reminder = annuityReminderService.getByBusinessId(tokenBean.getBusiness().getBusiness_id());
+			}
 			responseBody.setCode(Constants.INT_SUCCESS);
 			responseBody.setBean(reminder);
 		}else {
