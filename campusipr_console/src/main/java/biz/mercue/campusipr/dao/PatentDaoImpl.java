@@ -217,6 +217,45 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 	
 	@Override
+	public List<Patent> searchFieldCountryPatent(List<String> coutryIdList, String fieldCode, String businessId, int page, int pageSize,String orderFieldId,int is_asc){
+		Session session = getSession();
+		String queryStr = "SELECT p from Patent p ";
+		if(!StringUtils.isNULL(businessId)) {
+			queryStr += "JOIN p.listBusiness lb WHERE p.patent_appl_country IN (:list) and lb.business_id = :businessId";
+		}else {
+			queryStr += "WHERE p.patent_appl_country IN (:list)";
+		}
+		Query q = session.createQuery(queryStr);
+		
+		if(!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		q.setParameter("list", coutryIdList);
+		q.setFirstResult((page - 1) * pageSize);
+		q.setMaxResults(pageSize);
+		return q.list();
+	}
+	
+	@Override
+	public int countSearchFieldCountryPatent(List<String> coutryIdList, String fieldCode,String businessId){
+		Session session = getSession();
+		String queryStr = "SELECT count(p) from Patent p ";
+		if(!StringUtils.isNULL(businessId)) {
+			queryStr += "JOIN p.listBusiness lb WHERE p.patent_appl_country IN (:list) and lb.business_id = :businessId";
+		}else {
+			queryStr += "WHERE p.patent_appl_country IN (:list)";
+		}
+		Query q = session.createQuery(queryStr);
+		
+		if(!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		q.setParameter("list", coutryIdList);
+		long count = (long)q.uniqueResult();
+		return (int)count;
+	}
+	
+	@Override
 	public List<Patent> searchFieldPatent(Date startDate, Date endDate, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc){
 		Criteria criteria =  createEntityCriteria();
 		if(!StringUtils.isNULL(businessId)) {

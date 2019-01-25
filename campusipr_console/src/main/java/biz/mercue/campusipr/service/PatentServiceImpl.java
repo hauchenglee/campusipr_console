@@ -24,6 +24,7 @@ import biz.mercue.campusipr.dao.AdminDao;
 import biz.mercue.campusipr.dao.ApplicantDao;
 import biz.mercue.campusipr.dao.AssigneeDao;
 import biz.mercue.campusipr.dao.BusinessDao;
+import biz.mercue.campusipr.dao.CountryDao;
 import biz.mercue.campusipr.dao.FieldDao;
 import biz.mercue.campusipr.dao.IPCClassDao;
 import biz.mercue.campusipr.dao.InventorDao;
@@ -36,6 +37,7 @@ import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Business;
+import biz.mercue.campusipr.model.Country;
 import biz.mercue.campusipr.model.IPCClass;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.ListQueryForm;
@@ -74,6 +76,9 @@ public class PatentServiceImpl implements PatentService{
 	
 	@Autowired
 	private BusinessDao businessDao;
+	
+	@Autowired
+	private CountryDao countryDao;
 	
 	@Autowired
 	private PatentDao patentDao;
@@ -847,6 +852,17 @@ public class PatentServiceImpl implements PatentService{
 				count = patentDao.countSearchFieldPatent('%'+text+'%', field.getField_code(), businessId);
 				break;
 			case Constants.PATENT_COUNTRY_FIELD:
+				String countryName = (String) searchObj;
+				List<Country> countryList = countryDao.getListByFuzzy(countryName);
+				List<String> coutryIdList = new ArrayList<>();
+				for (Country country:countryList) {
+					if (!coutryIdList.contains(country.getCountry_id())) {
+						coutryIdList.add(country.getCountry_id());
+					}
+				}
+				log.info(coutryIdList);
+				list = patentDao.searchFieldCountryPatent(coutryIdList, field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE, orderFieldId, is_asc);
+				count = patentDao.countSearchFieldCountryPatent(coutryIdList, field.getField_code(), businessId);
 				break;
 				
 				
@@ -857,6 +873,7 @@ public class PatentServiceImpl implements PatentService{
 				Date sd = new Date(Long.valueOf(searchDateObj[0]));
 				Date ed = new Date(Long.valueOf(searchDateObj[1]));
 				list = patentDao.searchFieldPatent(sd, ed, field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
+				count = patentDao.countSearchFieldPatent(sd, ed, field.getField_code(), businessId);
 				break;
 				
 			case Constants.ASSIGNEE_NAME_FIELD:

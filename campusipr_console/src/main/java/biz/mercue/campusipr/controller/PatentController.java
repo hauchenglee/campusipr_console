@@ -436,10 +436,10 @@ public class PatentController {
 	@ResponseBody
 	public String searchPatent(HttpServletRequest request,
 			@RequestBody String receiveJSONString,
-			@RequestParam(value ="page",required=false,defaultValue ="1") int page,
-			@RequestParam(value ="order_field",required=false,defaultValue ="") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue ="") int is_asc) {
+			@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
 		log.info("searchpatent ");
+		String fieldId = "";
+		int is_asc = 0;
 		ListResponseBody responseBody  = new ListResponseBody();
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
 		String fieldStr = jsonObject.getJSONObject("field").toString();

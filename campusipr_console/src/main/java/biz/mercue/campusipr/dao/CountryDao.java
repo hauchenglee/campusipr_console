@@ -17,6 +17,5 @@ public interface CountryDao {
 	
 	
 	List<Country> getListByFuzzy(String name);
-	
 
 }
