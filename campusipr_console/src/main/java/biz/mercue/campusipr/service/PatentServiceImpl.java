@@ -740,7 +740,18 @@ public class PatentServiceImpl implements PatentService{
 	@Override
 	public 	ListQueryForm getByBusinessId(String businessId,int page,String orderFieldId,int is_asc) {
 		log.info("businessId:"+businessId);
-		List<Patent> list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE,orderFieldId,is_asc);
+		
+		PatentField orderField = null;
+		String orderFieldCode = null;
+		if(!StringUtils.isNULL(orderFieldId)) {
+			orderField = fieldDao.getById(orderFieldId);
+			if(orderField!=null) {
+				orderFieldCode = orderField.getField_code();
+			}
+		}
+		List<Patent> list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
+		
+		
 		for(Patent patent : list) {
 			patent.getListStatus().size();
 			patent.getListExtension().size();
@@ -811,12 +822,12 @@ public class PatentServiceImpl implements PatentService{
 	public ListQueryForm fieldSearchPatent(Object searchObj, String fieldId, String businessId, int page,String orderFieldId,int is_asc) {
 		//check text is date or not
 		PatentField field = fieldDao.getById(fieldId);
-		PatentField searchField = null;
+		PatentField orderField = null;
 		String orderFieldCode = null;
 		if(!StringUtils.isNULL(orderFieldId)) {
-			searchField = fieldDao.getById(orderFieldId);
-			if(searchField!=null) {
-				orderFieldCode = searchField.getField_code();
+			orderField = fieldDao.getById(orderFieldId);
+			if(orderField!=null) {
+				orderFieldCode = orderField.getField_code();
 			}
 		}
 		int count = 0;

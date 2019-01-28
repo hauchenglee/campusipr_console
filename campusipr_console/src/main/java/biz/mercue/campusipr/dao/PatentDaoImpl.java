@@ -78,7 +78,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 
 	@Override
-	public List<Patent> getByBusinessId(String businessId,int page,int pageSize,String orderFieldId,int is_asc){
+	public List<Patent> getByBusinessId(String businessId,int page,int pageSize,String orderFieldCode,int is_asc){
 		log.info("businessId:"+businessId);
 		Criteria criteria =null;
 		if(!StringUtils.isNULL(businessId)) {
