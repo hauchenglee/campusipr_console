@@ -436,10 +436,10 @@ public class PatentController {
 	@ResponseBody
 	public String searchPatent(HttpServletRequest request,
 			@RequestBody String receiveJSONString,
-			@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
+			@RequestParam(value ="page",required=false,defaultValue ="1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue ="") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue ="1") int is_asc) {
 		log.info("searchpatent ");
-		String fieldId = "";
-		int is_asc = 0;
 		ListResponseBody responseBody  = new ListResponseBody();
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
 		String fieldStr = jsonObject.getJSONObject("field").toString();
@@ -466,11 +466,8 @@ public class PatentController {
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
-		if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-			return responseBody.getJacksonString(View.Patent.class);
-		}else {
-			return responseBody.getJacksonString(View.PatentEnhance.class);
-		}
+		return responseBody.getJacksonString(View.Patent.class);
+		
 	}
 	
 
@@ -513,7 +510,7 @@ public class PatentController {
 				String ip = request.getRemoteAddr();
 
 				List<Patent> list = new ArrayList<>();
-				int taskResult = patentService.addPatentByApplicant(list, businessName, Constants.SYSTEM_ADMIN, tokenBean.getBusiness().getBusiness_id(), ip);
+				int taskResult = patentService.addPatentByApplicant(list, Constants.SYSTEM_ADMIN, tokenBean.getBusiness().getBusiness_id(), ip);
 				for (Patent patent:list) {
 					patentService.syncPatentStatus(patent);
 				}

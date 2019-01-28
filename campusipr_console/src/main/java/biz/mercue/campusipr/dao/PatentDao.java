@@ -20,6 +20,9 @@ public interface PatentDao {
 	
 	
 	List<Patent> getByBusinessId(String businessId,int page,int pageSize,String orderFieldId,int is_asc);
+	List<Patent> getByBusinessIdOderExtension(String businessId,int page,int pageSize,String orderFieldCode,int is_asc);
+	List<Patent> getByBusinessIdOderStatus(String businessId,int page,int pageSize,String orderFieldCode,int is_asc);
+	List<Patent> getByBusinessIdOderFamily(String businessId,int page,int pageSize,String orderFieldCode,int is_asc);
 	int  getCountByBusinessId(String businessId);	
 	
 	List<Patent> getAllByBusinessId(String businessId);

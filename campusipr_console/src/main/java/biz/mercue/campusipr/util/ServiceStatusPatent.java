@@ -44,9 +44,14 @@ public class ServiceStatusPatent {
 			}
 			
 			try {
-				String content = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));
-				if (!StringUtils.isNULL(content)) {
-					convertPatentStatusInfoEPOXml(patent, content);
+				String token = generateToken("Basic "+Constants.PATENT_TOKEN_EU);
+				if (token != null) {
+					String content = (HttpRequestUtils.sendGetByToken(url, token));
+					if (!StringUtils.isNULL(content)) {
+						convertPatentStatusInfoEPOXml(patent, content);
+					}
+				} else {
+					log.error("token must not null");
 				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -171,9 +176,12 @@ public class ServiceStatusPatent {
 		String authToken = null;
 		try {
 			String param = "grant_type=client_credentials";
-			JSONObject contentObj = new JSONObject(HttpRequestUtils.sendPostByToken(url, param, token));
-			authToken = "Bearer "+contentObj.optString("access_token");
-			log.info("AuthTokn:"+authToken);
+			String context = HttpRequestUtils.sendPostByToken(url, param, token);
+			if (!StringUtils.isNULL(context)) {
+				JSONObject contentObj = new JSONObject(context);
+				authToken = "Bearer "+contentObj.optString("access_token");
+				log.info("AuthTokn:"+authToken);
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

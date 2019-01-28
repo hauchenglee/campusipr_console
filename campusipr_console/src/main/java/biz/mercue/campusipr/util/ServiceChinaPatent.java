@@ -49,57 +49,62 @@ public class ServiceChinaPatent {
 				}
 				
 				try {
-					String context = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));
-					if (!StringUtils.isNULL(context)) {
-						try {
-							DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-							dbf.setValidating(false);
-							dbf.setNamespaceAware(true);
-							dbf.setFeature("http://xml.org/sax/features/namespaces", false);
-							dbf.setFeature("http://xml.org/sax/features/validation", false);
-							dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
-							dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-							
-							DocumentBuilder db = dbf.newDocumentBuilder();
-							InputSource is = new InputSource();
-							is.setCharacterStream(new StringReader(context));
-							Document doc = db.parse(is);
-							doc.getDocumentElement().normalize();
-							NodeList documentList = doc.getElementsByTagName("document-id");
-							for (int temp = 0; temp < documentList.getLength(); temp++) {
-								Node nNode = documentList.item(temp);
-								if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
-									Element eElement = (Element) nNode;
-									String formatType = eElement.getAttribute("document-id-type");
-									String countryId = null;
-									String docId = null;
-									NodeList cNodes = eElement.getChildNodes();
-									for (int childIndex = 0; childIndex < cNodes.getLength(); childIndex++) {
-										Node cNode = cNodes.item(childIndex);
-										if (cNode.getNodeType() == Node.ELEMENT_NODE) { 
-											Element cElement = (Element) cNode;
-											if ("country".equals(cElement.getNodeName())) {
-												countryId = cElement.getTextContent();
-											}
-											if ("doc-number".equals(cElement.getNodeName())) {
-												docId = cElement.getTextContent();
+					String token = generateToken("Basic "+Constants.PATENT_TOKEN_EU);
+					if (token != null) {
+						String context = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));
+						if (!StringUtils.isNULL(context)) {
+							try {
+								DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+								dbf.setValidating(false);
+								dbf.setNamespaceAware(true);
+								dbf.setFeature("http://xml.org/sax/features/namespaces", false);
+								dbf.setFeature("http://xml.org/sax/features/validation", false);
+								dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+								dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+								
+								DocumentBuilder db = dbf.newDocumentBuilder();
+								InputSource is = new InputSource();
+								is.setCharacterStream(new StringReader(context));
+								Document doc = db.parse(is);
+								doc.getDocumentElement().normalize();
+								NodeList documentList = doc.getElementsByTagName("document-id");
+								for (int temp = 0; temp < documentList.getLength(); temp++) {
+									Node nNode = documentList.item(temp);
+									if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
+										Element eElement = (Element) nNode;
+										String formatType = eElement.getAttribute("document-id-type");
+										String countryId = null;
+										String docId = null;
+										NodeList cNodes = eElement.getChildNodes();
+										for (int childIndex = 0; childIndex < cNodes.getLength(); childIndex++) {
+											Node cNode = cNodes.item(childIndex);
+											if (cNode.getNodeType() == Node.ELEMENT_NODE) { 
+												Element cElement = (Element) cNode;
+												if ("country".equals(cElement.getNodeName())) {
+													countryId = cElement.getTextContent();
+												}
+												if ("doc-number".equals(cElement.getNodeName())) {
+													docId = cElement.getTextContent();
+												}
 											}
 										}
-									}
-									if (!dupucateStr.contains(countryId+docId)) {
-										Patent patent = new Patent();
-										patent.setPatent_publish_no(countryId+docId);
-										patent.setPatent_appl_country(countryId.toLowerCase());
-										parserBilbo(patent, formatType);
-										list.add(patent);
-										dupucateStr.add(countryId+docId);
+										if (!dupucateStr.contains(countryId+docId)) {
+											Patent patent = new Patent();
+											patent.setPatent_publish_no(countryId+docId);
+											patent.setPatent_appl_country(countryId.toLowerCase());
+											parserBilbo(patent, formatType);
+											list.add(patent);
+											dupucateStr.add(countryId+docId);
+										}
 									}
 								}
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
 						}
+					} else {
+						log.error("token must not null");
 					}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
@@ -379,9 +384,12 @@ public class ServiceChinaPatent {
 		String authToken = null;
 		try {
 			String param = "grant_type=client_credentials";
-			JSONObject contentObj = new JSONObject(HttpRequestUtils.sendPostByToken(url, param, token));
-			authToken = "Bearer "+contentObj.optString("access_token");
-			log.info("AuthTokn:"+authToken);
+			String context = HttpRequestUtils.sendPostByToken(url, param, token);
+			if (!StringUtils.isNULL(context)) {
+				JSONObject contentObj = new JSONObject(context);
+				authToken = "Bearer "+contentObj.optString("access_token");
+				log.info("AuthTokn:"+authToken);
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
