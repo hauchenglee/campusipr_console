@@ -889,7 +889,7 @@ public class PatentServiceImpl implements PatentService{
 				
 			case Constants.ASSIGNEE_NAME_FIELD:
 			case Constants.APPLIANT_NAME_FIELD:
-			case Constants.IVENTOR_NAME_FIELD:
+			case Constants.INVENTOR_NAME_FIELD:
 				String name = (String) searchObj;
 				list = patentDao.searchFieldHumanListPatent('%'+name+'%',field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
 				count = patentDao.countSearchFieldHumanListPatent('%'+name+'%',field.getField_code(), businessId);
@@ -1162,7 +1162,7 @@ public class PatentServiceImpl implements PatentService{
 					if (peh != null) {dbBean.addHistory(peh);}
 				}
 			}
-			if (Constants.IVENTOR_NAME_FIELD.equals(field.getField_id())) {
+			if (Constants.INVENTOR_NAME_FIELD.equals(field.getField_id())) {
 				//add
 				List<String> invAddData = new ArrayList<>();
 				HashMap<String, Inventor> mapping = new HashMap<String, Inventor>();
@@ -1296,7 +1296,7 @@ public class PatentServiceImpl implements PatentService{
 					history.setDisplay_data(history.getHistory_data());
 					history.setDisplay_data_en(history.getHistory_data());
 					break;
-				case Constants.IVENTOR_NAME_FIELD:
+				case Constants.INVENTOR_NAME_FIELD:
 
 					List<Inventor> listInventor = (List<Inventor>) JacksonJSONUtils.readValue(history.getHistory_data(), new TypeReference<List<Inventor>>(){});
 					if(listInventor!=null && listInventor.size() > 0 ) {

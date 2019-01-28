@@ -413,13 +413,13 @@ public class PatentController {
 		BeanResponseBody responseBody = new BeanResponseBody();
 		try {
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-//			if (tokenBean != null) {
-//				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
-//				int result = excelTaskService.submitTask(task,tokenBean.getAdmin());
-//				responseBody.setCode(result);
-//			} else {
-//				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-//			}
+			if (tokenBean != null) {
+				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
+				int result = excelTaskService.submitTask(task,tokenBean.getAdmin());
+				responseBody.setCode(result);
+			} else {
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			}
 			
 			responseBody.setCode(Constants.INT_SUCCESS);
 		} catch (Exception e) {

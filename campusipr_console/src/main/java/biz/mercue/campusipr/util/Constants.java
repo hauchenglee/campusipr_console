@@ -269,7 +269,7 @@ public class Constants {
 	public static final String PATENT_PUBLISH_DATE_FIELD = "eb2f853e0fefd4af566cbd1fa8f5f744";
 	public static final String ASSIGNEE_NAME_FIELD = "614191c8ec65d0e6429801429794ebcd";
 	public static final String APPLIANT_NAME_FIELD = "6c761184252dd9f0148a361ed9c4c8c2";
-	public static final String IVENTOR_NAME_FIELD = "f08b87006f899e74c0b570f76349f49d";
+	public static final String INVENTOR_NAME_FIELD = "f08b87006f899e74c0b570f76349f49d";
 	public static final String PATENT_STATUS_FIELD = "bca0a0b8d0cc16e64758ad3a0fec31ee";
 	public static final String PATENT_COST_FIELD = "3892cf473179f665709031feccfc8ac8";
 	public static final String PATENT_FAMILY_FIELD = "ce47e85fa784fd2a4a681ccf572712c9";

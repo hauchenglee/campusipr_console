@@ -191,6 +191,10 @@ public class Patent extends BaseBean{
 	@JsonView(View.PatentDetail.class)
 	private Admin admin;
 	
+	
+	@Transient
+	private PatentExtension extension;
+	
 	@Transient
 	private String admin_ip;
 	
@@ -576,6 +580,14 @@ public class Patent extends BaseBean{
 
 	public void setListAnnuity(List<Annuity> listAnnuity) {
 		this.listAnnuity = listAnnuity;
+	}
+
+	public PatentExtension getExtension() {
+		return extension;
+	}
+
+	public void setExtension(PatentExtension extension) {
+		this.extension = extension;
 	}
 
 
