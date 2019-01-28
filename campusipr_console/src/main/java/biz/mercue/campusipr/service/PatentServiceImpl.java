@@ -677,8 +677,31 @@ public class PatentServiceImpl implements PatentService{
 				orderFieldCode = orderField.getField_code();
 			}
 		}
-		List<Patent> list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
-		
+		List<Patent> list = new ArrayList<>();
+		switch (orderFieldId) {
+		case Constants.PATENT_NAME_FIELD:
+		case Constants.PATENT_NAME_EN_FIELD:
+		case Constants.PATENT_APPL_NO_FIELD:
+			list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
+			break;
+		case Constants.SCHOOL_NO_FIELD:
+			List<Patent> sourcelist = patentDao.getByBusinessIdOderExtension(businessId,page,Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
+			for (Patent patent:sourcelist) {
+				if (!list.contains(patent)) {
+					list.add(patent);
+				}
+			}
+			break;
+		case Constants.PATENT_FAMILY_FIELD:
+			list = patentDao.getByBusinessIdOderFamily(businessId, page, Constants.SYSTEM_PAGE_SIZE, orderFieldCode, is_asc);
+			break;
+		case Constants.PATENT_STATUS_FIELD:
+			list = patentDao.getByBusinessIdOderStatus(businessId, page, Constants.SYSTEM_PAGE_SIZE, orderFieldCode, is_asc);
+			break;
+		default:
+			list = patentDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE,orderFieldCode,is_asc);
+			break;
+		}
 		
 		for(Patent patent : list) {
 			patent.getListStatus().size();
