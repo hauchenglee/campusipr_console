@@ -142,43 +142,48 @@ public class ServiceUSPatent {
 		url = String.format(url, patent.getPatent_publish_no());
 		
 		try {
-			String content = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));
-			if (!StringUtils.isNULL(content)) {
-				try {
-					DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-					dbf.setValidating(false);
-					dbf.setNamespaceAware(true);
-					dbf.setFeature("http://xml.org/sax/features/namespaces", false);
-					dbf.setFeature("http://xml.org/sax/features/validation", false);
-					dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
-					dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-					
-					DocumentBuilder db = dbf.newDocumentBuilder();
-					InputSource is = new InputSource();
-					is.setCharacterStream(new StringReader(content));
-					org.w3c.dom.Document doc = db.parse(is);
-					doc.getDocumentElement().normalize();
-					
-					NodeList ipcrList = doc.getElementsByTagName("classification-ipcr");
-					List<IPCClass> listIPC = new ArrayList<IPCClass>();
-					for (int temp = 0; temp < ipcrList.getLength(); temp++) {
-						org.w3c.dom.Node nNode = ipcrList.item(temp);
-						if (nNode.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) { 
-							org.w3c.dom.Element eElement = (org.w3c.dom.Element) nNode;
-							IPCClass ipc = new IPCClass();
-							String ipcId = eElement.getTextContent().replaceAll("\\s+","")
-									.substring(0, eElement.getTextContent().replaceAll("\\s+","").length()-2);
-							ipcId = ipcId.substring(0,4)+" "+ipcId.substring(4,ipcId.length());
-							ipc.setIpc_class_id(ipcId);
-							int year = Calendar.getInstance().get(Calendar.YEAR);
-							ipc.setIpc_version(Integer.toString(year)+"01");
-							listIPC.add(ipc);
+			String token = generateToken("Basic "+Constants.PATENT_TOKEN_EU);
+			if (token != null) {
+				String content = (HttpRequestUtils.sendGetByToken(url, token));
+				if (!StringUtils.isNULL(content)) {
+					try {
+						DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+						dbf.setValidating(false);
+						dbf.setNamespaceAware(true);
+						dbf.setFeature("http://xml.org/sax/features/namespaces", false);
+						dbf.setFeature("http://xml.org/sax/features/validation", false);
+						dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+						dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+						
+						DocumentBuilder db = dbf.newDocumentBuilder();
+						InputSource is = new InputSource();
+						is.setCharacterStream(new StringReader(content));
+						org.w3c.dom.Document doc = db.parse(is);
+						doc.getDocumentElement().normalize();
+						
+						NodeList ipcrList = doc.getElementsByTagName("classification-ipcr");
+						List<IPCClass> listIPC = new ArrayList<IPCClass>();
+						for (int temp = 0; temp < ipcrList.getLength(); temp++) {
+							org.w3c.dom.Node nNode = ipcrList.item(temp);
+							if (nNode.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) { 
+								org.w3c.dom.Element eElement = (org.w3c.dom.Element) nNode;
+								IPCClass ipc = new IPCClass();
+								String ipcId = eElement.getTextContent().replaceAll("\\s+","")
+										.substring(0, eElement.getTextContent().replaceAll("\\s+","").length()-2);
+								ipcId = ipcId.substring(0,4)+" "+ipcId.substring(4,ipcId.length());
+								ipc.setIpc_class_id(ipcId);
+								int year = Calendar.getInstance().get(Calendar.YEAR);
+								ipc.setIpc_version(Integer.toString(year)+"01");
+								listIPC.add(ipc);
+							}
 						}
+						patent.setListIPC(listIPC);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					patent.setListIPC(listIPC);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} else {
+					log.error("token must not null");
 				}
 			}
 		} catch (JSONException e) {
@@ -486,9 +491,12 @@ public class ServiceUSPatent {
 		String authToken = null;
 		try {
 			String param = "grant_type=client_credentials";
-			JSONObject contentObj = new JSONObject(HttpRequestUtils.sendPostByToken(url, param, token));
-			authToken = "Bearer "+contentObj.optString("access_token");
-			log.info("AuthTokn:"+authToken);
+			String context = HttpRequestUtils.sendPostByToken(url, param, token);
+			if (!StringUtils.isNULL(context)) {
+				JSONObject contentObj = new JSONObject(context);
+				authToken = "Bearer "+contentObj.optString("access_token");
+				log.info("AuthTokn:"+authToken);
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
