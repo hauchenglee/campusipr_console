@@ -34,6 +34,7 @@ public class AnnuityReminder extends BaseBean{
 	@JsonView(View.Reminder.class)
 	private int phone_day;
 	
+	@JsonView(View.Reminder.class)
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name="business_id", referencedColumnName="business_id")
 	private Business business;

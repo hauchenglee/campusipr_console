@@ -12,7 +12,7 @@ public interface AnnuityReminderService {
 
     void create(AnnuityReminder reminder);
 	
-    void update(AnnuityReminder reminder);
+    int update(AnnuityReminder reminder);
 	
 	AnnuityReminder getByBusinessId(String businessId);
 

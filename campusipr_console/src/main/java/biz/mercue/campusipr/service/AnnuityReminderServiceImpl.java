@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import biz.mercue.campusipr.dao.AnnuityReminderDao;
 import biz.mercue.campusipr.model.AnnuityReminder;
+import biz.mercue.campusipr.util.Constants;
 
 
 @Service("annuityReminderService")
@@ -31,7 +32,7 @@ public class AnnuityReminderServiceImpl implements AnnuityReminderService{
     }
 	
 	@Override
-	public void update(AnnuityReminder reminder) {
+	public int update(AnnuityReminder reminder) {
 		AnnuityReminder dbBean = annuityReminderDao.getByBusinessId(reminder.getBusiness().getBusiness_id());
 
 		if(dbBean!=null){
@@ -39,6 +40,9 @@ public class AnnuityReminderServiceImpl implements AnnuityReminderService{
 			dbBean.setPhone_day(reminder.getPhone_day());
 			dbBean.setAvailable(reminder.isAvailable());
 			dbBean.setUpdate_date(new Date());
+			return Constants.INT_SUCCESS;
+		}else {
+			return Constants.INT_CANNOT_FIND_DATA;
 		}
     }
 	

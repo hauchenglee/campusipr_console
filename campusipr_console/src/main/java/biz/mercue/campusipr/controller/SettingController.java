@@ -28,15 +28,18 @@ import biz.mercue.campusipr.model.AnnuityReminder;
 import biz.mercue.campusipr.model.Banner;
 import biz.mercue.campusipr.model.Country;
 import biz.mercue.campusipr.model.Currency;
+import biz.mercue.campusipr.model.FieldSync;
 import biz.mercue.campusipr.model.PatentField;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.AnnuityReminderService;
 import biz.mercue.campusipr.service.BannerService;
+import biz.mercue.campusipr.service.BusinessService;
 import biz.mercue.campusipr.service.CountryService;
 import biz.mercue.campusipr.service.CurrencyService;
 import biz.mercue.campusipr.service.PermissionService;
 import biz.mercue.campusipr.service.FieldService;
+import biz.mercue.campusipr.service.FieldSyncService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.ImageUtils;
@@ -70,6 +73,13 @@ public class SettingController {
 	
 	@Autowired
 	FieldService fieldService;
+	
+	
+	@Autowired
+	FieldSyncService fieldSyncService;
+	
+	@Autowired
+	BusinessService businessService;
 	
 	
 	@RequestMapping(value="/api/countrylist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
@@ -107,10 +117,11 @@ public class SettingController {
 		log.info("getAnnuityReminder ");
 		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		
+		log.info("business:"+businessId);
 		if(tokenBean!=null) {
 			AnnuityReminder reminder = null;
 			if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+				log.info("cross business");
 				reminder = annuityReminderService.getByBusinessId(businessId);
 			}else {
 				reminder = annuityReminderService.getByBusinessId(tokenBean.getBusiness().getBusiness_id());
@@ -134,9 +145,16 @@ public class SettingController {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
 			AnnuityReminder reminder = (AnnuityReminder) JacksonJSONUtils.readValue(receiveJSONString, AnnuityReminder.class);
-			annuityReminderService.update(reminder);
-			responseBody.setCode(Constants.INT_SUCCESS);
-			responseBody.setBean(reminder);
+			if(!tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+				
+			}else {
+				reminder.setBusiness(tokenBean.getBusiness());
+			}
+			int taskResult = annuityReminderService.update(reminder);
+			responseBody.setCode(taskResult);
+			if(taskResult == Constants.INT_SUCCESS) {
+				responseBody.setBean(reminder);
+			}
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			
@@ -336,6 +354,25 @@ public class SettingController {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
 			List<PatentField>  list  = fieldService.getAllFields();
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setList(list);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		
+		
+		
+		return responseBody.getJacksonString(View.Public.class);
+	}
+	
+	
+	@RequestMapping(value="/api/getallfieldsync", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String getAllFieldSync(HttpServletRequest request) {
+		ListResponseBody responseBody  = new ListResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			List<FieldSync>  list  = fieldSyncService.getAll();
 			responseBody.setCode(Constants.INT_SUCCESS);
 			responseBody.setList(list);
 		}else {
