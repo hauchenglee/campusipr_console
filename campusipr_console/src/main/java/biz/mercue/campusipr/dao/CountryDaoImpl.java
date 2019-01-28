@@ -57,8 +57,5 @@ public class CountryDaoImpl extends AbstractDao<String,  Country> implements Cou
 		return criteria.list();
 	}
 	
-	
-
-	
 
 }
