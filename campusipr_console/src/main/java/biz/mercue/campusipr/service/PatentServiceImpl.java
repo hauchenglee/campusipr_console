@@ -168,7 +168,7 @@ public class PatentServiceImpl implements PatentService{
 	@Override
 	public ListQueryForm getHistoryBypatentId(String businessId,String patentId,String fieldId,int page) {
 		List<PatentEditHistory> listpeh = pehDao.getByPatentAndField(patentId, fieldId, businessId,page,Constants.SYSTEM_PAGE_SIZE);
-		handleEditHistory(listpeh);
+		getDisplayEditHistory(listpeh);
 		int count = pehDao.countByPatentAndField(patentId, fieldId, businessId);
 		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,listpeh);
 		
@@ -504,8 +504,7 @@ public class PatentServiceImpl implements PatentService{
 					PatentAbstract paDb = dbBean.getPatentAbstract();
 					paDb.setContext_abstract(patent.getPatentAbstract().getContext_abstract());
 				} else {
-					if (StringUtils.isNULL(
-							patent.getPatentAbstract().getPatent_abstract_id())) {
+					if (StringUtils.isNULL(patent.getPatentAbstract().getPatent_abstract_id())) {
 						patent.getPatentAbstract().setPatent_abstract_id(KeyGeneratorUtils.generateRandomString());
 					}
 					patent.getPatentAbstract().setPatent(patent);
@@ -518,8 +517,7 @@ public class PatentServiceImpl implements PatentService{
 					PatentClaim pcDb = dbBean.getPatentClaim();
 					pcDb.setContext_claim(patent.getPatentClaim().getContext_claim());
 				} else {
-					if (StringUtils.isNULL(
-							patent.getPatentClaim().getPatent_claim_id())) {
+					if (StringUtils.isNULL(patent.getPatentClaim().getPatent_claim_id())) {
 						patent.getPatentClaim().setPatent_claim_id(KeyGeneratorUtils.generateRandomString());
 					}
 					patent.getPatentClaim().setPatent(patent);
@@ -529,15 +527,11 @@ public class PatentServiceImpl implements PatentService{
 			
 			if (patent.getPatentDesc() != null) {
 				String descStr = patent.getPatentDesc().getContext_desc();
-				if (patent.getPatentDesc().getContext_desc().length() > 65000) {
-					descStr = descStr.substring(0, 65000)+"....";
-				}
 				if (dbBean.getPatentDesc() != null) {
 					PatentDescription pdDb = dbBean.getPatentDesc();
 					pdDb.setContext_desc(descStr);
 				} else {
-					if (StringUtils.isNULL(
-							patent.getPatentDesc().getPatent_desc_id())) {
+					if (StringUtils.isNULL(patent.getPatentDesc().getPatent_desc_id())) {
 						patent.getPatentDesc().setPatent_desc_id(KeyGeneratorUtils.generateRandomString());
 					}
 					patent.getPatentDesc().setPatent(patent);
@@ -553,6 +547,8 @@ public class PatentServiceImpl implements PatentService{
              		   ipcDao.create(ipc);
              	   }
                 }
+                
+                handleIPC(dbBean, patent);
             }
 			
 			//TODO charles 
@@ -1190,22 +1186,39 @@ public class PatentServiceImpl implements PatentService{
 		return peh;
 	}
 	
-	 private  void handleCost(Patent dbPatent,Patent editPatent) {
-	       List<PatentCost> listCost = editPatent.getListCost();
-	       for(PatentCost cost :listCost) {
-	           if(StringUtils.isNULL(cost.getCost_id())) {
-	               cost.setCost_id(KeyGeneratorUtils.generateRandomString());
-	           }
-	           cost.setPatent(dbPatent);
-	       }
-	       patentDao.deletePatentCost(dbPatent.getPatent_id());
-	       dbPatent.setListCost(editPatent.getListCost());
-	   }
+	private void handleCost(Patent dbPatent, Patent editPatent) {
+		if (editPatent.getListCost() != null && editPatent.getListCost().size() > 0) {
+			List<PatentCost> listCost = editPatent.getListCost();
+			for (PatentCost cost : listCost) {
+				if (StringUtils.isNULL(cost.getCost_id())) {
+					cost.setCost_id(KeyGeneratorUtils.generateRandomString());
+				}
+				cost.setPatent(dbPatent);
+			}
+			patentDao.deletePatentCost(dbPatent.getPatent_id());
+			dbPatent.setListCost(editPatent.getListCost());
+		}
+	}
+	 
+	 
+	 private  void handleIPC(Patent dbBean, Patent editPatent) {
+		 if ( editPatent.getListIPC()!= null && editPatent.getListIPC().size() > 0) {
+//				List<PatentCost> listCost = editPatent.getListCost();
+//				for (PatentCost cost : listCost) {
+//					if (StringUtils.isNULL(cost.getCost_id())) {
+//						cost.setCost_id(KeyGeneratorUtils.generateRandomString());
+//					}
+//					cost.setPatent(dbPatent);
+//				}
+//				patentDao.deletePatentCost(dbPatent.getPatent_id());
+//				dbPatent.setListCost(editPatent.getListCost());
+		 }
+	 }
 	   
 	
 	
 	
-	private void handleEditHistory(List<PatentEditHistory> list) {
+	private void getDisplayEditHistory(List<PatentEditHistory> list) {
 		for(PatentEditHistory history : list) {
 			String fieldId = history.getField_id();
 			if(!StringUtils.isNULL(fieldId)) {
