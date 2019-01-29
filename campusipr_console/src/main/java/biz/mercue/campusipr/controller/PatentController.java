@@ -537,7 +537,7 @@ public class PatentController {
 				String ip = request.getRemoteAddr();
 
 				List<Patent> list = new ArrayList<>();
-				int taskResult = patentService.addPatentByApplicant(list, Constants.SYSTEM_ADMIN, tokenBean.getBusiness().getBusiness_id(), ip);
+				int taskResult = patentService.syncPatentsByApplicant(list, Constants.SYSTEM_ADMIN, tokenBean.getBusiness().getBusiness_id(), ip);
 				for (Patent patent:list) {
 					patentService.syncPatentStatus(patent);
 				}
