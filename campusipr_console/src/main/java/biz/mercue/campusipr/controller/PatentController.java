@@ -467,6 +467,7 @@ public class PatentController {
 			@RequestParam(value ="order_field",required=false,defaultValue ="") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue ="1") int is_asc) {
 		log.info("searchpatent ");
+		log.info("order_field:"+fieldId);
 		ListResponseBody responseBody  = new ListResponseBody();
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
 		String fieldStr = jsonObject.getJSONObject("field").toString();
