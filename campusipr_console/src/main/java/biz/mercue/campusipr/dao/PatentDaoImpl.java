@@ -196,6 +196,48 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc(orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc(orderFieldCode));
+			}
+		}
+		return criteria.list();
+	}
+	
+	@Override
+	public List<Patent> searchAllFieldPatentOderExtension(String  searchText,String businessId,int page,int pageSize,String orderFieldCode,int is_asc){
+		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
+		Criterion re1 = Restrictions.like("patent_name", searchText);
+		Criterion re2 = Restrictions.like("patent_name_en", searchText);
+		Criterion re3 = Restrictions.like("patent_appl_country", searchText);
+		Criterion re4 = Restrictions.like("patent_appl_no", searchText);
+		Criterion re5 = Restrictions.like("patent_notice_no", searchText);
+		Criterion re6 = Restrictions.like("patent_publish_no", searchText);
+		Criterion re7 = Restrictions.like("patent_no", searchText);
+		criteria.createAlias("patentAbstract", "pa", Criteria.LEFT_JOIN);
+		Criterion re8 = Restrictions.like("pa.context_abstract", searchText);
+		criteria.createAlias("patentClaim", "pc", Criteria.LEFT_JOIN);
+		Criterion re9 = Restrictions.like("pc.context_claim", searchText);
+		criteria.createAlias("patentDesc", "pd", Criteria.LEFT_JOIN);
+		Criterion re10 = Restrictions.like("pd.context_desc", searchText);
+		criteria.add(Restrictions.or(re1,re2,re3,re4,re5,re6,re7,re8,re9,re10));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			criteria.createAlias("listExtension","le", Criteria.LEFT_JOIN);
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc("le."+orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc("le."+orderFieldCode));
+			}
+		}
 		return criteria.list();
 	}
 	
@@ -485,84 +527,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		long count = (long)criteria.uniqueResult();
 		return (int)count;
 	}
-//	
-//	@Override
-//	public List<Patent> searchFieldApplicantListPatent(String searchText, String businessId, int page, int pageSize){
-//		Criteria criteria =  createEntityCriteria();
-//		if(!StringUtils.isNULL(businessId)) {
-//			criteria.createAlias("listBusiness","bs");
-//			criteria.add(Restrictions.eq("bs.business_id", businessId));
-//		}
-//		criteria.createAlias("listApplicant", "lApp");
-//		Criterion re1 = Restrictions.like("lApp.applicant_name", searchText);
-//		Criterion re2 = Restrictions.like("lApp.applicant_name_en", searchText);
-//		Criterion re3 = Restrictions.like("lApp.applicant_address", searchText);
-//		Criterion re4 = Restrictions.like("lApp.applicant_address_en", searchText);
-//		Criterion re5 = Restrictions.like("lApp.country_id", searchText);
-//		Criterion re6 = Restrictions.like("lApp.country_name", searchText);
-//		criteria.add(Restrictions.or(re1,re2,re3,re4,re5,re6));
-//		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-//		criteria.setFirstResult((page - 1) * pageSize);
-//		criteria.setMaxResults(pageSize);
-//		return criteria.list();
-//	}
-//	
-//	@Override
-//	public int countSearchFieldApplicantPatent(String searchText, String businessId){
-//		Criteria criteria =  createEntityCriteria();
-//		if(!StringUtils.isNULL(businessId)) {
-//			criteria.createAlias("listBusiness","bs");
-//			criteria.add(Restrictions.eq("bs.business_id", businessId));
-//		}
-//		criteria.createAlias("listApplicant", "lApp");
-//		Criterion re1 = Restrictions.like("lApp.applicant_name", searchText);
-//		Criterion re2 = Restrictions.like("lApp.applicant_name_en", searchText);
-//		Criterion re3 = Restrictions.like("lApp.applicant_address", searchText);
-//		Criterion re4 = Restrictions.like("lApp.applicant_address_en", searchText);
-//		Criterion re5 = Restrictions.like("lApp.country_id", searchText);
-//		Criterion re6 = Restrictions.like("lApp.country_name", searchText);
-//		criteria.add(Restrictions.or(re1,re2,re3,re4,re5,re6));
-//		criteria.setProjection(Projections.rowCount());
-//		long count = (long)criteria.uniqueResult();
-//		return (int)count;
-//	}
-//	
-//	@Override
-//	public List<Patent> searchFieldInventorListPatent(String searchText, String businessId, int page, int pageSize){
-//		Criteria criteria =  createEntityCriteria();
-//		if(!StringUtils.isNULL(businessId)) {
-//			criteria.createAlias("listBusiness","bs");
-//			criteria.add(Restrictions.eq("bs.business_id", businessId));
-//		}
-//		criteria.createAlias("listInventor", "lIn");
-//		Criterion re1 = Restrictions.like("lIn.inventor_name", searchText);
-//		Criterion re2 = Restrictions.like("lIn.inventor_name_en", searchText);
-//		Criterion re3 = Restrictions.like("lIn.country_id", searchText);
-//		Criterion re4 = Restrictions.like("lIn.country_name", searchText);
-//		criteria.add(Restrictions.or(re1,re2,re3,re4));
-//		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-//		criteria.setFirstResult((page - 1) * pageSize);
-//		criteria.setMaxResults(pageSize);
-//		return criteria.list();
-//	}
-	
-//	@Override
-//	public int countSearchFieldInventorPatent(String searchText, String businessId){
-//		Criteria criteria =  createEntityCriteria();
-//		if(!StringUtils.isNULL(businessId)) {
-//			criteria.createAlias("listBusiness","bs");
-//			criteria.add(Restrictions.eq("bs.business_id", businessId));
-//		}
-//		criteria.createAlias("listInventor", "lIn");
-//		Criterion re1 = Restrictions.like("lIn.inventor_name", searchText);
-//		Criterion re2 = Restrictions.like("lIn.inventor_name_en", searchText);
-//		Criterion re3 = Restrictions.like("lIn.country_id", searchText);
-//		Criterion re4 = Restrictions.like("lIn.country_name", searchText);
-//		criteria.add(Restrictions.or(re1,re2,re3,re4));
-//		criteria.setProjection(Projections.rowCount());
-//		long count = (long)criteria.uniqueResult();
-//		return (int)count;
-//	}
 	
 	@Override
 	public List<Patent> searchFieldStatusListPatent(String searchText, String businessId, int page, int pageSize,String orderFieldCode,int is_asc){
@@ -632,63 +596,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		return (int)count;
 	}
 	
-//	@Override
-//	public List<Patent> searchFieldCostListPatent(String searchText, String businessId, int page, int pageSize){
-//		Criteria criteria =  createEntityCriteria();
-//		if(!StringUtils.isNULL(businessId)) {
-//			criteria.createAlias("listBusiness","bs");
-//			criteria.add(Restrictions.eq("bs.business_id", businessId));
-//		}
-//		criteria.createAlias("listCost", "lC");
-//		criteria.add(Restrictions.like("lC.cost_name", searchText));
-//		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-//		criteria.setFirstResult((page - 1) * pageSize);
-//		criteria.setMaxResults(pageSize);
-//		return criteria.list();
-//	}
-//	
-//	@Override
-//	public int countSearchFieldCostPatent(String searchText, String businessId){
-//		Criteria criteria =  createEntityCriteria();
-//		if(!StringUtils.isNULL(businessId)) {
-//			criteria.createAlias("listBusiness","bs");
-//			criteria.add(Restrictions.eq("bs.business_id", businessId));
-//		}
-//		criteria.createAlias("listCost", "lC");
-//		criteria.add(Restrictions.like("lC.cost_name", searchText));
-//		criteria.setProjection(Projections.rowCount());
-//		long count = (long)criteria.uniqueResult();
-//		return (int)count;
-//	}
-	
-//	@Override
-//	public List<Patent> searchFieldFamilyListPatent(String searchText, String businessId, int page, int pageSize){
-//		Criteria criteria =  createEntityCriteria();
-//		if(!StringUtils.isNULL(businessId)) {
-//			criteria.createAlias("listBusiness","bs");
-//			criteria.add(Restrictions.eq("bs.business_id", businessId));
-//		}
-//		criteria.createAlias("family", "family");
-//		criteria.add(Restrictions.like("family.country_list", searchText));
-//		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-//		criteria.setFirstResult((page - 1) * pageSize);
-//		criteria.setMaxResults(pageSize);
-//		return criteria.list();
-//	}
-//	
-//	@Override
-//	public int countSearchFieldFamilyPatent(String searchText, String businessId){
-//		Criteria criteria =  createEntityCriteria();
-//		if(!StringUtils.isNULL(businessId)) {
-//			criteria.createAlias("listBusiness","bs");
-//			criteria.add(Restrictions.eq("bs.business_id", businessId));
-//		}
-//		criteria.createAlias("family", "family");
-//		criteria.add(Restrictions.like("family.country_list", searchText));
-//		criteria.setProjection(Projections.rowCount());
-//		long count = (long)criteria.uniqueResult();
-//		return (int)count;
-//	}
 	
 	@Override
 	public List<Patent> searchFieldExtensionListPatent(String searchText, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc){
@@ -795,34 +702,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	       query.setParameter("patent_id", patentId);
 	       query.executeUpdate();
 	   }
-
-
-//	@Override
-//	public int searchCountPatent(String searchText, String businessId) {
-//		Criteria criteria =  createEntityCriteria();
-//		criteria.createAlias("listBusiness","bs");
-//		criteria.add(Restrictions.eq("bs.business_id", businessId));
-//		Criterion re1 = Restrictions.like("patent_name", searchText);
-//		Criterion re2 = Restrictions.like("patent_name_en", searchText);
-//		Criterion re3 = Restrictions.like("patent_appl_country", searchText);
-//		Criterion re4 = Restrictions.like("patent_appl_no", searchText);
-//		Criterion re5 = Restrictions.like("patent_notice_no", searchText);
-//		Criterion re6 = Restrictions.like("patent_publish_no", searchText);
-//		Criterion re7 = Restrictions.like("patent_no", searchText);
-//		criteria.createAlias("patentContext", "pc", CriteriaSpecification.LEFT_JOIN);
-//		Criterion re14 = Restrictions.like("pc.context_abstract", searchText);
-//		Criterion re15 = Restrictions.like("pc.context_desc", searchText);
-//		Criterion re16 = Restrictions.like("pc.context_claim", searchText);
-//		criteria.add(Restrictions.or(re1,re2,re3,re4,re5,re6,re7,re14,re15,re16));
-//		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-//		criteria.setProjection(Projections.rowCount());
-//		long count = (long)criteria.uniqueResult();
-//		return (int)count;
-//	}
-	
-
-
-
 
 	
 

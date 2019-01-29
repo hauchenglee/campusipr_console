@@ -35,6 +35,8 @@ public interface PatentDao {
 	
 	
 	List<Patent> searchAllFieldPatent(String  searchText, String businessId, int page, int pageSize, String orderFieldCode, int is_asc);
+	List<Patent> searchAllFieldPatentOderExtension(String searchText, String businessId, int page,
+			int pageSize, String orderFieldCode, int is_asc);
 	int  countSearchAllFieldPatent(String searchText,String businessId);
 	
 	List<Patent> searchFieldCountryPatent(List<String> coutryIdList, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc);
@@ -57,12 +59,6 @@ public interface PatentDao {
 	List<Patent> searchFieldStatusListPatent(String searchText,String businessId, int page, int pageSize,String orderFieldCode,int is_asc);
 	List<Patent> searchFieldStatusListPatentOderExtension(String searchText,String businessId, int page, int pageSize,String orderFieldCode,int is_asc);
 	int  countSearchFieldStatusPatent(String searchText, String businessId);
-	
-//	List<Patent> searchFieldCostListPatent(String searchText,String businessId, int page, int pageSize,String orderFieldId,int is_asc);
-//	int  countSearchFieldCostPatent(String searchText, String businessId);
-//	
-//	List<Patent> searchFieldFamilyListPatent(String searchText,String businessId, int page, int pageSize,String orderFieldId,int is_asc);
-//	int  countSearchFieldFamilyPatent(String searchText, String businessId);
 	
 	List<Patent> searchFieldExtensionListPatent(String searchText, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc);
 	List<Patent> searchFieldExtensionListPatentOderExtension(String searchText, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc);
