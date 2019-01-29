@@ -99,6 +99,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 				criteria.addOrder(Order.desc(orderFieldCode));
 			}
 		}
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
 		return criteria.list();
@@ -124,60 +125,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 				criteria.addOrder(Order.asc("le."+orderFieldCode));
 			}else {
 				criteria.addOrder(Order.desc("le."+orderFieldCode));
-			}
-		}
-		criteria.setFirstResult((page - 1) * pageSize);
-		criteria.setMaxResults(pageSize);
-		return criteria.list();
-	}
-	
-	@Override
-	public List<Patent> getByBusinessIdOderFamily(String businessId,int page,int pageSize,String orderFieldCode,int is_asc){
-		log.info("businessId:"+businessId);
-		Criteria criteria =null;
-		if(!StringUtils.isNULL(businessId)) {
-			Session session = getSession();
-			Filter filter = session.enableFilter("businessFilter");
-			filter.setParameter("business_id",businessId);
-			criteria = session.createCriteria(Patent.class);
-			criteria.createAlias("listBusiness","bs");
-			criteria.add(Restrictions.eq("bs.business_id", businessId));
-		}else {
-			criteria = createEntityCriteria();
-		}
-		if (orderFieldCode != null) {
-			criteria.createAlias("family","family", Criteria.LEFT_JOIN);
-			if (is_asc == 1) {
-				criteria.addOrder(Order.asc("family.country_list"));
-			}else {
-				criteria.addOrder(Order.desc("family.country_list"));
-			}
-		}
-		criteria.setFirstResult((page - 1) * pageSize);
-		criteria.setMaxResults(pageSize);
-		return criteria.list();
-	}
-	
-	@Override
-	public List<Patent> getByBusinessIdOderStatus(String businessId,int page,int pageSize,String orderFieldCode,int is_asc){
-		log.info("businessId:"+businessId);
-		Criteria criteria =null;
-		if(!StringUtils.isNULL(businessId)) {
-			Session session = getSession();
-			Filter filter = session.enableFilter("businessFilter");
-			filter.setParameter("business_id",businessId);
-			criteria = session.createCriteria(Patent.class);
-			criteria.createAlias("listBusiness","bs");
-			criteria.add(Restrictions.eq("bs.business_id", businessId));
-		}else {
-			criteria = createEntityCriteria();
-		}
-		if (orderFieldCode != null) {
-			criteria.createAlias("listStatus","ls", Criteria.LEFT_JOIN);
-			if (is_asc == 1) {
-				criteria.addOrder(Order.asc("ls.status_desc"));
-			}else {
-				criteria.addOrder(Order.desc("ls.status_desc"));
 			}
 		}
 		criteria.setFirstResult((page - 1) * pageSize);
@@ -279,7 +226,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 	
 	@Override
-	public List<Patent> searchFieldPatent(String searchText, String fieldCode, String businessId, int page, int pageSize,String orderFieldId,int is_asc){
+	public List<Patent> searchFieldPatent(String searchText, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc){
 		Criteria criteria =  createEntityCriteria();
 		if(!StringUtils.isNULL(businessId)) {
 			criteria.createAlias("listBusiness","bs");
@@ -289,6 +236,35 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc(orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc(orderFieldCode));
+			}
+		}
+		return criteria.list();
+	}
+	
+	@Override
+	public List<Patent> searchFieldPatentOderExtension(String searchText, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc){
+		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
+		criteria.add(Restrictions.like(fieldCode, searchText));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			criteria.createAlias("listExtension","le", Criteria.LEFT_JOIN);
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc("le."+orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc("le."+orderFieldCode));
+			}
+		}
 		return criteria.list();
 	}
 	
@@ -306,7 +282,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 	
 	@Override
-	public List<Patent> searchFieldCountryPatent(List<String> coutryIdList, String fieldCode, String businessId, int page, int pageSize,String orderFieldId,int is_asc){
+	public List<Patent> searchFieldCountryPatent(List<String> coutryIdList, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc){
 		Session session = getSession();
 		String queryStr = "SELECT p from Patent p ";
 		if(!StringUtils.isNULL(businessId)) {
@@ -314,12 +290,50 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		}else {
 			queryStr += "WHERE p.patent_appl_country IN (:list)";
 		}
+		if (orderFieldCode != null) {
+			if (is_asc == 1) {
+				queryStr += " ORDER BY p."+orderFieldCode+" ASC";
+			}else {
+				queryStr += " ORDER BY p."+orderFieldCode+" DESC";
+			}
+		}
 		Query q = session.createQuery(queryStr);
 		
 		if(!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
 		q.setParameter("list", coutryIdList);
+		q.setFirstResult((page - 1) * pageSize);
+		q.setMaxResults(pageSize);
+		return q.list();
+	}
+	
+	@Override
+	public List<Patent> searchFieldCountryPatentOderExtension(List<String> coutryIdList, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc){
+		Session session = getSession();
+		String queryStr = "SELECT p from Patent p";
+		if (orderFieldCode != null) {
+			queryStr +=  " LEFT OUTER JOIN p.listExtension le";
+		}
+		if(!StringUtils.isNULL(businessId)) {
+			queryStr += " JOIN p.listBusiness lb WHERE p.patent_appl_country IN (:list) and lb.business_id = :businessId";
+		}else {
+			queryStr += " WHERE p.patent_appl_country IN (:list)";
+		}
+		if (orderFieldCode != null) {
+			if (is_asc == 1) {
+				queryStr += " ORDER BY le.business_num ASC";
+			}else {
+				queryStr += " ORDER BY le.business_num DESC";
+			}
+		}
+		Query q = session.createQuery(queryStr);
+		
+		if(!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		q.setParameter("list", coutryIdList);
+		q.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		q.setFirstResult((page - 1) * pageSize);
 		q.setMaxResults(pageSize);
 		return q.list();
@@ -334,6 +348,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		}else {
 			queryStr += "WHERE p.patent_appl_country IN (:list)";
 		}
+		
 		Query q = session.createQuery(queryStr);
 		
 		if(!StringUtils.isNULL(businessId)) {
@@ -356,6 +371,36 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc(orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc(orderFieldCode));
+			}
+		}
+		return criteria.list();
+	}
+	
+	@Override
+	public List<Patent> searchFieldPatentOderExtension(Date startDate, Date endDate, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc){
+		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
+		criteria.add(Restrictions.ge(fieldCode, startDate));
+		criteria.add(Restrictions.le(fieldCode, endDate));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			criteria.createAlias("listExtension","le", Criteria.LEFT_JOIN);
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc("le."+orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc("le."+orderFieldCode));
+			}
+		}
 		return criteria.list();
 	}
 	
@@ -388,6 +433,39 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc(orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc(orderFieldCode));
+			}
+		}
+		return criteria.list();
+	}
+	
+	@Override
+	public List<Patent> searchFieldHumanListPatentOderExtension(String searchText,String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc){
+		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
+		String strList = "list"+fieldCode.substring(0, 1).toUpperCase() + fieldCode.substring(1);
+		criteria.createAlias(strList, "ls");
+		Criterion re1 = Restrictions.like("ls."+fieldCode+"_name", searchText);
+		Criterion re2 = Restrictions.like("ls."+fieldCode+"_name_en", searchText);
+		criteria.add(Restrictions.or(re1,re2));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			criteria.createAlias("listExtension","le", Criteria.LEFT_JOIN);
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc("le."+orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc("le."+orderFieldCode));
+			}
+		}
 		return criteria.list();
 	}
 	
@@ -494,12 +572,46 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			criteria.add(Restrictions.eq("bs.business_id", businessId));
 		}
 		criteria.createAlias("listStatus", "lS");
+		Criterion re1 = Restrictions.like("lS.status_id", searchText);
 		Criterion re2 = Restrictions.like("lS.status_desc", searchText);
 		Criterion re3 = Restrictions.like("lS.status_desc_en", searchText);
-		criteria.add(Restrictions.or( re2, re3));
+		criteria.add(Restrictions.or( re1, re2, re3));
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc(orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc(orderFieldCode));
+			}
+		}
+		return criteria.list();
+	}
+	
+	@Override
+	public List<Patent> searchFieldStatusListPatentOderExtension(String searchText, String businessId, int page, int pageSize,String orderFieldCode,int is_asc){
+		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
+		criteria.createAlias("listStatus", "lS");
+		Criterion re1 = Restrictions.like("lS.status_id", searchText);
+		Criterion re2 = Restrictions.like("lS.status_desc", searchText);
+		Criterion re3 = Restrictions.like("lS.status_desc_en", searchText);
+		criteria.add(Restrictions.or( re1, re2, re3));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			criteria.createAlias("listExtension","le", Criteria.LEFT_JOIN);
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc("le."+orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc("le."+orderFieldCode));
+			}
+		}
 		return criteria.list();
 	}
 	
@@ -511,9 +623,10 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			criteria.add(Restrictions.eq("bs.business_id", businessId));
 		}
 		criteria.createAlias("listStatus", "lS");
+		Criterion re1 = Restrictions.like("lS.status_id", searchText);
 		Criterion re2 = Restrictions.like("lS.status_desc", searchText);
 		Criterion re3 = Restrictions.like("lS.status_desc_en", searchText);
-		criteria.add(Restrictions.or(re2, re3));
+		criteria.add(Restrictions.or(re1, re2, re3));
 		criteria.setProjection(Projections.rowCount());
 		long count = (long)criteria.uniqueResult();
 		return (int)count;
@@ -589,6 +702,35 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc(orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc(orderFieldCode));
+			}
+		}
+		return criteria.list();
+	}
+	
+	@Override
+	public List<Patent> searchFieldExtensionListPatentOderExtension(String searchText, String fieldCode, String businessId, int page, int pageSize,String orderFieldCode,int is_asc){
+		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
+		criteria.createAlias("listExtension", "listExtension");
+		criteria.add(Restrictions.like("listExtension."+fieldCode, searchText));
+		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
+		if (orderFieldCode != null) {
+			if (is_asc == 1) {
+				criteria.addOrder(Order.asc("listExtension."+orderFieldCode));
+			}else {
+				criteria.addOrder(Order.desc("listExtension."+orderFieldCode));
+			}
+		}
 		return criteria.list();
 	}
 	
