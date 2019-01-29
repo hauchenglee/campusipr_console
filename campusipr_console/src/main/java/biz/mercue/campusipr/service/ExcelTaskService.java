@@ -28,8 +28,9 @@ public interface ExcelTaskService {
 	
 	ExcelTask getTaskField(Admin admin, String id)throws IOException;
 
-	
 	int submitTask(ExcelTask bean,Admin admin);
+	
+	int previewTask(ExcelTask bean,Admin admin);
 
 	List<ExcelTask> getByBusiness(String businessId);
 	

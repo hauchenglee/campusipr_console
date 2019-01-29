@@ -196,6 +196,48 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		return task;
 	}
 	
+	@Override
+	public int previewTask(ExcelTask bean,Admin admin) {
+		ExcelTask dbBean = dao.getByBusinessId(admin.getBusiness().getBusiness_id(), bean.getExcel_task_id());
+		boolean is_continue = true;
+		FileInputStream fileInputStream = null;
+		try {
+			if(dbBean !=null) {
+				List<FieldMap> filedList = bean.getListMap();
+				if(filedList.size() > 0) {
+					Map<String, FieldMap> maps = convertFieldList2Map(filedList);
+					if(checkRequiredField(maps)) {
+						File excel = new File(Constants.FILE_UPLOAD_PATH+File.separator+dbBean.getTask_file_name());
+						fileInputStream = new FileInputStream(excel);
+					    Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
+					    List<Patent>listPatent = readBook2Patent(book, filedList, 1);
+					    log.info("listPatent:"+listPatent.size());
+					    bean.setListPatent(listPatent);
+						return Constants.INT_SUCCESS;
+					}else {
+						return Constants.INT_DATA_ERROR;
+					}
+				}else {
+					return Constants.INT_DATA_ERROR;
+				}
+	
+			}else {
+				return Constants.INT_CANNOT_FIND_DATA;
+			}
+		}catch (Exception e) {
+			log.error("Exception :"+e.getMessage());
+		}finally {
+			if(fileInputStream!=null) {
+				try {
+					fileInputStream.close();
+				}catch (Exception e) {
+					log.error("Exception:"+e.getMessage());
+				}
+			}
+		}
+		return Constants.INT_SYSTEM_PROBLEM;
+	}
+	
 	
 	@Override
 	public int submitTask(ExcelTask bean,Admin admin) {
@@ -211,7 +253,9 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						File excel = new File(Constants.FILE_UPLOAD_PATH+File.separator+dbBean.getTask_file_name());
 						fileInputStream = new FileInputStream(excel);
 					    Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
-					    readBook2Patent(book, filedList, 0);
+					    List<Patent>listPatent = readBook2Patent(book, filedList, 0);
+					    log.info("listPatent:"+listPatent.size());
+					    bean.setListPatent(listPatent);
 						return Constants.INT_SUCCESS;
 					}else {
 						return Constants.INT_DATA_ERROR;
@@ -293,6 +337,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		Sheet sheet = book.getSheetAt(0);
 		int rowIndex = 0;
 		int cellIndex = 0;
+		
 		List<Country> listCountry = countryDao.getAll();
 		for (Row row : sheet) {
 			log.info("Row");
@@ -300,9 +345,14 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			if (rowIndex == 0) {
 				log.info("Title Row");
 			} else {
+				if(size != 0 && listPatent.size() >=size) {
+					break;
+				}
+				
+				
 				Patent patent = new Patent();
 				for (FieldMap fieldMap : listField) {
-					//log.info("fieldMap:"+fieldMap.getField_map_id());
+					log.info("fieldMap:"+fieldMap.getField_map_id());
 					if (fieldMap.getExcel_field_index() != -1) {
 						PatentField  field= fieldMap.getField();
 						if(field == null) {
@@ -411,7 +461,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								extension = new PatentExtension();
 								patent.setExtension(extension);
 							}
-							extension.setBusiness_num(cellBusinessNo.getStringCellValue());
+							extension.setBusiness_num(parseNumricCell(cellBusinessNo));
 							break;
 							
 						case Constants.SCHOOL_MEMO_FIELD:
@@ -442,6 +492,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	}
 	
 	private Date parseDateCell(Cell cell) {
+		log.info("parseDateCell");
 		Date date= null;
 		DecimalFormat df = new DecimalFormat("0");
 		switch (cell.getCellTypeEnum()) {

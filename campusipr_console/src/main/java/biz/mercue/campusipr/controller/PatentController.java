@@ -406,10 +406,36 @@ public class PatentController {
 		return responseBody.getJacksonString(View.ExcelTask.class);
 	}
 	
+	
+	
+	@RequestMapping(value = "/api/previewexceltask", method = {RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String previewExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) {
+		log.info("previewExcelTask ");
+		BeanResponseBody responseBody = new BeanResponseBody();
+		try {
+			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if (tokenBean != null) {
+				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
+				int result = excelTaskService.previewTask(task, tokenBean.getAdmin());
+				responseBody.setCode(result);
+				responseBody.setBean(task);
+			} else {
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			}
+			
+			responseBody.setCode(Constants.INT_SUCCESS);
+		} catch (Exception e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		}
+		return responseBody.getJacksonString(View.ExcelTask.class);
+	}
+	
 	@RequestMapping(value = "/api/submitexceltask", method = {RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String submitExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) {
-		log.info("getTaskField ");
+		log.info("submitExcelTask ");
 		BeanResponseBody responseBody = new BeanResponseBody();
 		try {
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
@@ -417,6 +443,7 @@ public class PatentController {
 				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
 				int result = excelTaskService.submitTask(task,tokenBean.getAdmin());
 				responseBody.setCode(result);
+				responseBody.setBean(task);
 			} else {
 				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			}
