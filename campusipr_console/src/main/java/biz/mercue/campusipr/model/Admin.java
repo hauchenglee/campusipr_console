@@ -65,6 +65,10 @@ public class Admin extends BaseBean {
 	private Date create_date;
 	
 	private Date update_date;
+	
+	
+	@Transient
+	private String admin_ip;
 
 	public String getAdmin_id() {
 		return admin_id;
@@ -160,6 +164,14 @@ public class Admin extends BaseBean {
 
 	public void setRe_admin_password(String re_admin_password) {
 		this.re_admin_password = re_admin_password;
+	}
+
+	public String getAdmin_ip() {
+		return admin_ip;
+	}
+
+	public void setAdmin_ip(String admin_ip) {
+		this.admin_ip = admin_ip;
 	}
 	
 

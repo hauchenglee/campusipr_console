@@ -27,6 +27,8 @@ import org.hibernate.annotations.ParamDef;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import biz.mercue.campusipr.util.StringUtils;
+
 
 @FilterDef(name = "businessFilter",  parameters = @ParamDef(name = "business_id", type ="string"))
 @Entity
@@ -190,6 +192,15 @@ public class Patent extends BaseBean{
 	@Transient
 	@JsonView(View.PatentDetail.class)
 	private Admin admin;
+	
+	
+	//same patent_appl_no in database or same patent id in database.
+	@Transient
+	private Patent comparePatent;
+	
+	
+	@Transient
+	private PatentExtension extension;
 	
 	@Transient
 	private String admin_ip;
@@ -576,6 +587,25 @@ public class Patent extends BaseBean{
 
 	public void setListAnnuity(List<Annuity> listAnnuity) {
 		this.listAnnuity = listAnnuity;
+	}
+
+	public PatentExtension getExtension() {
+		return extension;
+	}
+
+	public void setExtension(PatentExtension extension) {
+		this.extension = extension;
+	}
+
+	public Patent getComparePatent() {
+		return comparePatent;
+	}
+
+	public void setComparePatent(Patent comparePatent) {
+		if(StringUtils.isNULL(this.patent_id)) {
+			this.patent_id = comparePatent.getPatent_id();
+		}
+		this.comparePatent = comparePatent;
 	}
 
 

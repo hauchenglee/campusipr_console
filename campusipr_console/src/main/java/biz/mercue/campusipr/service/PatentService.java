@@ -2,6 +2,8 @@ package biz.mercue.campusipr.service;
 
 import java.util.List;
 
+import biz.mercue.campusipr.model.Admin;
+import biz.mercue.campusipr.model.Business;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.Status;
@@ -45,6 +47,8 @@ public interface PatentService {
 	
 
 	int combinePatentFamily(List<String> ids,String businessId); 
+	
+	int importPatent(List<Patent> list, Admin admin,Business business);
 
 	Patent getByPatentNo(String patentNo);
 	

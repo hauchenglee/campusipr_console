@@ -52,6 +52,11 @@ public class ExcelTask extends BaseBean {
 	@JsonView(View.ExcelTask.class)
 	@Transient
 	private Map<String, Integer> titleMap;
+	
+	
+	@JsonView(View.ExcelTask.class)
+	@Transient
+	private List<Patent> listPatent;
 
 	public String getExcel_task_id() {
 		return excel_task_id;
@@ -123,6 +128,14 @@ public class ExcelTask extends BaseBean {
 
 	public void setTitleMap(Map<String, Integer> titleMap) {
 		this.titleMap = titleMap;
+	}
+
+	public List<Patent> getListPatent() {
+		return listPatent;
+	}
+
+	public void setListPatent(List<Patent> listPatent) {
+		this.listPatent = listPatent;
 	}
 
 }
