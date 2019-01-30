@@ -649,6 +649,9 @@ public class PatentServiceImpl implements PatentService{
 			}
 		}
 		switch(orderFieldId) {
+		case Constants.PATENT_COUNTRY_FIELD:
+			orderFieldCode = "patent_appl_country";
+			break;
 		case Constants.SCHOOL_NO_FIELD:
 			orderList = "listExtension";
 			break;
@@ -745,6 +748,9 @@ public class PatentServiceImpl implements PatentService{
 			}
 		}
 		switch(orderFieldId) {
+		case Constants.PATENT_COUNTRY_FIELD:
+			orderFieldCode = "patent_appl_country";
+			break;
 		case Constants.SCHOOL_NO_FIELD:
 			orderList = "listExtension";
 			break;
@@ -758,6 +764,8 @@ public class PatentServiceImpl implements PatentService{
 		default:
 			break;
 		}
+		log.info("fieldId:"+fieldId);
+		log.info("orderFieldCode:"+orderFieldCode);
 		int count = 0;
 		List<Patent> list = new ArrayList<>();
 		if (Constants.PATENT_ALL_FIELD.equals(fieldId) || field == null) {

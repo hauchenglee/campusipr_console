@@ -22,8 +22,6 @@ public interface PatentDao {
 	List<Patent> getByBusinessId(String businessId,int page,int pageSize, String orderList, String orderFieldCode,int is_asc);
 	int  getCountByBusinessId(String businessId);	
 	
-	List<Patent> getAllByBusinessId(String businessId);
-	
 	
 	
 

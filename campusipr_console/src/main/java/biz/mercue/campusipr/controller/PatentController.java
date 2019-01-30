@@ -467,13 +467,15 @@ public class PatentController {
 			@RequestParam(value ="order_field",required=false,defaultValue ="") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue ="1") int is_asc) {
 		log.info("searchpatent ");
+		log.info("page:"+page);
 		log.info("order_field:"+fieldId);
+		log.info("asc:"+is_asc);
 		ListResponseBody responseBody  = new ListResponseBody();
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
 		String fieldStr = jsonObject.getJSONObject("field").toString();
 		PatentField field = (PatentField) JacksonJSONUtils.readValue(fieldStr, PatentField.class);
 		Object searchText = jsonObject.get("searchText");
-		
+		log.info("searchText:"+searchText);
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
@@ -494,6 +496,7 @@ public class PatentController {
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
+		log.info("patentList:"+responseBody.getJacksonString(View.Patent.class));
 		return responseBody.getJacksonString(View.Patent.class);
 		
 	}
