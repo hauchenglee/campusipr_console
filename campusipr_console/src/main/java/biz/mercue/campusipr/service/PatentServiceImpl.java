@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -148,7 +149,7 @@ public class PatentServiceImpl implements PatentService{
 			patent.getListContact().size();
 			patent.getListCost().size();
 			patent.getListInventor().size();
-			patent.getListPortfolio().size();
+			log.info("portfolio size "+patent.getListPortfolio().size());
 			patent.getListAnnuity().size();
 			
 			List<PatentStatus> listPatentStatus = patentStatusDao.getByPatent(patent.getPatent_id());
@@ -568,11 +569,14 @@ public class PatentServiceImpl implements PatentService{
 	
 	
 	@Override
-	public int combinePatentFamily(List<String> ids,String businessId) {
-		log.info("businessId :"+businessId);
+	public int combinePatentFamily(PatentFamily inputFamily,String businessId) {
+		if(StringUtils.isNULL(inputFamily.getPatent_family_id())) {
+			
+		}
+		List<String> ids = inputFamily.getListPatentIds();
 		List<Patent> list = patentDao.getByPatentIds(ids, businessId);
 		log.info("list :"+list.size());
-		PatentFamily family = null;
+		PatentFamily family =null;
 		for(Patent patent : list) {
 			log.info("patent :"+patent.getPatent_id());
 			if(patent.getFamily()!=null) {
@@ -602,7 +606,6 @@ public class PatentServiceImpl implements PatentService{
 				family.addPatent(patent);
 				//patent.setFamily(family);
 			}
-			return Constants.INT_SUCCESS;
 		}else {
 			log.info("set family");
 			for(Patent patent : list) {
@@ -613,7 +616,8 @@ public class PatentServiceImpl implements PatentService{
 				}
 			}
 		}
-		
+		BeanUtils.copyProperties(family, inputFamily);
+		log.info("id : "+inputFamily.getPatent_family_id());
 		return Constants.INT_SUCCESS;
 	}
 	

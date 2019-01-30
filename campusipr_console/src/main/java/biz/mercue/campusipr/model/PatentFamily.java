@@ -39,6 +39,10 @@ public class PatentFamily extends BaseBean{
 	@Transient
 	private List<String> listCountry;
 	
+	@JsonView({View.Patent.class})
+	@Transient
+	private List<String> listPatentIds;
+	
 	@JsonView({View.PatentFamily.class})
 	@OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY,mappedBy ="family")
 	private List<Patent> listPatent;
@@ -132,6 +136,14 @@ public class PatentFamily extends BaseBean{
 				this.country_list = gson.toJson(this.listCountry);
 			}
 		}
+	}
+
+	public List<String> getListPatentIds() {
+		return listPatentIds;
+	}
+
+	public void setListPatentIds(List<String> listPatentIds) {
+		this.listPatentIds = listPatentIds;
 	}
 	
 

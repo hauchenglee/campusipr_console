@@ -6,6 +6,7 @@ import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Business;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentFamily;
 import biz.mercue.campusipr.model.Status;
 
 
@@ -46,7 +47,7 @@ public interface PatentService {
 	Patent getById(String id);
 	
 
-	int combinePatentFamily(List<String> ids,String businessId); 
+	int combinePatentFamily(PatentFamily family,String businessId); 
 	
 	int importPatent(List<Patent> list, Admin admin,Business business);
 
