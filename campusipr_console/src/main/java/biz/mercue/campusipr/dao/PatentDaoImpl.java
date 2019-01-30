@@ -166,7 +166,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 				"left join p.listApplicant as lap " + 
 				"left join p.listInventor as lin ";
 		if (orderList != null) {
-			queryStr +=  " LEFT OUTER JOIN p."+orderList+" as OLS ";
+			queryStr +=  " LEFT JOIN p."+orderList+" as OLS ";
 		}
 		if(!StringUtils.isNULL(businessId)) {
 			queryStr += "JOIN p.listBusiness as lb WHERE lb.business_id = :businessId and " +
@@ -207,7 +207,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			q.setParameter("businessId", businessId);
 		}
 		q.setParameter("searchText", searchText);
-//		q.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		q.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		q.setFirstResult((page - 1) * pageSize);
 		q.setMaxResults(pageSize);
 		return q.list();
@@ -247,7 +247,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			q.setParameter("businessId", businessId);
 		}
 		q.setParameter("searchText", searchText);
-//		q.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		q.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		long count = (long)q.uniqueResult();
 		return (int)count;
 	}
@@ -328,7 +328,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		if(!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
-//		q.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		q.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		q.setParameter("list", coutryIdList);
 		q.setFirstResult((page - 1) * pageSize);
 		q.setMaxResults(pageSize);

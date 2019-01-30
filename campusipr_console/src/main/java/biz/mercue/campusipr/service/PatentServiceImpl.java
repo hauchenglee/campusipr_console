@@ -656,7 +656,8 @@ public class PatentServiceImpl implements PatentService{
 			orderFieldCode = "family";
 			break;
 		case Constants.PATENT_STATUS_FIELD:
-			orderFieldCode = "listStatus";
+			orderList = "listStatus";
+			orderFieldCode = "status_desc";
 			break;
 		default:
 			break;
@@ -751,7 +752,8 @@ public class PatentServiceImpl implements PatentService{
 			orderFieldCode = "family";
 			break;
 		case Constants.PATENT_STATUS_FIELD:
-			orderFieldCode = "listStatus";
+			orderList = "listStatus";
+			orderFieldCode = "status_desc";
 			break;
 		default:
 			break;
