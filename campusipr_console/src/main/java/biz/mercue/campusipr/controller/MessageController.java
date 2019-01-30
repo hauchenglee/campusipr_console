@@ -15,24 +15,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.yaml.snakeyaml.scanner.Constant;
 
-import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 
 import biz.mercue.campusipr.model.AdminToken;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Message;
-import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.MessageService;
-import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.JWTUtils;
-import biz.mercue.campusipr.util.JacksonJSONUtils;
-import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
-import biz.mercue.campusipr.util.StringResponseBody;
+
 
 
 @Controller
