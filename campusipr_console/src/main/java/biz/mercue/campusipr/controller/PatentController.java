@@ -25,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.AdminToken;
@@ -33,6 +35,7 @@ import biz.mercue.campusipr.model.ExcelTask;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentEditHistory;
+import biz.mercue.campusipr.model.PatentFamily;
 import biz.mercue.campusipr.model.PatentField;
 import biz.mercue.campusipr.model.PatentStatus;
 import biz.mercue.campusipr.model.Permission;
@@ -272,12 +275,22 @@ public class PatentController {
 	@ResponseBody
 	public String combinePatentFamily(HttpServletRequest request,@RequestBody String receiveJSONString){
 		log.info("combinePatentFamily ");
-		StringResponseBody responseBody  = new StringResponseBody();
+		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-			List<String> ids = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});	
-			int taskResult = patentService.combinePatentFamily(ids, tokenBean.getBusiness().getBusiness_id());
-			responseBody.setCode(taskResult);
+		
+			PatentFamily family = (PatentFamily) JacksonJSONUtils.readValue(receiveJSONString, PatentFamily.class);	
+			if(family != null) {
+				String businessId = null;
+				if(!tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)){
+					businessId  = tokenBean.getBusiness().getBusiness_id();
+				}
+				int taskResult = patentService.combinePatentFamily(family, businessId);
+				responseBody.setCode(taskResult);
+				if(taskResult == Constants.INT_SUCCESS) {
+					responseBody.setBean(family);
+				}
+			}
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
