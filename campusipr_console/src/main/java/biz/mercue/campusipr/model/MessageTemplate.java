@@ -4,12 +4,8 @@ package biz.mercue.campusipr.model;
 
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -26,11 +22,7 @@ public class MessageTemplate extends BaseBean{
 	@JsonView(View.Public.class)
 	private String message_template_id;
 	
-	
-	@JsonView(View.Public.class)
-	private String message_social_type;
-	
-	
+		
 	@JsonView(View.Public.class)
 	private String business_id;
 	
@@ -83,23 +75,12 @@ public class MessageTemplate extends BaseBean{
 	private String push_title;
 	
 
-	public String getMessage_social_type() {
-		return message_social_type;
-	}
-	
 	public String getMessage_type() {
 		return message_type;
 	}
 	
 	public String getMessage_text() {
 		return message_text;
-	}
-
-
-
-	
-	public void setMessage_social_type(String message_social_type) {
-		this.message_social_type = message_social_type;
 	}
 	
 	public void setMessage_type(String message_type) {
@@ -109,14 +90,6 @@ public class MessageTemplate extends BaseBean{
 	public void setMessage_text(String message_text) {
 		this.message_text = message_text;
 	}
-
-//	public String getAdmin_id() {
-//		return admin_id;
-//	}
-//
-//	public void setAdmin_id(String admin_id) {
-//		this.admin_id = admin_id;
-//	}
 
 	public String getAlt_text() {
 		return alt_text;

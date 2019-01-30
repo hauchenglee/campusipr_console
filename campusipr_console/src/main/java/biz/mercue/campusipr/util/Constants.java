@@ -182,8 +182,8 @@ public class Constants {
 
 
 	
-
-	
+	//message type
+	public static final String MESSAGE_TYPE_TEXT = "text";
 
 	
 	
@@ -213,7 +213,6 @@ public class Constants {
 	
 	
 
-	public static final String SYSTEM_ADMIN_ID = "1";
 	public static final String SYSTEM_MANAGER_ROLE_NAME="系統管理者";
 	
 	//image
