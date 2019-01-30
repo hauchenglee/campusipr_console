@@ -4,6 +4,7 @@ import java.io.StringReader;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import org.xml.sax.InputSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import biz.mercue.campusipr.model.Annuity;
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.IPCClass;
@@ -278,11 +280,13 @@ public class ServiceTaiwanPatent {
 			
 			if (patentObj.optJSONObject("patent-right") != null) {
 				patent.setPatent_no(patentObj.optJSONObject("patent-right").optString("patent-no"));
+				Annuity annuity = new Annuity();
 				try {
 					String patentBeginDateStr = patentObj.optJSONObject("patent-right").optString("patent-bdate");
 					if (!StringUtils.isNULL(patentBeginDateStr)) {
 						Date patentBeginDate = DateUtils.parserSimpleDateSlashFormatDate(patentBeginDateStr);
 						patent.setPatent_bdate(patentBeginDate);
+						annuity.setAnnuity_date(patentBeginDate);
 					}
 							
 					String patentEndDateStr = patentObj.optJSONObject("patent-right").optString("patent-edate");
@@ -301,6 +305,7 @@ public class ServiceTaiwanPatent {
 					if (!StringUtils.isNULL(patentExpireDateStr)) {
 						Date patentExpireDate = DateUtils.parserSimpleDateSlashFormatDate(patentExpireDateStr);
 						patent.setPatent_charge_expire_date(patentExpireDate);
+						annuity.setAnnuity_end_date(patentExpireDate);
 					}
 							
 				} catch (ParseException e) {
@@ -309,7 +314,22 @@ public class ServiceTaiwanPatent {
 				}
 						
 				String expireYear = patentObj.optJSONObject("patent-right").optString("charge-expir-year");
-				patent.setPatent_charge_duration_year(Integer.parseInt(expireYear));
+				if (!StringUtils.isNULL(expireYear)) {
+					patent.setPatent_charge_duration_year(Integer.parseInt(expireYear));
+					annuity.setAnnuity_charge_year(Integer.parseInt(expireYear));
+				}else {
+					if (annuity.getAnnuity_end_date() != null) {
+						Date annuityDate = annuity.getAnnuity_date();
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(annuityDate);
+						calendar.set(Calendar.DAY_OF_YEAR, 1);
+						patent.setPatent_charge_expire_date(calendar.getTime());
+						annuity.setAnnuity_date(calendar.getTime());
+					}
+					patent.setPatent_charge_duration_year(1);
+					annuity.setAnnuity_charge_year(1);
+				}
+				patent.addAnnuity(annuity);
 			}	
 			String contextUrl = patentObj.optJSONObject("link").optString("patentpubxml-url");
 			if (!StringUtils.isNULL(contextUrl)) {

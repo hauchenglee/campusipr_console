@@ -34,6 +34,7 @@ import biz.mercue.campusipr.dao.PatentFamilyDao;
 import biz.mercue.campusipr.dao.PatentStatusDao;
 import biz.mercue.campusipr.dao.StatusDao;
 import biz.mercue.campusipr.model.Admin;
+import biz.mercue.campusipr.model.Annuity;
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Business;
@@ -252,6 +253,14 @@ public class PatentServiceImpl implements PatentService{
 				mInventor.setPatent(patent);
 			}
 		}
+		
+		List<Annuity> listAnnuity = patent.getListAnnuity();
+		if (listAnnuity != null && listAnnuity.size() > 0) {
+			for (Annuity mAnnuity : listAnnuity) {
+				mAnnuity.setAnnuity_id(KeyGeneratorUtils.generateRandomString());
+				mAnnuity.setPatent(patent);
+			}
+		}
 
 		if (patent.getListIPC() != null) {
 			for (IPCClass ipc : patent.getListIPC()) {
@@ -311,17 +320,25 @@ public class PatentServiceImpl implements PatentService{
 	          int taskResult= -1;
 	          Business ownBusiness = businessDao.getById(businessId);
 	          List<String> englishNames = new ArrayList<>();
-	          englishNames.add(ownBusiness.getBusiness_name_en());
-	          String[] itemsEn = ownBusiness.getBusiness_alias_en().split(",");
-	          for (String item:itemsEn) {
-	              englishNames.add(item);
+	          if (!StringUtils.isNULL(ownBusiness.getBusiness_name_en())) {
+	        	  englishNames.add(ownBusiness.getBusiness_name_en());
+	          }
+	          if (!StringUtils.isNULL(ownBusiness.getBusiness_alias_en())) {
+	        	  String[] itemsEn = ownBusiness.getBusiness_alias_en().split(",");
+	        	  for (String item:itemsEn) {
+		              englishNames.add(item);
+		          }
 	          }
 	                  
 	          List<String> chineseNames = new ArrayList<>();
-	          chineseNames.add(ownBusiness.getBusiness_name());
-	          String[] itemsCh = ownBusiness.getBusiness_alias().split(",");
-	          for (String item:itemsCh) {
-	               chineseNames.add(item);
+	          if (!StringUtils.isNULL(ownBusiness.getBusiness_name())) {
+	        	  chineseNames.add(ownBusiness.getBusiness_name());
+	          }
+	          if (!StringUtils.isNULL(ownBusiness.getBusiness_alias())) {
+		          String[] itemsCh = ownBusiness.getBusiness_alias().split(",");
+		          for (String item:itemsCh) {
+		               chineseNames.add(item);
+		          }
 	          }
 	                  
 	          List<String> dupucateStr = new ArrayList<>();
