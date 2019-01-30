@@ -7,12 +7,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+
 
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,13 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import biz.mercue.campusipr.dao.AdminDao;
-import biz.mercue.campusipr.dao.ApplicantDao;
-import biz.mercue.campusipr.dao.AssigneeDao;
 import biz.mercue.campusipr.dao.BusinessDao;
 import biz.mercue.campusipr.dao.CountryDao;
 import biz.mercue.campusipr.dao.FieldDao;
 import biz.mercue.campusipr.dao.IPCClassDao;
-import biz.mercue.campusipr.dao.InventorDao;
 import biz.mercue.campusipr.dao.PatentDao;
 import biz.mercue.campusipr.dao.PatentEditHistoryDao;
 import biz.mercue.campusipr.dao.PatentFamilyDao;
@@ -48,7 +42,6 @@ import biz.mercue.campusipr.model.PatentClaim;
 import biz.mercue.campusipr.model.PatentCost;
 import biz.mercue.campusipr.model.PatentDescription;
 import biz.mercue.campusipr.model.PatentEditHistory;
-import biz.mercue.campusipr.model.PatentExtension;
 import biz.mercue.campusipr.model.PatentFamily;
 import biz.mercue.campusipr.model.PatentField;
 import biz.mercue.campusipr.model.PatentStatus;
@@ -149,7 +142,7 @@ public class PatentServiceImpl implements PatentService{
 			patent.getListContact().size();
 			patent.getListCost().size();
 			patent.getListInventor().size();
-			log.info("portfolio size "+patent.getListPortfolio().size());
+			patent.getListPortfolio().size();
 			patent.getListAnnuity().size();
 			
 			List<PatentStatus> listPatentStatus = patentStatusDao.getByPatent(patent.getPatent_id());

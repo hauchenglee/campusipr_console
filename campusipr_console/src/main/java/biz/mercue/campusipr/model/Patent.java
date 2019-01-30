@@ -40,53 +40,69 @@ public class Patent extends BaseBean{
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_id;
 	
+	//all
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_name;
 	
+	//all
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_name_en;
 	
+	//all
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_appl_country;
 	
-	
+	//all
 	@JsonView(View.Patent.class)
 	private Date patent_appl_date;
 	
+	//all
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_appl_no;
 	
+	//all
 	@JsonView(View.Patent.class)
 	private String patent_notice_no;
 	
+	
+	//all
 	@JsonView(View.Patent.class)
 	private Date patent_notice_date;
 	
+	//all
 	@JsonView(View.Patent.class)
 	private String patent_publish_no;
 	
+	//all
 	@JsonView(View.Patent.class)
 	private Date patent_publish_date;
 	
+	//all
 	@JsonView(View.Patent.class)
 	private String patent_no;
 	
+	//tw
 	@JsonView(View.Patent.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date patent_bdate;
 	
+	//tw
 	@JsonView(View.Patent.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date patent_edate;
 	
+	//tw
 	@JsonView(View.Patent.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date patent_cancel_date;
 	
+	
+	//tw
 	@JsonView(View.Patent.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date patent_charge_expire_date;
 	
+	//tw
 	@JsonView(View.Patent.class)
 	private int patent_charge_duration_year;
 	
@@ -98,6 +114,7 @@ public class Patent extends BaseBean{
 		inverseJoinColumns = { @JoinColumn(name = "business_id") })
 	private List<Business> listBusiness;
 	
+	//all
 	@JsonView(View.PatentDetail.class)
 	@ManyToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_ipc", 
@@ -106,7 +123,7 @@ public class Patent extends BaseBean{
 	@OrderColumn(name="ipc_order")
 	private List<IPCClass> listIPC;
 	
-	
+	//all + manual
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_status", 
@@ -121,46 +138,54 @@ public class Patent extends BaseBean{
 	private List<Agent> listAgent;
 	
 	
+	//all
 	@JsonView(View.PatentDetail.class)
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@OrderBy("assignee_order")
 	private List<Assignee> listAssignee;
 	
+	//all
 	@JsonView(View.PatentDetail.class)
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@OrderBy("applicant_order")
 	private List<Applicant> listApplicant;
 	
+	//all
 	@JsonView(View.PatentDetail.class)
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@OrderBy("inventor_order")
 	private List<Inventor> listInventor;
 	
+	
+	//manual
 	@JsonView(View.PatentDetail.class)
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@OrderBy("contact_order")
 	private List<PatentContact> listContact;
 	
-	
+	//manual
 	@JsonView(View.PatentDetail.class)
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@OrderBy("cost_date desc")
 	private List<PatentCost> listCost;
 	
-	
+	//all
 	@JsonView(View.PatentDetail.class)
 	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private PatentAbstract patentAbstract;
 	
+	
+	//all
 	@JsonView(View.PatentDetail.class)
 	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private PatentClaim patentClaim;
 	
+	//all
 	@JsonView(View.PatentDetail.class)
 	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private PatentDescription patentDesc;
 	
-	
+	//manual + import
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@Filter(name = "businessFilter",condition=" business_id= :business_id")
@@ -173,11 +198,19 @@ public class Patent extends BaseBean{
 	private List<PatentEditHistory> listHistory;
 	
 	
-	
-//	@JsonView(View.PatentDetail.class)
+	//tw + maunual
+	@JsonView(View.PatentDetail.class)
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@OrderBy("annuity_date DESC")
 	private List<Annuity> listAnnuity;
+	
+	
+	@JsonView(View.PatentDetail.class)
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinTable(name = "patent_portfolio", 
+		joinColumns = { @JoinColumn(name = "patent_id") }, 
+		inverseJoinColumns = { @JoinColumn(name = "portfolio_id") })
+	private List<Portfolio> listPortfolio;
 	
 	@ManyToOne
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
@@ -218,12 +251,7 @@ public class Patent extends BaseBean{
 	@Transient
 	public static final int EDIT_SOURCE_IMPORT =3;
 	
-	@JsonView(View.PatentDetail.class)
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinTable(name = "patent_portfolio", 
-		joinColumns = { @JoinColumn(name = "patent_id") }, 
-		inverseJoinColumns = { @JoinColumn(name = "portfolio_id") })
-	private List<Portfolio> listPortfolio;
+
 	
 	public String getPatent_id() {
 		return patent_id;
