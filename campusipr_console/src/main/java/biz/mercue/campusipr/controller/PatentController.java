@@ -159,10 +159,6 @@ public class PatentController {
 			}else {
 				responseBody.setCode(Constants.INT_NO_PERMISSION);
 			}
-			
-			
-			
-
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}

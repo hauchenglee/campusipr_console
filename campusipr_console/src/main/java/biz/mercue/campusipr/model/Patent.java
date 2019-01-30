@@ -214,6 +214,10 @@ public class Patent extends BaseBean{
 	@Transient
 	public static final int EDIT_SOURCE_SERVICE =2;
 	
+	
+	@Transient
+	public static final int EDIT_SOURCE_IMPORT =3;
+	
 	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_portfolio", 
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
