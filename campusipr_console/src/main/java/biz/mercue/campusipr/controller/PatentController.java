@@ -541,7 +541,7 @@ public class PatentController {
 		log.info("syncapplicant ");
 		ListResponseBody responseBody  = new ListResponseBody();
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		String businessName = jsonObject.getString("business_name");
+		String businessId = jsonObject.getString("business_id");
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
@@ -550,7 +550,7 @@ public class PatentController {
 				String ip = request.getRemoteAddr();
 
 				List<Patent> list = new ArrayList<>();
-				int taskResult = patentService.syncPatentsByApplicant(list, Constants.SYSTEM_ADMIN, tokenBean.getBusiness().getBusiness_id(), ip);
+				int taskResult = patentService.syncPatentsByApplicant(list, Constants.SYSTEM_ADMIN, businessId, ip);
 				for (Patent patent:list) {
 					patentService.syncPatentStatus(patent);
 				}

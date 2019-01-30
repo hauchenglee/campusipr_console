@@ -197,7 +197,7 @@ public class Patent extends BaseBean{
 	@OrderBy("create_date DESC")
 	private List<PatentEditHistory> listHistory;
 	
-	
+
 	//tw + maunual
 	@JsonView(View.PatentDetail.class)
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -546,7 +546,7 @@ public class Patent extends BaseBean{
 	public void setBusiness(Business business) {
 		this.business = business;
 	}
-
+	
 
 	public List<Status> getListStatus() {
 		return listStatus;
@@ -620,6 +620,13 @@ public class Patent extends BaseBean{
 
 	public void setListAnnuity(List<Annuity> listAnnuity) {
 		this.listAnnuity = listAnnuity;
+	}
+	
+	public void addAnnuity(Annuity annuity) {
+		if(this.listAnnuity == null) {
+			this.listAnnuity = new ArrayList<Annuity>();
+		}
+		listAnnuity.add(annuity);
 	}
 
 	public PatentExtension getExtension() {
