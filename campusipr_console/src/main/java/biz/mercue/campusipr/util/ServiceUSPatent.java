@@ -109,7 +109,7 @@ public class ServiceUSPatent {
 					JSONObject patentObj = patentDocsObj.optJSONObject(index);
 					try {
 						String compareDateStr = patentObj.optString("publicationDate");
-						if (StringUtils.isNULL(compareDateStr) == false) {
+						if (!StringUtils.isNULL(compareDateStr)) {
 							Date compareDate = DateUtils.parserDateTimeUTCString(compareDateStr);
 							if (compareDate != null && temp != null) {
 								if (temp.before(compareDate)) {
@@ -206,7 +206,7 @@ public class ServiceUSPatent {
 				
 			try {
 				String applDateStr = patentObj.optString("applicationDate");
-				if (StringUtils.isNULL(applDateStr) == false) {
+				if (!StringUtils.isNULL(applDateStr)) {
 					Date applDate = DateUtils.parserDateTimeUTCString(applDateStr);
 					patent.setPatent_appl_date(applDate);
 				}
@@ -318,7 +318,7 @@ public class ServiceUSPatent {
 							.substring(0, patentObj.optString("documentId").indexOf("A1")));
 					try {
 						String noticeDateStr = patentObj.optString("publicationDate");
-						if (StringUtils.isNULL(noticeDateStr) == false) {
+						if (!StringUtils.isNULL(noticeDateStr)) {
 							Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
 							patent.setPatent_notice_date(noticeDate);
 						}
@@ -332,7 +332,7 @@ public class ServiceUSPatent {
 							.substring(0, patentObj.optString("documentId").indexOf("A2")));
 					try {
 						String noticeDateStr = patentObj.optString("publicationDate");
-						if (StringUtils.isNULL(noticeDateStr) == false) {
+						if (!StringUtils.isNULL(noticeDateStr)) {
 							Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
 							patent.setPatent_notice_date(noticeDate);
 						}
@@ -346,7 +346,7 @@ public class ServiceUSPatent {
 							.substring(0, patentObj.optString("documentId").indexOf("A9")));
 					try {
 						String noticeDateStr = patentObj.optString("publicationDate");
-						if (StringUtils.isNULL(noticeDateStr) == false) {
+						if (!StringUtils.isNULL(noticeDateStr)) {
 							Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
 							patent.setPatent_notice_date(noticeDate);
 						}
@@ -361,7 +361,7 @@ public class ServiceUSPatent {
 							.substring(0, patentObj.optString("documentId").indexOf("B1")));
 					try {
 						String publishDateStr = patentObj.optString("publicationDate");
-						if (StringUtils.isNULL(publishDateStr) == false) {
+						if (!StringUtils.isNULL(publishDateStr)) {
 							Date publishDate = DateUtils.parserDateTimeUTCString(publishDateStr);
 							patent.setPatent_publish_date(publishDate);
 						}
@@ -376,7 +376,7 @@ public class ServiceUSPatent {
 							.substring(0, patentObj.optString("documentId").indexOf("B2")));
 					try {
 						String publishDateStr = patentObj.optString("publicationDate");
-						if (StringUtils.isNULL(publishDateStr) == false) {
+						if (!StringUtils.isNULL(publishDateStr)) {
 							Date publishDate = DateUtils.parserDateTimeUTCString(publishDateStr);
 							patent.setPatent_publish_date(publishDate);
 						}

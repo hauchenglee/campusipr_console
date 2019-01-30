@@ -267,7 +267,7 @@ public class ServiceTaiwanPatent {
 			patent.setPatent_publish_no(patentObj.optJSONObject("publication-reference").optString("publish-no"));
 			try {
 				String publishDateStr = patentObj.optJSONObject("publication-reference").optString("publish-date");
-				if (StringUtils.isNULL(publishDateStr) == false) {
+				if (!StringUtils.isNULL(publishDateStr)) {
 					Date publishDate = DateUtils.parserSimpleDateSlashFormatDate(publishDateStr);
 					patent.setPatent_publish_date(publishDate);
 				}
@@ -280,25 +280,25 @@ public class ServiceTaiwanPatent {
 				patent.setPatent_no(patentObj.optJSONObject("patent-right").optString("patent-no"));
 				try {
 					String patentBeginDateStr = patentObj.optJSONObject("patent-right").optString("patent-bdate");
-					if (StringUtils.isNULL(patentBeginDateStr) == false) {
+					if (!StringUtils.isNULL(patentBeginDateStr)) {
 						Date patentBeginDate = DateUtils.parserSimpleDateSlashFormatDate(patentBeginDateStr);
 						patent.setPatent_bdate(patentBeginDate);
 					}
 							
 					String patentEndDateStr = patentObj.optJSONObject("patent-right").optString("patent-edate");
-					if (StringUtils.isNULL(patentEndDateStr) == false) {
+					if (!StringUtils.isNULL(patentEndDateStr)) {
 						Date patentEndDate = DateUtils.parserSimpleDateSlashFormatDate(patentEndDateStr);
 						patent.setPatent_edate(patentEndDate);
 					}
 							
 					String patentCancelDateStr = patentObj.optJSONObject("patent-right").optString("cancel-date");
-					if (StringUtils.isNULL(patentCancelDateStr) == false) {
+					if (!StringUtils.isNULL(patentCancelDateStr)) {
 						Date patentCancelDate = DateUtils.parserSimpleDateSlashFormatDate(patentCancelDateStr);
 						patent.setPatent_cancel_date(patentCancelDate);
 					}
 							
 					String patentExpireDateStr = patentObj.optJSONObject("patent-right").optString("charge-expir-date");
-					if (StringUtils.isNULL(patentExpireDateStr) == false) {
+					if (!StringUtils.isNULL(patentExpireDateStr)) {
 						Date patentExpireDate = DateUtils.parserSimpleDateSlashFormatDate(patentExpireDateStr);
 						patent.setPatent_charge_expire_date(patentExpireDate);
 					}
@@ -312,7 +312,7 @@ public class ServiceTaiwanPatent {
 				patent.setPatent_charge_duration_year(Integer.parseInt(expireYear));
 			}	
 			String contextUrl = patentObj.optJSONObject("link").optString("patentpubxml-url");
-			if (StringUtils.isNULL(contextUrl)==false) {
+			if (!StringUtils.isNULL(contextUrl)) {
 				getContext(patent, contextUrl);
 			}
 					

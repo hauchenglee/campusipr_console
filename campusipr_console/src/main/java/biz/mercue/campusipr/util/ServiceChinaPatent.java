@@ -129,7 +129,7 @@ public class ServiceChinaPatent {
 		
 		try {
 			String content = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));
-			if (StringUtils.isNULL(content) == false) {
+			if (!StringUtils.isNULL(content)) {
 				convertPatentIdXml(patent, content);
 			}
 		} catch (JSONException e) {
@@ -248,7 +248,7 @@ public class ServiceChinaPatent {
 								patent.setPatent_notice_no(publicateNo);
 								try {
 									String publishDateStr =pubDateNode.getTextContent();
-									if (StringUtils.isNULL(publishDateStr) == false) {
+									if (!StringUtils.isNULL(publishDateStr)) {
 										Date publishDate = DateUtils.parserSimpleDateFormatDate(publishDateStr);
 										patent.setPatent_publish_date(publishDate);
 										patent.setPatent_notice_date(publishDate);
@@ -283,7 +283,7 @@ public class ServiceChinaPatent {
 								patent.setPatent_no(applNo);
 								try {
 									String publishDateStr =applDateNode.getTextContent();
-									if (StringUtils.isNULL(publishDateStr) == false) {
+									if (!StringUtils.isNULL(publishDateStr)) {
 										Date publishDate = DateUtils.parserSimpleDateFormatDate(publishDateStr);
 										patent.setPatent_appl_date(publishDate);
 									}
