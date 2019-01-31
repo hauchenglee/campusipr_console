@@ -454,6 +454,7 @@ public class PatentController {
 			if (tokenBean != null) {
 				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
 				int result = excelTaskService.submitTask(task,tokenBean.getAdmin());
+				patentService.importPatent(task.getListPatent(), tokenBean.getAdmin(), tokenBean.getBusiness());
 				responseBody.setCode(result);
 				responseBody.setBean(task);
 			} else {

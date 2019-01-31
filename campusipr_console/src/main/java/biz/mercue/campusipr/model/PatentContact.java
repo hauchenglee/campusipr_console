@@ -32,6 +32,9 @@ public class PatentContact extends BaseBean{
 	private Admin admin;
 	
 	@JsonView(View.PatentDetail.class)
+	private String  contact_name;
+	
+	@JsonView(View.PatentDetail.class)
 	private String  contact_email;
 	
 	@JsonView(View.PatentDetail.class)
@@ -98,6 +101,14 @@ public class PatentContact extends BaseBean{
 
 	public void setCreate_date(Date create_date) {
 		this.create_date = create_date;
+	}
+
+	public String getContact_name() {
+		return contact_name;
+	}
+
+	public void setContact_name(String contact_name) {
+		this.contact_name = contact_name;
 	}
 	
 	

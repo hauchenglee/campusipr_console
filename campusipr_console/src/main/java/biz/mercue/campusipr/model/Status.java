@@ -43,6 +43,10 @@ public class Status extends BaseBean{
 	@Transient
 	@JsonView({View.Patent.class})
 	private PatentStatus patentStatus;
+	
+	@Transient
+	@JsonView({View.Patent.class})
+	private Date create_date;
 
 	private String status_from;
 
