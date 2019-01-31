@@ -277,6 +277,7 @@ public class PatentController {
 	@ResponseBody
 	public String combinePatentFamily(HttpServletRequest request,@RequestBody String receiveJSONString){
 		log.info("combinePatentFamily ");
+		log.info(receiveJSONString);
 		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {

@@ -285,6 +285,7 @@ public class PatentServiceImpl implements PatentService{
 				pContact.setContact_email(business.getContact_email());
 				pContact.setContact_phone(business.getContact_phone());
 				pContact.setContact_order(0);
+				patent.addContact(pContact);
 			}
 		}
 		
@@ -649,6 +650,13 @@ public class PatentServiceImpl implements PatentService{
 					family.addPatent(patent);
 					
 				}
+			}
+		}
+		//check other patent family if has this family remove it
+		List<Patent> checkPatentList = patentDao.getByFamily(family.getPatent_family_id());
+		for (Patent checkPatent:checkPatentList) {
+			if (!ids.contains(checkPatent.getPatent_id())) {
+				checkPatent.setFamily(null);
 			}
 		}
 		BeanUtils.copyProperties(family, inputFamily);
