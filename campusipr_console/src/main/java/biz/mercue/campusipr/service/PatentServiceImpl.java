@@ -1044,7 +1044,7 @@ public class PatentServiceImpl implements PatentService{
 			}
 
 			
-			if (Constants.ASSIGNEE_NAME_FIELD.equals(field.getField_id())) {
+			if (Constants.ASSIGNEE_NAME_FIELD.equals(field.getField_id()) && patent.getListAssignee() != null) {
 				//add
 				List<String> assigneeAddData = new ArrayList<>();
 				HashMap<String, Assignee> mapping = new HashMap<String, Assignee>();
@@ -1090,7 +1090,7 @@ public class PatentServiceImpl implements PatentService{
 					if (peh != null) {dbBean.addHistory(peh);}
 				}
 			}
-			if (Constants.APPLIANT_NAME_FIELD.equals(field.getField_id())) {
+			if (Constants.APPLIANT_NAME_FIELD.equals(field.getField_id()) && patent.getListApplicant() != null) {
 				//add
 				List<String> applAddData = new ArrayList<>();
 				HashMap<String, Applicant> mapping = new HashMap<String, Applicant>();
@@ -1136,7 +1136,7 @@ public class PatentServiceImpl implements PatentService{
 					if (peh != null) {dbBean.addHistory(peh);}
 				}
 			}
-			if (Constants.INVENTOR_NAME_FIELD.equals(field.getField_id())) {
+			if (Constants.INVENTOR_NAME_FIELD.equals(field.getField_id()) && patent.getListInventor() != null) {
 				//add
 				List<String> invAddData = new ArrayList<>();
 				HashMap<String, Inventor> mapping = new HashMap<String, Inventor>();
