@@ -160,7 +160,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 
 
 
-					List<PatentField> totalList = fieldDao.getAllFields();
+					List<PatentField> totalList = fieldDao.getInputFields();
 					List<FieldMap> newMapList = new ArrayList<FieldMap>();
 					for (PatentField field : totalList) {
 						FieldMap map = new FieldMap();
@@ -358,6 +358,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						if(field == null) {
 							log.error("field is null");
 						}
+						log.info("index:"+fieldMap.getExcel_field_index());
 						switch (fieldMap.getField().getField_id()) {
 						case Constants.PATENT_NAME_FIELD:
 							patent.setPatent_name(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());

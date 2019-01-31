@@ -7,10 +7,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.io.FilenameUtils;
@@ -788,17 +793,46 @@ public class ExcelUtils {
 		Sheet sheet = book.getSheetAt(0);
 		Row row = sheet.getRow(0);
 
-		int cellIndex = 0;
 
 		for (Cell cell : row) {
-			log.info("cell :"+cellIndex+" /"+cell.getStringCellValue());
-			titleMap.put(cell.getStringCellValue(), cellIndex);
-
-
-			cellIndex++;
+			log.info("cell :"+cell.getColumnIndex()+" /"+cell.getStringCellValue());
+			titleMap.put(cell.getStringCellValue(), cell.getColumnIndex());
+			
 		}
+		
+		LinkedHashMap<String, Integer> sortMap = sortHashMapByValues(titleMap);
 
-		return titleMap;
+		return sortMap;
+	}
+	
+	public static LinkedHashMap<String, Integer> sortHashMapByValues(
+	        Map<String, Integer> titleMap) {
+	    List<String> mapKeys = new ArrayList<>(titleMap.keySet());
+	    List<Integer> mapValues = new ArrayList<>(titleMap.values());
+	    Collections.sort(mapValues);
+	    Collections.sort(mapKeys);
+
+	    LinkedHashMap<String, Integer> sortedMap =
+	        new LinkedHashMap<>();
+
+	    Iterator<Integer> valueIt = mapValues.iterator();
+	    while (valueIt.hasNext()) {
+	    	Integer val = valueIt.next();
+	        Iterator<String> keyIt = mapKeys.iterator();
+
+	        while (keyIt.hasNext()) {
+	        	String key = keyIt.next();
+	        	Integer comp1 = titleMap.get(key);
+	        	Integer comp2 = val;
+
+	            if (comp1.equals(comp2)) {
+	                keyIt.remove();
+	                sortedMap.put(key, val);
+	                break;
+	            }
+	        }
+	    }
+	    return sortedMap;
 	}
 
 }

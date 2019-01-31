@@ -272,7 +272,22 @@ public class PatentServiceImpl implements PatentService{
 			patent.setIs_public(true);
 			patent.setIs_sync(true);
 		}
-
+		
+		//同步時同時新增預設聯絡人
+		if (Patent.EDIT_SOURCE_SERVICE   == patent.getEdit_source()) {
+			if (patent.getBusiness() != null) {
+				Business business = patent.getBusiness();
+				PatentContact pContact = new PatentContact();
+				pContact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
+				pContact.setPatent(patent);
+				pContact.setAdmin(patent.getAdmin());
+				pContact.setCreate_date(new Date());
+				pContact.setContact_email(business.getContact_email());
+				pContact.setContact_phone(business.getContact_phone());
+				pContact.setContact_order(0);
+			}
+		}
+		
 		patentDao.create(patent);
 		return Constants.INT_SUCCESS;
 	}

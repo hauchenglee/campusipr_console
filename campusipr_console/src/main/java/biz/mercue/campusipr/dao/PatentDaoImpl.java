@@ -147,12 +147,12 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	public List<Patent> searchAllFieldPatent(String  searchText,String businessId,int page,int pageSize, String orderList,String orderFieldCode,int is_asc){
 		Session session = getSession();
 		String queryStr = "SELECT p from Patent as p" + 
-				" JOIN p.patentAbstract as pa " + 
-				" JOIN p.patentClaim as pc " + 
-				" JOIN p.patentDesc as pd " + 
-				" JOIN p.listAssignee as las " + 
-				" JOIN p.listApplicant as lap " + 
-				" JOIN p.listInventor as lin ";
+				" LEFT JOIN p.patentAbstract as pa " + 
+				" LEFT JOIN p.patentClaim as pc " + 
+				" LEFT JOIN p.patentDesc as pd " + 
+				" LEFT JOIN p.listAssignee as las " + 
+				" LEFT JOIN p.listApplicant as lap " + 
+				" LEFT JOIN p.listInventor as lin ";
 		if (orderList != null) {
 			queryStr +=  " LEFT JOIN p."+orderList+" as OLS";
 		}
@@ -205,12 +205,12 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	public int countSearchAllFieldPatent(String searchText, String businessId) {
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct p.patent_id) from Patent as p" + 
-				" JOIN p.patentAbstract as pa " + 
-				" JOIN p.patentClaim as pc " + 
-				" JOIN p.patentDesc as pd " + 
-				" JOIN p.listAssignee as las " + 
-				" JOIN p.listApplicant as lap " + 
-				" JOIN p.listInventor as lin ";
+				" LEFT JOIN p.patentAbstract as pa " + 
+				" LEFT JOIN p.patentClaim as pc " + 
+				" LEFT JOIN p.patentDesc as pd " + 
+				" LEFT JOIN p.listAssignee as las " + 
+				" LEFT JOIN p.listApplicant as lap " + 
+				" LEFT JOIN p.listInventor as lin ";
 		if(!StringUtils.isNULL(businessId)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE lb.business_id = :businessId and" +
 					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" + 
