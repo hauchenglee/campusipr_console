@@ -1059,9 +1059,9 @@ public class PatentServiceImpl implements PatentService{
 						assignee.setPatent(patent);
 						dbBean.addAssignee(assignee);
 						assigneeAddData.add(JacksonJSONUtils.mapObjectWithView(assignee,  View.PatentDetail.class));
-					} else {
-						mapping.put(assignee.getAssignee_id(), assignee);
 					}
+					mapping.put(assignee.getAssignee_id(), assignee);
+					
 				}
 				if (!assigneeAddData.isEmpty()) {
 					PatentEditHistory peh = insertFieldHistory(patent, assigneeAddData, "create", field.getField_id());
@@ -1120,9 +1120,9 @@ public class PatentServiceImpl implements PatentService{
 						appl.setPatent(patent);
 						dbBean.addApplicant(appl);
 						applAddData.add(JacksonJSONUtils.mapObjectWithView(appl,  View.PatentDetail.class));
-					} else {
-						mapping.put(appl.getApplicant_id(), appl);
-					}
+					} 
+					mapping.put(appl.getApplicant_id(), appl);
+					
 				}
 				if (!applAddData.isEmpty()) {
 					PatentEditHistory peh = insertFieldHistory(patent, applAddData, "create", field.getField_id());

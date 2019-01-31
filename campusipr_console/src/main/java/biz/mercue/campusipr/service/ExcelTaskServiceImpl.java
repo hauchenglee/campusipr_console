@@ -157,23 +157,22 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 					// title map index
 					Map<String, Integer> titleMap = ExcelUtils.readExcelTitle(book);
 					// compare title and filed name
-					List<FieldMap> fieldMaps = task.getListMap();
-					if (fieldMaps.size() > 0) {
 
-					} else {
-						List<PatentField> totalList = fieldDao.getAllFields();
-						List<FieldMap> newMapList = new ArrayList<FieldMap>();
-						for (PatentField field : totalList) {
-							FieldMap map = new FieldMap();
-							map.setField_map_id(KeyGeneratorUtils.generateRandomString());
-							map.setField(field);
-							map.setTask(task);
-							map.setCreate_date(new Date());
-							map.setUpdate_date(new Date());
-							newMapList.add(map);
-						}
-						task.setListMap(newMapList);
+
+
+					List<PatentField> totalList = fieldDao.getAllFields();
+					List<FieldMap> newMapList = new ArrayList<FieldMap>();
+					for (PatentField field : totalList) {
+						FieldMap map = new FieldMap();
+						map.setField_map_id(KeyGeneratorUtils.generateRandomString());
+						map.setField(field);
+						map.setTask(task);
+						map.setCreate_date(new Date());
+						map.setUpdate_date(new Date());
+						newMapList.add(map);
 					}
+					task.setListMap(newMapList);
+					
 					task.setTitleMap(titleMap);
 
 					book.close();
