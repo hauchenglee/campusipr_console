@@ -599,6 +599,15 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	       query.executeUpdate();
 	   }
 	   
+	   @Override
+	   public void deletePatentContact(String patentId) {
+	       String hql = "Delete From PatentContact where patent_id = :patent_id";
+	       Session session = getSession();
+	       Query query = session.createQuery(hql);
+	       query.setParameter("patent_id", patentId);
+	       query.executeUpdate();
+	   }
+	   
 	   
 	   @Override
 	   public void deleteInventor(String patentId) {

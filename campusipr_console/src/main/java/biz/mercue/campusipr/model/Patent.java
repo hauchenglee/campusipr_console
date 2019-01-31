@@ -133,26 +133,26 @@ public class Patent extends BaseBean{
 	
 	
 	@JsonView(View.PatentDetail.class)
-	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
 	@OrderBy("agent_order")
 	private List<Agent> listAgent;
 	
 	
 	//all
 	@JsonView(View.PatentDetail.class)
-	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
 	@OrderBy("assignee_order")
 	private List<Assignee> listAssignee;
 	
 	//all
 	@JsonView(View.PatentDetail.class)
-	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
 	@OrderBy("applicant_order")
 	private List<Applicant> listApplicant;
 	
 	//all
 	@JsonView(View.PatentDetail.class)
-	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
 	@OrderBy("inventor_order")
 	private List<Inventor> listInventor;
 	
@@ -217,6 +217,11 @@ public class Patent extends BaseBean{
 	@JoinColumn(name="patent_family_id")
 	private PatentFamily family;
 	
+	private boolean is_public = false;
+	
+	@JsonView({View.PatentDetail.class})
+	private boolean is_sync = false;
+	
 	//for update and add patent
 	@Transient
 	@JsonView(View.PatentDetail.class)
@@ -225,7 +230,6 @@ public class Patent extends BaseBean{
 	@Transient
 	@JsonView(View.PatentDetail.class)
 	private Admin admin;
-	
 	
 	//same patent_appl_no in database or same patent id in database.
 	@Transient
@@ -646,6 +650,22 @@ public class Patent extends BaseBean{
 			this.patent_id = comparePatent.getPatent_id();
 		}
 		this.comparePatent = comparePatent;
+	}
+
+	public boolean isIs_public() {
+		return is_public;
+	}
+
+	public void setIs_public(boolean is_public) {
+		this.is_public = is_public;
+	}
+
+	public boolean isIs_sync() {
+		return is_sync;
+	}
+
+	public void setIs_sync(boolean is_sync) {
+		this.is_sync = is_sync;
 	}
 
 
