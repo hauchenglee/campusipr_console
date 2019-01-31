@@ -351,6 +351,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				
 				
 				Patent patent = new Patent();
+				patent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
 				for (FieldMap fieldMap : listField) {
 					log.info("fieldMap:"+fieldMap.getField_map_id());
 					if (fieldMap.getExcel_field_index() != -1) {

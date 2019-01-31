@@ -41,6 +41,7 @@ import biz.mercue.campusipr.model.PatentStatus;
 import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
+import biz.mercue.campusipr.model.View.PatentDetail;
 import biz.mercue.campusipr.service.AdminService;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.ExcelTaskService;
