@@ -267,6 +267,11 @@ public class PatentServiceImpl implements PatentService{
 				}
 			}
 		}
+		
+		if (Patent.EDIT_SOURCE_SERVICE   == patent.getEdit_source()) {
+			patent.setIs_public(true);
+			patent.setIs_sync(true);
+		}
 
 		patentDao.create(patent);
 		return Constants.INT_SUCCESS;
@@ -1071,9 +1076,24 @@ public class PatentServiceImpl implements PatentService{
 					Assignee assignee = iterator.next();
 					if (mapping.containsKey(assignee.getAssignee_id())) {
 						//update
-						if (!assignee.getAssignee_name().equals(
-								mapping.get(assignee.getAssignee_id()).getAssignee_name())
-								|| !assignee.getAssignee_name_en().equals(mapping.get(assignee.getAssignee_id()).getAssignee_name_en())) {
+						String assName = "";
+						if (assignee.getAssignee_name() != null) {
+							assName = assignee.getAssignee_name();
+						}
+						String assNameMap = "";
+						if (mapping.get(assignee.getAssignee_id()).getAssignee_name() != null) {
+							assNameMap = mapping.get(assignee.getAssignee_id()).getAssignee_name();
+						}
+						String assNameEn = "";
+						if (assignee.getAssignee_name_en() != null) {
+							assNameEn = assignee.getAssignee_name_en();
+						}
+						String assNameEnMap = "";
+						if (mapping.get(assignee.getAssignee_id()).getAssignee_name_en() != null) {
+							assNameEnMap = mapping.get(assignee.getAssignee_id()).getAssignee_name_en();
+						}
+						if (!assName.equals(assNameMap)
+								|| !assNameEn.equals(assNameEnMap)) {
 							assigneeUpdateData.add(JacksonJSONUtils.mapObjectWithView(mapping.get(assignee.getAssignee_id()),  View.PatentDetail.class));
 						}
 					}else {
@@ -1116,10 +1136,24 @@ public class PatentServiceImpl implements PatentService{
 					Applicant appl = iterator.next();
 					if (mapping.containsKey(appl.getApplicant_id())) {
 						//update
-						if (!appl.getApplicant_name().equals(
-								mapping.get(appl.getApplicant_id()).getApplicant_name())
-								|| !appl.getApplicant_name_en().equals(
-										mapping.get(appl.getApplicant_id()).getApplicant_name_en())) {
+						String appName = "";
+						if (appl.getApplicant_name() != null) {
+							appName = appl.getApplicant_name();
+						}
+						String appNameMap = "";
+						if (mapping.get(appl.getApplicant_id()).getApplicant_name() != null) {
+							appNameMap = mapping.get(appl.getApplicant_id()).getApplicant_name();
+						}
+						String appNameEn = "";
+						if (appl.getApplicant_name_en() != null) {
+							appNameEn = appl.getApplicant_name_en();
+						}
+						String appNameEnMap = "";
+						if (mapping.get(appl.getApplicant_id()).getApplicant_name_en() != null) {
+							appNameEnMap = mapping.get(appl.getApplicant_id()).getApplicant_name_en();
+						}
+						if (!appName.equals(appNameMap)
+								|| !appNameEn.equals(appNameEnMap)) {
 							applUpdateData.add(JacksonJSONUtils.mapObjectWithView(mapping.get(appl.getApplicant_id()),  View.PatentDetail.class));
 						}
 					}else {
@@ -1166,10 +1200,25 @@ public class PatentServiceImpl implements PatentService{
 					if (mapping.containsKey(inv.getInventor_id())) {
 						log.info("contain");
 						//update
-						if (!inv.getInventor_name().equals(
-								mapping.get(inv.getInventor_id()).getInventor_name())
-								|| !inv.getInventor_name_en().equals(
-										mapping.get(inv.getInventor_id()).getInventor_name_en())) {
+						String invName = "";
+						if (inv.getInventor_name() != null) {
+							invName = inv.getInventor_name();
+						}
+						String invNameMap = "";
+						if (mapping.get(inv.getInventor_id()).getInventor_name() != null) {
+							invNameMap = mapping.get(inv.getInventor_id()).getInventor_name();
+						}
+						String invNameEn = "";
+						if (inv.getInventor_name_en() != null) {
+							invNameEn = inv.getInventor_name_en();
+						}
+						String invNameEnMap = "";
+						if (mapping.get(inv.getInventor_id()).getInventor_name_en() != null) {
+							invNameEnMap = mapping.get(inv.getInventor_id()).getInventor_name_en();
+						}
+						if (!invName.equals(invNameMap)
+								|| !invNameEn.equals(
+										invNameEnMap)) {
 							invUpdateData.add(JacksonJSONUtils.mapObjectWithView(mapping.get(inv.getInventor_id()),  View.PatentDetail.class));
 						}
 					}else {
