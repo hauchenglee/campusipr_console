@@ -196,7 +196,7 @@ public class ServiceUSPatent {
 	}
 	
 	private static void convertPatentInfoUS(Patent patent, JSONObject patentObj) {
-		
+			patent.setPatent_name(patentObj.optString("title"));
 			patent.setPatent_name_en(patentObj.optString("title"));
 			patent.setPatent_appl_country("US");
 			

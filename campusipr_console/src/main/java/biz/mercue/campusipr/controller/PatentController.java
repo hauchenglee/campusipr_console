@@ -279,6 +279,7 @@ public class PatentController {
 	@ResponseBody
 	public String combinePatentFamily(HttpServletRequest request,@RequestBody String receiveJSONString){
 		log.info("combinePatentFamily ");
+		log.info(receiveJSONString);
 		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
@@ -455,6 +456,7 @@ public class PatentController {
 			if (tokenBean != null) {
 				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
 				int result = excelTaskService.submitTask(task,tokenBean.getAdmin());
+				patentService.importPatent(task.getListPatent(), tokenBean.getAdmin(), tokenBean.getBusiness());
 				responseBody.setCode(result);
 				responseBody.setBean(task);
 			} else {

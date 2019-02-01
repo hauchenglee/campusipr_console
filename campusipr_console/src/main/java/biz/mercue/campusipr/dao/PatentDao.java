@@ -46,15 +46,15 @@ public interface PatentDao {
 	List<Patent> searchFieldHumanListPatent(String searchText, String fieldCode,String businessId, int page, int pageSize, String orderList,String orderFieldCode,int is_asc);
 	int  countSearchFieldHumanListPatent(String searchText, String fieldCode, String businessId);
 	
-	List<Patent> searchFieldStatusListPatent(String searchText,String businessId, int page, int pageSize, String orderList,String orderFieldCode,int is_asc);
-	int  countSearchFieldStatusPatent(String searchText, String businessId);
+	List<Patent> searchFieldStatusListPatent(String searchText, String searchTextEn,String businessId, int page, int pageSize, String orderList,String orderFieldCode,int is_asc);
+	int  countSearchFieldStatusPatent(String searchText, String searchTextEn, String businessId);
 	
 	List<Patent> searchFieldExtensionListPatent(String searchText, String fieldCode, String businessId, int page, int pageSize, String orderList,String orderFieldCode,int is_asc);
 	int  countSearchFieldExtensionPatent(String searchText, String fieldCode, String businessId);
 	
 	Patent getByPatentNo(String patentNo);
 	
-	
+	void deletePatentAnnuity(String patentId);
 	void deletePatentCost(String patentId);
 	void deletePatentContact(String patentId);
 	void deleteInventor(String patentId);

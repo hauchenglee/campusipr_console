@@ -35,7 +35,7 @@ public class PatentField extends BaseBean{
 	@JsonView(View.Public.class)
 	private String field_format;
 	
-	
+	private boolean is_input;
 
 	public String getField_id() {
 		return field_id;
@@ -99,6 +99,14 @@ public class PatentField extends BaseBean{
 
 	public void setField_format(String field_format) {
 		this.field_format = field_format;
+	}
+
+	public boolean isIs_input() {
+		return is_input;
+	}
+
+	public void setIs_input(boolean is_input) {
+		this.is_input = is_input;
 	}
 
 }
