@@ -125,11 +125,8 @@ public class Patent extends BaseBean{
 	
 	//all + manual
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinTable(name = "patent_status", 
-		joinColumns = { @JoinColumn(name = "patent_id") }, 
-		inverseJoinColumns = { @JoinColumn(name = "status_id")})
-	private List<Status> listStatus;
+	@OneToMany(mappedBy= "primaryKey.patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval =true)
+	private List<PatentStatus> listPatentStatus;
 	
 	
 	@JsonView(View.PatentDetail.class)
@@ -552,13 +549,7 @@ public class Patent extends BaseBean{
 	}
 	
 
-	public List<Status> getListStatus() {
-		return listStatus;
-	}
 
-	public void setListStatus(List<Status> listStatus) {
-		this.listStatus = listStatus;
-	}
 
 
 	public Admin getAdmin() {
@@ -666,6 +657,36 @@ public class Patent extends BaseBean{
 
 	public void setIs_sync(boolean is_sync) {
 		this.is_sync = is_sync;
+	}
+
+	public List<PatentStatus> getListPatentStatus() {
+		return listPatentStatus;
+	}
+
+	public void setListPatentStatus(List<PatentStatus> listPatentStatus) {
+		this.listPatentStatus = listPatentStatus;
+	}
+	
+	public void addPatentStatus(PatentStatus patentStatus) {
+		if(this.listPatentStatus == null) {
+			this.listPatentStatus  = new ArrayList<PatentStatus>();
+		}
+		this.listPatentStatus.add(patentStatus);
+	}
+	
+	public void addStatus(Status status) {
+		this.addStatus(status,new Date());
+	}
+	
+	public void addStatus(Status status,Date date) {
+		if(this.listPatentStatus == null) {
+			this.listPatentStatus  = new ArrayList<PatentStatus>();
+		}
+		PatentStatus patentStatus = new PatentStatus();
+		patentStatus.setPatent(this);
+		patentStatus.setStatus(status);
+		patentStatus.setCreate_date(date);
+		this.listPatentStatus.add(patentStatus);
 	}
 
 

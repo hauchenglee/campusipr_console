@@ -85,14 +85,14 @@ public class ServiceStatusPatent {
 	private static void convertPatentStatusInfoUSTPOXml(Patent patent, JSONObject getObject) {
 		JSONArray patentDocsObj = getObject.optJSONObject("queryResults").optJSONObject("searchResponse")
 				.optJSONObject("response").optJSONArray("docs");
-		List<Status> statusList = new ArrayList<>();
+		List<PatentStatus> listPatentStatus = new ArrayList<PatentStatus>();
 		for (int index = 0; index < patentDocsObj.length(); index++) {
 			JSONObject patentObj = patentDocsObj.optJSONObject(index);
 			JSONArray patentTransaction = patentObj.optJSONArray("transactions");
 			for (int indexTransaction = 0; indexTransaction < patentTransaction.length(); indexTransaction++) {
 				JSONObject transactionObj = patentTransaction.optJSONObject(indexTransaction);
 				PatentStatus ps = new PatentStatus();
-				ps.setPatent_id(patent.getPatent_id());
+				ps.setPatent(patent);
 				Status status = new Status();
 				status.setCountry_id("us");
 				status.setEvent_code(transactionObj.optString("code"));
@@ -108,11 +108,11 @@ public class ServiceStatusPatent {
 					e.printStackTrace();
 				}
 				status.setStatus_from(Constants.STATUS_FROM_USPTO);
-				status.setPatentStatus(ps);
-				statusList.add(status);
+				ps.setStatus(status);
+				listPatentStatus.add(ps);
 			}
 		}
-		patent.setListStatus(statusList);
+		patent.setListPatentStatus(listPatentStatus);
 	}
 	
 	private static void convertPatentStatusInfoEPOXml(Patent patent, String content) {
@@ -130,11 +130,11 @@ public class ServiceStatusPatent {
 			is.setCharacterStream(new StringReader(content));
 			Document doc = db.parse(is);
 			doc.getDocumentElement().normalize();
-			List<Status> statusList = new ArrayList<>();
+			List<PatentStatus> listPatentStatus = new ArrayList<PatentStatus>();
 			NodeList documentList = doc.getElementsByTagName("ops:legal");
 			for (int temp = 0; temp < documentList.getLength(); temp++) {
 				PatentStatus ps = new PatentStatus();
-				ps.setPatent_id(patent.getPatent_id());
+				ps.setPatent(patent);
 				Status status = new Status();
 				Node nNode = documentList.item(temp);
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
@@ -155,19 +155,17 @@ public class ServiceStatusPatent {
 								ps.setCreate_date(psCreateDate);
 							}
 						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							log.error("ParseException:"+e.getMessage());
 						}
 						status.setStatus_from(Constants.STATUS_FROM_EPO);
-						status.setPatentStatus(ps);
-						statusList.add(status);
+						ps.setStatus(status);
+						listPatentStatus.add(ps);
 					}
 				}
 			}
-			patent.setListStatus(statusList);
+			patent.setListPatentStatus(listPatentStatus);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Exception:"+e.getMessage());
 		}
 	}
 	
@@ -183,8 +181,7 @@ public class ServiceStatusPatent {
 				log.info("AuthTokn:"+authToken);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Exception:"+e.getMessage());
 		}
 		
 		return authToken;

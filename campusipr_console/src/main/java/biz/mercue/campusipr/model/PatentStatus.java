@@ -3,11 +3,18 @@ package biz.mercue.campusipr.model;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.AssociationOverride;
+import javax.persistence.AssociationOverrides;
+import javax.persistence.CascadeType;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -16,33 +23,48 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity
 @Table(name="patent_status")
+@AssociationOverrides({
+    @AssociationOverride(name = "primaryKey.patent",
+        joinColumns = @JoinColumn(name = "patent_id")),
+    @AssociationOverride(name = "primaryKey.status",
+        joinColumns = @JoinColumn(name = "status_id")) })
 public class PatentStatus extends BaseBean {
 	
-	@Id
-	private String patent_id;
+	@EmbeddedId
+	private PatentStatusId primaryKey = new PatentStatusId();
 	
-	@Id
-	private String status_id;
-	
-	@Id
+
+	@Temporal(TemporalType.DATE)
 	@JsonView(View.Patent.class)
 	private Date create_date;
 
-	public String getStatus_id() {
-		return status_id;
+	public PatentStatusId getPrimaryKey() {
+        return primaryKey;
+    }
+	
+	public void setPrimaryKey(PatentStatusId primaryKey) {
+	        this.primaryKey = primaryKey;
 	}
-
-	public void setStatus_id(String status_id) {
-		this.status_id = status_id;
-	}
-
-	public String getPatent_id() {
-		return patent_id;
-	}
-
-	public void setPatent_id(String patent_id) {
-		this.patent_id = patent_id;
-	}
+	
+	@Transient
+//	@JsonView({View.Patent.class,View.PortfolioDetail.class})
+    public Patent getPatent() {
+        return getPrimaryKey().getPatent();
+    }
+ 
+    public void setPatent(Patent patent) {
+        getPrimaryKey().setPatent(patent);
+    }
+    
+	@Transient
+	@JsonView({View.Patent.class,View.PortfolioDetail.class})
+    public Status getStatus() {
+        return getPrimaryKey().getStatus();
+    }
+ 
+    public void setStatus(Status status) {
+        getPrimaryKey().setStatus(status);
+    }
 
 	public Date getCreate_date() {
 		return create_date;
@@ -51,6 +73,7 @@ public class PatentStatus extends BaseBean {
 	public void setCreate_date(Date create_date) {
 		this.create_date = create_date;
 	}
+
 	
 	
 

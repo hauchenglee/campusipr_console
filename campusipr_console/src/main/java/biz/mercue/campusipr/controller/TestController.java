@@ -1,10 +1,15 @@
 package biz.mercue.campusipr.controller;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder.Case;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.fileupload.disk.DiskFileItem;
@@ -29,12 +34,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import com.fasterxml.classmate.util.ResolvedTypeCache.Key;
 
-import biz.mercue.campusipr.model.AdminToken;
-import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.Permission;
-import biz.mercue.campusipr.model.Role;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.AdminTokenService;
@@ -45,16 +46,12 @@ import biz.mercue.campusipr.service.StatusService;
 import biz.mercue.campusipr.service.SysRolePermissionService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
-import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
+import biz.mercue.campusipr.util.MailSender;
 import biz.mercue.campusipr.util.MapResponseBody;
-import biz.mercue.campusipr.util.ServiceChinaPatent;
-import biz.mercue.campusipr.util.StringResponseBody;
 import biz.mercue.campusipr.util.StringUtils;
-import biz.mercue.campusipr.util.ServiceTaiwanPatent;
-import biz.mercue.campusipr.util.ServiceUSPatent;
 
 @Controller
 public class TestController {
@@ -81,6 +78,9 @@ public class TestController {
 	
 	@Autowired
 	SysRolePermissionService sysRolePermissionService;
+	
+	@Autowired
+	ServletContext servletContext;
 	
 	
 	@RequestMapping(value="/gettestid", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
@@ -146,6 +146,51 @@ public class TestController {
 		listResponseBody.setMessage(Constants.MSG_SUCCESS);
 
 		String result = JacksonJSONUtils.mapObjectWithView(listResponseBody, View.PatentDetail.class);
+		log.info("result :"+result);
+		return result;
+	}
+	
+	
+	@RequestMapping(value="/api/demopatentchange", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String demoPatentChange(HttpServletRequest request) {
+		log.info("getPatent ");
+		BeanResponseBody responseBody  = new BeanResponseBody();
+	
+		InputStream is = null;
+		String fileAsString = null;
+		File fiel = new File("/WEB-INF/html/patent_change.html");
+		try {
+			 is = new FileInputStream(servletContext.getRealPath("/WEB-INF/html/patent_change.html"));
+			BufferedReader buf = new BufferedReader(new InputStreamReader(is));
+		        
+			String line = buf.readLine();
+			StringBuilder sb = new StringBuilder();
+		        
+			while(line != null){
+				sb.append(line).append("\n");
+				line = buf.readLine();
+			}
+		        
+			fileAsString = sb.toString();
+			//MailSender
+			new MailSender().sendMail("leohuang@mercue.biz", "test", "test content");
+		}catch (Exception e) {
+			log.error("Exception :"+e.getMessage());
+		}finally {
+			if(is != null) {
+				try {
+					is.close();
+				}catch (Exception e) {
+					log.error("Exception :"+e.getMessage());
+				}
+			}
+		}
+		log.info("fileAsString : "+fileAsString);
+		responseBody.setCode(Constants.INT_SUCCESS);
+		responseBody.setMessage(Constants.MSG_SUCCESS);
+
+		String result = JacksonJSONUtils.mapObjectWithView(responseBody, View.PatentDetail.class);
 		log.info("result :"+result);
 		return result;
 	}

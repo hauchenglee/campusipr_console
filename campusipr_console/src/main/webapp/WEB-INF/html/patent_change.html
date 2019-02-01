@@ -1,0 +1,352 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<head>
+
+  <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />
+  <title>教育部大學智財服務平臺</title>
+
+  <style type="text/css">
+    html {
+      width: 100%;
+    }
+
+    table {
+      font-size: 12px;
+      border: 0;
+      border: none;
+    }
+
+    table,
+    th,
+    td {
+      border: 1px solid transparent;
+    }
+
+    .border-patch{
+      border: 1px solid white;
+    }
+
+    @media screen and (min-width:641px) {
+      body {
+        width: auto !important;
+        font-size:100%;
+
+        background-color: #ebedf2;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .pc-layout{ }
+      .phone-layout{ display:none; }
+
+      .head-text{
+         font-size:29px; 
+         color:#575962; 
+         font-weight:bold;
+         padding-top:105px;
+         padding-bottom:46px;
+      }
+
+      .card{
+        width:80%;
+        box-shadow: 0 1px 10px 0 rgba(69, 65, 78, 0.08), 0 2px 10px 0 rgba(0, 0, 0, 0.2) !important;
+      }
+
+      .card_head{
+        padding:23px 38px;
+        font-size:18px;
+
+        width:100%;
+        background-color: white;
+        color: #575962;
+        font-weight: bold;
+        border: 0;
+        border-bottom: 1.5px solid #ebedf2;
+        /* border-bottom: 1.5px solid transparent; */
+	      -webkit-border-image: -webkit-gradient(linear, left top, right top, from(#716aca), to(#F4516C)) 1 stretch;
+	      -webkit-border-image: -webkit-linear-gradient(left, #716aca, #F4516C) 1 stretch;
+				-o-border-image: -o-linear-gradient(left, #716aca, #F4516C) 1 stretch;
+					border-image: -webkit-gradient(linear, left top, right top, from(#716aca), to(#F4516C)) 1 stretch;
+					border-image: linear-gradient(to right, #716aca, #F4516C) 1 stretch;
+      }
+
+      .card_form{
+        width:100%; 
+        padding:10px;
+        background-color: white;
+        border: 1px solid white;
+      }
+
+      .first_form{
+        padding-top:31px; 
+      }
+
+      .info_h_padding{
+        width:10%;
+      }
+
+      .info-text{
+        width:80%;
+        font-size: 18px;
+        color: #575962;
+        font-weight: normal;
+      }
+
+      .link-text{
+        width:80%;
+        font-size: 18px;
+        font-weight: normal;
+      }
+
+      .warn-text{
+        font-size:18px; 
+        color:#f4516c; 
+        padding-top:50px;
+        padding-bottom:20px
+      }
+
+      .info-button{
+        text-align: center;
+        padding: 20px;
+        margin: -2px;
+        background-color: #5867dd;
+        color: #fff;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .bottom-text{
+        font-size:18px;
+        color:#575962;
+        padding:5px;
+      }
+
+      .bottom-text-first{
+        padding-top: 55px !important;
+      }
+
+      .bottom-text-last{
+        padding-bottom: 55px !important;
+      }
+
+    }
+
+    @media screen and (max-width:640px) {
+      body {
+        width: auto !important;
+        font-size:50%;
+
+        background-color: #ebedf2;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .pc-layout{ display:none; }
+      .phone-layout{ }
+
+     .head-text{
+         font-size:15px; 
+         color:#575962; 
+         font-weight:bold;
+         padding-top:52px;
+         padding-bottom:23px;
+      }
+
+      .card{
+        width:95%;
+        box-shadow: 0 1px 10px 0 rgba(69, 65, 78, 0.08), 0 2px 10px 0 rgba(0, 0, 0, 0.2) !important;
+      }
+
+      .card_head{
+        padding:12px 19px;
+        font-size:11px;
+
+        width:100%;
+        background-color: white;
+        color: #575962;
+        font-weight: bold;
+        border: 0;
+        border-bottom: 1.5px solid #ebedf2;
+        /* border-bottom: 1.5px solid transparent; */
+	      -webkit-border-image: -webkit-gradient(linear, left top, right top, from(#716aca), to(#F4516C)) 1 stretch;
+	      -webkit-border-image: -webkit-linear-gradient(left, #716aca, #F4516C) 1 stretch;
+				-o-border-image: -o-linear-gradient(left, #716aca, #F4516C) 1 stretch;
+					border-image: -webkit-gradient(linear, left top, right top, from(#716aca), to(#F4516C)) 1 stretch;
+					border-image: linear-gradient(to right, #716aca, #F4516C) 1 stretch;
+      }
+
+      .card_form{
+        width:100%; 
+        padding:5px 19px; 
+        background-color: white;
+        border: 1px solid white;
+      }
+
+      .first_form{
+        padding-top:15px; 
+      }
+
+      .info_h_padding{
+        width:0%;
+      }
+
+      .info-text{
+        width:100%;
+        font-size: 11px;
+        color: #575962;
+        font-weight: normal;
+        padding-bottom:5px;
+      }
+
+      .link-text{
+        width:100%;
+        font-size: 11px;
+        font-weight: normal;
+        padding-bottom:5px;
+      }
+      
+      .warn-text{
+        font-size:9px; 
+        color:#f4516c; 
+        padding-top:25px;
+        padding-bottom:10px
+      }
+
+      .info-button{
+        text-align: center;
+        padding: 10px;
+        margin: -2px;
+        background-color: #5867dd;
+        color: #fff;
+        font-size: 10px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .bottom-text{
+        font-size:9px;
+        color:#575962;
+        padding:3px;
+      }
+
+      .bottom-text-first{
+        padding-top: 27px !important;
+      }
+
+      .bottom-text-last{
+        padding-bottom: 27px !important;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <!--Main Table Start-->
+  <table align="center" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ebedf2;"><tbody></tbody>
+
+    <!--Offer Text Start-->
+
+    <tr><td align="center" class="pc-layout head-text">IMPACT 台灣智財加值營運管理中心</td><tr> 
+    
+    <tr><td align="center" class="phone-layout head-text">
+      <div>IMPACT</div>
+      <div>台灣智財加值營運管理中心</div>
+    </td><tr> 
+    <!--Offer Text End-->
+
+    <!--Info Card Head Start-->
+    <tr>
+      <td align="center" cellpadding="0" cellspacing="0" border="0">
+        <table align="center" cellpadding="0" cellspacing="0" border="0" class="card"><tbody>         
+          <tr><td align="left"class="card_head">忘記密碼提醒信</td></tr>
+          <tr><td class="border-patch">
+            <div class="pc-layout">
+                <table align="center" cellpadding="0" cellspacing="0" border="0" class="card_form first_form"><tbody>
+                  <tr>
+                    <td align="left" valign="center" class="info_h_padding"></td>
+                    <td align="left" valign="center" class="info-text">親愛的 官峰輝 您好</td>
+                    <td align="left" valign="center" class="info_h_padding"></td>
+                  </tr>
+                </tbody></table>
+                <table align="center" cellpadding="0" cellspacing="0" border="0" class="card_form"><tbody>
+                    <tr>
+                      <td align="left" valign="center" class="info_h_padding"></td>
+                      <td align="left" valign="center" class="info-text">您已於IMPACT平台網站申請重新設定登入密碼</td>
+                      <td align="left" valign="center" class="info_h_padding"></td>
+                    </tr>
+                    <tr>
+                      <td align="left" valign="center" class="info_h_padding"></td>
+                      <td align="left" valign="center" class="info-text">請點選下列連結登入，並修改您的登入密碼。</td>
+                      <td align="left" valign="center" class="info_h_padding"></td>
+                    </tr>
+                    <tr>
+                      <td align="left" valign="center" class="info_h_padding"></td>
+                      <td align="left" valign="center">
+                        <a href="https://www.google.com.tw/?gws_rd=ssl">
+                          <div class="link-text">https://xxx.xxx.xxx</div></a>
+                      </td>
+                      <td align="left" valign="center" class="info_h_padding"></td>
+                    </tr>
+                </tbody></table>
+                  <table align="center" cellpadding="0" cellspacing="0" border="0" class="card_form"><tbody>
+                      <tr>
+                        <td align="left" valign="center" class="info_h_padding"></td>
+                        <td align="left" valign="center" class="info-text">請注意，此網址僅能使用一次，48小時後將自動失效。</td>
+                        <td align="left" valign="center" class="info_h_padding"></td>
+                      </tr>
+                  </tbody></table>
+            </div>
+
+            <div class="phone-layout">
+                <table align="center" cellpadding="0" cellspacing="0" border="0" class="card_form first_form"><tbody>
+                    <tr>
+                      <td align="left" valign="center" class="info-left-text">親愛的 官峰輝 您好</td>
+                    </tr>
+                  </tbody></table>
+                  <table align="center" cellpadding="0" cellspacing="0" border="0" class="card_form"><tbody>
+                      <tr>
+                        <td align="left" valign="center" class="info-text">您已於IMPACT平台網站申請重新設定登入密碼</td>
+                      </tr>
+                      <tr>
+                        <td align="left" valign="center" class="info-text">請點選下列連結登入，並修改您的登入密碼。</td>
+                      </tr>
+                      <tr>
+                        <td align="left" valign="center">
+                          <a href="https://www.google.com.tw/?gws_rd=ssl">
+                            <div class="link-text">https://xxx.xxx.xxx</div></a>
+                        </td>
+                      </tr>
+                  </tbody></table>
+                  <table align="center" cellpadding="0" cellspacing="0" border="0" class="card_form"><tbody>
+                      <tr>
+                        <td align="left" valign="center" class="info-text">請注意，此網址僅能使用一次，48小時後將自動失效。</td>
+                      </tr>
+                  </tbody></table>
+            </div>
+              
+            <table align="center" cellpadding="0" cellspacing="0" border="0" class="card_form"><tbody>
+              <tr>
+                <td align="center" cellpadding="0" cellspacing="0" border="0" valign="center" class="warn-text">此信件為系統發出信件，請勿直接回覆</td>
+              </tr>
+            </tbody></table>
+          </td></tr>
+        </tbody></table>
+      </td>
+    <tr> 
+    <!--Info Card Head End-->
+    
+    <!--Bottom Start-->
+    <tr><td align="center" cellpadding="0" cellspacing="0" border="0" class="bottom-text bottom-text-first">www.impacttaiwan.org.tw</td><tr> 
+    <tr><td align="center" cellpadding="0" cellspacing="0" border="0" class="bottom-text">台北市大安區忠孝東路三段1號</td><tr> 
+    <tr><td align="center" cellpadding="0" cellspacing="0" border="0" class="bottom-text bottom-text-last">臺北科技大學 億光大樓 5樓 501室</td><tr> 
+    <!--Bottom End-->
+  </tbody></table>
+  <!--Main Table End-->
+</body>
+</html>

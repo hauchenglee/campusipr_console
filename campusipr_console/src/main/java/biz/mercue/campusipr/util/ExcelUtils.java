@@ -152,15 +152,17 @@ public class ExcelUtils {
 		            
 		            row.createCell(4).setCellValue(patent.getPatent_appl_country());
 		            
-		            if (patent.getListStatus() != null) {
+		            if (patent.getListPatentStatus() != null) {
 		            	String statusStr = "";
 		            	int index = 0;
-		            	for (Status status:patent.getListStatus()) {
-		            		if (status.getPatentStatus() != null) {
-			            		if (status.getPatentStatus().getCreate_date() != null) {
-		            				statusStr += DateUtils.getDashFormatDateTime(status.getPatentStatus().getCreate_date());
-		            			}
+		            	
+		            	for (PatentStatus patentStatus:patent.getListPatentStatus()) {
+		            		Status status = patentStatus.getStatus();
+		      
+			            	if (patentStatus.getCreate_date() != null) {
+		            			statusStr += DateUtils.getDashFormatDateTime(patentStatus.getCreate_date());
 		            		}
+		            		
 		            		if (!StringUtils.isNULL(status.getEvent_code())) {
 		            			if (!StringUtils.isNULL(statusStr)) {
 		            				statusStr += "_";
@@ -173,7 +175,7 @@ public class ExcelUtils {
 		            			}
 		            			statusStr += "_"+status.getEvent_code_desc();
 			            	}
-			            	if (index < patent.getListStatus().size() - 1) {
+			            	if (index < patent.getListPatentStatus().size() - 1) {
 				            	statusStr += "\n";
 			            	}
 		            		
@@ -466,15 +468,15 @@ public class ExcelUtils {
 		            
 		            row.createCell(5).setCellValue(patent.getPatent_appl_country());
 		            
-		            if (patent.getListStatus() != null) {
+		            if (patent.getListPatentStatus() != null) {
 		            	String statusStr = "";
 		            	int index = 0;
-		            	for (Status status:patent.getListStatus()) {
-		            		if (status.getPatentStatus() != null) {
-			            		if (status.getPatentStatus().getCreate_date() != null) {
-		            				statusStr += DateUtils.getDashFormatDateTime(status.getPatentStatus().getCreate_date());
-		            			}
+		            	for (PatentStatus patentStatus :patent.getListPatentStatus()) {
+		            		Status status = patentStatus.getStatus();
+			            	if (patentStatus.getCreate_date() != null) {
+		            			statusStr += DateUtils.getDashFormatDateTime(patentStatus.getCreate_date());
 		            		}
+		            		
 		            		if (!StringUtils.isNULL(status.getEvent_code())) {
 		            			if (!StringUtils.isNULL(statusStr)) {
 		            				statusStr += "_";
@@ -487,7 +489,7 @@ public class ExcelUtils {
 		            			}
 		            			statusStr += status.getEvent_code_desc();
 			            	}
-			            	if (index < patent.getListStatus().size() - 1) {
+			            	if (index < patent.getListPatentStatus().size() - 1) {
 				            	statusStr += "\n";
 			            	}
 		            		

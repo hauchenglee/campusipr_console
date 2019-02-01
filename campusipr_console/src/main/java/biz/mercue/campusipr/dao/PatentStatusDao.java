@@ -18,4 +18,7 @@ public interface PatentStatusDao {
 	List<PatentStatus> getByPatent(String patentId);
 	
 	void create(PatentStatus ps);
+	
+	
+	//void  deletePatentStatus(String patentId);
 }

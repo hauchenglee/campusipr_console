@@ -118,6 +118,7 @@ public class Constants {
 	
 	public static final int  INT_SUCCESS = 1;
 	public static final String  MSG_SUCCESS = "成功";
+	public static final String  MSG_MAIL_SEND_SUCCESS = "Email發送成功";
 	public static final String  MSG_EN_SUCCESS = "Success";
 	
 

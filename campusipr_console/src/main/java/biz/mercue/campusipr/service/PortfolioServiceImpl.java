@@ -42,7 +42,7 @@ public class PortfolioServiceImpl implements PortfolioService{
 			List<Patent> listPatent = portfolio.getListPatent();
 			for(Patent patent : listPatent) {
 				patent.getListBusiness().size();
-				patent.getListStatus().size();
+				patent.getListPatentStatus().size();
 				patent.getListExtension().size();
 			}
 		}

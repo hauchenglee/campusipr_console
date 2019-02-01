@@ -20,10 +20,10 @@ public class MailSender {
 	private Logger log = Logger.getLogger(this.getClass().getName());
 	
 	
-	//final String username = "contact@mercue.biz";
-	//final String password = "Mercue_5024";
-	final String username = Constants.MAIL_USER_NAME;
-	final String password =  Constants.MAIL_PASSWORD;
+	final String username = "contact@mercue.biz";
+	final String password = "Mercue_5024";
+	//final String username = Constants.MAIL_USER_NAME;
+	//final String password =  Constants.MAIL_PASSWORD;
 
 	
 	private String receiver = null;
@@ -37,10 +37,7 @@ public class MailSender {
 	public MailSender(){
 		props = new Properties();
 		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.starttls.enable", Constants.MAIL_STARTTLS);
-		//props.put("mail.smtp.host", "smtp.gmail.com");
-		//props.put("mail.smtp.port", "587");
-		
+		props.put("mail.smtp.starttls.enable", Constants.MAIL_STARTTLS);		
 		props.put("mail.smtp.host",  Constants.MAIL_HOST);
 		props.put("mail.smtp.port", Constants.MAIL_PORT);
 		

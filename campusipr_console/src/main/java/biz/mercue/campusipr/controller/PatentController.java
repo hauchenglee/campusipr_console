@@ -126,6 +126,8 @@ public class PatentController {
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
 			int taskResult = patentService.addPatentByApplNo(patent);
+			
+			//TODO charles
 			patentService.syncPatentStatus(patent);
 			responseBody.setCode(taskResult);
 			responseBody.setBean(patent);
