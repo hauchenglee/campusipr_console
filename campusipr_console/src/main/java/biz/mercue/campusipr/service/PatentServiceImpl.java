@@ -86,9 +86,6 @@ public class PatentServiceImpl implements PatentService{
 	private StatusDao statusDao;
 	
 	@Autowired
-	private PatentStatusDao patentStatusDao;
-	
-	@Autowired
 	private PatentEditHistoryDao pehDao;
 	
 	@Autowired
@@ -294,48 +291,47 @@ public class PatentServiceImpl implements PatentService{
 		return Constants.INT_SUCCESS;
 	}
 	
-	@Override
-	public int syncPatentStatus(Patent patent) {
-		int taskResult= -1;
-		ServiceStatusPatent.getPatentStatus(patent);
-		
-		if (patent.getListPatentStatus()!= null) {
-			for (PatentStatus patentStatus:patent.getListPatentStatus()) {
-				Status status = patentStatus.getStatus();
-				Status statusDb = statusDao.getByEventCode(status.getEvent_code(), status.getCountry_id());
-				if (statusDb != null) {
-					status.setStatus_id(statusDb.getStatus_id());
-					status.setStatus_desc(statusDb.getStatus_desc());
-					status.setStatus_desc_en(statusDb.getStatus_desc_en());
-					status.setStatus_color(statusDb.getStatus_color());
-					status.setEvent_class(statusDb.getEvent_class());
-					//TODO modify patent status
-//					status.getPatentStatus().setStatus_id(status.getStatus_id());
-//					PatentStatus dBean = patentStatusDao.getByStatusAndPatent(status.getPatentStatus().getPatent_id(), status.getPatentStatus().getStatus_id(), status.getPatentStatus().getCreate_date());
+//	@Override
+//	public int syncPatentStatus(Patent patent) {
+//		int taskResult= -1;
+//		
+//		if (patent.getListPatentStatus()!= null) {
+//			for (PatentStatus patentStatus:patent.getListPatentStatus()) {
+//				Status status = patentStatus.getStatus();
+//				Status statusDb = statusDao.getByEventCode(status.getEvent_code(), status.getCountry_id());
+//				if (statusDb != null) {
+//					status.setStatus_id(statusDb.getStatus_id());
+//					status.setStatus_desc(statusDb.getStatus_desc());
+//					status.setStatus_desc_en(statusDb.getStatus_desc_en());
+//					status.setStatus_color(statusDb.getStatus_color());
+//					status.setEvent_class(statusDb.getEvent_class());
+//					//TODO modify patent status
+////					status.getPatentStatus().setStatus_id(status.getStatus_id());
+////					PatentStatus dBean = patentStatusDao.getByStatusAndPatent(status.getPatentStatus().getPatent_id(), status.getPatentStatus().getStatus_id(), status.getPatentStatus().getCreate_date());
+////					
+////					if (dBean == null) {
+////						patentStatusDao.create(status.getPatentStatus());
+////					}
+//				} else {
 //					
-//					if (dBean == null) {
-//						patentStatusDao.create(status.getPatentStatus());
+//					if(StringUtils.isNULL(status.getStatus_id())) {
+//						status.setStatus_id(KeyGeneratorUtils.generateRandomString());
 //					}
-				} else {
-					
-					if(StringUtils.isNULL(status.getStatus_id())) {
-						status.setStatus_id(KeyGeneratorUtils.generateRandomString());
-					}
-					statusDao.create(status);
-					//TODO modify patent status
-//					status.getPatentStatus().setStatus_id(status.getStatus_id());
-//					PatentStatus dBean = patentStatusDao.getByStatusAndPatent(status.getPatentStatus().getPatent_id(), status.getPatentStatus().getStatus_id(), status.getPatentStatus().getCreate_date());
-//					if (dBean == null) {
-//						patentStatusDao.create(status.getPatentStatus());
-//					}
-				}
-			}
-		}else {
-			taskResult = Constants.INT_CANNOT_FIND_DATA;
-		}
-		
-		return taskResult;
-	}
+//					statusDao.create(status);
+//					//TODO modify patent status
+////					status.getPatentStatus().setStatus_id(status.getStatus_id());
+////					PatentStatus dBean = patentStatusDao.getByStatusAndPatent(status.getPatentStatus().getPatent_id(), status.getPatentStatus().getStatus_id(), status.getPatentStatus().getCreate_date());
+////					if (dBean == null) {
+////						patentStatusDao.create(status.getPatentStatus());
+////					}
+//				}
+//			}
+//		}else {
+//			taskResult = Constants.INT_CANNOT_FIND_DATA;
+//		}
+//		
+//		return taskResult;
+//	}
 	
 	@Override
 	public int syncPatentsByApplicant(List<Patent> list, String adminId, String businessId, String ip) {
@@ -376,6 +372,8 @@ public class PatentServiceImpl implements PatentService{
 	             addlist = ServiceChinaPatent.getPatentRightByAssignee(chineseNames, dupucateStr);
 	             list.addAll(addlist);
 	          }
+
+	  		  ServiceStatusPatent.syncListPatentStatus(list);
 	          
 	          for (Patent patent:list) {
 	               patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
@@ -426,6 +424,7 @@ public class PatentServiceImpl implements PatentService{
 	    }else {
 	         ServiceChinaPatent.getPatentRightByApplicantNo(patent);
 	    }
+	    ServiceStatusPatent.getPatentStatus(patent);
 		
 		if(!StringUtils.isNULL(patent.getPatent_name())|| !StringUtils.isNULL(patent.getPatent_name_en())) {
 			String applNo =  patent.getPatent_appl_no();
@@ -534,6 +533,17 @@ public class PatentServiceImpl implements PatentService{
 	             	   }
 	                }
 	            }
+//				if (patent.getListPatentStatus() != null) {
+//					dbBean.setListPatentStatus(patent.getListPatentStatus());
+//	                for (PatentStatus patentStatus:patent.getListPatentStatus()) {
+//	                	Status status = patentStatus.getStatus();
+//	                	Status statusDb = statusDao.getByEventCode(status.getEvent_code(), status.getCountry_id());
+//	             	   
+//	             	   	if (statusDb == null) {
+//	             	   		statusDao.create(status);
+//	             	   	}
+//	                }
+//	            }
 			}
 
 			if (patent.getPatentAbstract() != null) {
@@ -597,6 +607,15 @@ public class PatentServiceImpl implements PatentService{
 			if(Patent.EDIT_SOURCE_HUMAN   == patent.getEdit_source()) {
 				dbBean.setFamily(patent.getFamily());
 				dbBean.setListPortfolio(patent.getListPortfolio());
+			}
+			
+			List<String> checkBusinessIds = new ArrayList<>();
+			for (Business bussiness:dbBean.getListBusiness()) {
+				checkBusinessIds.add(bussiness.getBusiness_id());
+			}
+			if (!checkBusinessIds.contains(patent.getBusiness().getBusiness_id())) {
+				log.info("add business");
+				dbBean.addBusiness(patent.getBusiness());
 			}
 			
 			return Constants.INT_SUCCESS;

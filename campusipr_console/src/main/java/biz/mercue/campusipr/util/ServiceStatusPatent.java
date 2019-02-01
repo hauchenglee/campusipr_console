@@ -34,6 +34,12 @@ public class ServiceStatusPatent {
 	
 	private static  Logger log = Logger.getLogger(ServiceStatusPatent.class.getName());
 	
+	public static void syncListPatentStatus(List<Patent> list) {
+		for (Patent patent:list) {
+			getPatentStatus(patent);
+		}
+	}
+	
 	public static void getPatentStatus(Patent patent) {
 		if (!patent.getPatent_appl_country().equals(Constants.APPL_COUNTRY_US)) {
 			String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/family/publication/EPODOC/%s/legal";
@@ -91,25 +97,23 @@ public class ServiceStatusPatent {
 			JSONArray patentTransaction = patentObj.optJSONArray("transactions");
 			for (int indexTransaction = 0; indexTransaction < patentTransaction.length(); indexTransaction++) {
 				JSONObject transactionObj = patentTransaction.optJSONObject(indexTransaction);
-				PatentStatus ps = new PatentStatus();
-				ps.setPatent(patent);
 				Status status = new Status();
 				status.setCountry_id("us");
 				status.setEvent_code(transactionObj.optString("code"));
 				status.setEvent_code_desc(transactionObj.optString("description"));
+
+				Date psCreateDate = null;
 				try {
 					String psCreateDateStr = transactionObj.optString("recordDate");
 					if (StringUtils.isNULL(psCreateDateStr) == false) {
-						Date psCreateDate = DateUtils.parserDateTimeString(psCreateDateStr);
-						ps.setCreate_date(psCreateDate);
+						psCreateDate = DateUtils.parserDateTimeString(psCreateDateStr);
 					}
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				status.setStatus_from(Constants.STATUS_FROM_USPTO);
-				ps.setStatus(status);
-				listPatentStatus.add(ps);
+				patent.addStatus(status, psCreateDate);
 			}
 		}
 		patent.setListPatentStatus(listPatentStatus);
@@ -133,8 +137,6 @@ public class ServiceStatusPatent {
 			List<PatentStatus> listPatentStatus = new ArrayList<PatentStatus>();
 			NodeList documentList = doc.getElementsByTagName("ops:legal");
 			for (int temp = 0; temp < documentList.getLength(); temp++) {
-				PatentStatus ps = new PatentStatus();
-				ps.setPatent(patent);
 				Status status = new Status();
 				Node nNode = documentList.item(temp);
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
@@ -148,18 +150,18 @@ public class ServiceStatusPatent {
 						status.setEvent_code_desc(eventDesc);
 						String eventClass = eElement.getElementsByTagName("ops:L004EP").item(0).getTextContent();
 						status.setEvent_class(eventClass);
+
+						Date psCreateDate = null;
 						try {
 							String psCreateDateStr = eElement.getElementsByTagName("ops:L019EP").item(0).getTextContent();
 							if (StringUtils.isNULL(psCreateDateStr) == false) {
-								Date psCreateDate = DateUtils.parserSimpleDateHyphenFormatDate(psCreateDateStr);
-								ps.setCreate_date(psCreateDate);
+								psCreateDate = DateUtils.parserSimpleDateHyphenFormatDate(psCreateDateStr);
 							}
 						} catch (ParseException e) {
 							log.error("ParseException:"+e.getMessage());
 						}
 						status.setStatus_from(Constants.STATUS_FROM_EPO);
-						ps.setStatus(status);
-						listPatentStatus.add(ps);
+						patent.addStatus(status, psCreateDate);
 					}
 				}
 			}

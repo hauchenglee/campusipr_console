@@ -15,7 +15,7 @@ public interface PatentService {
 
 	int addPatent(Patent patent);
 	
-	int syncPatentStatus(Patent patent);
+//	int syncPatentStatus(Patent patent);
 	
 	int addPatentByApplNo(Patent patent);
 

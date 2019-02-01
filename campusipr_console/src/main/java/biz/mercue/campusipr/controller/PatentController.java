@@ -128,7 +128,7 @@ public class PatentController {
 			int taskResult = patentService.addPatentByApplNo(patent);
 			
 			//TODO charles
-			patentService.syncPatentStatus(patent);
+//			patentService.syncPatentStatus(patent);
 			responseBody.setCode(taskResult);
 			responseBody.setBean(patent);
 			
@@ -557,9 +557,7 @@ public class PatentController {
 
 				List<Patent> list = new ArrayList<>();
 				int taskResult = patentService.syncPatentsByApplicant(list, Constants.SYSTEM_ADMIN, businessId, ip);
-				for (Patent patent:list) {
-					patentService.syncPatentStatus(patent);
-				}
+				
 				responseBody.setCode(taskResult);
 				responseBody.setTotal_count(list.size());
 				responseBody.setList(list);
