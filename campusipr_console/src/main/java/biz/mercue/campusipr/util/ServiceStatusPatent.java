@@ -26,6 +26,7 @@ import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentStatus;
+import biz.mercue.campusipr.model.PatentStatusId;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.PatentService;
@@ -91,7 +92,6 @@ public class ServiceStatusPatent {
 	private static void convertPatentStatusInfoUSTPOXml(Patent patent, JSONObject getObject) {
 		JSONArray patentDocsObj = getObject.optJSONObject("queryResults").optJSONObject("searchResponse")
 				.optJSONObject("response").optJSONArray("docs");
-		List<PatentStatus> listPatentStatus = new ArrayList<PatentStatus>();
 		for (int index = 0; index < patentDocsObj.length(); index++) {
 			JSONObject patentObj = patentDocsObj.optJSONObject(index);
 			JSONArray patentTransaction = patentObj.optJSONArray("transactions");
@@ -116,7 +116,6 @@ public class ServiceStatusPatent {
 				patent.addStatus(status, psCreateDate);
 			}
 		}
-		patent.setListPatentStatus(listPatentStatus);
 	}
 	
 	private static void convertPatentStatusInfoEPOXml(Patent patent, String content) {
@@ -134,7 +133,6 @@ public class ServiceStatusPatent {
 			is.setCharacterStream(new StringReader(content));
 			Document doc = db.parse(is);
 			doc.getDocumentElement().normalize();
-			List<PatentStatus> listPatentStatus = new ArrayList<PatentStatus>();
 			NodeList documentList = doc.getElementsByTagName("ops:legal");
 			for (int temp = 0; temp < documentList.getLength(); temp++) {
 				Status status = new Status();
@@ -162,10 +160,11 @@ public class ServiceStatusPatent {
 						}
 						status.setStatus_from(Constants.STATUS_FROM_EPO);
 						patent.addStatus(status, psCreateDate);
+						
 					}
 				}
 			}
-			patent.setListPatentStatus(listPatentStatus);
+			
 		} catch (Exception e) {
 			log.error("Exception:"+e.getMessage());
 		}

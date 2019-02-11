@@ -27,11 +27,10 @@ public class IPCClassDaoImpl extends AbstractDao<String,  IPCClass> implements I
 	private Logger log = Logger.getLogger(this.getClass().getName());
 
 	@Override
-	public IPCClass getByIdAndVersion(String id, String version) {
+	public IPCClass getByIdAndVersion(String id) {
 		// TODO Auto-generated method stub
 		Criteria criteria =  createEntityCriteria();
 		criteria.add(Restrictions.eq("ipc_class_id", id));
-		criteria.add(Restrictions.eq("ipc_version", version));
 		return (IPCClass) criteria.uniqueResult();
 	}
 	

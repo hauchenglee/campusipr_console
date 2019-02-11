@@ -125,7 +125,7 @@ public class Patent extends BaseBean{
 	
 	//all + manual
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
-	@OneToMany(mappedBy= "primaryKey.patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval =true)
+	@OneToMany(mappedBy= "primaryKey.patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
 	private List<PatentStatus> listPatentStatus;
 	
 	
