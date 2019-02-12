@@ -163,18 +163,22 @@ public class ServiceUSPatent {
 						
 						NodeList ipcrList = doc.getElementsByTagName("classification-ipcr");
 						List<IPCClass> listIPC = new ArrayList<IPCClass>();
+						List<String> duplicateIpc = new ArrayList<>();
 						for (int temp = 0; temp < ipcrList.getLength(); temp++) {
 							org.w3c.dom.Node nNode = ipcrList.item(temp);
 							if (nNode.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) { 
 								org.w3c.dom.Element eElement = (org.w3c.dom.Element) nNode;
-								IPCClass ipc = new IPCClass();
 								String ipcId = eElement.getTextContent().replaceAll("\\s+","")
 										.substring(0, eElement.getTextContent().replaceAll("\\s+","").length()-2);
 								ipcId = ipcId.substring(0,4)+" "+ipcId.substring(4,ipcId.length());
-								ipc.setIpc_class_id(ipcId);
-								int year = Calendar.getInstance().get(Calendar.YEAR);
-								ipc.setIpc_version(Integer.toString(year)+"01");
-								listIPC.add(ipc);
+								if (!duplicateIpc.contains(ipcId)) {
+									IPCClass ipc = new IPCClass();
+									ipc.setIpc_class_id(ipcId);
+									int year = Calendar.getInstance().get(Calendar.YEAR);
+									ipc.setIpc_version(Integer.toString(year)+"01");
+									listIPC.add(ipc);
+									duplicateIpc.add(ipcId);
+								}
 							}
 						}
 						patent.setListIPC(listIPC);

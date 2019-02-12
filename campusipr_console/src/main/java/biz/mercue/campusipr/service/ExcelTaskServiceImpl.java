@@ -394,6 +394,15 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						case Constants.PATENT_APPL_NO_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								patent.setPatent_appl_no(parseNumricCell(row.getCell(fieldMap.getExcel_field_index())));
+								if (patent.getPatent_appl_no().toLowerCase().startsWith(Constants.APPL_COUNTRY_TW)) {
+									patent.setPatent_appl_no(patent.getPatent_appl_no().replace("TW", "").replace("tw", ""));
+								}
+								if (!patent.getPatent_appl_no().toLowerCase().startsWith(Constants.APPL_COUNTRY_US)) {
+									patent.setPatent_appl_no("US"+patent.getPatent_appl_no());
+								}
+								if (patent.getPatent_appl_no().toLowerCase().startsWith(Constants.APPL_COUNTRY_CN)) {
+									patent.setPatent_appl_no("CN"+patent.getPatent_appl_no());
+								}
 							}
 							log.info("patent appl no:"+patent.getPatent_appl_no());
 							break;

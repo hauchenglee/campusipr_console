@@ -149,7 +149,6 @@ public class PatentServiceImpl implements PatentService{
 			patent.getListInventor().size();
 			patent.getListPortfolio().size();
 			patent.getListAnnuity().size();
-			
 		}
 		return patent;
 	}
@@ -219,6 +218,7 @@ public class PatentServiceImpl implements PatentService{
     				ps.setStatus(statusDb);
          	   	}
 				ps.setPatent(patent);
+				log.info(ps.getPrimaryKey());
 			}
 		}
 
@@ -415,15 +415,34 @@ public class PatentServiceImpl implements PatentService{
 	public int addPatentByApplNo(Patent patent) {
 		int taskResult= -1;
 		
-		if (patent.getPatent_appl_no().length() == 10 && 
-                Constants.APPL_COUNTRY_TW.equals(patent.getPatent_appl_country())) {
-            patent.setPatent_appl_no(patent.getPatent_appl_no().replace("TW", "").replace("tw", ""));
+		if (Constants.APPL_COUNTRY_US.equals(patent.getPatent_appl_country())) {
+            patent.setPatent_appl_no(patent.getPatent_appl_no().replace("[\\pP\\p{Punct}]",""));
+            if (!patent.getPatent_appl_no().toLowerCase().contains(Constants.APPL_COUNTRY_US)) {
+            	patent.setPatent_appl_no("US"+patent.getPatent_appl_no());
+            }
         }
-        
-        if (patent.getPatent_appl_no().length() == 11 && 
-                Constants.APPL_COUNTRY_TW.equals(patent.getPatent_appl_country())) {
-            patent.setPatent_appl_no(patent.getPatent_appl_no().replace("TW", "").replace("tw", ""));
+		
+		if (Constants.APPL_COUNTRY_TW.equals(patent.getPatent_appl_country())) {
+            patent.setPatent_appl_no(patent.getPatent_appl_no().replace("TW", "").replace("tw", "").replace("[\\pP\\p{Punct}]",""));
         }
+		
+		if (Constants.APPL_COUNTRY_CN.equals(patent.getPatent_appl_country())) {
+			patent.setPatent_appl_no(patent.getPatent_appl_no().replace("CN", "").replace("cn", ""));
+			if (patent.getPatent_appl_no().contains(".")) {
+				patent.setPatent_appl_no(patent.getPatent_appl_no().substring(0, patent.getPatent_appl_no().indexOf(".")));
+			}
+			log.info(patent.getPatent_appl_no().substring(6,7));
+			log.info(patent.getPatent_appl_no().substring(7,8));
+			if ("0".equals(patent.getPatent_appl_no().substring(6,7))  &&
+					"0".equals(patent.getPatent_appl_no().substring(7,8))) {
+				log.info(patent.getPatent_appl_no().substring(0,6));
+				log.info(patent.getPatent_appl_no().substring(7,patent.getPatent_appl_no().length()));
+				patent.setPatent_appl_no(patent.getPatent_appl_no().substring(0,7)+patent.getPatent_appl_no().substring(8,patent.getPatent_appl_no().length()));
+			}
+			patent.setPatent_appl_no(("CN"+patent.getPatent_appl_no()).replace("[\\pP\\p{Punct}]",""));
+        }
+		
+		log.info(patent.getPatent_appl_no());
      
 	     //查詢台灣專利
 	    if ((patent.getPatent_appl_no().length() == 8 ||
@@ -539,8 +558,6 @@ public class PatentServiceImpl implements PatentService{
 				if (patent.getListIPC() != null) {
 					dbBean.setListIPC(patent.getListIPC());
 	                for (IPCClass ipc:patent.getListIPC()) {
-	                	log.info(ipc.getIpc_class_id());
-	                	log.info(ipc.getIpc_version());
 	             	    IPCClass ipcDb = ipcDao.getByIdAndVersion(ipc.getIpc_class_id());
 	             	    log.info(ipcDb);
 	             	    if (ipcDb == null) {
@@ -615,13 +632,13 @@ public class PatentServiceImpl implements PatentService{
 			for (Business bussiness:dbBean.getListBusiness()) {
 				checkBusinessIds.add(bussiness.getBusiness_id());
 			}
-			if (!checkBusinessIds.isEmpty()) {
-				if (patent.getBusiness() != null) {
+			log.info(checkBusinessIds);
+			if (patent.getBusiness() != null) {
+					log.info(patent.getBusiness().getBusiness_id());
 					if (!checkBusinessIds.contains(patent.getBusiness().getBusiness_id())) {
 						log.info("add business");
 						dbBean.addBusiness(patent.getBusiness());
 					}
-				}
 			}
 			return Constants.INT_SUCCESS;
 		}else {
@@ -1082,8 +1099,6 @@ public class PatentServiceImpl implements PatentService{
 					for (PatentStatus patentStatus:patent.getListPatentStatus()) {
 						Status status = patentStatus.getStatus();
 						String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
-						log.info(dbMapping);
-						log.info(status.getStatus_id() + "-" + dateStr);
 						if(!dbMapping.containsKey(status.getStatus_id() + "-" + dateStr)) {
 							log.info("add status");
 							dbBean.addPatentStatus(patentStatus);
@@ -1106,8 +1121,6 @@ public class PatentServiceImpl implements PatentService{
 					PatentStatus patentStatus = iterator.next();
 					Status status = patentStatus.getStatus();
 					String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
-					log.info(newMapping);
-					log.info(status.getStatus_id() + "-" + dateStr);
 					if (!newMapping.containsKey(status.getStatus_id() + "-" + dateStr)) {
 						if(patent.getEdit_source() == Patent.EDIT_SOURCE_HUMAN) {
 							if("sys".equals(status.getStatus_from()) ) {
@@ -1558,7 +1571,11 @@ public class PatentServiceImpl implements PatentService{
 	}
 	
 	
-
+	@Override
+	public void deleteById(String id) {
+		patentDao.deletePatentStatus(id);
+		patentDao.delete(id);
+	}
 
 	
 }

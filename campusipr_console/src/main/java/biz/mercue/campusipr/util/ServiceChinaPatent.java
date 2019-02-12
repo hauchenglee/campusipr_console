@@ -121,7 +121,7 @@ public class ServiceChinaPatent {
 	public static void getPatentRightByApplicantNo(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/search?q=%s";
 		try {
-			url = String.format(url,URLEncoder.encode("ap="+patent.getPatent_appl_no(), "UTF-8"));
+			url = String.format(url,URLEncoder.encode("ap=", "UTF-8")+patent.getPatent_appl_no());
 		} catch (UnsupportedEncodingException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -299,18 +299,23 @@ public class ServiceChinaPatent {
 			
 			NodeList ipcrList = doc.getElementsByTagName("classification-ipcr");
 			List<IPCClass> listIPC = new ArrayList<IPCClass>();
+			List<String> duplicateIpc = new ArrayList<>();
 			for (int temp = 0; temp < ipcrList.getLength(); temp++) {
 				Node nNode = ipcrList.item(temp);
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
 					Element eElement = (Element) nNode;
-					IPCClass ipc = new IPCClass();
+
 					String ipcId = eElement.getTextContent().replaceAll("\\s+","")
 							.substring(0, eElement.getTextContent().replaceAll("\\s+","").length()-2);
 					ipcId = ipcId.substring(0,4)+" "+ipcId.substring(4,ipcId.length());
-					ipc.setIpc_class_id(ipcId);
-					int year = Calendar.getInstance().get(Calendar.YEAR);
-					ipc.setIpc_version(Integer.toString(year)+"01");
-					listIPC.add(ipc);
+					if (!duplicateIpc.contains(ipcId)) {
+						IPCClass ipc = new IPCClass();
+						ipc.setIpc_class_id(ipcId);
+						int year = Calendar.getInstance().get(Calendar.YEAR);
+						ipc.setIpc_version(Integer.toString(year)+"01");
+						listIPC.add(ipc);
+						duplicateIpc.add(ipcId);
+					}
 				}
 			}
 			patent.setListIPC(listIPC);
@@ -318,6 +323,7 @@ public class ServiceChinaPatent {
 			NodeList inventorsList = doc.getElementsByTagName("inventors");
 			for (int temp = 0; temp < inventorsList.getLength(); temp++) {
 				List<Inventor> listInventor = new ArrayList<Inventor>();
+				List<String> duplicateInventor = new ArrayList<>();
 				Node nNode = inventorsList.item(temp);
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
 					Element nElement = (Element) nNode;
@@ -325,11 +331,14 @@ public class ServiceChinaPatent {
 					for (int temp1 = 0; temp1 < inventorList.getLength(); temp1++) {
 						Element inventor = (Element) inventorList.item(temp1);
 						NodeList nameList = inventor.getElementsByTagName("name");
-						Inventor inv = new Inventor();
-						inv.setInventor_name(nameList.item(0).getTextContent().replace(",", ""));
-						inv.setInventor_order(Integer.parseInt(inventor.getAttribute("sequence")));
-						inv.setPatent(patent);
-						listInventor.add(inv);
+						if (!duplicateInventor.contains(nameList.item(0).getTextContent().replace(",", ""))) {
+							Inventor inv = new Inventor();
+							inv.setInventor_name(nameList.item(0).getTextContent().replace(",", ""));
+							inv.setInventor_order(Integer.parseInt(inventor.getAttribute("sequence")));
+							inv.setPatent(patent);
+							listInventor.add(inv);
+							duplicateInventor.add(nameList.item(0).getTextContent().replace(",", ""));
+						}
 					}
 				}
 				patent.setListInventor(listInventor);
@@ -339,6 +348,7 @@ public class ServiceChinaPatent {
 			for (int temp = 0; temp < applicantsList.getLength(); temp++) {
 				List<Assignee> listAssignee = new ArrayList<Assignee>();
 				List<Applicant> listAppl = new ArrayList<Applicant>();
+				List<String> duplicateAppl = new ArrayList<>();
 				Node nNode = applicantsList.item(temp);
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
 					Element nElement = (Element) nNode;
@@ -346,16 +356,19 @@ public class ServiceChinaPatent {
 					for (int temp1 = 0; temp1 < applicantList.getLength(); temp1++) {
 						Element applicant = (Element) applicantList.item(temp1);
 						NodeList nameList = applicant.getElementsByTagName("name");
-						Assignee assign = new Assignee();
-						Applicant appl = new Applicant();
-						assign.setAssignee_name(nameList.item(0).getTextContent());
-						assign.setAssignee_order(Integer.parseInt(applicant.getAttribute("sequence")));
-						assign.setPatent(patent);
-						appl.setApplicant_name_en(nameList.item(0).getTextContent());
-						appl.setApplicant_order(Integer.parseInt(applicant.getAttribute("sequence")));
-						appl.setPatent(patent);
-						listAssignee.add(assign);
-						listAppl.add(appl);
+						if (!duplicateAppl.contains(nameList.item(0).getTextContent())) {
+							Assignee assign = new Assignee();
+							Applicant appl = new Applicant();
+							assign.setAssignee_name(nameList.item(0).getTextContent());
+							assign.setAssignee_order(Integer.parseInt(applicant.getAttribute("sequence")));
+							assign.setPatent(patent);
+							appl.setApplicant_name_en(nameList.item(0).getTextContent());
+							appl.setApplicant_order(Integer.parseInt(applicant.getAttribute("sequence")));
+							appl.setPatent(patent);
+							listAssignee.add(assign);
+							listAppl.add(appl);
+							duplicateAppl.add(nameList.item(0).getTextContent());
+						}
 					}
 				}
 				patent.setListApplicant(listAppl);
