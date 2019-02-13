@@ -241,7 +241,7 @@ public class PatentController {
 		}
 	}
 	
-	@RequestMapping(value="/api/deletePatentbyid/{patentId}", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/deletePatentbyId/{patentId}", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String deletePatentbyId(HttpServletRequest request,@PathVariable String patentId) {
 		log.info("deletePatentbyId ");
@@ -461,7 +461,7 @@ public class PatentController {
 	public String submitExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) {
 		log.info("submitExcelTask ");
 		BeanResponseBody responseBody = new BeanResponseBody();
-		try {
+//		try {
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
 			if (tokenBean != null) {
 				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
@@ -474,10 +474,10 @@ public class PatentController {
 			}
 			
 			responseBody.setCode(Constants.INT_SUCCESS);
-		} catch (Exception e) {
-			log.error("Exception :" + e.getMessage());
-			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
-		}
+//		} catch (Exception e) {
+//			log.error("Exception :" + e.getMessage());
+//			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+//		}
 		return responseBody.getJacksonString(View.ExcelTask.class);
 	}
 	

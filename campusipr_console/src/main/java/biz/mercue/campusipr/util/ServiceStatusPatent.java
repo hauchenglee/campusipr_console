@@ -45,9 +45,9 @@ public class ServiceStatusPatent {
 		if (!patent.getPatent_appl_country().equals(Constants.APPL_COUNTRY_US)) {
 			String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/family/publication/EPODOC/%s/legal";
 			if (patent.getPatent_appl_country().equals(Constants.APPL_COUNTRY_TW)) {
-				url = String.format(url, "TW"+patent.getPatent_notice_no());
+				url = String.format(url, patent.getPatent_appl_country().toUpperCase()+patent.getPatent_notice_no());
 			}else {
-				url = String.format(url, patent.getPatent_appl_no());
+				url = String.format(url, patent.getPatent_appl_country().toUpperCase()+patent.getPatent_appl_no());
 			}
 			
 			try {
@@ -71,7 +71,7 @@ public class ServiceStatusPatent {
 			String url = Constants.PATENT_INVENTOR_WEB_SERVICE_US;
 			JSONObject obj = new JSONObject();
 			if (patent.getPatent_appl_no() != null) {
-				obj.put("searchText", "applId:"+patent.getPatent_appl_no().substring(2));
+				obj.put("searchText", "applId:"+patent.getPatent_appl_no());
 				obj.put("mm", "100%");
 				obj.put("qf", "applId");
 				log.info(obj.toString());

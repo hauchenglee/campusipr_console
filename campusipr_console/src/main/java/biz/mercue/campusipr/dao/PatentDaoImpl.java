@@ -89,6 +89,9 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		String queryStr = "SELECT p from Patent as p";
 		if (orderList != null) {
 			queryStr +=  " LEFT JOIN p."+orderList+" as OLS";
+			if ("listPatentStatus".equals(orderList)) {
+				queryStr +=  " LEFT JOIN OLS.primaryKey.status as OPA";
+			}
 		}
 		if(!StringUtils.isNULL(businessId)) {
 			Filter filter = session.enableFilter("businessFilter");
@@ -99,9 +102,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		if (orderFieldCode != null) {
 			if (orderList != null) {
 				if (is_asc == 1) {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" ASC";
+					} else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					}
 				}else {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" DESC";
+					}else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					}
 				}
 			} else {
 				if (is_asc == 1) {
@@ -156,6 +167,9 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 				" LEFT JOIN p.listInventor as lin ";
 		if (orderList != null) {
 			queryStr +=  " LEFT JOIN p."+orderList+" as OLS";
+			if ("listPatentStatus".equals(orderList)) {
+				queryStr +=  " LEFT JOIN OLS.primaryKey.status as OPA";
+			}
 		}
 		if(!StringUtils.isNULL(businessId)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE lb.business_id = :businessId and" +
@@ -180,9 +194,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		if (orderFieldCode != null) {
 			if (orderList != null) {
 				if (is_asc == 1) {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" ASC";
+					} else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					}
 				}else {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" DESC";
+					}else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					}
 				}
 			} else {
 				if (is_asc == 1) {
@@ -192,6 +214,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 				}
 			}
 		}
+		log.info(queryStr);
 		Query q = session.createQuery(queryStr);
 		if(!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
@@ -246,6 +269,9 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		String queryStr = "SELECT p from Patent as p";
 		if (orderList != null) {
 			queryStr +=  " LEFT JOIN p."+orderList+" as OLS";
+			if ("listPatentStatus".equals(orderList)) {
+				queryStr +=  " LEFT JOIN OLS.primaryKey.status as OPA";
+			}
 		}
 		if(!StringUtils.isNULL(businessId)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE lb.business_id = :businessId"
@@ -258,9 +284,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		if (orderFieldCode != null) {
 			if (orderList != null) {
 				if (is_asc == 1) {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" ASC";
+					} else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					}
 				}else {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" DESC";
+					}else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					}
 				}
 			} else {
 				if (is_asc == 1) {
@@ -299,6 +333,9 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		String queryStr = "SELECT p from Patent as p ";
 		if (orderList != null) {
 			queryStr +=  " LEFT JOIN p."+orderList+" as OLS";
+			if ("listPatentStatus".equals(orderList)) {
+				queryStr +=  " LEFT JOIN OLS.primaryKey.status as OPA";
+			}
 		}
 		if(!StringUtils.isNULL(businessId)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE p.patent_appl_country IN (:list)"
@@ -310,9 +347,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		if (orderFieldCode != null) {
 			if (orderList != null) {
 				if (is_asc == 1) {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" ASC";
+					} else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					}
 				}else {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" DESC";
+					}else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					}
 				}
 			} else {
 				if (is_asc == 1) {
@@ -360,6 +405,9 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		String queryStr = "SELECT p from Patent as p ";
 		if (orderList != null) {
 			queryStr +=  " LEFT JOIN p."+orderList+" as OLS";
+			if ("listPatentStatus".equals(orderList)) {
+				queryStr +=  " LEFT JOIN OLS.primaryKey.status as OPA";
+			}
 		}
 		if(!StringUtils.isNULL(businessId)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE p."+fieldCode+" >= :startDate "
@@ -373,9 +421,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		if (orderFieldCode != null) {
 			if (orderList != null) {
 				if (is_asc == 1) {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" ASC";
+					} else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					}
 				}else {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" DESC";
+					}else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					}
 				}
 			} else {
 				if (is_asc == 1) {
@@ -419,6 +475,9 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		queryStr +=  " LEFT JOIN p."+strList+" as ls";
 		if (orderList != null) {
 			queryStr +=  " LEFT JOIN p."+orderList+" as OLS";
+			if ("listPatentStatus".equals(orderList)) {
+				queryStr +=  " LEFT JOIN OLS.primaryKey.status as OPA";
+			}
 		}
 		if(!StringUtils.isNULL(businessId)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE (ls."+fieldCode+"_name like :searchText "
@@ -432,9 +491,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		if (orderFieldCode != null) {
 			if (orderList != null) {
 				if (is_asc == 1) {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" ASC";
+					} else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					}
 				}else {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" DESC";
+					}else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					}
 				}
 			} else {
 				if (is_asc == 1) {
@@ -479,6 +546,9 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 					+ " LEFT JOIN ls.primaryKey.status as pk_aliase";
 		if (orderList != null) {
 			queryStr +=  " LEFT JOIN p."+orderList+" as OLS";
+			if ("listPatentStatus".equals(orderList)) {
+				queryStr +=  " LEFT JOIN OLS.primaryKey.status as OPA";
+			}
 		}
 		if(!StringUtils.isNULL(businessId)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE"
@@ -492,9 +562,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		if (orderFieldCode != null) {
 			if (orderList != null) {
 				if (is_asc == 1) {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" ASC";
+					} else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					}
 				}else {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" DESC";
+					}else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					}
 				}
 			} else {
 				if (is_asc == 1) {
@@ -547,6 +625,9 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 							+ " LEFT JOIN p.listExtension as ls";
 		if (orderList != null) {
 			queryStr +=  " LEFT JOIN p."+orderList+" as OLS";
+			if ("listPatentStatus".equals(orderList)) {
+				queryStr +=  " LEFT JOIN OLS.primaryKey.status as OPA";
+			}
 		}
 		if(!StringUtils.isNULL(businessId)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE ls."+fieldCode+" like :searchText "
@@ -558,9 +639,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		if (orderFieldCode != null) {
 			if (orderList != null) {
 				if (is_asc == 1) {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" ASC";
+					} else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" ASC";
+					}
 				}else {
-					queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					if ("listPatentStatus".equals(orderList)) {
+						queryStr +=  " ORDER BY OPA."+orderFieldCode+" DESC";
+					}else {
+						queryStr += " ORDER BY OLS."+orderFieldCode+" DESC";
+					}
 				}
 			} else {
 				if (is_asc == 1) {
@@ -677,6 +766,15 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	       query.setParameter("patent_id", patentId);
 	       query.setParameter("status_id", statusId);
 	       query.setParameter("create_date", createTime);
+	       query.executeUpdate();
+	   }
+	   
+	   @Override
+	   public void deletePatentExtension(String patentId) {
+	       String hql = "Delete From PatentExtension where patent_id = :patent_id";
+	       Session session = getSession();
+	       Query query = session.createQuery(hql);
+	       query.setParameter("patent_id", patentId);
 	       query.executeUpdate();
 	   }
 
