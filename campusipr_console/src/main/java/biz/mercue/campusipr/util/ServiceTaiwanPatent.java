@@ -47,9 +47,9 @@ public class ServiceTaiwanPatent {
 			if (StringUtils.hasChinese(assignee)) {
 				url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?top=100&format=json&tk=%s&applnamec=%s&applclass=%s";
 			}
-			url = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee), 1);
+			String urlSend = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee), 1);
 			try {
-				String context = HttpRequestUtils.sendGet(url);
+				String context = HttpRequestUtils.sendGet(urlSend);
 				if (!StringUtils.isNULL(context)) {
 					JSONObject getObject = new JSONObject(context);
 					int totalCount = getObject.optInt("total-count");
@@ -72,8 +72,8 @@ public class ServiceTaiwanPatent {
 					}
 				}
 				if (isSync == false) {
-					url = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee),2);
-					context = HttpRequestUtils.sendGet(url);
+					urlSend = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee),2);
+					context = HttpRequestUtils.sendGet(urlSend);
 					if (!StringUtils.isNULL(context)) {
 						JSONObject getObject = new JSONObject(context);
 						JSONObject obj = getObject.optJSONObject("tw-patent-rightsM");
@@ -96,8 +96,8 @@ public class ServiceTaiwanPatent {
 					}
 				}
 				if (isSync == false) {
-					url = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee),3);
-					context = HttpRequestUtils.sendGet(url);
+					urlSend = String.format(url, Constants.PATENT_KEY_TW ,URLEncoder.encode(assignee),3);
+					context = HttpRequestUtils.sendGet(urlSend);
 					if (!StringUtils.isNULL(context)) {
 						JSONObject getObject = new JSONObject(context);
 						JSONObject obj = getObject.optJSONObject("tw-patent-rightsD");
@@ -161,10 +161,10 @@ public class ServiceTaiwanPatent {
 	public static void getPatentRightByApplNo(Patent patent) {
 		boolean isSync = false;
 		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s&applclass=%s";
-		url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no(),1);
+		String urlSend = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no(),1);
 		
 		try {
-			String context = HttpRequestUtils.sendGet(url);
+			String context = HttpRequestUtils.sendGet(urlSend);
 			if (!StringUtils.isNULL(context)) {
 				JSONObject getObject = new JSONObject(context);
 				JSONObject obj = getObject.optJSONObject("tw-patent-rightsI");
@@ -178,8 +178,8 @@ public class ServiceTaiwanPatent {
 				}
 			}
 			if (isSync == false) {
-				url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no(),2);
-				context = HttpRequestUtils.sendGet(url);
+				urlSend = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no(),2);
+				context = HttpRequestUtils.sendGet(urlSend);
 				if (!StringUtils.isNULL(context)) {
 					JSONObject getObject = new JSONObject(context);
 					JSONObject obj = getObject.optJSONObject("tw-patent-rightsM");
@@ -194,8 +194,8 @@ public class ServiceTaiwanPatent {
 				}
 			}
 			if (isSync == false) {
-				url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no(),3);
-				context = HttpRequestUtils.sendGet(url);
+				urlSend = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no(),3);
+				context = HttpRequestUtils.sendGet(urlSend);
 				if (!StringUtils.isNULL(context)) {
 					JSONObject getObject = new JSONObject(context);
 					JSONObject obj = getObject.optJSONObject("tw-patent-rightsD");
