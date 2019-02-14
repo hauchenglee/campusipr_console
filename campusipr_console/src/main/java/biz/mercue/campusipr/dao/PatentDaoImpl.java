@@ -172,14 +172,14 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			}
 		}
 		if(!StringUtils.isNULL(businessId)) {
-			queryStr += " JOIN p.listBusiness as lb WHERE lb.business_id = :businessId and" +
+			queryStr += " JOIN p.listBusiness as lb WHERE lb.business_id = :businessId and (" +
 					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" + 
 					" p.patent_appl_country like :searchText or p.patent_appl_no like :searchText or" + 
 					" p.patent_notice_no like :searchText or p.patent_publish_no like :searchText or" + 
 					" p.patent_no like :searchText or pa.context_abstract like :searchText) or" + 
 					" p.patent_id in (SELECT lin.patent FROM lin where lin.inventor_name like :searchText or lin.inventor_name_en like :searchText) or" + 
-					" p.patent_id in (SELECT las.patent FROM las where las.assignee_name like :searchText or las.assignee_name_en like :searchText )or" + 
-					" p.patent_id in (SELECT lap.patent FROM lap where lap.applicant_name like :searchText or lap.applicant_name_en like :searchText )";
+					" p.patent_id in (SELECT las.patent FROM las where las.assignee_name like :searchText or las.assignee_name_en like :searchText ) or" + 
+					" p.patent_id in (SELECT lap.patent FROM lap where lap.applicant_name like :searchText or lap.applicant_name_en like :searchText ))";
 		}else {
 			queryStr += " WHERE" + 
 					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" + 
@@ -236,14 +236,14 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 				" LEFT JOIN p.listApplicant as lap " + 
 				" LEFT JOIN p.listInventor as lin ";
 		if(!StringUtils.isNULL(businessId)) {
-			queryStr += " JOIN p.listBusiness as lb WHERE lb.business_id = :businessId and" +
+			queryStr += " JOIN p.listBusiness as lb WHERE lb.business_id = :businessId and (" +
 					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" + 
 					" p.patent_appl_country like :searchText or p.patent_appl_no like :searchText or" + 
 					" p.patent_notice_no like :searchText or p.patent_publish_no like :searchText or" + 
 					" p.patent_no like :searchText or pa.context_abstract like :searchText) or" + 
 					" p.patent_id in (SELECT lin.patent FROM lin where lin.inventor_name like :searchText or lin.inventor_name_en like :searchText) or" + 
 					" p.patent_id in (SELECT las.patent FROM las where las.assignee_name like :searchText or las.assignee_name_en like :searchText )or" + 
-					" p.patent_id in (SELECT lap.patent FROM lap where lap.applicant_name like :searchText or lap.applicant_name_en like :searchText )";
+					" p.patent_id in (SELECT lap.patent FROM lap where lap.applicant_name like :searchText or lap.applicant_name_en like :searchText ))";
 		}else {
 			queryStr += " WHERE" + 
 					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" + 
