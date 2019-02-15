@@ -234,6 +234,14 @@ public class Patent extends BaseBean{
 	
 	
 	@Transient
+	private String  country_name;
+	
+	//sample 2019/01/22
+	@Transient
+	private String  annuity_date;
+	
+	
+	@Transient
 	private PatentExtension extension;
 	
 	@Transient
@@ -687,6 +695,22 @@ public class Patent extends BaseBean{
 		patentStatus.setStatus(status);
 		patentStatus.setCreate_date(date);
 		this.listPatentStatus.add(patentStatus);
+	}
+
+	public String getCountry_name() {
+		return country_name;
+	}
+
+	public void setCountry_name(String country_name) {
+		this.country_name = country_name;
+	}
+
+	public String getAnnuity_date() {
+		return annuity_date;
+	}
+
+	public void setAnnuity_date(String annuity_date) {
+		this.annuity_date = annuity_date;
 	}
 
 

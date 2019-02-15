@@ -48,3 +48,20 @@ patent_api:
     patent_context_webservice_us : "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN%2F"
     patent_webservice_eu : "https://ops.epo.org/3.2"
     patent_token_eu : QWV0UjhhdGlmeTZiRzBzRDNiZkdsaHBObVBmUkRlZ0E6YTY1bXVjUzZobm5yMGNRUg==
+    
+mail:
+    mail_username : contact@mercue.biz
+    mail_pwd : Mercue_5024
+    mail_host : smtp.gmail.com
+    mail_host_port : 587
+    mail_starttls : true
+    mail_from : contact@mercue.biz
+
+html:
+    forget_password : /opt/impact/html/forgetpwd.html
+    new_account : /opt/impact/html/accountactivation.html
+    one_patent_change :  /opt/impact/html/onepatent.html
+    multiple_patent_change :  /opt/impact/html/multiplepatent.html
+    annuity_reminder :  /opt/impact/html/annuity_reminder.html
+    url_reset_password :  https:/api.mercue.biz:663/impact/app/html/resetpwd.html
+    url_enable_password :  https:/api.mercue.biz:663/impact/app/html/enablepwd.html

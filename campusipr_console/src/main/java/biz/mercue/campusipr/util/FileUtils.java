@@ -1,7 +1,9 @@
 package biz.mercue.campusipr.util;
 
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -43,6 +45,24 @@ public class FileUtils {
 		}
 
 		return convFile;
+	}
+	
+	
+	public static final String readHtml(String filePath) {
+		StringBuilder contentBuilder = new StringBuilder();
+		try {
+		    BufferedReader in = new BufferedReader(new FileReader(filePath));
+		    String str;
+		    while ((str = in.readLine()) != null) {
+		        contentBuilder.append(str);
+		    }
+		    in.close();
+		} catch (IOException e) {
+			log.error("read file error");	
+			return null;
+		}
+		
+		return  contentBuilder.toString();
 	}
 	
 

@@ -412,6 +412,9 @@ public class AdminController {
 			Role role = admin.getRole();
 			
 			if(checkRolePermission(role,token,Constants.ADD)) {
+				if(!token.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+					admin.setBusiness(token.getBusiness());
+				}
 				taskResult = adminService.createAdmin(admin);
 				if(taskResult == Constants.INT_SUCCESS) {
 					responseBody.setCode(Constants.INT_SUCCESS);
@@ -485,14 +488,12 @@ public class AdminController {
 	@ResponseBody
 	public String forgetPassword(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		BeanResponseBody responseBody = new BeanResponseBody();
-		JSONObject reqJSON = new JSONObject(receiveJSONString);
-		String email = reqJSON.optString("admin_email");
 
-		Admin admin = adminService.getByEmail(email);
+		Admin admin = (Admin) JacksonJSONUtils.readValue(receiveJSONString, Admin.class);
 
 		if(admin != null) {
-			//TODO send email
-			responseBody.setCode(Constants.INT_SUCCESS);
+			int taskResult = adminService.forgetPassword(admin);
+			responseBody.setCode(taskResult);
 			
 		}else {
 			responseBody.setCode(Constants.INT_CANNOT_FIND_DATA);
@@ -503,9 +504,9 @@ public class AdminController {
 	}
 	
 	
-	@RequestMapping(value="/api/resetpassword", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/updatepassword", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String resetPassword(HttpServletRequest request,@RequestBody String receiveJSONString) {
+	public String updatePassword(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		BeanResponseBody responseBody = new BeanResponseBody();
 		AdminToken token =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 	
@@ -545,10 +546,7 @@ public class AdminController {
 	public String modifyPassword(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		BeanResponseBody responseBody = new BeanResponseBody();
 		AdminToken token =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-	
-		
 		if(token !=null) {
-	
 			Admin admin = (Admin) JacksonJSONUtils.readValue(receiveJSONString, Admin.class);
 			if(admin!=null) {
 				if(!StringUtils.isNULL(admin.getAdmin_password()) && admin.getAdmin_password().equals(admin.getRe_admin_password())) {
@@ -572,6 +570,37 @@ public class AdminController {
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
+		return responseBody.getJacksonString(View.Public.class);
+	}
+	
+	
+	@RequestMapping(value = "/api/resetpassword", method = {RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String resetPassword(HttpServletRequest request, @RequestBody String receiveJSONString) {
+		BeanResponseBody responseBody = new BeanResponseBody();
+
+		JSONObject reqJSON = new JSONObject(receiveJSONString);
+		String token = reqJSON.optString("token");
+		String password = reqJSON.optString("password");
+		String repassword = reqJSON.optString("repassword");
+
+		if (!StringUtils.isNULL(password) && password.equals(repassword)) {
+			Admin admin = new Admin();
+			admin.setToken(token);
+			admin.setAdmin_password(password);
+			int taskResult = adminService.resetPassword(admin);
+			if (taskResult == Constants.INT_SUCCESS) {
+				responseBody.setCode(Constants.INT_SUCCESS);
+
+			} else if (taskResult == Constants.INT_CANNOT_FIND_DATA) {
+				responseBody.setCode(Constants.INT_CANNOT_FIND_DATA);
+			} else {
+				responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+			}
+		} else {
+			responseBody.setCode(Constants.INT_PASSWORD_ERROR);
+		}
+
 		return responseBody.getJacksonString(View.Public.class);
 	}
 	
@@ -620,7 +649,6 @@ public class AdminController {
 	private boolean checkRolePermission(Role role,AdminToken token,String operation) {
 		boolean hasPermission = false;
 		Permission permission = permissionService.getSettingPermissionByRoleAndModule(role.getRole_id(), operation);
-		log.info("permission:"+ permission);
 		if(permission!=null) {
 			hasPermission = token.checkPermission(permission.getPermission_id());
 		}

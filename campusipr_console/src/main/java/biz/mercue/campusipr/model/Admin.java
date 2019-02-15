@@ -62,6 +62,11 @@ public class Admin extends BaseBean {
 	@JsonView(View.Public.class)
 	private String role_name;
 	
+	
+	@Transient
+	@JsonView(View.Public.class)
+	private String token;
+	
 	private Date create_date;
 	
 	private Date update_date;
@@ -173,6 +178,16 @@ public class Admin extends BaseBean {
 	public void setAdmin_ip(String admin_ip) {
 		this.admin_ip = admin_ip;
 	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+
 	
 
 }

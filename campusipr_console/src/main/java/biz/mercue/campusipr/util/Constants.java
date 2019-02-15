@@ -45,6 +45,7 @@ public class Constants {
 	public static String MAIL_HOST = "";
 	public static String MAIL_PORT = "";
 	public static String MAIL_USER_NAME = "";
+	public static String MAIL_FROM = "";
 	public static String MAIL_PASSWORD = "";
 	public static String SYSTEM_EMAIL = "";
 	
@@ -328,4 +329,15 @@ public class Constants {
 	public static final String VIEW  = "view";
 	public static final String EDIT  = "edit";
 	public static final String ADD  = "add";
+	
+	
+	public static String HTML_FORGET_PASSWORD  = "";
+	public static String HTML_NEW_ACCOUNT  = "";
+	public static String HTML_ONE_PATENT_CHANGE  = "";
+	public static String HTML_MULTIPLE_PATENT_CHANGE  = "";
+	public static String HTML_ANNUITY_REMINDER  = "";
+	
+	public static String URL_RESET_PASSWORD  = "";
+	public static String URL_ENABLE_PASSWORD  = "";
+	public static String URL_PATENT_CONTENT  = "";
 }

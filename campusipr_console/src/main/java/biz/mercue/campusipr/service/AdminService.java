@@ -32,7 +32,9 @@ public interface AdminService {
 	
 	public int updatePassword(String adminId,String password);
 	
+	public int forgetPassword(Admin admin);
 	
+	public int resetPassword(Admin admin);
 	
 	//public ListQueryForm getListByBusinessId(String businessId);
 	

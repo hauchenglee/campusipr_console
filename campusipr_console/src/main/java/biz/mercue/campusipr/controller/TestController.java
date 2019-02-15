@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.criteria.CriteriaBuilder.Case;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -21,7 +20,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -34,6 +32,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
+import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 
 import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Status;
@@ -46,6 +45,7 @@ import biz.mercue.campusipr.service.StatusService;
 import biz.mercue.campusipr.service.SysRolePermissionService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
+import biz.mercue.campusipr.util.FileUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
@@ -159,22 +159,22 @@ public class TestController {
 	
 		InputStream is = null;
 		String fileAsString = null;
-		File fiel = new File("/WEB-INF/html/patent_change.html");
+		
 		try {
-			 is = new FileInputStream(servletContext.getRealPath("/WEB-INF/html/patent_change.html"));
-			BufferedReader buf = new BufferedReader(new InputStreamReader(is));
-		        
-			String line = buf.readLine();
-			StringBuilder sb = new StringBuilder();
-		        
-			while(line != null){
-				sb.append(line).append("\n");
-				line = buf.readLine();
-			}
-		        
-			fileAsString = sb.toString();
-			//MailSender
-			new MailSender().sendMail("leohuang@mercue.biz", "test", "test content");
+			log.info("HTML_FORGET_PASSWORD:"+Constants.HTML_FORGET_PASSWORD);
+			log.info("URL_RESET_PASSWORD:"+Constants.URL_RESET_PASSWORD);
+			String html = FileUtils.readHtml(Constants.HTML_FORGET_PASSWORD);
+			log.info("1");
+//			String htmlContent = String.format(html, "黃富榆",Constants.URL_RESET_PASSWORD +"?token=" + KeyGeneratorUtils.generateRandomString(),
+//					"黃富榆",Constants.URL_RESET_PASSWORD + "?token=" + KeyGeneratorUtils.generateRandomString());
+			String htmlContent =html.replaceAll("admin_name", "黃富榆");
+			htmlContent =htmlContent.replaceAll("forget_link", Constants.URL_RESET_PASSWORD + "?token=" + KeyGeneratorUtils.generateRandomString());
+			log.info("2");
+			List<String> list = new ArrayList<String>();
+			list.add("leohuang@mercue.biz");
+			log.info("3");
+			new MailSender().sendHTMLMail(list, "忘記密碼", htmlContent);
+			log.info("4");
 		}catch (Exception e) {
 			log.error("Exception :"+e.getMessage());
 		}finally {
@@ -186,7 +186,7 @@ public class TestController {
 				}
 			}
 		}
-		log.info("fileAsString : "+fileAsString);
+		//log.info("fileAsString : "+fileAsString);
 		responseBody.setCode(Constants.INT_SUCCESS);
 		responseBody.setMessage(Constants.MSG_SUCCESS);
 

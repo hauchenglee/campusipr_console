@@ -13,6 +13,9 @@ public class YamlProperty {
 	private Map<String, String> duckling;
 	private Map<String, String> elasticsearch;
 	private Map<String, String> patent_api;
+	private Map<String, String> mail;
+	
+	private Map<String, String> html;
 	
 	private Map<String, String> google;
 	
@@ -80,6 +83,18 @@ public class YamlProperty {
 	}
 	public void setPatent_api(Map<String, String> patent_api) {
 		this.patent_api = patent_api;
+	}
+	public Map<String, String> getMail() {
+		return mail;
+	}
+	public void setMail(Map<String, String> mail) {
+		this.mail = mail;
+	}
+	public Map<String, String> getHtml() {
+		return html;
+	}
+	public void setHtml(Map<String, String> html) {
+		this.html = html;
 	}
 	
 }

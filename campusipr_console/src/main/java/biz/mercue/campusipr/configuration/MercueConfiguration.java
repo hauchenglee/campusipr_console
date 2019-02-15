@@ -74,6 +74,26 @@ public class MercueConfiguration implements WebMvcConfigurer{
 		
 		Constants.PATENT_WEB_SERVICE_EU = yamlConfig.getConfig().getPatent_api().get("patent_webservice_eu");
 		Constants.PATENT_TOKEN_EU = yamlConfig.getConfig().getPatent_api().get("patent_token_eu");
+		
+		
+		Constants.MAIL_USER_NAME = yamlConfig.getConfig().getMail().get("mail_username");
+		Constants.MAIL_PASSWORD = yamlConfig.getConfig().getMail().get("mail_pwd");
+		Constants.MAIL_HOST = yamlConfig.getConfig().getMail().get("mail_host");
+		Constants.MAIL_PORT = yamlConfig.getConfig().getMail().get("mail_host_port");
+		Constants.MAIL_STARTTLS = yamlConfig.getConfig().getMail().get("mail_starttls");
+		Constants.MAIL_FROM = yamlConfig.getConfig().getMail().get("mail_from");
+		
+		
+		Constants.HTML_FORGET_PASSWORD = yamlConfig.getConfig().getHtml().get("forget_password");
+		Constants.HTML_NEW_ACCOUNT = yamlConfig.getConfig().getHtml().get("new_account");
+		Constants.HTML_ONE_PATENT_CHANGE = yamlConfig.getConfig().getHtml().get("one_patent_change");
+		Constants.HTML_MULTIPLE_PATENT_CHANGE = yamlConfig.getConfig().getHtml().get("multiple_patent_change");
+		Constants.HTML_ANNUITY_REMINDER = yamlConfig.getConfig().getHtml().get("annuity_reminder");
+		
+		Constants.URL_RESET_PASSWORD = yamlConfig.getConfig().getHtml().get("url_reset_password");
+		
+		Constants.URL_ENABLE_PASSWORD = yamlConfig.getConfig().getHtml().get("url_enable_password");
+		
 
 	}
 	
