@@ -15,7 +15,7 @@ public class PatentStatusId implements Serializable {
 	@JoinColumn(name = "patent_id")
 	private Patent patent;
 
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "status_id")
 	private Status status;
 

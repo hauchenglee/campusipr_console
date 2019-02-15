@@ -44,12 +44,6 @@ public class Status extends BaseBean{
 	@JsonView({View.Patent.class})
 	private String status_color;
 	
-	@OneToMany(mappedBy= "primaryKey.status", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval =true)
-	private List<PatentStatus> listPatentStatus;
-	
-	@Transient
-	@JsonView({View.Patent.class})
-	private Date  create_date;
 
 	private String status_from;
 
@@ -69,7 +63,7 @@ public class Status extends BaseBean{
 
 
 	public void setCountry_id(String country_id) {
-		this.country_id = country_id;
+		this.country_id = country_id.toLowerCase();
 	}
 
 
@@ -139,35 +133,6 @@ public class Status extends BaseBean{
 
 	public void setStatus_from(String status_from) {
 		this.status_from = status_from;
-	}
-
-
-
-
-	public Date getCreate_date() {
-		return create_date;
-	}
-
-
-	public void setCreate_date(Date create_date) {
-		this.create_date = create_date;
-	}
-
-
-	public List<PatentStatus> getListPatentStatus() {
-		return listPatentStatus;
-	}
-
-
-	public void setListPatentStatus(List<PatentStatus> listPatentStatus) {
-		this.listPatentStatus = listPatentStatus;
-	}
-	
-	public void addListPatentStatus(PatentStatus patentStatus) {
-		if(this.listPatentStatus == null) {
-			this.listPatentStatus  = new ArrayList<PatentStatus>();
-		}
-		this.listPatentStatus.add(patentStatus);
 	}
 	
 	

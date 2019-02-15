@@ -26,6 +26,7 @@ import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Inventor;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentStatus;
+import biz.mercue.campusipr.model.PatentStatusId;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.PatentService;
@@ -44,9 +45,9 @@ public class ServiceStatusPatent {
 		if (!patent.getPatent_appl_country().equals(Constants.APPL_COUNTRY_US)) {
 			String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/family/publication/EPODOC/%s/legal";
 			if (patent.getPatent_appl_country().equals(Constants.APPL_COUNTRY_TW)) {
-				url = String.format(url, "TW"+patent.getPatent_notice_no());
+				url = String.format(url, patent.getPatent_appl_country().toUpperCase()+patent.getPatent_notice_no());
 			}else {
-				url = String.format(url, patent.getPatent_appl_no());
+				url = String.format(url, patent.getPatent_appl_country().toUpperCase()+patent.getPatent_appl_no());
 			}
 			
 			try {
@@ -70,7 +71,7 @@ public class ServiceStatusPatent {
 			String url = Constants.PATENT_INVENTOR_WEB_SERVICE_US;
 			JSONObject obj = new JSONObject();
 			if (patent.getPatent_appl_no() != null) {
-				obj.put("searchText", "applId:"+patent.getPatent_appl_no().substring(2));
+				obj.put("searchText", "applId:"+patent.getPatent_appl_no());
 				obj.put("mm", "100%");
 				obj.put("qf", "applId");
 				log.info(obj.toString());
@@ -91,17 +92,12 @@ public class ServiceStatusPatent {
 	private static void convertPatentStatusInfoUSTPOXml(Patent patent, JSONObject getObject) {
 		JSONArray patentDocsObj = getObject.optJSONObject("queryResults").optJSONObject("searchResponse")
 				.optJSONObject("response").optJSONArray("docs");
-		List<PatentStatus> listPatentStatus = new ArrayList<PatentStatus>();
+		List<String> duplicateData = new ArrayList<>();
 		for (int index = 0; index < patentDocsObj.length(); index++) {
 			JSONObject patentObj = patentDocsObj.optJSONObject(index);
 			JSONArray patentTransaction = patentObj.optJSONArray("transactions");
 			for (int indexTransaction = 0; indexTransaction < patentTransaction.length(); indexTransaction++) {
 				JSONObject transactionObj = patentTransaction.optJSONObject(indexTransaction);
-				Status status = new Status();
-				status.setCountry_id("us");
-				status.setEvent_code(transactionObj.optString("code"));
-				status.setEvent_code_desc(transactionObj.optString("description"));
-
 				Date psCreateDate = null;
 				try {
 					String psCreateDateStr = transactionObj.optString("recordDate");
@@ -112,11 +108,17 @@ public class ServiceStatusPatent {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				status.setStatus_from(Constants.STATUS_FROM_USPTO);
-				patent.addStatus(status, psCreateDate);
+				if (!duplicateData.contains(transactionObj.optString("code")+"-"+DateUtils.getDashFormatDate(psCreateDate))) {
+					Status status = new Status();
+					status.setCountry_id("us");
+					status.setEvent_code(transactionObj.optString("code"));
+					status.setEvent_code_desc(transactionObj.optString("description"));
+					status.setStatus_from(Constants.STATUS_FROM_USPTO);
+					patent.addStatus(status, psCreateDate);
+					duplicateData.add(transactionObj.optString("code")+"-"+DateUtils.getDashFormatDate(psCreateDate));
+				}
 			}
 		}
-		patent.setListPatentStatus(listPatentStatus);
 	}
 	
 	private static void convertPatentStatusInfoEPOXml(Patent patent, String content) {
@@ -134,8 +136,8 @@ public class ServiceStatusPatent {
 			is.setCharacterStream(new StringReader(content));
 			Document doc = db.parse(is);
 			doc.getDocumentElement().normalize();
-			List<PatentStatus> listPatentStatus = new ArrayList<PatentStatus>();
 			NodeList documentList = doc.getElementsByTagName("ops:legal");
+			List<String> duplicateData = new ArrayList<>();
 			for (int temp = 0; temp < documentList.getLength(); temp++) {
 				Status status = new Status();
 				Node nNode = documentList.item(temp);
@@ -143,13 +145,9 @@ public class ServiceStatusPatent {
 					Element eElement = (Element) nNode;
 					String countryId = eElement.getElementsByTagName("ops:L001EP").item(0).getTextContent().toLowerCase();
 					if (countryId.equals(patent.getPatent_appl_country().toLowerCase())) {
-						status.setCountry_id(countryId);
 						String eventCode = eElement.getAttribute("code");
-						status.setEvent_code(eventCode);
 						String eventDesc = eElement.getAttribute("desc");
-						status.setEvent_code_desc(eventDesc);
 						String eventClass = eElement.getElementsByTagName("ops:L004EP").item(0).getTextContent();
-						status.setEvent_class(eventClass);
 
 						Date psCreateDate = null;
 						try {
@@ -160,12 +158,20 @@ public class ServiceStatusPatent {
 						} catch (ParseException e) {
 							log.error("ParseException:"+e.getMessage());
 						}
-						status.setStatus_from(Constants.STATUS_FROM_EPO);
-						patent.addStatus(status, psCreateDate);
+						if (!duplicateData.contains(eventCode+"-"+DateUtils.getDashFormatDate(psCreateDate))) {
+							status.setCountry_id(countryId);
+							status.setEvent_code(eventCode);
+							status.setEvent_code_desc(eventDesc);
+							status.setEvent_class(eventClass);
+							status.setStatus_from(Constants.STATUS_FROM_EPO);
+							patent.addStatus(status, psCreateDate);
+							duplicateData.add(eventCode+"-"+DateUtils.getDashFormatDate(psCreateDate));
+						}
+						
 					}
 				}
 			}
-			patent.setListPatentStatus(listPatentStatus);
+			
 		} catch (Exception e) {
 			log.error("Exception:"+e.getMessage());
 		}

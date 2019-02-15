@@ -12,7 +12,7 @@ import biz.mercue.campusipr.model.Status;
 
 public interface IPCClassDao {
 	
-	IPCClass getByIdAndVersion(String id, String version);
+	IPCClass getByIdAndVersion(String id);
 	
 	void create(IPCClass ps);
 }

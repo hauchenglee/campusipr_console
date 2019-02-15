@@ -33,7 +33,7 @@ public class PatentStatus extends BaseBean {
 	@EmbeddedId
 	private PatentStatusId primaryKey = new PatentStatusId();
 	
-
+	@Id
 	@Temporal(TemporalType.DATE)
 	@JsonView(View.Patent.class)
 	private Date create_date;

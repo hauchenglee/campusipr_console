@@ -59,6 +59,20 @@ public class StatusDaoImpl extends AbstractDao<String,  Status> implements Statu
 		return (Status) criteria.uniqueResult();
 	}
 	
+	@Override
+	public Status getByEditCode(String StatusDesc) {
+		// TODO Auto-generated method stub
+		Criteria criteria =  createEntityCriteria();
+		criteria.add(Restrictions.eq("status_desc", StatusDesc));
+		criteria.add(Restrictions.eq("status_from", "sys"));
+		List list = criteria.list();
+		Status status = null;
+		if (!list.isEmpty()) {
+			status = (Status) list.get(0);
+		}
+		return status;
+	}
+	
 	
 	@Override
 	public List<Status> getEditable(){

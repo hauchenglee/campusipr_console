@@ -27,6 +27,7 @@ import org.hibernate.annotations.ParamDef;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.StringUtils;
 
 
@@ -125,7 +126,7 @@ public class Patent extends BaseBean{
 	
 	//all + manual
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
-	@OneToMany(mappedBy= "primaryKey.patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval =true)
+	@OneToMany(mappedBy= "primaryKey.patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
 	private List<PatentStatus> listPatentStatus;
 	
 	
@@ -307,6 +308,17 @@ public class Patent extends BaseBean{
 	}
 
 	public void setPatent_appl_no(String patent_appl_no) {
+		if (!StringUtils.isNULL(patent_appl_no)) {
+			if (patent_appl_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_TW)) {
+				patent_appl_no = patent_appl_no.replace("TW", "").replace("tw", "");
+			}
+			if (patent_appl_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_US)) {
+				patent_appl_no = patent_appl_no.replace("US", "").replace("us", "");
+			}
+			if (patent_appl_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_CN)) {
+				patent_appl_no = patent_appl_no.replace("CN", "").replace("cn", "");
+			}
+		}
 		this.patent_appl_no = patent_appl_no;
 	}
 
@@ -315,6 +327,17 @@ public class Patent extends BaseBean{
 	}
 
 	public void setPatent_notice_no(String patent_notice_no) {
+		if (!StringUtils.isNULL(patent_notice_no)) {
+			if (patent_notice_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_TW)) {
+				patent_notice_no = patent_notice_no.replace("TW", "").replace("tw", "");
+			}
+			if (patent_notice_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_US)) {
+				patent_notice_no = patent_notice_no.replace("US", "").replace("us", "");
+			}
+			if (patent_notice_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_CN)) {
+				patent_notice_no = patent_notice_no.replace("CN", "").replace("cn", "");
+			}
+		}
 		this.patent_notice_no = patent_notice_no;
 	}
 
@@ -331,6 +354,17 @@ public class Patent extends BaseBean{
 	}
 
 	public void setPatent_publish_no(String patent_publish_no) {
+		if (!StringUtils.isNULL(patent_publish_no)) {
+			if (patent_publish_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_TW)) {
+				patent_publish_no = patent_publish_no.replace("TW", "").replace("tw", "");
+			}
+			if (patent_publish_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_US)) {
+				patent_publish_no = patent_publish_no.replace("US", "").replace("us", "");
+			}
+			if (patent_publish_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_CN)) {
+				patent_publish_no = patent_publish_no.replace("CN", "").replace("cn", "");
+			}
+		}
 		this.patent_publish_no = patent_publish_no;
 	}
 
@@ -347,6 +381,17 @@ public class Patent extends BaseBean{
 	}
 
 	public void setPatent_no(String patent_no) {
+		if (!StringUtils.isNULL(patent_no)) {
+			if (patent_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_TW)) {
+				patent_no = patent_no.replace("TW", "").replace("tw", "");
+			}
+			if (patent_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_US)) {
+				patent_no = patent_no.replace("US", "").replace("us", "");
+			}
+			if (patent_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_CN)) {
+				patent_no = patent_no.replace("CN", "").replace("cn", "");
+			}
+		}
 		this.patent_no = patent_no;
 	}
 

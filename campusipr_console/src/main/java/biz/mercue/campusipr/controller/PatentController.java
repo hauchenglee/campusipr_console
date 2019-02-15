@@ -241,6 +241,16 @@ public class PatentController {
 		}
 	}
 	
+	@RequestMapping(value="/api/deletePatentbyId/{patentId}", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String deletePatentbyId(HttpServletRequest request,@PathVariable String patentId) {
+		log.info("deletePatentbyId ");
+		BeanResponseBody responseBody  = new BeanResponseBody();
+		patentService.deleteById(patentId);
+		responseBody.setCode(Constants.INT_SUCCESS);
+		return responseBody.getJacksonString(View.PatentDetail.class);
+	}
+	
 	@RequestMapping(value="/api/getpatenthistorybyid", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getPatentHistorybyId(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {

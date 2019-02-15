@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -18,6 +19,7 @@ import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentEditHistory;
 import biz.mercue.campusipr.model.PatentStatus;
 import biz.mercue.campusipr.model.Status;
+import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.StringUtils;
 
 
@@ -40,7 +42,9 @@ public class PatentEditHistoryDaoImpl extends AbstractDao<String,  PatentEditHis
 		Criteria criteria =  createEntityCriteria();
 		if(!StringUtils.isNULL(businessId)) {
 			criteria.createAlias("admin","admin");
-			criteria.add(Restrictions.eq("admin.business.business_id", businessId));
+			Criterion re1 = Restrictions.eq("admin.business.business_id", businessId);
+			Criterion re2 = Restrictions.eq("admin.admin_id", Constants.SYSTEM_ADMIN);
+			criteria.add(Restrictions.or(re1,re2));
 		}
 		criteria.createAlias("patent","patent");
 		criteria.add(Restrictions.eq("patent.patent_id", patentId));
@@ -56,7 +60,9 @@ public class PatentEditHistoryDaoImpl extends AbstractDao<String,  PatentEditHis
 		Criteria criteria =  createEntityCriteria();
 		if(!StringUtils.isNULL(businessId)) {
 			criteria.createAlias("admin","admin");
-			criteria.add(Restrictions.eq("admin.business.business_id", businessId));
+			Criterion re1 = Restrictions.eq("admin.business.business_id", businessId);
+			Criterion re2 = Restrictions.eq("admin.admin_id", Constants.SYSTEM_ADMIN);
+			criteria.add(Restrictions.or(re1,re2));
 		}
 		criteria.createAlias("patent","patent");
 		criteria.add(Restrictions.eq("patent.patent_id", patentId));
