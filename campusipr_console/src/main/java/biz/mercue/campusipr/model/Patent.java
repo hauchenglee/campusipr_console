@@ -310,13 +310,13 @@ public class Patent extends BaseBean{
 	public void setPatent_appl_no(String patent_appl_no) {
 		if (!StringUtils.isNULL(patent_appl_no)) {
 			if (patent_appl_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_TW)) {
-				patent_appl_no = patent_appl_no.replace("TW", "").replace("tw", "");
+				patent_appl_no = patent_appl_no.replace("TW", "").replace("tw", "").replaceAll("\\s+","");
 			}
 			if (patent_appl_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_US)) {
-				patent_appl_no = patent_appl_no.replace("US", "").replace("us", "");
+				patent_appl_no = patent_appl_no.replace("US", "").replace("us", "").replace("/", "").replace(",", "").replaceAll("\\s+","");
 			}
 			if (patent_appl_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_CN)) {
-				patent_appl_no = patent_appl_no.replace("CN", "").replace("cn", "");
+				patent_appl_no = patent_appl_no.replace("CN", "").replace("cn", "").replaceAll("\\s+","");
 			}
 		}
 		this.patent_appl_no = patent_appl_no;
