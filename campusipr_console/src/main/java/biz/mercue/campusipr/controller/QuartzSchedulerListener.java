@@ -13,8 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import biz.mercue.campusipr.model.PushTask;
+import biz.mercue.campusipr.model.ReminderTask;
+import biz.mercue.campusipr.model.SynchronizeTask;
 import biz.mercue.campusipr.service.PushService;
 import biz.mercue.campusipr.service.QuartzService;
+import biz.mercue.campusipr.service.ReminderService;
+import biz.mercue.campusipr.service.SynchronizeService;
 
 
 @Component
@@ -27,6 +31,12 @@ public class QuartzSchedulerListener implements SchedulerListener{
 	
 	@Autowired
 	PushService pushService;
+	
+	@Autowired
+	ReminderService reminderService;
+	
+	@Autowired
+	SynchronizeService synchronizeService;
 	
 	@Override
 	public void jobScheduled(Trigger trigger) {
@@ -122,16 +132,26 @@ public class QuartzSchedulerListener implements SchedulerListener{
 	public void schedulerStarted() {
 		
 		log.info("schedule started");
-//		
-//		List<PushTask> taskList = pushService.getAvailableUnsendPush();
-//		log.info("un send task list size: " + taskList.size());
-//		for(PushTask task: taskList) {
-//			try {
-//				quartzService.createJob(task);
-//			} catch (Exception e) {
-//				log.error(e);
-//			}
-//		}
+		
+		List<ReminderTask> taskList = reminderService.getAvailableReminder();
+		log.info("un send task list size: " + taskList.size());
+		for(ReminderTask task: taskList) {
+			try {
+				quartzService.createJob(task);
+			} catch (Exception e) {
+				log.error(e);
+			}
+		}
+		
+		List<SynchronizeTask> syncList = synchronizeService.getAvailableSynchronize();
+		log.info("un sync task list size: " + syncList.size());
+		for(SynchronizeTask sync: syncList) {
+			try {
+				quartzService.createJob(sync);
+			} catch (Exception e) {
+				log.error(e);
+			}
+		}
 	}
 
 	@Override

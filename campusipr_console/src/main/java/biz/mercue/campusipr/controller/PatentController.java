@@ -176,9 +176,9 @@ public class PatentController {
 	@RequestMapping(value="/api/patentlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getPatentList(HttpServletRequest request,
-			@RequestParam(value ="page",required=false,defaultValue ="1") int page,
-			@RequestParam(value ="order_field",required=false,defaultValue ="") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue ="1") int is_asc) {
+			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
 		log.info("getPatentList ");
 		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
@@ -488,9 +488,9 @@ public class PatentController {
 	@ResponseBody
 	public String searchPatent(HttpServletRequest request,
 			@RequestBody String receiveJSONString,
-			@RequestParam(value ="page",required=false,defaultValue ="1") int page,
-			@RequestParam(value ="order_field",required=false,defaultValue ="") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue ="1") int is_asc) {
+			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
 		log.info("searchpatent ");
 		log.info("page:"+page);
 		log.info("order_field:"+fieldId);

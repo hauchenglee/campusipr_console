@@ -115,19 +115,19 @@ public class SettingController {
 	public String getAnnuityReminder(HttpServletRequest request,
 	  @RequestParam(value ="business",required=false,defaultValue ="") String businessId) {
 		log.info("getAnnuityReminder ");
-		BeanResponseBody responseBody  = new BeanResponseBody();
+		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		log.info("business:"+businessId);
 		if(tokenBean!=null) {
-			AnnuityReminder reminder = null;
+			List<AnnuityReminder> reminderList = null;
 			if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 				log.info("cross business");
-				reminder = annuityReminderService.getByBusinessId(businessId);
+				reminderList = annuityReminderService.getByBusinessId(businessId);
 			}else {
-				reminder = annuityReminderService.getByBusinessId(tokenBean.getBusiness().getBusiness_id());
+				reminderList = annuityReminderService.getByBusinessId(tokenBean.getBusiness().getBusiness_id());
 			}
 			responseBody.setCode(Constants.INT_SUCCESS);
-			responseBody.setBean(reminder);
+			responseBody.setList(reminderList);
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			

@@ -1,6 +1,7 @@
 package biz.mercue.campusipr.util;
 
-
+import java.util.Arrays;
+import java.util.List;
 
 public class Constants {
 	
@@ -340,4 +341,6 @@ public class Constants {
 	public static String URL_RESET_PASSWORD  = "";
 	public static String URL_ENABLE_PASSWORD  = "";
 	public static String URL_PATENT_CONTENT  = "";
+	
+	public static final List<Integer> defaultReminderDays = Arrays.asList(90, 30, 1, -1); 
 }

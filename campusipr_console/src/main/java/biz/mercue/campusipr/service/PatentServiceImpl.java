@@ -4,11 +4,14 @@ package biz.mercue.campusipr.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
@@ -22,6 +25,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 
 import biz.mercue.campusipr.dao.AdminDao;
+import biz.mercue.campusipr.dao.AnnuityReminderDao;
 import biz.mercue.campusipr.dao.BusinessDao;
 import biz.mercue.campusipr.dao.CountryDao;
 import biz.mercue.campusipr.dao.FieldDao;
@@ -30,9 +34,11 @@ import biz.mercue.campusipr.dao.PatentDao;
 import biz.mercue.campusipr.dao.PatentEditHistoryDao;
 import biz.mercue.campusipr.dao.PatentFamilyDao;
 import biz.mercue.campusipr.dao.PatentStatusDao;
+import biz.mercue.campusipr.dao.ReminderDao;
 import biz.mercue.campusipr.dao.StatusDao;
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Annuity;
+import biz.mercue.campusipr.model.AnnuityReminder;
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
 import biz.mercue.campusipr.model.Business;
@@ -51,12 +57,14 @@ import biz.mercue.campusipr.model.PatentExtension;
 import biz.mercue.campusipr.model.PatentFamily;
 import biz.mercue.campusipr.model.PatentField;
 import biz.mercue.campusipr.model.PatentStatus;
+import biz.mercue.campusipr.model.ReminderTask;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.DateUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
+import biz.mercue.campusipr.util.MailSender;
 import biz.mercue.campusipr.util.ServiceChinaPatent;
 import biz.mercue.campusipr.util.ServiceStatusPatent;
 import biz.mercue.campusipr.util.ServiceTaiwanPatent;
@@ -97,7 +105,16 @@ public class PatentServiceImpl implements PatentService{
 	
 	@Autowired
 	private IPCClassDao ipcDao;
+	
+	@Autowired
+	private ReminderDao reminderDao;
+	
+	@Autowired
+	private QuartzService quartzService;
 
+	@Autowired
+	private AnnuityReminderDao annuityReminderDao;
+	
 	@Override
 	public Patent getById(String businessId,String id) {
 		log.info("get by id: " + id);
@@ -291,6 +308,7 @@ public class PatentServiceImpl implements PatentService{
 					PatentContact pContact = new PatentContact();
 					pContact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
 					pContact.setPatent(patent);
+					pContact.setBusiness(business);
 					pContact.setCreate_date(new Date());
 					pContact.setContact_name(business.getContact_name());
 					pContact.setContact_email(business.getContact_email());
@@ -301,51 +319,11 @@ public class PatentServiceImpl implements PatentService{
 			}
 		}
 		
+		handleReminder(patent, patent.getListBusiness());
+		
 		patentDao.create(patent);
 		return Constants.INT_SUCCESS;
 	}
-	
-//	@Override
-//	public int syncPatentStatus(Patent patent) {
-//		int taskResult= -1;
-//		
-//		if (patent.getListPatentStatus()!= null) {
-//			for (PatentStatus patentStatus:patent.getListPatentStatus()) {
-//				Status status = patentStatus.getStatus();
-//				Status statusDb = statusDao.getByEventCode(status.getEvent_code(), status.getCountry_id());
-//				if (statusDb != null) {
-//					status.setStatus_id(statusDb.getStatus_id());
-//					status.setStatus_desc(statusDb.getStatus_desc());
-//					status.setStatus_desc_en(statusDb.getStatus_desc_en());
-//					status.setStatus_color(statusDb.getStatus_color());
-//					status.setEvent_class(statusDb.getEvent_class());
-//					//TODO modify patent status
-////					status.getPatentStatus().setStatus_id(status.getStatus_id());
-////					PatentStatus dBean = patentStatusDao.getByStatusAndPatent(status.getPatentStatus().getPatent_id(), status.getPatentStatus().getStatus_id(), status.getPatentStatus().getCreate_date());
-////					
-////					if (dBean == null) {
-////						patentStatusDao.create(status.getPatentStatus());
-////					}
-//				} else {
-//					
-//					if(StringUtils.isNULL(status.getStatus_id())) {
-//						status.setStatus_id(KeyGeneratorUtils.generateRandomString());
-//					}
-//					statusDao.create(status);
-//					//TODO modify patent status
-////					status.getPatentStatus().setStatus_id(status.getStatus_id());
-////					PatentStatus dBean = patentStatusDao.getByStatusAndPatent(status.getPatentStatus().getPatent_id(), status.getPatentStatus().getStatus_id(), status.getPatentStatus().getCreate_date());
-////					if (dBean == null) {
-////						patentStatusDao.create(status.getPatentStatus());
-////					}
-//				}
-//			}
-//		}else {
-//			taskResult = Constants.INT_CANNOT_FIND_DATA;
-//		}
-//		
-//		return taskResult;
-//	}
 	
 	@Override
 	public int syncPatentsByApplicant(List<Patent> list, String adminId, String businessId, String ip) {
@@ -638,6 +616,7 @@ public class PatentServiceImpl implements PatentService{
 						dbBean.addBusiness(patent.getBusiness());
 					}
 			}
+			handleReminder(patent, dbBean.getListBusiness());
 			return Constants.INT_SUCCESS;
 		}else {
 			return Constants.INT_CANNOT_FIND_DATA;
@@ -1416,34 +1395,6 @@ public class PatentServiceImpl implements PatentService{
 		return peh;
 	}
 	
-	
-	
-//	private void handleAssignee(Patent dbPatent, Patent editPatent) {
-//		log.info("handleAssignee");
-//		if (editPatent.getListAssignee() != null && editPatent.getListAssignee().size() > 0) {
-//			
-//	
-//			patentDao.deleteAssignee(dbPatent.getPatent_id());
-//			dbPatent.setListAssignee(editPatent.getListAssignee());
-//		}
-//	}
-	
-//	private void handleApplicant(Patent dbPatent, Patent editPatent) {
-//		if (editPatent.getListApplicant() != null && editPatent.getListApplicant().size() > 0) {
-//			
-//	
-//			patentDao.deleteApplicant(dbPatent.getPatent_id());
-//			dbPatent.setListApplicant(editPatent.getListApplicant());
-//		}
-//	}
-	
-//	private void handleInventor(Patent dbPatent, Patent editPatent) {
-//		if (editPatent.getListInventor() != null && editPatent.getListInventor().size() > 0) {
-//			patentDao.deleteInventor(dbPatent.getPatent_id());
-//			dbPatent.setListInventor(editPatent.getListInventor());
-//		}
-//	}
-	
 	private void handleCost(Patent dbPatent, Patent editPatent) {
 		if (editPatent.getListCost() != null && editPatent.getListCost().size() > 0) {
 			List<PatentCost> listCost = editPatent.getListCost();
@@ -1487,6 +1438,12 @@ public class PatentServiceImpl implements PatentService{
 				if (StringUtils.isNULL(annuity.getAnnuity_id())) {
 					annuity.setAnnuity_id(KeyGeneratorUtils.generateRandomString());
 				}
+				if (annuity.getAnnuity_end_date() == null) {
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(DateUtils.getDayStart(annuity.getAnnuity_date()));
+					calendar.add(Calendar.YEAR, annuity.getAnnuity_charge_year());
+					annuity.setAnnuity_end_date(calendar.getTime());
+				}
 				annuity.setPatent(dbPatent);
 			}
 			patentDao.deletePatentAnnuity(dbPatent.getPatent_id());
@@ -1495,6 +1452,87 @@ public class PatentServiceImpl implements PatentService{
 			if (dbPatent.getListAnnuity() != null) {
 				patentDao.deletePatentAnnuity(dbPatent.getPatent_id());
 			}
+		}
+	}
+	
+	private void handleReminder(Patent patent, List<Business> listBusiness) {
+		try {
+			List<ReminderTask> reminderList = reminderDao.getAvailableReminderByPatentId(patent.getPatent_id());
+			log.info("remove reminder patent:"+patent.getPatent_id());
+			for (ReminderTask reminder:reminderList) {
+				reminderDao.delete(reminder.getTask_id());
+				quartzService.removeJob(reminder);
+			}
+			if (patent.getListAnnuity() != null && patent.getListAnnuity().size() > 0) {
+				List<Annuity> listAnnuity = patent.getListAnnuity();
+				List<String> businessIds = new ArrayList<>();
+				for (Business business:listBusiness) {
+					businessIds.add(business.getBusiness_id());
+				}
+				List<AnnuityReminder> annuityReminderList = annuityReminderDao.getByBusinessIds(businessIds);
+				log.info(annuityReminderList.size());
+				for (Annuity annuity : listAnnuity) {
+					for (AnnuityReminder annuityReminder:annuityReminderList) {
+						Calendar calendar = Calendar.getInstance();
+						calendar.setTime(annuity.getAnnuity_end_date());
+						calendar.add(Calendar.DATE, -annuityReminder.getEmail_day());
+						Date now = DateUtils.getDayStart(new Date());
+							
+						ReminderTask reminder = new ReminderTask();
+						reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
+						reminder.setPatent_id(patent.getPatent_id());
+						reminder.setBusiness_id(annuityReminder.getBusiness().getBusiness_id());
+						reminder.setTask_type(ReminderTask.reminderTypeAnnuity);
+						reminder.setTask_date(calendar.getTime());
+						reminder.setReminder_day(annuityReminder.getEmail_day());
+						reminder.setIs_send(false);
+						reminder.setIs_remind(annuity.is_reminder());
+						
+						log.info("before:"+reminder.getTask_date());
+						log.info("now:"+now);
+						log.info("after:"+annuity.getAnnuity_end_date());
+						if (reminder.getTask_date().after(now)) {
+							log.info("send on schulder");
+							reminderDao.create(reminder);
+							if (reminder.is_remind() && !reminder.is_send()) {
+								quartzService.createJob(reminder);
+							}
+						}
+						if (reminder.getTask_date().equals(now) ||
+								(now.compareTo(calendar.getTime()) >= 0 && now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
+							log.info("send right now");
+							reminder.setIs_send(true);
+							reminderDao.create(reminder);
+							if (reminder.is_remind()) {
+								MailSender mail = new MailSender();
+								Country country = countryDao.getByLanguage(patent.getPatent_appl_country(), "tw");
+								patent.setCountry_name(country.getCountry_name());
+								String annuity_date = DateUtils.getSimpleSlashFormatDate(calendar.getTime());
+								patent.setAnnuity_date(annuity_date);
+								List<PatentContact> listContact = new ArrayList<>();
+								for(PatentContact contact:patent.getListContact()) {
+									log.info("contact:"+contact.getContact_email());
+									if (contact.getBusiness() != null) {
+										if (reminder.getBusiness_id().equals(contact.getBusiness().getBusiness_id())) {
+											listContact.add(contact);
+										}
+									} else {
+										listContact.add(contact);
+									}
+								}
+								if (!listContact.isEmpty()) {
+									mail.sendPatentAnnuityReminder(patent, listContact);
+								} else {
+									log.error("no contact for this patent");
+								}
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	

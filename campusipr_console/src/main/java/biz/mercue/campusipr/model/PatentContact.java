@@ -25,6 +25,11 @@ public class PatentContact extends BaseBean{
 	@JoinColumn(name="patent_id")
 	private Patent patent;
 	
+	@ManyToOne
+	@JsonView(View.PatentDetail.class)
+	@JoinColumn(name="business_id")
+	private Business business;
+	
 	
 	@ManyToOne
 	@JsonView(View.PatentDetail.class)
@@ -109,6 +114,14 @@ public class PatentContact extends BaseBean{
 
 	public void setContact_name(String contact_name) {
 		this.contact_name = contact_name;
+	}
+
+	public Business getBusiness() {
+		return business;
+	}
+
+	public void setBusiness(Business business) {
+		this.business = business;
 	}
 	
 	

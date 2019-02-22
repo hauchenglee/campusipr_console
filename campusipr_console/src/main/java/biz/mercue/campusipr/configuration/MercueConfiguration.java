@@ -32,8 +32,8 @@ public class MercueConfiguration implements WebMvcConfigurer{
 	
 	private Logger log = Logger.getLogger(MercueConfiguration.class);
 	
-//    @Autowired
-//    QuartzService quartzService;
+    @Autowired
+    QuartzService quartzService;
     
     @Autowired
     YamlConfiguration yamlConfig;
@@ -94,7 +94,7 @@ public class MercueConfiguration implements WebMvcConfigurer{
 		
 		Constants.URL_ENABLE_PASSWORD = yamlConfig.getConfig().getHtml().get("url_enable_password");
 		
-
+		Constants.URL_PATENT_CONTENT = yamlConfig.getConfig().getHtml().get("url_patent_content");
 	}
 	
 	

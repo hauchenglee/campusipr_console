@@ -3,7 +3,7 @@ package biz.mercue.campusipr.service;
 
 
 import java.util.Date;
-
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class AnnuityReminderServiceImpl implements AnnuityReminderService{
 	
 	@Override
 	public int update(AnnuityReminder reminder) {
-		AnnuityReminder dbBean = annuityReminderDao.getByBusinessId(reminder.getBusiness().getBusiness_id());
+		AnnuityReminder dbBean = annuityReminderDao.getById(reminder.getReminder_id());
 
 		if(dbBean!=null){
 			dbBean.setEmail_day(reminder.getEmail_day());
@@ -47,7 +47,7 @@ public class AnnuityReminderServiceImpl implements AnnuityReminderService{
     }
 	
 	@Override
-	public AnnuityReminder getByBusinessId(String businessId) {
+	public List<AnnuityReminder> getByBusinessId(String businessId) {
 		return annuityReminderDao.getByBusinessId(businessId);
 	}
 

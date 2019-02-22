@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import biz.mercue.campusipr.model.Admin;
+import biz.mercue.campusipr.model.Business;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentContact;
 
@@ -239,18 +240,32 @@ public class MailSender {
 	public void sendPatentAnnuityReminder(Patent patent,List<PatentContact> listContact) {
 		
 		if(patent != null) {
-			String html = FileUtils.readHtml(Constants.HTML_NEW_ACCOUNT);
+			String html = FileUtils.readHtml(Constants.HTML_ANNUITY_REMINDER);
 			
 			String htmlContent = html.replaceAll("@patent_name", patent.getPatent_name());
 			htmlContent = htmlContent.replaceAll("@country_name", patent.getCountry_name());
 			htmlContent = htmlContent.replaceAll("@patent_appl_no", patent.getPatent_appl_no());
 			htmlContent = htmlContent.replaceAll("@annuity_date", patent.getAnnuity_date());
-			htmlContent =htmlContent.replaceAll("@patent_link", Constants.URL_PATENT_CONTENT  +patent.getPatent_id());
+			htmlContent =htmlContent.replaceAll("@patent_link", Constants.URL_PATENT_CONTENT  + patent.getPatent_id());
 			List<String> list = new ArrayList<String>();
 			for(PatentContact contact : listContact) {
 				list.add(contact.getContact_email());
 			}
-			sendHTMLMail(list, "邀請使用", htmlContent);
+			sendHTMLMail(list, "繳費通知", htmlContent);
+		}
+		
+	}
+	
+	public void sendPatentMutipleChange(Business business) {
+		
+		if(business != null) {
+			String html = FileUtils.readHtml(Constants.HTML_MULTIPLE_PATENT_CHANGE);
+			if (!StringUtils.isNULL(business.getContact_name())) {
+				String htmlContent = html.replaceAll("@admin_name", business.getContact_name());
+				List<String> list = new ArrayList<String>();
+				list.add(business.getContact_email());
+				sendHTMLMail(list, "專利同步通知", htmlContent);
+			}
 		}
 		
 	}

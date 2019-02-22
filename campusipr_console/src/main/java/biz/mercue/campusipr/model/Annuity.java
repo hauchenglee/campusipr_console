@@ -11,6 +11,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -44,7 +45,8 @@ public class Annuity extends BaseBean{
 	
 	private boolean is_paid;
 
-
+	@Transient
+	private boolean is_reminder = true;
 
 	public Date getAnnuity_date() {
 		return annuity_date;
@@ -86,7 +88,7 @@ public class Annuity extends BaseBean{
 		this.create_date = create_date;
 	}
 
-	public boolean isIs_paid() {
+	public boolean is_paid() {
 		return is_paid;
 	}
 
@@ -100,6 +102,14 @@ public class Annuity extends BaseBean{
 
 	public void setAnnuity_id(String annuity_id) {
 		this.annuity_id = annuity_id;
+	}
+
+	public boolean is_reminder() {
+		return is_reminder;
+	}
+
+	public void setIs_reminder(boolean is_reminder) {
+		this.is_reminder = is_reminder;
 	}
 	
 
