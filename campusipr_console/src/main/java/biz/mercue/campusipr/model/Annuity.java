@@ -45,8 +45,8 @@ public class Annuity extends BaseBean{
 	
 	private boolean is_paid;
 
-	@Transient
-	private boolean is_reminder = true;
+	@JsonView(View.PatentDetail.class)
+	private boolean is_reminder;
 
 	public Date getAnnuity_date() {
 		return annuity_date;

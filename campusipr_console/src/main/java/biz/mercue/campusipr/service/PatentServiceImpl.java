@@ -395,19 +395,7 @@ public class PatentServiceImpl implements PatentService{
 	public int addPatentByApplNo(Patent patent) {
 		int taskResult= -1;
 		
-		if (Constants.APPL_COUNTRY_US.equals(patent.getPatent_appl_country())) {
-            patent.setPatent_appl_no(patent.getPatent_appl_no().replace("[\\pP\\p{Punct}]","").replace("US", "").replace("us", ""));
-        }
-		
-		if (Constants.APPL_COUNTRY_TW.equals(patent.getPatent_appl_country())) {
-            patent.setPatent_appl_no(patent.getPatent_appl_no().replace("TW", "").replace("tw", "").replace("[\\pP\\p{Punct}]",""));
-        }
-		
 		if (Constants.APPL_COUNTRY_CN.equals(patent.getPatent_appl_country())) {
-			patent.setPatent_appl_no(patent.getPatent_appl_no().replace("CN", "").replace("cn", "").replace("[\\pP\\p{Punct}]",""));
-			if (patent.getPatent_appl_no().contains(".")) {
-				patent.setPatent_appl_no(patent.getPatent_appl_no().substring(0, patent.getPatent_appl_no().indexOf(".")));
-			}
 			log.info(patent.getPatent_appl_no().substring(6,7));
 			log.info(patent.getPatent_appl_no().substring(7,8));
 			if ("0".equals(patent.getPatent_appl_no().substring(6,7))  &&
@@ -417,6 +405,8 @@ public class PatentServiceImpl implements PatentService{
 				patent.setPatent_appl_no(patent.getPatent_appl_no().substring(0,7)+patent.getPatent_appl_no().substring(8,patent.getPatent_appl_no().length()));
 			}
         }
+		
+		patent.setPatent_appl_no(patent.getPatent_appl_no());
 		
 		log.info(patent.getPatent_appl_no());
      
@@ -1421,6 +1411,14 @@ public class PatentServiceImpl implements PatentService{
 					contact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
 				}
 				contact.setPatent(dbPatent);
+				if (Patent.EDIT_SOURCE_HUMAN == editPatent.getEdit_source()) {
+					contact.setBusiness(editPatent.getAdmin().getBusiness());
+				}
+				
+				if (Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()) {
+					contact.setBusiness(editPatent.getBusiness());
+				}
+				contact.setCreate_date(new Date());
 			}
 			patentDao.deletePatentContact(dbPatent.getPatent_id());
 			dbPatent.setListContact(editPatent.getListContact());
@@ -1492,18 +1490,18 @@ public class PatentServiceImpl implements PatentService{
 						log.info("now:"+now);
 						log.info("after:"+annuity.getAnnuity_end_date());
 						if (reminder.getTask_date().after(now)) {
-							log.info("send on schulder");
-							reminderDao.create(reminder);
 							if (reminder.is_remind() && !reminder.is_send()) {
+								log.info("send on schulder");
+								reminderDao.create(reminder);
 								quartzService.createJob(reminder);
 							}
 						}
 						if (reminder.getTask_date().equals(now) ||
 								(now.compareTo(calendar.getTime()) >= 0 && now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
-							log.info("send right now");
-							reminder.setIs_send(true);
-							reminderDao.create(reminder);
 							if (reminder.is_remind()) {
+								log.info("send right now");
+								reminder.setIs_send(true);
+								reminderDao.create(reminder);
 								MailSender mail = new MailSender();
 								Country country = countryDao.getByLanguage(patent.getPatent_appl_country(), "tw");
 								patent.setCountry_name(country.getCountry_name());
@@ -1516,8 +1514,6 @@ public class PatentServiceImpl implements PatentService{
 										if (reminder.getBusiness_id().equals(contact.getBusiness().getBusiness_id())) {
 											listContact.add(contact);
 										}
-									} else {
-										listContact.add(contact);
 									}
 								}
 								if (!listContact.isEmpty()) {

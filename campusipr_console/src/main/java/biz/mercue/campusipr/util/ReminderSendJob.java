@@ -66,8 +66,6 @@ public class ReminderSendJob  implements Job {
 						if (task.getBusiness_id().equals(contact.getBusiness().getBusiness_id())) {
 							listContact.add(contact);
 						}
-					} else {
-						listContact.add(contact);
 					}
 				}
 				Country country = countryService.getByLanguage(patent.getPatent_appl_country(), "tw");
