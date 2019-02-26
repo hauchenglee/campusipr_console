@@ -51,6 +51,7 @@ public class PatentEditHistoryDaoImpl extends AbstractDao<String,  PatentEditHis
 		criteria.add(Restrictions.eq("field_id", fieldId));
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
+		criteria.addOrder(Order.asc("create_date"));
 		return criteria.list();
 	}
 
