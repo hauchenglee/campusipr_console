@@ -162,50 +162,64 @@ public class BusinessServiceImpl implements BusinessService{
 				    }
 				}
 				
-				List<SynchronizeBusiness> syncList = syncDao.getAllSyncTask();
-				SynchronizeBusiness sync = syncDao.getByBusinessId(business.getBusiness_id());
-				if (sync == null) {
-					Calendar c = Calendar.getInstance();
-					c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-					c.add(Calendar.DATE, 7);
-					
-					sync = new SynchronizeBusiness();
-					sync.setSync_id(KeyGeneratorUtils.generateRandomString());
-					sync.setSync_date(DateUtils.getDayStart(c.getTime()));
-					c.add(Calendar.DATE, 7);
-					sync.setSync_next_date(DateUtils.getDayStart(c.getTime()));
-					sync.setBusiness(business);
-					Random rand = new Random();
-					int n = rand.nextInt(60);
-					//get max random number
-					int random_time = n;
-					if (syncList.size() > 0) {
-						random_time = syncList.get(syncList.size()-1).getRandom_time() + n;
+				if (business.isAvailable()) {
+					List<SynchronizeBusiness> syncList = syncDao.getAllSyncTask();
+					SynchronizeBusiness sync = syncDao.getByBusinessId(business.getBusiness_id());
+					if (sync == null) {
+						Calendar c = Calendar.getInstance();
+						c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+						c.add(Calendar.DATE, 7);
+						
+						sync = new SynchronizeBusiness();
+						sync.setSync_id(KeyGeneratorUtils.generateRandomString());
+						sync.setSync_date(DateUtils.getDayStart(c.getTime()));
+						c.add(Calendar.DATE, 7);
+						sync.setSync_next_date(DateUtils.getDayStart(c.getTime()));
+						sync.setBusiness(business);
+						Random rand = new Random();
+						int n = rand.nextInt(60);
+						//get max random number
+						int random_time = n;
+						if (syncList.size() > 0) {
+							random_time = syncList.get(syncList.size()-1).getRandom_time() + n;
+						}
+						sync.setRandom_time(random_time);
+						
+						syncDao.create(sync);
 					}
-					sync.setRandom_time(random_time);
 					
-					syncDao.create(sync);
+					//remove job
+					SynchronizeTask syncTaskDB = syncTaskDao.getAvailableBusinessId(business.getBusiness_id());
+					if (syncTaskDB != null) {
+						syncTaskDao.delete(syncTaskDB.getTask_id());
+						quartzService.removeJob(syncTaskDB);
+					}
+					
+					SynchronizeTask syncTask = new SynchronizeTask();
+					syncTask.setTask_id(KeyGeneratorUtils.generateRandomString());
+					syncTask.setSync(sync);
+					Calendar cTask = Calendar.getInstance();
+					cTask.setTime(DateUtils.getDayStart(sync.getSync_date()));
+					cTask.add(Calendar.MINUTE, sync.getRandom_time());
+					syncTask.setTask_date(cTask.getTime());
+					syncTask.setBusiness_id(business.getBusiness_id());
+					syncTask.setIs_sync(false);
+					syncTaskDao.create(syncTask);
+					
+					quartzService.createJob(syncTask);
+				} else {
+					//remove sync business
+					SynchronizeBusiness sync = syncDao.getByBusinessId(business.getBusiness_id());
+					if  (sync != null) {
+						syncDao.delete(sync.getSync_id());
+					}
+					//remove job
+					SynchronizeTask syncTaskDB = syncTaskDao.getAvailableBusinessId(business.getBusiness_id());
+					if (syncTaskDB != null) {
+						syncTaskDao.delete(syncTaskDB.getTask_id());
+						quartzService.removeJob(syncTaskDB);
+					}
 				}
-				
-				//remove job
-				SynchronizeTask syncTaskDB = syncTaskDao.getAvailableBusinessId(business.getBusiness_id());
-				if (syncTaskDB != null) {
-					syncTaskDao.delete(syncTaskDB.getTask_id());
-					quartzService.removeJob(syncTaskDB);
-				}
-				
-				SynchronizeTask syncTask = new SynchronizeTask();
-				syncTask.setTask_id(KeyGeneratorUtils.generateRandomString());
-				syncTask.setSync(sync);
-				Calendar cTask = Calendar.getInstance();
-				cTask.setTime(DateUtils.getDayStart(sync.getSync_date()));
-				cTask.add(Calendar.MINUTE, sync.getRandom_time());
-				syncTask.setTask_date(cTask.getTime());
-				syncTask.setBusiness_id(business.getBusiness_id());
-				syncTask.setIs_sync(false);
-				syncTaskDao.create(syncTask);
-				
-				quartzService.createJob(syncTask);
 				result = Constants.INT_SUCCESS;
 			}else {
 				result = Constants.INT_CANNOT_FIND_DATA;

@@ -327,6 +327,11 @@ public class Constants {
 	public static final String STATUS_FROM_EPO = "epo";
 	public static final String STATUS_FROM_SYSTM = "sys";
 	
+	public static final String STATUS_PUBLISH = "03e09f4b005b20353c4e89d04487ee38";
+	public static final String STATUS_APPLICANTING = "4d99f8ff9279b1f72262483f4072d3f7";
+	public static final String STATUS_NOTICE = "616b3bdc0bcde1031aa8cd53245e7412";
+	public static final String STATUS_EXPIRED = "21e5e18af551b355c2f3212a079410ea";
+	
 	public static final String VIEW  = "view";
 	public static final String EDIT  = "edit";
 	public static final String ADD  = "add";

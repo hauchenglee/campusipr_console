@@ -222,7 +222,7 @@ public class PatentServiceImpl implements PatentService{
 				Status status = ps.getStatus();
 				Status statusDb = null;
 				if (patent.getEdit_source() == Patent.EDIT_SOURCE_SERVICE) {
-					statusDb = statusDao.getByEventCode(status.getEvent_code(), status.getCountry_id());
+					statusDb = statusDao.getByEditCode(status.getStatus_desc());
 				}else {
 					statusDb = statusDao.getByEditCode(status.getStatus_desc());
 				}
@@ -364,13 +364,44 @@ public class PatentServiceImpl implements PatentService{
 	             addlist = ServiceChinaPatent.getPatentRightByAssignee(chineseNames, dupucateStr);
 	             list.addAll(addlist);
 	          }
-
-	  		  ServiceStatusPatent.syncListPatentStatus(list);
+	          //02/23更新停止同步api狀態資料
+//	  		  ServiceStatusPatent.syncListPatentStatus(list);
+	          
+	          log.info("start sync");
+	        //check exit patent and sync
+	          List<Patent> listSyncPatent = patentDao.getByNotSyncPatent(businessId);
+	          log.info(listSyncPatent.get(listSyncPatent.size()-1).getPatent_appl_no());
+	          for (Patent syncPatent:listSyncPatent) {
+	        	  log.info("next_patent:"+syncPatent.getPatent_appl_no());
+	        	  if (!dupucateStr.contains(syncPatent.getPatent_appl_no())) {
+	        		  	log.info("no_duplicate_next_patent:"+syncPatent.getPatent_appl_no());
+	        		  	Patent patent = new Patent();
+	        		  	patent.setPatent_appl_no(syncPatent.getPatent_appl_no());
+	        		  	patent.setPatent_appl_country(syncPatent.getPatent_appl_country());
+	        		  	if ((patent.getPatent_appl_no().length() == 8 ||
+	        		  			patent.getPatent_appl_no().length() == 9) && 
+	        		  			Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country())) {
+			      	         ServiceTaiwanPatent.getPatentRightByApplNo(patent);
+			      	    }else if (patent.getPatent_appl_no().length() == 8 && 
+			      	             Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
+			      	         ServiceUSPatent.getPatentRightByapplNo(patent);
+			      	    }else {
+			      	         ServiceChinaPatent.getPatentRightByApplicantNo(patent);
+			      	    }
+	        		  	log.info("add patent no:"+patent.getPatent_appl_no());
+	        		  	list.add(patent);
+	        		  	dupucateStr.add(patent.getPatent_appl_no());
+	        	  }
+	          }
+	          
+	          log.info("update to db");
 	          
 	          for (Patent patent:list) {
+	        	   syncPatentStatus(patent);
 	               patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 	               patent.setAdmin(adminDao.getById(adminId));
 	               patent.setBusiness(ownBusiness);
+	               patent.setSync_date(DateUtils.getDayStart(new Date()));
 	               if(!StringUtils.isNULL(patent.getPatent_name()) || !StringUtils.isNULL(patent.getPatent_name_en())) {
 	                   String applNo =  patent.getPatent_appl_no();
 	                   if (!StringUtils.isNULL(applNo)) {
@@ -388,6 +419,7 @@ public class PatentServiceImpl implements PatentService{
 	                   taskResult = Constants.INT_CANNOT_FIND_DATA;
 	               }
 	           }
+	          
 	          return taskResult;
 	}
 	
@@ -421,12 +453,15 @@ public class PatentServiceImpl implements PatentService{
 	    }else {
 	         ServiceChinaPatent.getPatentRightByApplicantNo(patent);
 	    }
-	    ServiceStatusPatent.getPatentStatus(patent);
+	    //02/23更新停止同步api狀態資料
+//	    ServiceStatusPatent.getPatentStatus(patent);
+	    syncPatentStatus(patent);
 		
 		if(!StringUtils.isNULL(patent.getPatent_name())|| !StringUtils.isNULL(patent.getPatent_name_en())) {
 			String applNo =  patent.getPatent_appl_no();
 			if (!StringUtils.isNULL(applNo)) {
 				Patent appNoPatent = patentDao.getByApplNo(applNo);
+				patent.setSync_date(DateUtils.getDayStart(new Date()));
                 if(appNoPatent==null) {
                 	this.addPatent(patent);
                     taskResult = Constants.INT_SUCCESS;
@@ -521,6 +556,7 @@ public class PatentServiceImpl implements PatentService{
 			if(Patent.EDIT_SOURCE_SERVICE   == patent.getEdit_source()) {
 				dbBean.setIs_public(true);
 				dbBean.setIs_sync(true);
+				dbBean.setSync_date(patent.getSync_date());
 				if (patent.getListIPC() != null) {
 					dbBean.setListIPC(patent.getListIPC());
 	                for (IPCClass ipc:patent.getListIPC()) {
@@ -1042,7 +1078,7 @@ public class PatentServiceImpl implements PatentService{
 						Status status = patentStatus.getStatus();
 						Status statusDb = null;
 						if (patent.getEdit_source() == Patent.EDIT_SOURCE_SERVICE) {
-							statusDb = statusDao.getByEventCode(status.getEvent_code(), status.getCountry_id());
+							statusDb = statusDao.getByEditCode(status.getStatus_desc());
 						}else {
 							statusDb = statusDao.getByEditCode(status.getStatus_desc());
 						}
@@ -1436,12 +1472,12 @@ public class PatentServiceImpl implements PatentService{
 				if (StringUtils.isNULL(annuity.getAnnuity_id())) {
 					annuity.setAnnuity_id(KeyGeneratorUtils.generateRandomString());
 				}
-				if (annuity.getAnnuity_end_date() == null) {
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTime(DateUtils.getDayStart(annuity.getAnnuity_date()));
-					calendar.add(Calendar.YEAR, annuity.getAnnuity_charge_year());
-					annuity.setAnnuity_end_date(calendar.getTime());
-				}
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(DateUtils.getDayStart(annuity.getAnnuity_date()));
+				calendar.add(Calendar.YEAR, annuity.getAnnuity_charge_year());
+				calendar.add(Calendar.DATE, -1);
+				annuity.setAnnuity_end_date(calendar.getTime());
+				
 				annuity.setPatent(dbPatent);
 			}
 			patentDao.deletePatentAnnuity(dbPatent.getPatent_id());
@@ -1463,63 +1499,86 @@ public class PatentServiceImpl implements PatentService{
 			}
 			if (patent.getListAnnuity() != null && patent.getListAnnuity().size() > 0) {
 				List<Annuity> listAnnuity = patent.getListAnnuity();
-				List<String> businessIds = new ArrayList<>();
-				for (Business business:listBusiness) {
-					businessIds.add(business.getBusiness_id());
-				}
-				List<AnnuityReminder> annuityReminderList = annuityReminderDao.getByBusinessIds(businessIds);
-				log.info(annuityReminderList.size());
 				for (Annuity annuity : listAnnuity) {
-					for (AnnuityReminder annuityReminder:annuityReminderList) {
-						Calendar calendar = Calendar.getInstance();
-						calendar.setTime(annuity.getAnnuity_end_date());
-						calendar.add(Calendar.DATE, -annuityReminder.getEmail_day());
+					for (Business business:listBusiness) {
+						List<AnnuityReminder> annuityReminderList = annuityReminderDao.getByBusinessId(business.getBusiness_id());
+						log.info(annuityReminderList.size());
+						List<AnnuityReminder> listARSendRightNow = new ArrayList<>();
 						Date now = DateUtils.getDayStart(new Date());
+						for (AnnuityReminder annuityReminder:annuityReminderList) {
+							Calendar calendar = Calendar.getInstance();
+							calendar.setTime(annuity.getAnnuity_end_date());
+							calendar.add(Calendar.DATE, -annuityReminder.getEmail_day());
+								
+							ReminderTask reminder = new ReminderTask();
+							reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
+							reminder.setPatent_id(patent.getPatent_id());
+							reminder.setBusiness_id(annuityReminder.getBusiness().getBusiness_id());
+							reminder.setTask_type(ReminderTask.reminderTypeAnnuity);
+							reminder.setTask_date(calendar.getTime());
+							reminder.setReminder_day(annuityReminder.getEmail_day());
+							reminder.setIs_send(false);
+							reminder.setIs_remind(annuity.is_reminder());
 							
-						ReminderTask reminder = new ReminderTask();
-						reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
-						reminder.setPatent_id(patent.getPatent_id());
-						reminder.setBusiness_id(annuityReminder.getBusiness().getBusiness_id());
-						reminder.setTask_type(ReminderTask.reminderTypeAnnuity);
-						reminder.setTask_date(calendar.getTime());
-						reminder.setReminder_day(annuityReminder.getEmail_day());
-						reminder.setIs_send(false);
-						reminder.setIs_remind(annuity.is_reminder());
-						
-						log.info("before:"+reminder.getTask_date());
-						log.info("now:"+now);
-						log.info("after:"+annuity.getAnnuity_end_date());
-						if (reminder.getTask_date().after(now)) {
-							if (reminder.is_remind() && !reminder.is_send()) {
-								log.info("send on schulder");
-								reminderDao.create(reminder);
-								quartzService.createJob(reminder);
+							log.info("before:"+reminder.getTask_date());
+							log.info("now:"+now);
+							log.info("after:"+annuity.getAnnuity_end_date());
+							if (reminder.getTask_date().after(now)) {
+								if (reminder.is_remind() && !reminder.is_send()) {
+									log.info("send on schulder");
+									reminderDao.create(reminder);
+									quartzService.createJob(reminder);
+								}
+							}
+							
+							if (reminder.getTask_date().equals(now) ||
+									(now.compareTo(reminder.getTask_date()) >= 0 && now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
+								listARSendRightNow.add(annuityReminder);
+								log.info("send right now List:"+listARSendRightNow.size());
 							}
 						}
-						if (reminder.getTask_date().equals(now) ||
-								(now.compareTo(calendar.getTime()) >= 0 && now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
-							if (reminder.is_remind()) {
-								log.info("send right now");
-								reminder.setIs_send(true);
-								reminderDao.create(reminder);
-								MailSender mail = new MailSender();
-								Country country = countryDao.getByLanguage(patent.getPatent_appl_country(), "tw");
-								patent.setCountry_name(country.getCountry_name());
-								String annuity_date = DateUtils.getSimpleSlashFormatDate(calendar.getTime());
-								patent.setAnnuity_date(annuity_date);
-								List<PatentContact> listContact = new ArrayList<>();
-								for(PatentContact contact:patent.getListContact()) {
-									log.info("contact:"+contact.getContact_email());
-									if (contact.getBusiness() != null) {
-										if (reminder.getBusiness_id().equals(contact.getBusiness().getBusiness_id())) {
-											listContact.add(contact);
+						// get last expire reminder but annuity not expire
+						if (listARSendRightNow.size() > 0) {
+							AnnuityReminder sendRemindInfo = listARSendRightNow.get(listARSendRightNow.size()-1);
+							Calendar calendarNowSend = Calendar.getInstance();
+							calendarNowSend.setTime(annuity.getAnnuity_end_date());
+							calendarNowSend.add(Calendar.DATE, -sendRemindInfo.getEmail_day());
+							
+							ReminderTask reminder = new ReminderTask();
+							reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
+							reminder.setPatent_id(patent.getPatent_id());
+							reminder.setBusiness_id(sendRemindInfo.getBusiness().getBusiness_id());
+							reminder.setTask_type(ReminderTask.reminderTypeAnnuity);
+							reminder.setTask_date(calendarNowSend.getTime());
+							reminder.setReminder_day(sendRemindInfo.getEmail_day());
+							reminder.setIs_send(false);
+							reminder.setIs_remind(annuity.is_reminder());
+							
+							if (reminder.getTask_date().equals(now) ||
+									(now.compareTo(reminder.getTask_date()) >= 0 && now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
+								if (reminder.is_remind()) {
+									log.info("send right now");
+									reminder.setIs_send(true);
+									reminderDao.create(reminder);
+									MailSender mail = new MailSender();
+									Country country = countryDao.getByLanguage(patent.getPatent_appl_country(), "tw");
+									patent.setCountry_name(country.getCountry_name());
+									String annuity_date = DateUtils.getSimpleSlashFormatDate(annuity.getAnnuity_end_date());
+									patent.setAnnuity_date(annuity_date);
+									List<PatentContact> listContact = new ArrayList<>();
+									for(PatentContact contact:patent.getListContact()) {
+										log.info("contact:"+contact.getContact_email());
+										if (contact.getBusiness() != null) {
+											if (reminder.getBusiness_id().equals(contact.getBusiness().getBusiness_id())) {
+												listContact.add(contact);
+											}
 										}
 									}
-								}
-								if (!listContact.isEmpty()) {
-									mail.sendPatentAnnuityReminder(patent, listContact);
-								} else {
-									log.error("no contact for this patent");
+									if (!listContact.isEmpty()) {
+										mail.sendPatentAnnuityReminder(patent, listContact);
+									} else {
+										log.error("no contact for this patent");
+									}
 								}
 							}
 						}
@@ -1624,6 +1683,37 @@ public class PatentServiceImpl implements PatentService{
 				}
 			}
 			
+		}
+	}
+	
+	private void syncPatentStatus(Patent patent) {
+		//02/23新增根據日期同步狀態
+		List<Status> ListStatus = statusDao.getEditable();
+		for (Status status:ListStatus) {
+			switch (status.getStatus_id()) {
+			case Constants.STATUS_PUBLISH:
+				if (patent.getPatent_publish_date() != null) {
+					patent.addStatus(status, patent.getPatent_publish_date());
+				}
+				break;
+			case Constants.STATUS_APPLICANTING:
+				if (patent.getPatent_appl_date() != null) {
+					patent.addStatus(status, patent.getPatent_appl_date());
+				}
+				break;
+			case Constants.STATUS_NOTICE:
+				if (patent.getPatent_notice_date() != null) {
+					patent.addStatus(status, patent.getPatent_notice_date());
+				}
+				break;
+			case Constants.STATUS_EXPIRED:
+				if (patent.getPatent_edate() != null) {
+					if (patent.getPatent_edate().before(new Date())) {
+						patent.addStatus(status, patent.getPatent_charge_expire_date());
+					}
+				}
+				break;
+			}
 		}
 	}
 	

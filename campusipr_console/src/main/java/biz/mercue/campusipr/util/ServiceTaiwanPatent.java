@@ -229,9 +229,11 @@ public class ServiceTaiwanPatent {
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error(e.getMessage());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error(e.getMessage());
 		} 
 	}
 	
@@ -254,7 +256,11 @@ public class ServiceTaiwanPatent {
 			}
 			patent.setPatent_appl_no(patentObj.optJSONObject("application-reference").optString("appl-no"));
 					
-			patent.setPatent_notice_no(patentObj.optJSONObject("publication-reference").optString("notice-no"));
+			if (!"0".equals(patentObj.optJSONObject("publication-reference").optString("notice-no"))) {
+				patent.setPatent_notice_no(patentObj.optJSONObject("publication-reference").optString("notice-no"));
+			} else {
+				patent.setPatent_notice_no(null);
+			}
 			try {
 				String noticeDateStr = patentObj.optJSONObject("publication-reference").optString("notice-date");
 				if (StringUtils.isNULL(noticeDateStr) == false) {
@@ -265,8 +271,12 @@ public class ServiceTaiwanPatent {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-					
-			patent.setPatent_publish_no(patentObj.optJSONObject("publication-reference").optString("publish-no"));
+			
+			if (!"0".equals(patentObj.optJSONObject("publication-reference").optString("publish-no"))) {
+				patent.setPatent_publish_no(patentObj.optJSONObject("publication-reference").optString("publish-no"));
+			} else {
+				patent.setPatent_publish_no(null);
+			}
 			try {
 				String publishDateStr = patentObj.optJSONObject("publication-reference").optString("publish-date");
 				if (!StringUtils.isNULL(publishDateStr)) {
@@ -368,7 +378,7 @@ public class ServiceTaiwanPatent {
 					
 			getPatentAlteration(patent);
 					
-			if (patent.getListApplicant().isEmpty()) {
+			if (patent.getListApplicant() == null) {
 				List<Applicant> listAppl = new ArrayList<Applicant>();
 				JSONArray appl = patentObj.optJSONObject("parties").optJSONArray("applicants");
 						
@@ -391,22 +401,26 @@ public class ServiceTaiwanPatent {
 			//get ipc
 			List<IPCClass> listIPCClass = new ArrayList<IPCClass>();
 			JSONArray ipcs = patentObj.optJSONArray("classification-ipc");
-			for (int ipcIndex = 0; ipcIndex < ipcs.length(); ipcIndex++) {
-				JSONObject ipcObj = ipcs.optJSONObject(ipcIndex);
-				if (!StringUtils.isNULL(ipcObj.optString("ipc-full"))) {
-					IPCClass ipc = new IPCClass();
-					ipc.setIpc_class_id(ipcObj.optString("ipc-section")+
-									ipcObj.optString("ipc-class") + ipcObj.optString("ipc-subclass") +
-									" " + ipcObj.optString("ipc-main-group") + "/" + ipcObj.optString("ipc-group"));
-					if (ipcObj.optString("ipc-version").startsWith("0")) {
-						ipc.setIpc_version("20"+ipcObj.optString("ipc-version")+"01");
-					} else {
-						ipc.setIpc_version(ipcObj.optString("ipc-version"));
+			if (ipcs != null) {
+				for (int ipcIndex = 0; ipcIndex < ipcs.length(); ipcIndex++) {
+					JSONObject ipcObj = ipcs.optJSONObject(ipcIndex);
+					if (!StringUtils.isNULL(ipcObj.optString("ipc-full"))) {
+						IPCClass ipc = new IPCClass();
+						ipc.setIpc_class_id(ipcObj.optString("ipc-section")+
+										ipcObj.optString("ipc-class") + ipcObj.optString("ipc-subclass") +
+										" " + ipcObj.optString("ipc-main-group") + "/" + ipcObj.optString("ipc-group"));
+						if (ipcObj.optString("ipc-version").startsWith("0")) {
+							ipc.setIpc_version("20"+ipcObj.optString("ipc-version")+"01");
+						} else {
+							ipc.setIpc_version(ipcObj.optString("ipc-version"));
+						}
+						listIPCClass.add(ipc);
 					}
-					listIPCClass.add(ipc);
 				}
 			}
 			patent.setListIPC(listIPCClass);
+			
+			log.info("finished sync");
 		}
 	}
 	
@@ -417,13 +431,13 @@ public class ServiceTaiwanPatent {
 		try {
 			String context = HttpRequestUtils.sendGet(url);
 
-			List<Applicant> listAppl = new ArrayList<Applicant>();
 			if (!StringUtils.isNULL(context)) {
-				JSONObject getObject = new JSONObject(HttpRequestUtils.sendGet(url));
+				JSONObject getObject = new JSONObject(context);
 				if (getObject.has("patentcontent")) {
 					JSONArray patentContent = getObject.optJSONArray("patentcontent");
 					JSONObject alterationObj = patentContent.optJSONObject(0);
 					JSONArray appls = alterationObj.optJSONArray("alteration-id1s");
+					List<Applicant> listAppl = new ArrayList<Applicant>();
 					for (int index = 0; index < appls.length(); index++) {
 						JSONObject appl = appls.optJSONObject(index);
 						Applicant applicant = new Applicant();
@@ -432,15 +446,17 @@ public class ServiceTaiwanPatent {
 						applicant.setPatent(patent);
 						listAppl.add(applicant);
 					}
+					patent.setListApplicant(listAppl);
 				}
 			}
-			patent.setListApplicant(listAppl);
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error(e.getMessage());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		
 	}

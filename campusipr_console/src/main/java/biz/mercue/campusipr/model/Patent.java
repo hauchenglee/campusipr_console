@@ -127,6 +127,7 @@ public class Patent extends BaseBean{
 	//all + manual
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	@OneToMany(mappedBy= "primaryKey.patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
+	@OrderBy("create_date DESC")
 	private List<PatentStatus> listPatentStatus;
 	
 	
@@ -219,6 +220,9 @@ public class Patent extends BaseBean{
 	
 	@JsonView({View.PatentDetail.class})
 	private boolean is_sync = false;
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date sync_date;
 	
 	//for update and add patent
 	@Transient
@@ -760,6 +764,14 @@ public class Patent extends BaseBean{
 
 	public void setAnnuity_date(String annuity_date) {
 		this.annuity_date = annuity_date;
+	}
+
+	public Date getSync_date() {
+		return sync_date;
+	}
+
+	public void setSync_date(Date sync_date) {
+		this.sync_date = sync_date;
 	}
 
 

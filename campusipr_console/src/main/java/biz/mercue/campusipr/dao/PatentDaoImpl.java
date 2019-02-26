@@ -1,5 +1,6 @@
 package biz.mercue.campusipr.dao;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -142,6 +143,23 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.setProjection(Projections.rowCount());
 		long count = (long)criteria.uniqueResult();
 		return (int)count;
+	}
+	
+	@Override
+	public List<Patent> getByNotSyncPatent(String businessId){
+		Calendar syncTime = Calendar.getInstance();
+		syncTime.setTime(new Date());
+		syncTime.add(Calendar.DATE, -7);
+		
+		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
+		Criterion c1 = Restrictions.ge("sync_date", syncTime.getTime());
+		Criterion c2 = Restrictions.isNull("sync_date");
+		criteria.add(Restrictions.or(c1,c2));
+		return criteria.list();
 	}
 	
 	@Override

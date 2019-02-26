@@ -251,17 +251,28 @@ public class MailSender {
 			for(PatentContact contact : listContact) {
 				list.add(contact.getContact_email());
 			}
-			sendHTMLMail(list, "繳費通知", htmlContent);
+			sendHTMLMail(list, "專利繳費通知 "+patent.getCountry_name() + " " +patent.getPatent_appl_no(), htmlContent);
 		}
 		
 	}
 	
-	public void sendPatentMutipleChange(Business business) {
+	public void sendPatentMutipleChange(Business business, List<Patent> listPatent) {
 		
 		if(business != null) {
 			String html = FileUtils.readHtml(Constants.HTML_MULTIPLE_PATENT_CHANGE);
 			if (!StringUtils.isNULL(business.getContact_name())) {
 				String htmlContent = html.replaceAll("@admin_name", business.getContact_name());
+				
+				if (listPatent.size() > 0) {
+					htmlContent = html.replaceAll("@patent_country_1", listPatent.get(0).getCountry_name());
+					htmlContent = html.replaceAll("@patent_appl_num_1", listPatent.get(0).getPatent_appl_no());
+					htmlContent =htmlContent.replaceAll("@patent_link_1", Constants.URL_PATENT_CONTENT  + listPatent.get(0).getPatent_id());
+				}
+				if (listPatent.size() > 1) {
+					htmlContent = html.replaceAll("@patent_country_2", listPatent.get(1).getCountry_name());
+					htmlContent = html.replaceAll("@patent_appl_num_2", listPatent.get(1).getPatent_appl_no());
+					htmlContent =htmlContent.replaceAll("@patent_link_2", Constants.URL_PATENT_CONTENT  + listPatent.get(1).getPatent_id());
+				}
 				List<String> list = new ArrayList<String>();
 				list.add(business.getContact_email());
 				sendHTMLMail(list, "專利同步通知", htmlContent);

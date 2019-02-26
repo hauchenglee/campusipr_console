@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
-
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -38,6 +38,7 @@ public class AnnuityReminderDaoImpl extends AbstractDao<String,  AnnuityReminder
 		Criteria criteria =  createEntityCriteria();
 		criteria.createAlias("business","bs");
 		criteria.add(Restrictions.eq("bs.business_id", businessId));
+		criteria.addOrder(Order.desc("email_day"));
 		return criteria.list();
 	}
 
