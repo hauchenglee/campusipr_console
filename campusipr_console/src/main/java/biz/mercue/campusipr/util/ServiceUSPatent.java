@@ -125,8 +125,11 @@ public class ServiceUSPatent {
 				}
 				log.info("indexPoint:"+indexPoint);
 				JSONObject patentObj = patentDocsObj.optJSONObject(indexPoint);
-				convertPatentInfoUS(patent, patentObj);
-				parserBilbo(patent);
+				String appId = patentObj.optString("applicationNumber");
+				if (patent.getPatent_appl_no().equals(appId)) {
+					convertPatentInfoUS(patent, patentObj);
+					parserBilbo(patent);
+				}
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
