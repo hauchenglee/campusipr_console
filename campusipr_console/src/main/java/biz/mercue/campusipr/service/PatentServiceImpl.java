@@ -916,8 +916,8 @@ public class PatentServiceImpl implements PatentService{
 				String status_desc_en = new JSONObject(statusStr).optString("status_desc_en");
 				log.info("status:"+status_desc);
 				log.info("status_en:"+status_desc_en);
-				list = patentDao.searchFieldStatusListPatent('%'+status_desc+'%','%'+status_desc_en+'%', businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
-				count = patentDao.countSearchFieldStatusPatent('%'+status_desc+'%','%'+status_desc_en+'%', businessId);
+				list = patentDao.searchFieldStatusListPatent(status_desc,status_desc_en, businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
+				count = patentDao.countSearchFieldStatusPatent(status_desc,status_desc_en, businessId);
 				break;
 				
 			case Constants.SCHOOL_NO_FIELD:
