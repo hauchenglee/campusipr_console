@@ -572,24 +572,18 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			queryStr += " JOIN p.listBusiness as lb WHERE"
 					+ " lb.business_id = :businessId"
 					+ " and ls.create_date = (\n" + 
-					"    SELECT max(mls.create_date)\n" + 
-					"    FROM Patent as mp\n" + 
-					"    LEFT JOIN mp.listPatentStatus as mls\n"+
-					"    LEFT JOIN mls.primaryKey.status as mpks\n" + 
-					"    WHERE mp.patent_id = p.patent_id \n" + 
-					"      AND mpks.status_id = pk_aliase.status_id\n" + 
-//					"      AND (mpks.status_desc = :searchText or mpks.status_desc_en like :searchTextEn)\n" + 
+					"    SELECT max(ps.create_date)\n" + 
+					"    FROM PatentStatus as ps\n" + 
+					"    LEFT JOIN ps.primaryKey.patent as mpkp\n" + 
+					"    WHERE mpkp.patent_id = p.patent_id \n" + 
 					")";
 		}else {
 			queryStr += " WHERE" +
 			"    ls.create_date = (\n" + 
-			"    SELECT max(mls.create_date)\n" + 
-			"    FROM Patent as mp\n" + 
-			"    LEFT JOIN mp.listPatentStatus as mls\n"+
-			"    LEFT JOIN mls.primaryKey.status as mpks\n" + 
-			"    WHERE mp.patent_id = p.patent_id \n" + 
-			"      AND mpks.status_id = pk_aliase.status_id\n" + 
-//			"      AND (mpks.status_desc = :searchText or mpks.status_desc_en like :searchTextEn)\n" + 
+			"    SELECT max(ps.create_date)\n" + 
+			"    FROM PatentStatus as ps\n" +  
+			"    LEFT JOIN ps.primaryKey.patent as mpkp\n" + 
+			"    WHERE mpkp.patent_id = p.patent_id \n" +  
 			")";
 		}
 		queryStr += " and (";
@@ -652,24 +646,18 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			queryStr += " JOIN p.listBusiness as lb WHERE"
 					+ " lb.business_id = :businessId"
 					+ " and ls.create_date = (\n" + 
-					"    SELECT max(mls.create_date)\n" + 
-					"    FROM Patent as mp\n" + 
-					"    LEFT JOIN mp.listPatentStatus as mls\n"+
-					"    LEFT JOIN mls.primaryKey.status as mpks\n" + 
-					"    WHERE mp.patent_id = p.patent_id \n" + 
-					"      AND mpks.status_id = pk_aliase.status_id\n" + 
-//					"      AND (mpks.status_desc = :searchText or mpks.status_desc_en like :searchTextEn)\n" + 
+					"    SELECT max(ps.create_date)\n" + 
+					"    FROM PatentStatus as ps\n" + 
+					"    LEFT JOIN ps.primaryKey.patent as mpkp\n" + 
+					"    WHERE mpkp.patent_id = p.patent_id \n" + 
 					")";
 		}else {
 			queryStr += " WHERE" +
 			"    ls.create_date = (\n" + 
-			"    SELECT max(mls.create_date)\n" + 
-			"    FROM Patent as mp\n" + 
-			"    LEFT JOIN mp.listPatentStatus as mls\n"+
-			"    LEFT JOIN mls.primaryKey.status as mpks\n" + 
-			"    WHERE mp.patent_id = p.patent_id \n" + 
-			"      AND mpks.status_id = pk_aliase.status_id\n" + 
-//			"      AND (mpks.status_desc = :searchText or mpks.status_desc_en like :searchTextEn)\n" + 
+			"    SELECT max(ps.create_date)\n" + 
+			"    FROM PatentStatus as ps\n" +  
+			"    LEFT JOIN ps.primaryKey.patent as mpkp\n" + 
+			"    WHERE mpkp.patent_id = p.patent_id \n" +  
 			")";
 		}
 
