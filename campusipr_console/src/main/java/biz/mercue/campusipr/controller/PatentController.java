@@ -27,7 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.AdminToken;

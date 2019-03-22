@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 
 import biz.mercue.campusipr.dao.AdminDao;
 import biz.mercue.campusipr.dao.AnnuityReminderDao;
