@@ -52,7 +52,7 @@ public class SyncSendJob  implements Job {
 
 		log.info("do sync task");
 
-//		try {
+		try {
 			
 			JobKey key = context.getJobDetail().getKey();
 			JobDataMap dataMap = context.getJobDetail().getJobDataMap();
@@ -64,18 +64,6 @@ public class SyncSendJob  implements Job {
 			if (task != null) {
 
 				SynchronizeBusiness syncBusiness = task.getSync();
-				List<Patent> listPatent = new ArrayList<>();
-				patentService.syncPatentsByApplicant(listPatent, Constants.SYSTEM_ADMIN, syncBusiness.getBusiness().getBusiness_id(), null);
-				
-				for (Patent patent:listPatent) {
-					Country country = countryService.getByLanguage(patent.getPatent_appl_country(), "tw");
-					patent.setCountry_name(country.getCountry_name());
-				}
-				
-				MailSender mail = new MailSender();
-				log.info("send mail");
-				mail.sendPatentMutipleChange(syncBusiness.getBusiness(), listPatent);
-				log.info("Done");
 				
 				//更新下一次同步時間
 				Date sycnNextTime = syncBusiness.getSync_next_date();
@@ -99,13 +87,28 @@ public class SyncSendJob  implements Job {
 				syncTask.setBusiness_id(syncBusiness.getBusiness().getBusiness_id());
 				syncTask.setIs_sync(false);
 				synchronizeService.addSync(syncTask);
-//				quartzService.createJob(syncTask);
+				quartzService.createJob(syncTask);
+				
+
+				synchronizeService.changeSyncStatus(taskId, true);
+				
+				List<Patent> listPatent = new ArrayList<>();
+				patentService.syncPatentsByApplicant(listPatent, Constants.SYSTEM_ADMIN, syncBusiness.getBusiness().getBusiness_id(), null);
+				
+				for (Patent patent:listPatent) {
+					Country country = countryService.getByLanguage(patent.getPatent_appl_country(), "tw");
+					patent.setCountry_name(country.getCountry_name());
+				}
+				
+				MailSender mail = new MailSender();
+				log.info("send mail");
+				mail.sendPatentMutipleChange(syncBusiness.getBusiness(), listPatent);
+				log.info("Done");
 			}
-			synchronizeService.changeSyncStatus(taskId, true);
-//		} catch (Exception e) {
-//		
-//			log.error(e.getMessage());
-//		}
+		} catch (Exception e) {
+		
+			log.error(e.getMessage());
+		}
 		
 	}
 

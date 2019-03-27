@@ -276,9 +276,6 @@ public class ServiceChinaPatent {
 								Node applNode = cElement.getElementsByTagName("doc-number").item(0);
 								Node applDateNode = cElement.getElementsByTagName("date").item(0);
 								String applNo = applNode.getTextContent().substring(0, applNode.getTextContent().length());
-								if (applNo.length() > 12) {
-									applNo = applNo.substring(0, applNo.length()-1);
-								}
 								patent.setPatent_appl_no(applNo);
 								patent.setPatent_no(applNo);
 								try {

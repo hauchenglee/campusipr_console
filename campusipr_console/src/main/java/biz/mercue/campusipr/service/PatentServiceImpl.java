@@ -526,7 +526,7 @@ public class PatentServiceImpl implements PatentService{
 
 	@Override
 	public int  updatePatent(Patent patent){
-		log.info("updatePatent");
+		log.info("updatePatent:"+patent.getPatent_id());
 		List<PatentEditHistory> editList = new ArrayList<PatentEditHistory>(); 
 		Patent dbBean = patent.getComparePatent();
 		if(dbBean == null) {
@@ -1088,23 +1088,29 @@ public class PatentServiceImpl implements PatentService{
 		         	   		patentStatus.setStatus(statusDb);
 		         	   	}
 		         	   	patentStatus.setPatent(patent);
-		         	   	String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
-						newMapping.put(patentStatus.getStatus().getStatus_id() + "-" + dateStr, patentStatus);
+		         	   	if (patentStatus.getCreate_date() != null) {
+			         	   	String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
+							newMapping.put(patentStatus.getStatus().getStatus_id() + "-" + dateStr, patentStatus);
+		         	   	}
 					}
 					
 					for (PatentStatus patentStatus:dbBean.getListPatentStatus()) {
 						Status status = patentStatus.getStatus();
-						String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
-						dbMapping.put(status.getStatus_id() + "-" + dateStr, patentStatus);
+						if (patentStatus.getCreate_date() != null) {
+							String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
+							dbMapping.put(status.getStatus_id() + "-" + dateStr, patentStatus);
+						}
 					}
 					
 					for (PatentStatus patentStatus:patent.getListPatentStatus()) {
 						Status status = patentStatus.getStatus();
-						String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
-						if(!dbMapping.containsKey(status.getStatus_id() + "-" + dateStr)) {
-							log.info("add status");
-							dbBean.addPatentStatus(patentStatus);
-							statusAddData.add(JacksonJSONUtils.mapObjectWithView(status,  View.Patent.class));
+						if (patentStatus.getCreate_date() != null) {
+							String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
+							if(!dbMapping.containsKey(status.getStatus_id() + "-" + dateStr)) {
+								log.info("add status");
+								dbBean.addPatentStatus(patentStatus);
+								statusAddData.add(JacksonJSONUtils.mapObjectWithView(status,  View.Patent.class));
+							}
 						}
 					}
 				}
@@ -1471,12 +1477,13 @@ public class PatentServiceImpl implements PatentService{
 				if (StringUtils.isNULL(annuity.getAnnuity_id())) {
 					annuity.setAnnuity_id(KeyGeneratorUtils.generateRandomString());
 				}
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(DateUtils.getDayStart(annuity.getAnnuity_date()));
-				calendar.add(Calendar.YEAR, annuity.getAnnuity_charge_year());
-				calendar.add(Calendar.DATE, -1);
-				annuity.setAnnuity_end_date(calendar.getTime());
-				
+				if (annuity.getAnnuity_date() != null) {
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(DateUtils.getDayStart(annuity.getAnnuity_date()));
+					calendar.add(Calendar.YEAR, annuity.getAnnuity_charge_year());
+					calendar.add(Calendar.DATE, -1);
+					annuity.setAnnuity_end_date(calendar.getTime());
+				}
 				annuity.setPatent(dbPatent);
 			}
 			patentDao.deletePatentAnnuity(dbPatent.getPatent_id());
