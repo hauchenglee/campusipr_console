@@ -290,13 +290,12 @@ public class ServiceTaiwanPatent {
 			
 			if (patentObj.optJSONObject("patent-right") != null) {
 				patent.setPatent_no(patentObj.optJSONObject("patent-right").optString("patent-no"));
-				Annuity annuity = new Annuity();
+				
 				try {
 					String patentBeginDateStr = patentObj.optJSONObject("patent-right").optString("patent-bdate");
 					if (!StringUtils.isNULL(patentBeginDateStr)) {
 						Date patentBeginDate = DateUtils.parserSimpleDateSlashFormatDate(patentBeginDateStr);
 						patent.setPatent_bdate(patentBeginDate);
-						annuity.setAnnuity_date(patentBeginDate);
 					}
 							
 					String patentEndDateStr = patentObj.optJSONObject("patent-right").optString("patent-edate");
@@ -315,7 +314,6 @@ public class ServiceTaiwanPatent {
 					if (!StringUtils.isNULL(patentExpireDateStr)) {
 						Date patentExpireDate = DateUtils.parserSimpleDateSlashFormatDate(patentExpireDateStr);
 						patent.setPatent_charge_expire_date(patentExpireDate);
-						annuity.setAnnuity_end_date(patentExpireDate);
 					}
 							
 				} catch (ParseException e) {
@@ -326,21 +324,12 @@ public class ServiceTaiwanPatent {
 				String expireYear = patentObj.optJSONObject("patent-right").optString("charge-expir-year");
 				if (!StringUtils.isNULL(expireYear)) {
 					patent.setPatent_charge_duration_year(Integer.parseInt(expireYear));
-					annuity.setAnnuity_charge_year(Integer.parseInt(expireYear));
 				}else {
-					if (annuity.getAnnuity_end_date() != null) {
-						Date annuityDate = annuity.getAnnuity_date();
-						Calendar calendar = Calendar.getInstance();
-						calendar.setTime(annuityDate);
-						calendar.set(Calendar.DAY_OF_YEAR, 1);
-						patent.setPatent_charge_expire_date(calendar.getTime());
-						annuity.setAnnuity_date(calendar.getTime());
-					}
 					patent.setPatent_charge_duration_year(1);
-					annuity.setAnnuity_charge_year(1);
 				}
-				patent.addAnnuity(annuity);
 			}	
+			getAllHistoryAnnuity(patent);
+			
 			String contextUrl = patentObj.optJSONObject("link").optString("patentpubxml-url");
 			if (!StringUtils.isNULL(contextUrl)) {
 				getContext(patent, contextUrl);
@@ -421,6 +410,55 @@ public class ServiceTaiwanPatent {
 			patent.setListIPC(listIPCClass);
 			
 			log.info("finished sync");
+		}
+	}
+	
+	private static void getAllHistoryAnnuity(Patent patent) {
+		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentAnnuity?format=json&tk=%s&applno=%s";
+		url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no());
+		try {
+			String context = HttpRequestUtils.sendGet(url);
+			if (!StringUtils.isNULL(context)) {
+				JSONObject getObject = new JSONObject(context);
+				JSONArray patentContents = getObject.optJSONObject("tw-patent-annuity").optJSONArray("patentcontent");
+				for (int index = 0; index < patentContents.length(); index++) {
+					JSONObject patentContent = patentContents.optJSONObject(index);
+					JSONArray charges = patentContent.optJSONArray("charges");
+					Date beginDate = null;
+					for (int chargeIndex = 0;chargeIndex < charges.length(); chargeIndex++) {
+						JSONObject charge = charges.optJSONObject(chargeIndex);
+						Annuity annuity = new Annuity();
+						if (chargeIndex == 0) {
+							beginDate = patent.getPatent_bdate();
+							annuity.setAnnuity_date(beginDate);
+							annuity.setAnnuity_charge_year(charge.optInt("annuity-end"));
+							Calendar calendar = Calendar.getInstance();
+							calendar.setTime(DateUtils.getDayStart(annuity.getAnnuity_date()));
+							calendar.add(Calendar.YEAR, annuity.getAnnuity_charge_year());
+							annuity.setAnnuity_end_date(calendar.getTime());
+							patent.addAnnuity(annuity);;
+							beginDate = calendar.getTime();
+						} else {
+							annuity.setAnnuity_date(beginDate);
+							annuity.setAnnuity_charge_year(charge.optInt("annuity-end"));
+							Calendar calendar = Calendar.getInstance();
+							calendar.setTime(DateUtils.getDayStart(annuity.getAnnuity_date()));
+							calendar.add(Calendar.YEAR, annuity.getAnnuity_charge_year());
+							annuity.setAnnuity_end_date(calendar.getTime());
+							patent.addAnnuity(annuity);
+							beginDate = calendar.getTime();
+						}
+					}
+				}
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			log.error(e.getMessage());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	}
 	
