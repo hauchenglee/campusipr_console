@@ -121,7 +121,7 @@ public class ServiceChinaPatent {
 	public static void getPatentRightByApplicantNo(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/search?q=%s";
 		try {
-			url = String.format(url,URLEncoder.encode("ap=", "UTF-8")+patent.getPatent_appl_country().toUpperCase()+patent.getPatent_appl_no());
+			url = String.format(url,URLEncoder.encode("ap=", "UTF-8")+patent.getPatent_appl_no());
 		} catch (UnsupportedEncodingException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -190,7 +190,7 @@ public class ServiceChinaPatent {
 	
 	private static void parserBilbo(Patent patent, String formatType) {
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/publication/%s/%s/biblio";
-		url = String.format(url, formatType, patent.getPatent_appl_country().toUpperCase()+patent.getPatent_publish_no());
+		url = String.format(url, formatType, patent.getPatent_appl_country().toUpperCase() + patent.getPatent_publish_no());
 		
 		try {
 			String content = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));

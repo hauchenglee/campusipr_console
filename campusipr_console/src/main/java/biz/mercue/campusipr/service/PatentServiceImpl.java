@@ -427,13 +427,13 @@ public class PatentServiceImpl implements PatentService{
 		int taskResult= -1;
 		
 		if (Constants.APPL_COUNTRY_CN.equals(patent.getPatent_appl_country())) {
-			log.info(patent.getPatent_appl_no().substring(6,7));
-			log.info(patent.getPatent_appl_no().substring(7,8));
-			if ("0".equals(patent.getPatent_appl_no().substring(6,7))  &&
-					"0".equals(patent.getPatent_appl_no().substring(7,8))) {
-				log.info(patent.getPatent_appl_no().substring(0,6));
-				log.info(patent.getPatent_appl_no().substring(7,patent.getPatent_appl_no().length()));
-				patent.setPatent_appl_no(patent.getPatent_appl_no().substring(0,7)+patent.getPatent_appl_no().substring(8,patent.getPatent_appl_no().length()));
+			log.info(patent.getPatent_appl_no().substring(8,9));
+			log.info(patent.getPatent_appl_no().substring(9,10));
+			if ("0".equals(patent.getPatent_appl_no().substring(8,9))  &&
+					"0".equals(patent.getPatent_appl_no().substring(9,10))) {
+				log.info(patent.getPatent_appl_no().substring(0,8));
+				log.info(patent.getPatent_appl_no().substring(9,patent.getPatent_appl_no().length()));
+				patent.setPatent_appl_no(patent.getPatent_appl_no().substring(0,9)+patent.getPatent_appl_no().substring(10,patent.getPatent_appl_no().length()));
 			}
         }
 		
@@ -442,11 +442,11 @@ public class PatentServiceImpl implements PatentService{
 		log.info(patent.getPatent_appl_no());
      
 	     //查詢台灣專利
-	    if ((patent.getPatent_appl_no().length() == 8 ||
-	                patent.getPatent_appl_no().length() == 9) && 
+	    if ((patent.getPatent_appl_no().length() == 10 ||
+	                patent.getPatent_appl_no().length() == 11) && 
 	             Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country())) {
 	         ServiceTaiwanPatent.getPatentRightByApplNo(patent);
-	    }else if (patent.getPatent_appl_no().length() == 8 && 
+	    }else if (patent.getPatent_appl_no().length() == 10 && 
 	             Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
 	         ServiceUSPatent.getPatentRightByapplNo(patent);
 	    }else {

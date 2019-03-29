@@ -69,7 +69,7 @@ public class ServiceUSPatent {
 									}
 								}
 								if (checkApplicant) {
-									if (!dupucateStr.contains(patentObj.optString("applicationNumber").replace("US", ""))) {
+									if (!dupucateStr.contains(patentObj.optString("applicationNumber"))) {
 										Patent patent = new Patent();
 										convertPatentInfoUS(patent, patentObj);
 										parserBilbo(patent);
@@ -94,7 +94,7 @@ public class ServiceUSPatent {
 	
 	public static void getPatentRightByapplNo(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_US+"?applicationNumber=%s";
-		url = String.format(url, patent.getPatent_appl_country().toUpperCase()+patent.getPatent_appl_no());
+		url = String.format(url, patent.getPatent_appl_no());
 		
 		try {
 			String context = HttpRequestUtils.sendGet(url);
@@ -125,7 +125,7 @@ public class ServiceUSPatent {
 				}
 				log.info("indexPoint:"+indexPoint);
 				JSONObject patentObj = patentDocsObj.optJSONObject(indexPoint);
-				String appId = patentObj.optString("applicationNumber").replace("US", "");
+				String appId = patentObj.optString("applicationNumber");
 				if (patent.getPatent_appl_no().equals(appId)) {
 					convertPatentInfoUS(patent, patentObj);
 					parserBilbo(patent);
@@ -142,7 +142,7 @@ public class ServiceUSPatent {
 	
 	private static void parserBilbo(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/publication/DOCDB/%s/biblio";
-		url = String.format(url, patent.getPatent_appl_country().toUpperCase()+patent.getPatent_publish_no());
+		url = String.format(url, "US"+patent.getPatent_publish_no());
 		
 		try {
 			String token = generateToken("Basic "+Constants.PATENT_TOKEN_EU);
@@ -269,7 +269,7 @@ public class ServiceUSPatent {
 		String url = Constants.PATENT_INVENTOR_WEB_SERVICE_US;
 		JSONObject obj = new JSONObject();
 		if (patent.getPatent_appl_no() != null) {
-			obj.put("searchText", "applId:"+patent.getPatent_appl_no());
+			obj.put("searchText", "applId:"+patent.getPatent_appl_no().replace("US", ""));
 			obj.put("mm", "100%");
 			obj.put("qf", "applId");
 			log.info(obj.toString());
@@ -311,7 +311,7 @@ public class ServiceUSPatent {
 	
 	private static void getPatentNoticeAndPublish(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_US+"?applicationNumber=%s";
-		url = String.format(url, patent.getPatent_appl_country().toUpperCase()+patent.getPatent_appl_no());
+		url = String.format(url, patent.getPatent_appl_no());
 	
 		
 		try {
@@ -409,7 +409,7 @@ public class ServiceUSPatent {
 	}
 	
 	private static void getContext(Patent patent) {
-		String url = Constants.PATENT_CONTEXT_WEB_SERVICE_US+patent.getPatent_appl_country().toUpperCase()+patent.getPatent_no();
+		String url = Constants.PATENT_CONTEXT_WEB_SERVICE_US+patent.getPatent_no();
 		
 		try {
 			Document doc = Jsoup.parse(new URL(url), 3000);
