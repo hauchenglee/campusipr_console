@@ -32,8 +32,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
-
 import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;

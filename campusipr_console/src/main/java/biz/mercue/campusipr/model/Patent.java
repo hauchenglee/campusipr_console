@@ -127,6 +127,7 @@ public class Patent extends BaseBean{
 	//all + manual
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	@OneToMany(mappedBy= "primaryKey.patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
+	@OrderBy("create_date DESC")
 	private List<PatentStatus> listPatentStatus;
 	
 	
@@ -220,6 +221,9 @@ public class Patent extends BaseBean{
 	@JsonView({View.PatentDetail.class})
 	private boolean is_sync = false;
 	
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date sync_date;
+	
 	//for update and add patent
 	@Transient
 	@JsonView(View.PatentDetail.class)
@@ -308,16 +312,20 @@ public class Patent extends BaseBean{
 	}
 
 	public void setPatent_appl_no(String patent_appl_no) {
-		if (!StringUtils.isNULL(patent_appl_no)) {
-			if (patent_appl_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_TW)) {
-				patent_appl_no = patent_appl_no.replace("TW", "").replace("tw", "").replaceAll("\\s+","");
+		if (!StringUtils.isNULL(patent_appl_no) && !StringUtils.isNULL(patent_appl_country)) {
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_TW)) {
+				patent_appl_no = Constants.APPL_COUNTRY_TW.toUpperCase()+(patent_appl_no.replace("TW", "").replace("US", "").replace("CN", ""));
 			}
-			if (patent_appl_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_US)) {
-				patent_appl_no = patent_appl_no.replace("US", "").replace("us", "").replace("/", "").replace(",", "").replaceAll("\\s+","");
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_US)) {
+				patent_appl_no = Constants.APPL_COUNTRY_US.toUpperCase()+(patent_appl_no.replace("TW", "").replace("US", "").replace("CN", ""));
 			}
-			if (patent_appl_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_CN)) {
-				patent_appl_no = patent_appl_no.replace("CN", "").replace("cn", "").replaceAll("\\s+","");
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_CN)) {
+				patent_appl_no = Constants.APPL_COUNTRY_CN.toUpperCase()+(patent_appl_no.replace("TW", "").replace("US", "").replace("CN", ""));
 			}
+			if (patent_appl_no.contains(".")) {
+				patent_appl_no = patent_appl_no.substring(0, patent_appl_no.indexOf("."));
+			}
+			patent_appl_no = patent_appl_no.replaceAll("\\s+","").replaceAll("/", "").replaceAll(",", "").replaceAll("[\\pP\\p{Punct}]","");
 		}
 		this.patent_appl_no = patent_appl_no;
 	}
@@ -756,6 +764,14 @@ public class Patent extends BaseBean{
 
 	public void setAnnuity_date(String annuity_date) {
 		this.annuity_date = annuity_date;
+	}
+
+	public Date getSync_date() {
+		return sync_date;
+	}
+
+	public void setSync_date(Date sync_date) {
+		this.sync_date = sync_date;
 	}
 
 

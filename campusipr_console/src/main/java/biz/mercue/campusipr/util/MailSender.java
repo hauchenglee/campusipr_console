@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import biz.mercue.campusipr.model.Admin;
+import biz.mercue.campusipr.model.Business;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentContact;
 
@@ -57,25 +58,7 @@ public class MailSender {
 	int condition =  -1;
 	
 	public static void main(String[] args){
-		
-		//new MailSender().sendSimpleMail("leohuang@mercue.biz", "測試", "測試內容");
-//		StringBuilder contentBuilder = new StringBuilder();
-//		try {
-//		    BufferedReader in = new BufferedReader(new FileReader("/Users/leo/Desktop/webpage/forgetpwd.html"));
-//		    String str;
-//		    while ((str = in.readLine()) != null) {
-//		        contentBuilder.append(str);
-//		    }
-//		    in.close();
-//		} catch (IOException e) {
-//			System.out.println("read file error");	
-//		}
-//		String content = contentBuilder.toString();
-//		
-//		List<String> listReceiver = new ArrayList<String>();
-//		listReceiver.add("leohuang@mercue.biz");
-//		listReceiver.add("leo731121@hotmail.com");
-//		new MailSender().sendHTMLMail(listReceiver, "測試", content);
+
 		
 		Constants.MAIL_USER_NAME = "contact@mercue.biz";
 		Constants.MAIL_PASSWORD = "Mercue_5024";
@@ -262,12 +245,39 @@ public class MailSender {
 			htmlContent = htmlContent.replaceAll("@country_name", patent.getCountry_name());
 			htmlContent = htmlContent.replaceAll("@patent_appl_no", patent.getPatent_appl_no());
 			htmlContent = htmlContent.replaceAll("@annuity_date", patent.getAnnuity_date());
-			htmlContent =htmlContent.replaceAll("@patent_link", Constants.URL_PATENT_CONTENT  +patent.getPatent_id());
+			htmlContent =htmlContent.replaceAll("@patent_link", Constants.URL_PATENT_CONTENT  + patent.getPatent_id());
 			List<String> list = new ArrayList<String>();
 			for(PatentContact contact : listContact) {
 				list.add(contact.getContact_email());
 			}
-			sendHTMLMail(list, "繳費提醒", htmlContent);
+
+			sendHTMLMail(list, "專利繳費通知 "+patent.getCountry_name() + " " +patent.getPatent_appl_no(), htmlContent);
+		}
+		
+	}
+	
+	public void sendPatentMutipleChange(Business business, List<Patent> listPatent) {
+		
+		if(business != null) {
+			String html = FileUtils.readHtml(Constants.HTML_MULTIPLE_PATENT_CHANGE);
+			if (!StringUtils.isNULL(business.getContact_name())) {
+				String htmlContent = html.replaceAll("@admin_name", business.getContact_name());
+				
+				if (listPatent.size() > 0) {
+					htmlContent = html.replaceAll("@patent_country_1", listPatent.get(0).getCountry_name());
+					htmlContent = html.replaceAll("@patent_appl_num_1", listPatent.get(0).getPatent_appl_no());
+					htmlContent =htmlContent.replaceAll("@patent_link_1", Constants.URL_PATENT_CONTENT  + listPatent.get(0).getPatent_id());
+				}
+				if (listPatent.size() > 1) {
+					htmlContent = html.replaceAll("@patent_country_2", listPatent.get(1).getCountry_name());
+					htmlContent = html.replaceAll("@patent_appl_num_2", listPatent.get(1).getPatent_appl_no());
+					htmlContent =htmlContent.replaceAll("@patent_link_2", Constants.URL_PATENT_CONTENT  + listPatent.get(1).getPatent_id());
+				}
+				List<String> list = new ArrayList<String>();
+				list.add(business.getContact_email());
+				sendHTMLMail(list, "專利同步通知", htmlContent);
+			}
+
 		}
 		
 	}

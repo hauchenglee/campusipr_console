@@ -1,5 +1,6 @@
 package biz.mercue.campusipr.dao;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -142,6 +143,23 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.setProjection(Projections.rowCount());
 		long count = (long)criteria.uniqueResult();
 		return (int)count;
+	}
+	
+	@Override
+	public List<Patent> getByNotSyncPatent(String businessId){
+		Calendar syncTime = Calendar.getInstance();
+		syncTime.setTime(new Date());
+		syncTime.add(Calendar.DATE, -7);
+		
+		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
+		Criterion c1 = Restrictions.ge("sync_date", syncTime.getTime());
+		Criterion c2 = Restrictions.isNull("sync_date");
+		criteria.add(Restrictions.or(c1,c2));
+		return criteria.list();
 	}
 	
 	@Override
@@ -552,12 +570,33 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		}
 		if(!StringUtils.isNULL(businessId)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE"
-					+ " (pk_aliase.status_desc like :searchText or pk_aliase.status_desc_en like :searchTextEn)"
-					+ " and lb.business_id = :businessId";
+					+ " lb.business_id = :businessId"
+					+ " and ls.create_date = (\n" + 
+					"    SELECT max(ps.create_date)\n" + 
+					"    FROM PatentStatus as ps\n" + 
+					"    LEFT JOIN ps.primaryKey.patent as mpkp\n" + 
+					"    WHERE mpkp.patent_id = p.patent_id \n" + 
+					")";
 		}else {
-			queryStr += " WHERE"
-					+ " pk_aliase.status_desc like :searchText or pk_aliase.status_desc_en like :searchTextEn";
+			queryStr += " WHERE" +
+			"    ls.create_date = (\n" + 
+			"    SELECT max(ps.create_date)\n" + 
+			"    FROM PatentStatus as ps\n" +  
+			"    LEFT JOIN ps.primaryKey.patent as mpkp\n" + 
+			"    WHERE mpkp.patent_id = p.patent_id \n" +  
+			")";
 		}
+		queryStr += " and (";
+		if (!StringUtils.isNULL(searchText)) {
+			queryStr += " pk_aliase.status_desc = :searchText";
+			if (!StringUtils.isNULL(searchTextEn)) {
+				queryStr += " or";
+			}
+		}
+		if (!StringUtils.isNULL(searchTextEn)) {
+			queryStr += " pk_aliase.status_desc_en = :searchTextEn";
+		}
+		queryStr += " )";
 		queryStr += " GROUP BY p";
 		if (orderFieldCode != null) {
 			if (orderList != null) {
@@ -586,8 +625,12 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		if(!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
-		q.setParameter("searchText", searchText);
-		q.setParameter("searchTextEn", searchTextEn);
+		if (!StringUtils.isNULL(searchText)) {
+			q.setParameter("searchText", searchText);
+		}
+		if (!StringUtils.isNULL(searchTextEn)) {
+			q.setParameter("searchTextEn", searchTextEn);
+		}
 		q.setFirstResult((page - 1) * pageSize);
 		q.setMaxResults(pageSize);
 		return q.list();
@@ -601,18 +644,44 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 					+ " LEFT JOIN ls.primaryKey.status as pk_aliase";
 		if(!StringUtils.isNULL(businessId)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE"
-					+ " (pk_aliase.status_desc like :searchText or pk_aliase.status_desc_en like :searchTextEn)"
-					+ " and lb.business_id = :businessId";
+					+ " lb.business_id = :businessId"
+					+ " and ls.create_date = (\n" + 
+					"    SELECT max(ps.create_date)\n" + 
+					"    FROM PatentStatus as ps\n" + 
+					"    LEFT JOIN ps.primaryKey.patent as mpkp\n" + 
+					"    WHERE mpkp.patent_id = p.patent_id \n" + 
+					")";
 		}else {
-			queryStr += " WHERE"
-					+ " pk_aliase.status_desc like :searchText or pk_aliase.status_desc_en like :searchTextEn";
+			queryStr += " WHERE" +
+			"    ls.create_date = (\n" + 
+			"    SELECT max(ps.create_date)\n" + 
+			"    FROM PatentStatus as ps\n" +  
+			"    LEFT JOIN ps.primaryKey.patent as mpkp\n" + 
+			"    WHERE mpkp.patent_id = p.patent_id \n" +  
+			")";
 		}
+
+		queryStr += " and (";
+		if (!StringUtils.isNULL(searchText)) {
+			queryStr += " pk_aliase.status_desc = :searchText";
+			if (!StringUtils.isNULL(searchTextEn)) {
+				queryStr += " or";
+			}
+		}
+		if (!StringUtils.isNULL(searchTextEn)) {
+			queryStr += " pk_aliase.status_desc_en = :searchTextEn";
+		}
+		queryStr += " )";
 		Query q = session.createQuery(queryStr);
 		if(!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
-		q.setParameter("searchText", searchText);
-		q.setParameter("searchTextEn", searchTextEn);
+		if (!StringUtils.isNULL(searchText)) {
+			q.setParameter("searchText", searchText);
+		}
+		if (!StringUtils.isNULL(searchTextEn)) {
+			q.setParameter("searchTextEn", searchTextEn);
+		}
 		long count = (long)q.uniqueResult();
 		return (int)count;
 	}

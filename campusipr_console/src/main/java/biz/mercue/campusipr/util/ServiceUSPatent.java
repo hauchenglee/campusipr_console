@@ -94,7 +94,7 @@ public class ServiceUSPatent {
 	
 	public static void getPatentRightByapplNo(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_US+"?applicationNumber=%s";
-		url = String.format(url, patent.getPatent_appl_country().toUpperCase()+patent.getPatent_appl_no());
+		url = String.format(url, patent.getPatent_appl_no());
 		
 		try {
 			String context = HttpRequestUtils.sendGet(url);
@@ -125,8 +125,11 @@ public class ServiceUSPatent {
 				}
 				log.info("indexPoint:"+indexPoint);
 				JSONObject patentObj = patentDocsObj.optJSONObject(indexPoint);
-				convertPatentInfoUS(patent, patentObj);
-				parserBilbo(patent);
+				String appId = patentObj.optString("applicationNumber");
+				if (patent.getPatent_appl_no().equals(appId)) {
+					convertPatentInfoUS(patent, patentObj);
+					parserBilbo(patent);
+				}
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
@@ -139,7 +142,7 @@ public class ServiceUSPatent {
 	
 	private static void parserBilbo(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/publication/DOCDB/%s/biblio";
-		url = String.format(url, patent.getPatent_appl_country().toUpperCase()+patent.getPatent_publish_no());
+		url = String.format(url, "US"+patent.getPatent_publish_no());
 		
 		try {
 			String token = generateToken("Basic "+Constants.PATENT_TOKEN_EU);
@@ -266,34 +269,37 @@ public class ServiceUSPatent {
 		String url = Constants.PATENT_INVENTOR_WEB_SERVICE_US;
 		JSONObject obj = new JSONObject();
 		if (patent.getPatent_appl_no() != null) {
-			obj.put("searchText", "applId:"+patent.getPatent_appl_no());
+			obj.put("searchText", "applId:"+patent.getPatent_appl_no().replace("US", ""));
 			obj.put("mm", "100%");
 			obj.put("qf", "applId");
 			log.info(obj.toString());
 			try {
-				JSONObject getObject = new JSONObject(HttpRequestUtils.sendPost(url, obj.toString()));
-				JSONArray patentDocsObj = getObject.optJSONObject("queryResults").optJSONObject("searchResponse")
-													.optJSONObject("response").optJSONArray("docs");
-				for (int index = 0; index < patentDocsObj.length(); index++) {
-					JSONObject patentObj = patentDocsObj.optJSONObject(index);
-					JSONArray patentInventors = patentObj.optJSONArray("inventors");
-					List<Inventor> listInventor = new ArrayList<Inventor>();
-					for (int indexInventors = 0; indexInventors < patentInventors.length(); indexInventors++) {
-						JSONObject inventorObj = patentInventors.optJSONObject(indexInventors);
-						Inventor inv = new Inventor();
-						if (StringUtils.isNULL(inventorObj.optString("nameLineTwo"))||
-								" ".equals(inventorObj.optString("nameLineTwo"))) {
-							inv.setInventor_name_en(inventorObj.optString("nameLineOne"));
-						} else {
-							inv.setInventor_name_en(inventorObj.optString("nameLineTwo")+
-									inventorObj.optString("nameLineOne"));
+				String responseStr = HttpRequestUtils.sendPost(url, obj.toString());
+				if (!StringUtils.isNULL(responseStr)) {
+					JSONObject getObject = new JSONObject(responseStr);
+					JSONArray patentDocsObj = getObject.optJSONObject("queryResults").optJSONObject("searchResponse")
+														.optJSONObject("response").optJSONArray("docs");
+					for (int index = 0; index < patentDocsObj.length(); index++) {
+						JSONObject patentObj = patentDocsObj.optJSONObject(index);
+						JSONArray patentInventors = patentObj.optJSONArray("inventors");
+						List<Inventor> listInventor = new ArrayList<Inventor>();
+						for (int indexInventors = 0; indexInventors < patentInventors.length(); indexInventors++) {
+							JSONObject inventorObj = patentInventors.optJSONObject(indexInventors);
+							Inventor inv = new Inventor();
+							if (StringUtils.isNULL(inventorObj.optString("nameLineTwo"))||
+									" ".equals(inventorObj.optString("nameLineTwo"))) {
+								inv.setInventor_name_en(inventorObj.optString("nameLineOne"));
+							} else {
+								inv.setInventor_name_en(inventorObj.optString("nameLineTwo")+
+										inventorObj.optString("nameLineOne"));
+							}
+							inv.setCountry_id(inventorObj.optString("country").replace("(", "").replace(")", ""));
+							inv.setInventor_order(Integer.parseInt(inventorObj.optString("rankNo")));
+							inv.setPatent(patent);
+							listInventor.add(inv);
 						}
-						inv.setCountry_id(inventorObj.optString("country").replace("(", "").replace(")", ""));
-						inv.setInventor_order(Integer.parseInt(inventorObj.optString("rankNo")));
-						inv.setPatent(patent);
-						listInventor.add(inv);
+						patent.setListInventor(listInventor);
 					}
-					patent.setListInventor(listInventor);
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -305,88 +311,91 @@ public class ServiceUSPatent {
 	
 	private static void getPatentNoticeAndPublish(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_US+"?applicationNumber=%s";
-		url = String.format(url, patent.getPatent_appl_country().toUpperCase()+patent.getPatent_appl_no());
+		url = String.format(url, patent.getPatent_appl_no());
 	
 		
 		try {
-			JSONObject getObject = new JSONObject(HttpRequestUtils.sendGet(url));
-			JSONArray patentDocsObj = getObject.optJSONObject("response").optJSONArray("docs");
-			for (int index = 0; index < patentDocsObj.length(); index++) {
-				JSONObject patentObj = patentDocsObj.optJSONObject(index);
-				if (patentObj.has("patentNumber")) {
-					patent.setPatent_no(patentObj.optString("patentNumber"));
-				}
-				
-				if (patentObj.optString("documentId").endsWith("A1")) {
-					patent.setPatent_notice_no(patentObj.optString("documentId")
-							.substring(0, patentObj.optString("documentId").indexOf("A1")));
-					try {
-						String noticeDateStr = patentObj.optString("publicationDate");
-						if (!StringUtils.isNULL(noticeDateStr)) {
-							Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
-							patent.setPatent_notice_date(noticeDate);
-						}
-					} catch (ParseException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+			String responseStr = HttpRequestUtils.sendGet(url);
+			if (!StringUtils.isNULL(responseStr)) {
+				JSONObject getObject = new JSONObject(responseStr);
+				JSONArray patentDocsObj = getObject.optJSONObject("response").optJSONArray("docs");
+				for (int index = 0; index < patentDocsObj.length(); index++) {
+					JSONObject patentObj = patentDocsObj.optJSONObject(index);
+					if (patentObj.has("patentNumber")) {
+						patent.setPatent_no(patentObj.optString("patentNumber"));
 					}
-				}
-				if (patentObj.optString("documentId").endsWith("A2")) {
-					patent.setPatent_notice_no(patentObj.optString("documentId")
-							.substring(0, patentObj.optString("documentId").indexOf("A2")));
-					try {
-						String noticeDateStr = patentObj.optString("publicationDate");
-						if (!StringUtils.isNULL(noticeDateStr)) {
-							Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
-							patent.setPatent_notice_date(noticeDate);
+					
+					if (patentObj.optString("documentId").endsWith("A1")) {
+						patent.setPatent_notice_no(patentObj.optString("documentId")
+								.substring(0, patentObj.optString("documentId").indexOf("A1")));
+						try {
+							String noticeDateStr = patentObj.optString("publicationDate");
+							if (!StringUtils.isNULL(noticeDateStr)) {
+								Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
+								patent.setPatent_notice_date(noticeDate);
+							}
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-					} catch (ParseException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
-				}
-				if (patentObj.optString("documentId").endsWith("A9")) {
-					patent.setPatent_notice_no(patentObj.optString("documentId")
-							.substring(0, patentObj.optString("documentId").indexOf("A9")));
-					try {
-						String noticeDateStr = patentObj.optString("publicationDate");
-						if (!StringUtils.isNULL(noticeDateStr)) {
-							Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
-							patent.setPatent_notice_date(noticeDate);
+					if (patentObj.optString("documentId").endsWith("A2")) {
+						patent.setPatent_notice_no(patentObj.optString("documentId")
+								.substring(0, patentObj.optString("documentId").indexOf("A2")));
+						try {
+							String noticeDateStr = patentObj.optString("publicationDate");
+							if (!StringUtils.isNULL(noticeDateStr)) {
+								Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
+								patent.setPatent_notice_date(noticeDate);
+							}
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-					} catch (ParseException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
-				}
-				
-				if (patentObj.optString("documentId").endsWith("B1")) {
-					patent.setPatent_publish_no(patentObj.optString("documentId")
-							.substring(0, patentObj.optString("documentId").indexOf("B1")));
-					try {
-						String publishDateStr = patentObj.optString("publicationDate");
-						if (!StringUtils.isNULL(publishDateStr)) {
-							Date publishDate = DateUtils.parserDateTimeUTCString(publishDateStr);
-							patent.setPatent_publish_date(publishDate);
+					if (patentObj.optString("documentId").endsWith("A9")) {
+						patent.setPatent_notice_no(patentObj.optString("documentId")
+								.substring(0, patentObj.optString("documentId").indexOf("A9")));
+						try {
+							String noticeDateStr = patentObj.optString("publicationDate");
+							if (!StringUtils.isNULL(noticeDateStr)) {
+								Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
+								patent.setPatent_notice_date(noticeDate);
+							}
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-					} catch (ParseException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
-				}
-				
-				if (patentObj.optString("documentId").endsWith("B2")) {
-					patent.setPatent_publish_no(patentObj.optString("documentId")
-							.substring(0, patentObj.optString("documentId").indexOf("B2")));
-					try {
-						String publishDateStr = patentObj.optString("publicationDate");
-						if (!StringUtils.isNULL(publishDateStr)) {
-							Date publishDate = DateUtils.parserDateTimeUTCString(publishDateStr);
-							patent.setPatent_publish_date(publishDate);
+					
+					if (patentObj.optString("documentId").endsWith("B1")) {
+						patent.setPatent_publish_no(patentObj.optString("documentId")
+								.substring(0, patentObj.optString("documentId").indexOf("B1")));
+						try {
+							String publishDateStr = patentObj.optString("publicationDate");
+							if (!StringUtils.isNULL(publishDateStr)) {
+								Date publishDate = DateUtils.parserDateTimeUTCString(publishDateStr);
+								patent.setPatent_publish_date(publishDate);
+							}
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-					} catch (ParseException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					}
+					
+					if (patentObj.optString("documentId").endsWith("B2")) {
+						patent.setPatent_publish_no(patentObj.optString("documentId")
+								.substring(0, patentObj.optString("documentId").indexOf("B2")));
+						try {
+							String publishDateStr = patentObj.optString("publicationDate");
+							if (!StringUtils.isNULL(publishDateStr)) {
+								Date publishDate = DateUtils.parserDateTimeUTCString(publishDateStr);
+								patent.setPatent_publish_date(publishDate);
+							}
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 				}
 			}
@@ -400,7 +409,7 @@ public class ServiceUSPatent {
 	}
 	
 	private static void getContext(Patent patent) {
-		String url = Constants.PATENT_CONTEXT_WEB_SERVICE_US+patent.getPatent_appl_country().toUpperCase()+patent.getPatent_no();
+		String url = Constants.PATENT_CONTEXT_WEB_SERVICE_US+patent.getPatent_no();
 		
 		try {
 			Document doc = Jsoup.parse(new URL(url), 3000);

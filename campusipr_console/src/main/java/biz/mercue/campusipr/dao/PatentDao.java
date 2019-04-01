@@ -23,7 +23,7 @@ public interface PatentDao {
 	int  getCountByBusinessId(String businessId);	
 	
 	
-	
+	List<Patent> getByNotSyncPatent(String businessId);
 
 	
 	List<Patent> getByPatentIds(List<String> ids,String businessId);
