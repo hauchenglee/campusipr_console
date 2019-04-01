@@ -65,7 +65,7 @@ html:
     new_account : /Users/leo/Desktop/webpage/accountactivation.html
     one_patent_change :  /Users/leo/Desktop/webpage/onepatent.html
     multiple_patent_change :  /Users/leo/Desktop/webpage/multiplepatent.html
-    annuity_reminder :  /Users/leo/Desktop/webpage/annuity_reminder.html
-    url_reset_password :  http://192.168.2.71:8080/impact/app/html/resetpwd.html
-    url_enable_password :  http://192.168.2.71:8080/impact/app/html/enablepwd.html
-    url_patent_content :  http://192.168.2.71:8080/campusipr_console/api/getpatentbyid/
+    annuity_reminder :  /Users/leo/Desktop/webpage/paymentnotice.html
+    url_reset_password  :   http://192.168.2.71:8080/impact/app/html/resetpwd.html
+    url_enable_password :   http://192.168.2.71:8080/impact/app/html/enablepwd.html
+    url_patent_content  :   http://192.168.2.71:8080/impact/html/patent-content/search?patent_id=

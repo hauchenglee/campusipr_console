@@ -64,6 +64,6 @@ html:
     one_patent_change :  /opt/impact/html/onepatent.html
     multiple_patent_change :  /opt/impact/html/multiplepatent.html
     annuity_reminder :  /opt/impact/html/paymentnotice.html
-    url_reset_password :  https:/api.mercue.biz:663/impact/app/html/resetpwd.html
-    url_enable_password :  https:/api.mercue.biz:663/impact/app/html/enablepwd.html
-  
+    url_reset_password :   https://api.mercue.biz:663/impact/app/html/resetpwd.html
+    url_enable_password :  https://api.mercue.biz:663/impact/app/html/enablepwd.html
+    url_patent_content  :  https://api.mercue.biz:663/impact/html/patent-content/search?patent_id=

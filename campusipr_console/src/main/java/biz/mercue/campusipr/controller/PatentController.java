@@ -83,7 +83,7 @@ public class PatentController {
 	
 	@RequestMapping(value="/api/addpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String addPatent(HttpServletRequest request,@RequestBody String receiveJSONString) {
+	public String addPatent(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="businessId",required=false) String businessId) {
 		log.info("addPatent ");
 		Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
 		BeanResponseBody responseBody  = new BeanResponseBody();

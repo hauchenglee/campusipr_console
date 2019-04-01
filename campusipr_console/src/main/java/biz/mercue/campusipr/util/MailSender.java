@@ -85,7 +85,11 @@ public class MailSender {
 		 
 		 Constants.URL_ENABLE_PASSWORD = "http://192.168.2.71:8080/impact/app/html/enablepwd.html";
 		 
+		 Constants.URL_PATENT_CONTENT =  "http://192.168.2.71:8080/impact/html/patent-content/search?patent_id=";
+		 
 		 Constants.HTML_NEW_ACCOUNT = "/Users/leo/Desktop/webpage/accountactivation.html";
+		 
+		 Constants.HTML_ANNUITY_REMINDER = "/Users/leo/Desktop/webpage/paymentnotice.html";
 		 
 		 Admin admin = new Admin();
 		 admin.setAdmin_name("Leo Huang");
@@ -93,7 +97,20 @@ public class MailSender {
 		 admin.setToken(KeyGeneratorUtils.generateRandomString());
 		 
 		 
-		 new MailSender().sendActiveAccount(admin);
+		 
+		 List<PatentContact> listContact = new ArrayList<PatentContact>();
+		 PatentContact contact = new PatentContact();
+		 contact.setContact_email("leohuang@mercue.biz");
+		 listContact.add(contact);
+		 
+		 Patent patent = new Patent();
+		 patent.setPatent_id("0137021b10a46fb54e9f0fea9c21f172");
+		 patent.setPatent_name("專利名稱");
+		 patent.setPatent_appl_no("TW1234567");
+		 patent.setCountry_name("中華民國");
+		 patent.setAnnuity_date("2019/02/20");
+		 
+		 new MailSender().sendPatentAnnuityReminder(patent, listContact);
 		
 	}
 	
@@ -239,7 +256,7 @@ public class MailSender {
 	public void sendPatentAnnuityReminder(Patent patent,List<PatentContact> listContact) {
 		
 		if(patent != null) {
-			String html = FileUtils.readHtml(Constants.HTML_NEW_ACCOUNT);
+			String html = FileUtils.readHtml(Constants.HTML_ANNUITY_REMINDER);
 			
 			String htmlContent = html.replaceAll("@patent_name", patent.getPatent_name());
 			htmlContent = htmlContent.replaceAll("@country_name", patent.getCountry_name());
@@ -250,7 +267,7 @@ public class MailSender {
 			for(PatentContact contact : listContact) {
 				list.add(contact.getContact_email());
 			}
-			sendHTMLMail(list, "邀請使用", htmlContent);
+			sendHTMLMail(list, "繳費提醒", htmlContent);
 		}
 		
 	}
