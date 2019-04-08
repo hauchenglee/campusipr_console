@@ -58,25 +58,7 @@ public class MailSender {
 	int condition =  -1;
 	
 	public static void main(String[] args){
-		
-		//new MailSender().sendSimpleMail("leohuang@mercue.biz", "測試", "測試內容");
-//		StringBuilder contentBuilder = new StringBuilder();
-//		try {
-//		    BufferedReader in = new BufferedReader(new FileReader("/Users/leo/Desktop/webpage/forgetpwd.html"));
-//		    String str;
-//		    while ((str = in.readLine()) != null) {
-//		        contentBuilder.append(str);
-//		    }
-//		    in.close();
-//		} catch (IOException e) {
-//			System.out.println("read file error");	
-//		}
-//		String content = contentBuilder.toString();
-//		
-//		List<String> listReceiver = new ArrayList<String>();
-//		listReceiver.add("leohuang@mercue.biz");
-//		listReceiver.add("leo731121@hotmail.com");
-//		new MailSender().sendHTMLMail(listReceiver, "測試", content);
+
 		
 		Constants.MAIL_USER_NAME = "contact@mercue.biz";
 		Constants.MAIL_PASSWORD = "Mercue_5024";
@@ -86,7 +68,11 @@ public class MailSender {
 		 
 		 Constants.URL_ENABLE_PASSWORD = "http://192.168.2.71:8080/impact/app/html/enablepwd.html";
 		 
+		 Constants.URL_PATENT_CONTENT =  "http://192.168.2.71:8080/impact/html/patent-content/search?patent_id=";
+		 
 		 Constants.HTML_NEW_ACCOUNT = "/Users/leo/Desktop/webpage/accountactivation.html";
+		 
+		 Constants.HTML_ANNUITY_REMINDER = "/Users/leo/Desktop/webpage/paymentnotice.html";
 		 
 		 Admin admin = new Admin();
 		 admin.setAdmin_name("Leo Huang");
@@ -94,7 +80,20 @@ public class MailSender {
 		 admin.setToken(KeyGeneratorUtils.generateRandomString());
 		 
 		 
-		 new MailSender().sendActiveAccount(admin);
+		 
+		 List<PatentContact> listContact = new ArrayList<PatentContact>();
+		 PatentContact contact = new PatentContact();
+		 contact.setContact_email("leohuang@mercue.biz");
+		 listContact.add(contact);
+		 
+		 Patent patent = new Patent();
+		 patent.setPatent_id("0137021b10a46fb54e9f0fea9c21f172");
+		 patent.setPatent_name("專利名稱");
+		 patent.setPatent_appl_no("TW1234567");
+		 patent.setCountry_name("中華民國");
+		 patent.setAnnuity_date("2019/02/20");
+		 
+		 new MailSender().sendPatentAnnuityReminder(patent, listContact);
 		
 	}
 	
@@ -251,6 +250,7 @@ public class MailSender {
 			for(PatentContact contact : listContact) {
 				list.add(contact.getContact_email());
 			}
+
 			sendHTMLMail(list, "專利繳費通知 "+patent.getCountry_name() + " " +patent.getPatent_appl_no(), htmlContent);
 		}
 		
@@ -277,6 +277,7 @@ public class MailSender {
 				list.add(business.getContact_email());
 				sendHTMLMail(list, "專利同步通知", htmlContent);
 			}
+
 		}
 		
 	}
