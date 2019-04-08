@@ -1,8 +1,14 @@
 package biz.mercue.campusipr.controller;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +41,7 @@ public class RouterController {
 	}
 	
 	@RequestMapping(value="/resetpassword", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
-	public ModelAndView restPasswordRouter(HttpServletRequest request,
+	public ResponseEntity<Object> restPasswordRouter(HttpServletRequest request,
 			@RequestParam(value ="token",required=true) String token){
 		String redirectUrl = null;
 	    if(!StringUtils.isNULL(token)){ 
@@ -43,12 +49,21 @@ public class RouterController {
 			redirectUrl = Constants.URL_RESET_PASSWORD + "?token=" + token;
 	    }else{
 			redirectUrl = Constants.URL_LOGIN;
-	    }	
-		return new ModelAndView("redirect:" + redirectUrl);
+	    }
+	    URI url = null;
+		try {
+			url = new URI(redirectUrl);
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    HttpHeaders httpHeaders = new HttpHeaders();
+	    httpHeaders.setLocation(url);
+		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 	}
 	
 	@RequestMapping(value="/enablepassword", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
-	public ModelAndView enablePasswordRouter(HttpServletRequest request,
+	public ResponseEntity<Object> enablePasswordRouter(HttpServletRequest request,
 			@RequestParam(value ="token",required=true) String token,
 			@RequestParam(value ="email",required=true) String email){
 		String redirectUrl = null;
@@ -58,7 +73,16 @@ public class RouterController {
 	    }else{
 			redirectUrl = Constants.URL_LOGIN;
 	    }	
-		return new ModelAndView("redirect:" + redirectUrl);
+	    URI url = null;
+		try {
+			url = new URI(redirectUrl);
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    HttpHeaders httpHeaders = new HttpHeaders();
+	    httpHeaders.setLocation(url);
+		return new ResponseEntity<>(httpHeaders, HttpStatus.SEE_OTHER);
 	}
 
 }
