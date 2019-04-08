@@ -65,6 +65,14 @@ public class SyncSendJob  implements Job {
 
 				SynchronizeBusiness syncBusiness = task.getSync();
 				
+				List<Patent> listPatent = new ArrayList<>();
+				patentService.syncPatentsByApplicant(listPatent, Constants.SYSTEM_ADMIN, syncBusiness.getBusiness().getBusiness_id(), null);
+				
+				for (Patent patent:listPatent) {
+					Country country = countryService.getByLanguage(patent.getPatent_appl_country(), "tw");
+					patent.setCountry_name(country.getCountry_name());
+				}
+				
 				//更新下一次同步時間
 				Date sycnNextTime = syncBusiness.getSync_next_date();
 				Calendar cNextNext = Calendar.getInstance();
@@ -91,14 +99,6 @@ public class SyncSendJob  implements Job {
 				
 
 				synchronizeService.changeSyncStatus(taskId, true);
-				
-				List<Patent> listPatent = new ArrayList<>();
-				patentService.syncPatentsByApplicant(listPatent, Constants.SYSTEM_ADMIN, syncBusiness.getBusiness().getBusiness_id(), null);
-				
-				for (Patent patent:listPatent) {
-					Country country = countryService.getByLanguage(patent.getPatent_appl_country(), "tw");
-					patent.setCountry_name(country.getCountry_name());
-				}
 				
 				MailSender mail = new MailSender();
 				log.info("send mail");

@@ -1,14 +1,15 @@
 package biz.mercue.campusipr.controller;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
-
-
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -141,19 +142,28 @@ public class SettingController {
 	public String updateAnnuityReminder(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("updateAnnuityReminder ");
 		
-		BeanResponseBody responseBody  = new BeanResponseBody();
+		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-			AnnuityReminder reminder = (AnnuityReminder) JacksonJSONUtils.readValue(receiveJSONString, AnnuityReminder.class);
+			List<AnnuityReminder> reminders = new ArrayList<AnnuityReminder>();
+			JSONArray reminderArr = new JSONArray(receiveJSONString);
+			for (int index = 0; index < reminderArr.length(); index++) {
+				JSONObject reminderObj = reminderArr.optJSONObject(index);
+				AnnuityReminder reminder = (AnnuityReminder) JacksonJSONUtils.readValue(reminderObj.toString(), AnnuityReminder.class);
+				reminders.add(reminder);
+			}
+			log.info(reminders.size());
 			if(!tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 				
 			}else {
-				reminder.setBusiness(tokenBean.getBusiness());
+				for (AnnuityReminder reminder:reminders) {
+					reminder.setBusiness(tokenBean.getBusiness());
+				}
 			}
-			int taskResult = annuityReminderService.update(reminder);
+			int taskResult = annuityReminderService.update(reminders, tokenBean.getBusiness().getBusiness_id());
 			responseBody.setCode(taskResult);
 			if(taskResult == Constants.INT_SUCCESS) {
-				responseBody.setBean(reminder);
+				responseBody.setList(reminders);
 			}
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);

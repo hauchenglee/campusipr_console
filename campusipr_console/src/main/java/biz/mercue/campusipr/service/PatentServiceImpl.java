@@ -1512,35 +1512,37 @@ public class PatentServiceImpl implements PatentService{
 						List<AnnuityReminder> listARSendRightNow = new ArrayList<>();
 						Date now = DateUtils.getDayStart(new Date());
 						for (AnnuityReminder annuityReminder:annuityReminderList) {
-							Calendar calendar = Calendar.getInstance();
-							calendar.setTime(annuity.getAnnuity_end_date());
-							calendar.add(Calendar.DATE, -annuityReminder.getEmail_day());
+							if (annuityReminder.isAvailable()) {
+								Calendar calendar = Calendar.getInstance();
+								calendar.setTime(annuity.getAnnuity_end_date());
+								calendar.add(Calendar.DATE, -annuityReminder.getEmail_day());
+									
+								ReminderTask reminder = new ReminderTask();
+								reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
+								reminder.setPatent_id(patent.getPatent_id());
+								reminder.setBusiness_id(annuityReminder.getBusiness().getBusiness_id());
+								reminder.setTask_type(ReminderTask.reminderTypeAnnuity);
+								reminder.setTask_date(calendar.getTime());
+								reminder.setReminder_day(annuityReminder.getEmail_day());
+								reminder.setIs_send(false);
+								reminder.setIs_remind(annuity.is_reminder());
 								
-							ReminderTask reminder = new ReminderTask();
-							reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
-							reminder.setPatent_id(patent.getPatent_id());
-							reminder.setBusiness_id(annuityReminder.getBusiness().getBusiness_id());
-							reminder.setTask_type(ReminderTask.reminderTypeAnnuity);
-							reminder.setTask_date(calendar.getTime());
-							reminder.setReminder_day(annuityReminder.getEmail_day());
-							reminder.setIs_send(false);
-							reminder.setIs_remind(annuity.is_reminder());
-							
-							log.info("before:"+reminder.getTask_date());
-							log.info("now:"+now);
-							log.info("after:"+annuity.getAnnuity_end_date());
-							if (reminder.getTask_date().after(now)) {
-								if (reminder.is_remind() && !reminder.is_send()) {
-									log.info("send on schulder");
-									reminderDao.create(reminder);
-									quartzService.createJob(reminder);
+								log.info("before:"+reminder.getTask_date());
+								log.info("now:"+now);
+								log.info("after:"+annuity.getAnnuity_end_date());
+								if (reminder.getTask_date().after(now)) {
+									if (reminder.is_remind() && !reminder.is_send()) {
+										log.info("send on schulder");
+										reminderDao.create(reminder);
+										quartzService.createJob(reminder);
+									}
 								}
-							}
-							
-							if (reminder.getTask_date().equals(now) ||
-									(now.compareTo(reminder.getTask_date()) >= 0 && now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
-								listARSendRightNow.add(annuityReminder);
-								log.info("send right now List:"+listARSendRightNow.size());
+								
+								if (reminder.getTask_date().equals(now) ||
+										(now.compareTo(reminder.getTask_date()) >= 0 && now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
+									listARSendRightNow.add(annuityReminder);
+									log.info("send right now List:"+listARSendRightNow.size());
+								}
 							}
 						}
 						// get last expire reminder but annuity not expire

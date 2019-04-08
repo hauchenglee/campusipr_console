@@ -62,8 +62,11 @@ html:
     forget_password : /opt/impact/html/forgetpwd.html
     new_account : /opt/impact/html/accountactivation.html
     one_patent_change :  /opt/impact/html/onepatent.html
-    multiple_patent_change :  /Users/audio/Desktop/charles/main_data/git/angularProject/Angular/default/src/app/html/patentstateupdate.html
-    annuity_reminder :  /Users/audio/Desktop/charles/main_data/git/angularProject/Angular/default/src/app/html/paymentnotice.html
+    multiple_patent_change :  /Users/audio/Desktop/交接事項/git/angularProject/Angular/default/src/app/html/patentstateupdate.html
+    annuity_reminder :  /Users/audio/Desktop/交接事項/git/angularProject/Angular/default/src/app/html/paymentnotice.html
+    url_reset_password_transfer :  https://api.mercue.biz:663/campusipr_console/resetpassword
+    url_enable_password_transfer :  https://api.mercue.biz:663/campusipr_console/enablepassword
+    url_login : https://api.mercue.biz:663/impact
     url_reset_password :  https://api.mercue.biz:663/impact/app/html/resetpwd.html
     url_enable_password :  https://api.mercue.biz:663/impact/app/html/enablepwd.html
     url_patent_content :  https://api.mercue.biz:663/impact/html/patent-content/search?patent_id=

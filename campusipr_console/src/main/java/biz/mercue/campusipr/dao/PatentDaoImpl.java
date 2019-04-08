@@ -82,6 +82,16 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			delete(dbBean);
 		}
 	}
+	
+	@Override
+	public List<Patent> getByBusinessId(String businessId) {
+		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
+		return criteria.list();
+	}
 
 	@Override
 	public List<Patent> getByBusinessId(String businessId,int page,int pageSize, String orderList, String orderFieldCode,int is_asc){
