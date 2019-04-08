@@ -183,21 +183,23 @@ public class AnnuityReminderServiceImpl implements AnnuityReminderService{
 		int seccuessTime = 0;
 		for (AnnuityReminder annuityReminder:reminders) {
 			
-			AnnuityReminder dbBean = annuityReminderDao.getById(annuityReminder.getReminder_id());
-	
-			if(dbBean!=null){
-				dbBean.setEmail_day(annuityReminder.getEmail_day());
-				dbBean.setPhone_day(annuityReminder.getPhone_day());
-				dbBean.setAvailable(annuityReminder.isAvailable());
-				dbBean.setUpdate_date(new Date());
-				seccuessTime += 1;
+			if (!StringUtils.isNULL(annuityReminder.getReminder_id())) {
+				AnnuityReminder dbBean = annuityReminderDao.getById(annuityReminder.getReminder_id());
+		
+				if(dbBean!=null){
+					dbBean.setEmail_day(annuityReminder.getEmail_day());
+					dbBean.setPhone_day(annuityReminder.getPhone_day());
+					dbBean.setAvailable(annuityReminder.isAvailable());
+					dbBean.setUpdate_date(new Date());
+					seccuessTime += 1;
+				}
 			} else {
 				if (StringUtils.isNULL(annuityReminder.getReminder_id())) {
 					annuityReminder.setReminder_id(KeyGeneratorUtils.generateRandomString());
 				}
-				annuityReminder.setIs_user_define(true);
 				annuityReminder.setCreate_date(new Date());
 				annuityReminderDao.create(annuityReminder);
+				seccuessTime += 1;
 			}
 		}
 		if (seccuessTime == reminders.size()) {
