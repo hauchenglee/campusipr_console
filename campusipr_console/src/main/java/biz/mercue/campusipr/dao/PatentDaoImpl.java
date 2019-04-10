@@ -849,11 +849,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	   }
 	   
 	   @Override
-	   public void deletePatentExtension(String patentId) {
+	   public void deletePatentExtension(String patentId, String bussinessId) {
 	       String hql = "Delete From PatentExtension where patent_id = :patent_id";
+	       if (!StringUtils.isNULL(bussinessId)) {
+	    	   hql += " and business_id = :business_id";
+	       }
 	       Session session = getSession();
 	       Query query = session.createQuery(hql);
 	       query.setParameter("patent_id", patentId);
+	       if (!StringUtils.isNULL(bussinessId)) {
+	    	   query.setParameter("business_id", bussinessId);
+	       }
 	       query.executeUpdate();
 	   }
 

@@ -410,7 +410,7 @@ public class PatentServiceImpl implements PatentService{
 	                           taskResult = Constants.INT_SUCCESS;
 	                       } else {
 	                           patent.setComparePatent(appNoPatent);
-	                           taskResult = updatePatent(patent);
+	                           taskResult = updatePatent(patent, null);
 	                       }
 	                   }
 	               } else {
@@ -466,7 +466,7 @@ public class PatentServiceImpl implements PatentService{
                     taskResult = Constants.INT_SUCCESS;
                 } else {
                 	patent.setComparePatent(appNoPatent);
-                    taskResult = updatePatent(patent);
+                    taskResult = updatePatent(patent, null);
                 }
 			} else {
 				taskResult = Constants.INT_CANNOT_FIND_DATA;
@@ -495,7 +495,7 @@ public class PatentServiceImpl implements PatentService{
                         taskResult = Constants.INT_SUCCESS;
                     } else {
                     	patent.setComparePatent(appNoPatent);
-                        taskResult = updatePatent(patent);
+                        taskResult = updatePatent(patent, null);
                     }
                 }else {
                    this.addPatent(patent);
@@ -517,7 +517,7 @@ public class PatentServiceImpl implements PatentService{
 		
 		Patent dbBean = patentDao.getById(businessId,patent.getPatent_id());
 		if(dbBean != null) {
-			return updatePatent(patent);
+			return updatePatent(patent, businessId);
 		}else {
 			return Constants.INT_CANNOT_FIND_DATA;
 		}
@@ -525,7 +525,7 @@ public class PatentServiceImpl implements PatentService{
 	}
 
 	@Override
-	public int  updatePatent(Patent patent){
+	public int  updatePatent(Patent patent, String businessId){
 		log.info("updatePatent:"+patent.getPatent_id());
 		List<PatentEditHistory> editList = new ArrayList<PatentEditHistory>(); 
 		Patent dbBean = patent.getComparePatent();
@@ -622,7 +622,7 @@ public class PatentServiceImpl implements PatentService{
 			handleCost(dbBean, patent);
 			handleContact(dbBean, patent);
 			handleAnnuity(dbBean, patent);
-			handleExtension(dbBean, patent);
+			handleExtension(dbBean, patent, businessId);
 			
 			if(Patent.EDIT_SOURCE_HUMAN   == patent.getEdit_source()) {
 				dbBean.setFamily(patent.getFamily());
@@ -1599,20 +1599,25 @@ public class PatentServiceImpl implements PatentService{
 		}
 	}
 	
-	private void handleExtension(Patent dbPatent, Patent editPatent) {
+	private void handleExtension(Patent dbPatent, Patent editPatent, String businessId) {
 		if (editPatent.getListExtension() != null && editPatent.getListExtension().size() > 0) {
 			List<PatentExtension> listExtension = editPatent.getListExtension();
+			List<String> duplicateBussinessId = new ArrayList<>();
 			for (PatentExtension extension : listExtension) {
 				if (StringUtils.isNULL(extension.getExtension_id())) {
 					extension.setExtension_id(KeyGeneratorUtils.generateRandomString());
 				}
 				extension.setPatent(dbPatent);
+				if (!duplicateBussinessId.contains(extension.getBusiness_id())) {
+					duplicateBussinessId.add(extension.getBusiness_id());
+				}
 			}
-			patentDao.deletePatentExtension(dbPatent.getPatent_id());
+			log.info(businessId);
+			patentDao.deletePatentExtension(dbPatent.getPatent_id(), businessId);
 			dbPatent.setListExtension(editPatent.getListExtension());
 		}else {
 			if (dbPatent.getListExtension() != null) {
-				patentDao.deletePatentExtension(dbPatent.getPatent_id());
+				patentDao.deletePatentExtension(dbPatent.getPatent_id(), businessId);
 			}
 		}
 	}
