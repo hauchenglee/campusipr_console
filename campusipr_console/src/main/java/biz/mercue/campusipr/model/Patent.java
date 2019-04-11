@@ -113,6 +113,7 @@ public class Patent extends BaseBean{
 	@JoinTable(name = "patent_business", 
 		joinColumns = { @JoinColumn(name = "patent_id") }, 
 		inverseJoinColumns = { @JoinColumn(name = "business_id") })
+	@Filter(name = "businessFilter",condition=" business_id= :business_id")
 	private List<Business> listBusiness;
 	
 	//all

@@ -148,18 +148,32 @@ public class BusinessServiceImpl implements BusinessService{
 				dbBean.setUpdate_date(new Date());
 				
 				//add annuity reminder
-				List<AnnuityReminder> listReminder = annuityReminderDao.getByBusinessId(business.getBusiness_id());
-				if (listReminder.isEmpty()) {
-				    for (Integer defaultReminderDay:Constants.defaultReminderDays) {
-					    AnnuityReminder anuityReminder = new AnnuityReminder();
-					    anuityReminder.setReminder_id(KeyGeneratorUtils.generateRandomString());
-					    anuityReminder.setReminder_text("專利{@patent_number}將於{@charges_edate}到期，請記得聯絡事務所進行繳費");
-					    anuityReminder.setBusiness(business);
-					    anuityReminder.setEmail_day(defaultReminderDay);
-					    anuityReminder.setCreate_date(new Date());
-					    anuityReminder.setAvailable(true);
-					    annuityReminderDao.create(anuityReminder);
-				    }
+				if (business.isAvailable()) {
+					List<AnnuityReminder> listReminder = annuityReminderDao.getByBusinessId(business.getBusiness_id());
+					if (listReminder.isEmpty()) {
+					    for (Integer defaultReminderDay:Constants.defaultReminderDays) {
+						    AnnuityReminder anuityReminder = new AnnuityReminder();
+						    anuityReminder.setReminder_id(KeyGeneratorUtils.generateRandomString());
+						    anuityReminder.setReminder_text("專利{@patent_number}將於{@charges_edate}到期，請記得聯絡事務所進行繳費");
+						    anuityReminder.setBusiness(business);
+						    anuityReminder.setEmail_day(defaultReminderDay);
+						    anuityReminder.setCreate_date(new Date());
+						    anuityReminder.setAvailable(true);
+						    anuityReminder.setIs_user_define(false);
+						    annuityReminderDao.create(anuityReminder);
+					    }
+					} else {
+						for (AnnuityReminder reminder:listReminder) {
+							reminder.setAvailable(true);
+						}
+					}
+				} else {
+					List<AnnuityReminder> listReminder = annuityReminderDao.getByBusinessId(business.getBusiness_id());
+					if (!listReminder.isEmpty()) {
+						for (AnnuityReminder reminder:listReminder) {
+							reminder.setAvailable(false);
+						}
+					}
 				}
 				
 				if (business.isAvailable()) {

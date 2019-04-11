@@ -13,7 +13,9 @@ public interface AnnuityReminderService {
 
     void create(AnnuityReminder reminder);
 	
-    int update(AnnuityReminder reminder);
+//    int update(AnnuityReminder reminder);
+    
+    int update(List<AnnuityReminder> reminders, String bussinessId);
 	
     List<AnnuityReminder> getByBusinessId(String businessId);
 	

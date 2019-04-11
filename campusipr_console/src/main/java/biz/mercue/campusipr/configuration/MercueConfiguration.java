@@ -90,9 +90,11 @@ public class MercueConfiguration implements WebMvcConfigurer{
 		Constants.HTML_MULTIPLE_PATENT_CHANGE = yamlConfig.getConfig().getHtml().get("multiple_patent_change");
 		Constants.HTML_ANNUITY_REMINDER = yamlConfig.getConfig().getHtml().get("annuity_reminder");
 		
+		Constants.URL_RESET_PASSWORD_TRANSFER = yamlConfig.getConfig().getHtml().get("url_reset_password_transfer");
+		Constants.URL_ENABLE_PASSWORD_TRANSFER = yamlConfig.getConfig().getHtml().get("url_enable_password_transfer");
 		Constants.URL_RESET_PASSWORD = yamlConfig.getConfig().getHtml().get("url_reset_password");
-		
 		Constants.URL_ENABLE_PASSWORD = yamlConfig.getConfig().getHtml().get("url_enable_password");
+		Constants.URL_LOGIN = yamlConfig.getConfig().getHtml().get("url_login");
 		
 		Constants.URL_PATENT_CONTENT = yamlConfig.getConfig().getHtml().get("url_patent_content");
 	}

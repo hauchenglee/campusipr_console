@@ -213,7 +213,7 @@ public class MailSender {
 			String html = FileUtils.readHtml(Constants.HTML_FORGET_PASSWORD);
 			
 			String htmlContent =html.replaceAll("@admin_name", admin.getAdmin_name());
-			htmlContent =htmlContent.replaceAll("@forget_link", Constants.URL_RESET_PASSWORD + "?token=" +admin.getToken());
+			htmlContent =htmlContent.replaceAll("@forget_link", Constants.URL_RESET_PASSWORD_TRANSFER + "?token=" + admin.getToken());
 			List<String> list = new ArrayList<String>();
 			list.add(admin.getAdmin_email());
 			sendHTMLMail(list, "忘記密碼", htmlContent);
@@ -227,7 +227,7 @@ public class MailSender {
 			String html = FileUtils.readHtml(Constants.HTML_NEW_ACCOUNT);
 			
 			String htmlContent =html.replaceAll("@admin_name", admin.getAdmin_name());
-			htmlContent =htmlContent.replaceAll("@active_link", Constants.URL_ENABLE_PASSWORD + "?token=" +admin.getToken()+"&email="+admin.getAdmin_email());
+			htmlContent =htmlContent.replaceAll("@active_link", Constants.URL_ENABLE_PASSWORD_TRANSFER + "?token=" + admin.getToken() + "&email=" + admin.getAdmin_email());
 			List<String> list = new ArrayList<String>();
 			list.add(admin.getAdmin_email());
 			sendHTMLMail(list, "邀請使用", htmlContent);

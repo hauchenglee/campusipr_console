@@ -22,7 +22,7 @@ public interface PatentDao {
 	List<Patent> getByBusinessId(String businessId,int page,int pageSize, String orderList, String orderFieldCode,int is_asc);
 	int  getCountByBusinessId(String businessId);	
 	
-	
+	List<Patent> getByBusinessId(String businessId);
 	List<Patent> getByNotSyncPatent(String businessId);
 
 	
@@ -62,5 +62,5 @@ public interface PatentDao {
 	void deleteApplicant(String patentId);
 	void deletePatentStatus(String patentId);
 	void deletePatentStatus(String patentId, String statusId, Date createTime);
-	void deletePatentExtension(String patentId);
+	void deletePatentExtension(String patentId, String bussinessId);
 }

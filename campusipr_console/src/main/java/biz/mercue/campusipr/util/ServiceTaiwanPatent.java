@@ -421,32 +421,34 @@ public class ServiceTaiwanPatent {
 			if (!StringUtils.isNULL(context)) {
 				JSONObject getObject = new JSONObject(context);
 				JSONArray patentContents = getObject.optJSONObject("tw-patent-annuity").optJSONArray("patentcontent");
-				for (int index = 0; index < patentContents.length(); index++) {
-					JSONObject patentContent = patentContents.optJSONObject(index);
-					JSONArray charges = patentContent.optJSONArray("charges");
-					Date beginDate = null;
-					for (int chargeIndex = 0;chargeIndex < charges.length(); chargeIndex++) {
-						JSONObject charge = charges.optJSONObject(chargeIndex);
-						Annuity annuity = new Annuity();
-						if (chargeIndex == 0) {
-							beginDate = patent.getPatent_bdate();
-							annuity.setAnnuity_date(beginDate);
-							annuity.setAnnuity_charge_year(charge.optInt("annuity-end"));
-							Calendar calendar = Calendar.getInstance();
-							calendar.setTime(DateUtils.getDayStart(annuity.getAnnuity_date()));
-							calendar.add(Calendar.YEAR, annuity.getAnnuity_charge_year());
-							annuity.setAnnuity_end_date(calendar.getTime());
-							patent.addAnnuity(annuity);;
-							beginDate = calendar.getTime();
-						} else {
-							annuity.setAnnuity_date(beginDate);
-							annuity.setAnnuity_charge_year(charge.optInt("annuity-end"));
-							Calendar calendar = Calendar.getInstance();
-							calendar.setTime(DateUtils.getDayStart(annuity.getAnnuity_date()));
-							calendar.add(Calendar.YEAR, annuity.getAnnuity_charge_year());
-							annuity.setAnnuity_end_date(calendar.getTime());
-							patent.addAnnuity(annuity);
-							beginDate = calendar.getTime();
+				if (patentContents != null) {
+					for (int index = 0; index < patentContents.length(); index++) {
+						JSONObject patentContent = patentContents.optJSONObject(index);
+						JSONArray charges = patentContent.optJSONArray("charges");
+						Date beginDate = null;
+						for (int chargeIndex = 0;chargeIndex < charges.length(); chargeIndex++) {
+							JSONObject charge = charges.optJSONObject(chargeIndex);
+							Annuity annuity = new Annuity();
+							if (chargeIndex == 0) {
+								beginDate = patent.getPatent_bdate();
+								annuity.setAnnuity_date(beginDate);
+								annuity.setAnnuity_charge_year(charge.optInt("annuity-end"));
+								Calendar calendar = Calendar.getInstance();
+								calendar.setTime(DateUtils.getDayStart(annuity.getAnnuity_date()));
+								calendar.add(Calendar.YEAR, annuity.getAnnuity_charge_year());
+								annuity.setAnnuity_end_date(calendar.getTime());
+								patent.addAnnuity(annuity);;
+								beginDate = calendar.getTime();
+							} else {
+								annuity.setAnnuity_date(beginDate);
+								annuity.setAnnuity_charge_year(charge.optInt("annuity-end"));
+								Calendar calendar = Calendar.getInstance();
+								calendar.setTime(DateUtils.getDayStart(annuity.getAnnuity_date()));
+								calendar.add(Calendar.YEAR, annuity.getAnnuity_charge_year());
+								annuity.setAnnuity_end_date(calendar.getTime());
+								patent.addAnnuity(annuity);
+								beginDate = calendar.getTime();
+							}
 						}
 					}
 				}

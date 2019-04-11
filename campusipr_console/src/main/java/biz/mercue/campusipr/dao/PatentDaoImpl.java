@@ -82,6 +82,16 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			delete(dbBean);
 		}
 	}
+	
+	@Override
+	public List<Patent> getByBusinessId(String businessId) {
+		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("listBusiness","bs");
+			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		}
+		return criteria.list();
+	}
 
 	@Override
 	public List<Patent> getByBusinessId(String businessId,int page,int pageSize, String orderList, String orderFieldCode,int is_asc){
@@ -839,11 +849,17 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	   }
 	   
 	   @Override
-	   public void deletePatentExtension(String patentId) {
+	   public void deletePatentExtension(String patentId, String bussinessId) {
 	       String hql = "Delete From PatentExtension where patent_id = :patent_id";
+	       if (!StringUtils.isNULL(bussinessId)) {
+	    	   hql += " and business_id = :business_id";
+	       }
 	       Session session = getSession();
 	       Query query = session.createQuery(hql);
 	       query.setParameter("patent_id", patentId);
+	       if (!StringUtils.isNULL(bussinessId)) {
+	    	   query.setParameter("business_id", bussinessId);
+	       }
 	       query.executeUpdate();
 	   }
 

@@ -410,7 +410,7 @@ public class PatentServiceImpl implements PatentService{
 	                           taskResult = Constants.INT_SUCCESS;
 	                       } else {
 	                           patent.setComparePatent(appNoPatent);
-	                           taskResult = updatePatent(patent);
+	                           taskResult = updatePatent(patent, null);
 	                       }
 	                   }
 	               } else {
@@ -466,7 +466,7 @@ public class PatentServiceImpl implements PatentService{
                     taskResult = Constants.INT_SUCCESS;
                 } else {
                 	patent.setComparePatent(appNoPatent);
-                    taskResult = updatePatent(patent);
+                    taskResult = updatePatent(patent, null);
                 }
 			} else {
 				taskResult = Constants.INT_CANNOT_FIND_DATA;
@@ -495,7 +495,7 @@ public class PatentServiceImpl implements PatentService{
                         taskResult = Constants.INT_SUCCESS;
                     } else {
                     	patent.setComparePatent(appNoPatent);
-                        taskResult = updatePatent(patent);
+                        taskResult = updatePatent(patent, null);
                     }
                 }else {
                    this.addPatent(patent);
@@ -517,7 +517,7 @@ public class PatentServiceImpl implements PatentService{
 		
 		Patent dbBean = patentDao.getById(businessId,patent.getPatent_id());
 		if(dbBean != null) {
-			return updatePatent(patent);
+			return updatePatent(patent, businessId);
 		}else {
 			return Constants.INT_CANNOT_FIND_DATA;
 		}
@@ -525,7 +525,7 @@ public class PatentServiceImpl implements PatentService{
 	}
 
 	@Override
-	public int  updatePatent(Patent patent){
+	public int  updatePatent(Patent patent, String businessId){
 		log.info("updatePatent:"+patent.getPatent_id());
 		List<PatentEditHistory> editList = new ArrayList<PatentEditHistory>(); 
 		Patent dbBean = patent.getComparePatent();
@@ -622,7 +622,7 @@ public class PatentServiceImpl implements PatentService{
 			handleCost(dbBean, patent);
 			handleContact(dbBean, patent);
 			handleAnnuity(dbBean, patent);
-			handleExtension(dbBean, patent);
+			handleExtension(dbBean, patent, businessId);
 			
 			if(Patent.EDIT_SOURCE_HUMAN   == patent.getEdit_source()) {
 				dbBean.setFamily(patent.getFamily());
@@ -1512,35 +1512,37 @@ public class PatentServiceImpl implements PatentService{
 						List<AnnuityReminder> listARSendRightNow = new ArrayList<>();
 						Date now = DateUtils.getDayStart(new Date());
 						for (AnnuityReminder annuityReminder:annuityReminderList) {
-							Calendar calendar = Calendar.getInstance();
-							calendar.setTime(annuity.getAnnuity_end_date());
-							calendar.add(Calendar.DATE, -annuityReminder.getEmail_day());
+							if (annuityReminder.isAvailable()) {
+								Calendar calendar = Calendar.getInstance();
+								calendar.setTime(annuity.getAnnuity_end_date());
+								calendar.add(Calendar.DATE, -annuityReminder.getEmail_day());
+									
+								ReminderTask reminder = new ReminderTask();
+								reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
+								reminder.setPatent_id(patent.getPatent_id());
+								reminder.setBusiness_id(annuityReminder.getBusiness().getBusiness_id());
+								reminder.setTask_type(ReminderTask.reminderTypeAnnuity);
+								reminder.setTask_date(calendar.getTime());
+								reminder.setReminder_day(annuityReminder.getEmail_day());
+								reminder.setIs_send(false);
+								reminder.setIs_remind(annuity.is_reminder());
 								
-							ReminderTask reminder = new ReminderTask();
-							reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
-							reminder.setPatent_id(patent.getPatent_id());
-							reminder.setBusiness_id(annuityReminder.getBusiness().getBusiness_id());
-							reminder.setTask_type(ReminderTask.reminderTypeAnnuity);
-							reminder.setTask_date(calendar.getTime());
-							reminder.setReminder_day(annuityReminder.getEmail_day());
-							reminder.setIs_send(false);
-							reminder.setIs_remind(annuity.is_reminder());
-							
-							log.info("before:"+reminder.getTask_date());
-							log.info("now:"+now);
-							log.info("after:"+annuity.getAnnuity_end_date());
-							if (reminder.getTask_date().after(now)) {
-								if (reminder.is_remind() && !reminder.is_send()) {
-									log.info("send on schulder");
-									reminderDao.create(reminder);
-									quartzService.createJob(reminder);
+								log.info("before:"+reminder.getTask_date());
+								log.info("now:"+now);
+								log.info("after:"+annuity.getAnnuity_end_date());
+								if (reminder.getTask_date().after(now)) {
+									if (reminder.is_remind() && !reminder.is_send()) {
+										log.info("send on schulder");
+										reminderDao.create(reminder);
+										quartzService.createJob(reminder);
+									}
 								}
-							}
-							
-							if (reminder.getTask_date().equals(now) ||
-									(now.compareTo(reminder.getTask_date()) >= 0 && now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
-								listARSendRightNow.add(annuityReminder);
-								log.info("send right now List:"+listARSendRightNow.size());
+								
+								if (reminder.getTask_date().equals(now) ||
+										(now.compareTo(reminder.getTask_date()) >= 0 && now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
+									listARSendRightNow.add(annuityReminder);
+									log.info("send right now List:"+listARSendRightNow.size());
+								}
 							}
 						}
 						// get last expire reminder but annuity not expire
@@ -1597,20 +1599,25 @@ public class PatentServiceImpl implements PatentService{
 		}
 	}
 	
-	private void handleExtension(Patent dbPatent, Patent editPatent) {
+	private void handleExtension(Patent dbPatent, Patent editPatent, String businessId) {
 		if (editPatent.getListExtension() != null && editPatent.getListExtension().size() > 0) {
 			List<PatentExtension> listExtension = editPatent.getListExtension();
+			List<String> duplicateBussinessId = new ArrayList<>();
 			for (PatentExtension extension : listExtension) {
 				if (StringUtils.isNULL(extension.getExtension_id())) {
 					extension.setExtension_id(KeyGeneratorUtils.generateRandomString());
 				}
 				extension.setPatent(dbPatent);
+				if (!duplicateBussinessId.contains(extension.getBusiness_id())) {
+					duplicateBussinessId.add(extension.getBusiness_id());
+				}
 			}
-			patentDao.deletePatentExtension(dbPatent.getPatent_id());
+			log.info(businessId);
+			patentDao.deletePatentExtension(dbPatent.getPatent_id(), businessId);
 			dbPatent.setListExtension(editPatent.getListExtension());
 		}else {
 			if (dbPatent.getListExtension() != null) {
-				patentDao.deletePatentExtension(dbPatent.getPatent_id());
+				patentDao.deletePatentExtension(dbPatent.getPatent_id(), businessId);
 			}
 		}
 	}

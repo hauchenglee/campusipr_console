@@ -39,7 +39,7 @@ public class AnnuityReminder extends BaseBean{
 	@JoinColumn(name="business_id", referencedColumnName="business_id")
 	private Business business;
 	
-	
+	@JsonView(View.Reminder.class)
 	private boolean available;
 	
 	@Temporal(TemporalType.TIMESTAMP)
@@ -47,6 +47,9 @@ public class AnnuityReminder extends BaseBean{
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date update_date;
+	
+	@JsonView(View.Reminder.class)
+	private boolean is_user_define;
 
 	public String getReminder_id() {
 		return reminder_id;
@@ -110,6 +113,14 @@ public class AnnuityReminder extends BaseBean{
 
 	public void setUpdate_date(Date update_date) {
 		this.update_date = update_date;
+	}
+
+	public boolean isIs_user_define() {
+		return is_user_define;
+	}
+
+	public void setIs_user_define(boolean is_user_define) {
+		this.is_user_define = is_user_define;
 	}
 	
 	

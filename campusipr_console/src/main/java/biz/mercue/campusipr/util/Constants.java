@@ -343,9 +343,12 @@ public class Constants {
 	public static String HTML_MULTIPLE_PATENT_CHANGE  = "";
 	public static String HTML_ANNUITY_REMINDER  = "";
 	
+	public static String URL_RESET_PASSWORD_TRANSFER  = "";
+	public static String URL_ENABLE_PASSWORD_TRANSFER  = "";
 	public static String URL_RESET_PASSWORD  = "";
 	public static String URL_ENABLE_PASSWORD  = "";
+	public static String URL_LOGIN  = "";
 	public static String URL_PATENT_CONTENT  = "";
 	
-	public static final List<Integer> defaultReminderDays = Arrays.asList(90, 30, 1, -1); 
+	public static final List<Integer> defaultReminderDays = Arrays.asList(90, 30, 7, -1); 
 }

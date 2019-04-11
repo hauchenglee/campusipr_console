@@ -37,33 +37,33 @@ public class PatentExtension extends BaseBean {
 	private String business_num;
 	
 	//申請年度
-	@JsonView(View.PatentEnhance.class)
+	@JsonView(View.PatentDetail.class)
 	private String extension_appl_year;
 	
 	
 	//備註
-	@JsonView(View.PatentEnhance.class)
+	@JsonView(View.PatentDetail.class)
 	private String extension_memo;
 	
 	//補助單位
-	@JsonView(View.PatentEnhance.class)
+	@JsonView(View.PatentDetail.class)
 	private String extension_subsidy_unit;
 	
 	//補助編號
-	@JsonView(View.PatentEnhance.class)
+	@JsonView(View.PatentDetail.class)
 	private String extension_subsidy_num;
 	
 	//補助計畫名稱
-	@JsonView(View.PatentEnhance.class)
+	@JsonView(View.PatentDetail.class)
 	private String extension_subsidy_plan;
 	
 	//事務所
-	@JsonView(View.PatentEnhance.class)
+	@JsonView(View.PatentDetail.class)
 	private String extension_agent;
 	
 	
 	//事務所編號
-	@JsonView(View.PatentEnhance.class)
+	@JsonView(View.PatentDetail.class)
 	private String extension_agent_num;
 
 
