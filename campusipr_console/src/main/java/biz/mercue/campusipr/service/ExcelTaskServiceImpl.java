@@ -245,14 +245,11 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	@Override
 	public int submitTask(ExcelTask bean,Admin admin) {
 		ExcelTask dbBean = dao.getByBusinessId(admin.getBusiness().getBusiness_id(), bean.getExcel_task_id());
-		//System.out.println("debean id : " + dbBean.getBusiness().getBusiness_id());
-		//System.out.println("debean name : " + dbBean.getBusiness().getBusiness_name());
 		boolean is_continue = true;
 		FileInputStream fileInputStream = null;
 		try {
 			if(dbBean !=null) {
 				List<FieldMap> filedList = bean.getListMap();
-				// filedList：Excel的欄位名稱，不包含value
 				if(filedList.size() > 0) {
 					Map<String, FieldMap> maps = convertFieldList2Map(filedList);
 					if(checkRequiredField(maps)) {
@@ -266,36 +263,12 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 //=======
 					    List<Patent> list = this.readBook2Patent(book, filedList, 0);
 
+					    // TODO alex: add patent to dao
 						for (Patent p : list) {
-							// 抓出list裡面的每個patent
-							if (p != null) {
-								//TODO remove patent new,use original list
-								Patent patent = new Patent();
-								patent.setPatent_name(p.getPatent_name());
-								patent.setPatent_name_en(p.getPatent_name_en());
-								patent.setPatent_appl_country(p.getPatent_appl_country());
-								patent.setPatent_appl_date(p.getPatent_appl_date());
-								patent.setPatent_appl_no(p.getPatent_appl_no());
-								patent.setPatent_notice_no(p.getPatent_notice_no());
-								patent.setPatent_notice_date(p.getPatent_notice_date());
-								patent.setPatent_publish_no(p.getPatent_publish_no());
-								patent.setPatent_publish_date(p.getPatent_publish_date());
-								patent.setPatent_no(p.getPatent_no());
-								patent.setPatent_bdate(p.getPatent_bdate());
-								patent.setPatent_edate(p.getPatent_edate());
-								patent.setPatent_cancel_date(p.getPatent_cancel_date());
-								patent.setPatent_charge_expire_date(p.getPatent_charge_expire_date());
-								patent.setPatent_charge_duration_year(p.getPatent_charge_duration_year());
-								patent.setBusiness(dbBean.getBusiness());
-
-								if (patent.getPatent_appl_no() != null) {
-									log.info(patent.getPatent_appl_no());
-									if (patent.getBusiness() != null) {
-										patentDao.addPatent(patent);
-									}
-								}
-							} 
+							p.setBusiness(dbBean.getBusiness());
+								patentDao.create(p);
 						}
+						// TODO end
 
 						return Constants.INT_SUCCESS;
 					}else {
@@ -309,7 +282,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				return Constants.INT_CANNOT_FIND_DATA;
 			}
 		}catch (Exception e) {
-			e.printStackTrace();
 			log.error("Exception :"+e.getMessage());
 		}finally {
 			if(fileInputStream!=null) {
@@ -423,19 +395,14 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								
 								if(!StringUtils.isNULL(countyName)) {
 									for (Country country : listCountry) {
-										aaaa
-										//TODO null point
-										//錯誤訊息為：java.lang.NullPointerException
-	//									可能原因：資料庫country table的美國資料為null
-//										if(!StringUtils.isNULL(country.getCountry_name()) || !StringUtils.isNULL(country.getCountry_alias_name())) {
-//											if (!StringUtils.isNULL(country.getCountry_name())  && country.getCountry_name().contains(countyName){
-//												
-//											}
-//										}
-//										if (country.getCountry_name().contains(countyName)|| country.getCountry_alias_name().contains(countyName)) {
-//											patent.setPatent_appl_country(country.getCountry_id());
-//											break;
-//										}
+										//TODO alex: null point
+										if(!StringUtils.isNULL(country.getCountry_name()) || !StringUtils.isNULL(country.getCountry_alias_name())) {
+											if (country.getCountry_name().contains(countyName) && country.getCountry_name().contains(countyName)) {
+												patent.setPatent_appl_country(country.getCountry_id());
+												break;
+											}
+										}
+										// TODO end
 									}
 								}
 							}
