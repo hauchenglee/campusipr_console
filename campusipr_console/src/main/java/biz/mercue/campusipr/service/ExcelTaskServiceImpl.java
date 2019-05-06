@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import biz.mercue.campusipr.dao.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.poifs.filesystem.DocumentOutputStream;
 import org.apache.poi.ss.usermodel.Cell;
@@ -27,11 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
 
-import biz.mercue.campusipr.dao.CountryDao;
-import biz.mercue.campusipr.dao.ExcelTaskDao;
-import biz.mercue.campusipr.dao.FieldDao;
-import biz.mercue.campusipr.dao.FieldMapDao;
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
@@ -69,6 +67,12 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	
 	@Autowired
 	private CountryDao countryDao;
+
+	@Autowired
+	private PatentDao patentDao;
+
+	@Autowired
+	private PatentService patentService;
 
 	@Override
 	public ExcelTask getById(String id) {
@@ -241,20 +245,58 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	@Override
 	public int submitTask(ExcelTask bean,Admin admin) {
 		ExcelTask dbBean = dao.getByBusinessId(admin.getBusiness().getBusiness_id(), bean.getExcel_task_id());
+		//System.out.println("debean id : " + dbBean.getBusiness().getBusiness_id());
+		//System.out.println("debean name : " + dbBean.getBusiness().getBusiness_name());
 		boolean is_continue = true;
 		FileInputStream fileInputStream = null;
 		try {
 			if(dbBean !=null) {
 				List<FieldMap> filedList = bean.getListMap();
+				// filedList：Excel的欄位名稱，不包含value
 				if(filedList.size() > 0) {
 					Map<String, FieldMap> maps = convertFieldList2Map(filedList);
 					if(checkRequiredField(maps)) {
 						File excel = new File(Constants.FILE_UPLOAD_PATH+File.separator+dbBean.getTask_file_name());
 						fileInputStream = new FileInputStream(excel);
 					    Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
-					    List<Patent>listPatent = readBook2Patent(book, filedList, 0);
-					    log.info("listPatent:"+listPatent.size());
-					    bean.setListPatent(listPatent);
+//<<<<<<< HEAD
+//					    List<Patent>listPatent = readBook2Patent(book, filedList, 0);
+//					    log.info("listPatent:"+listPatent.size());
+//					    bean.setListPatent(listPatent);
+//=======
+					    List<Patent> list = this.readBook2Patent(book, filedList, 0);
+
+						for (Patent p : list) {
+							// 抓出list裡面的每個patent
+							if (p != null) {
+								//TODO remove patent new,use original list
+								Patent patent = new Patent();
+								patent.setPatent_name(p.getPatent_name());
+								patent.setPatent_name_en(p.getPatent_name_en());
+								patent.setPatent_appl_country(p.getPatent_appl_country());
+								patent.setPatent_appl_date(p.getPatent_appl_date());
+								patent.setPatent_appl_no(p.getPatent_appl_no());
+								patent.setPatent_notice_no(p.getPatent_notice_no());
+								patent.setPatent_notice_date(p.getPatent_notice_date());
+								patent.setPatent_publish_no(p.getPatent_publish_no());
+								patent.setPatent_publish_date(p.getPatent_publish_date());
+								patent.setPatent_no(p.getPatent_no());
+								patent.setPatent_bdate(p.getPatent_bdate());
+								patent.setPatent_edate(p.getPatent_edate());
+								patent.setPatent_cancel_date(p.getPatent_cancel_date());
+								patent.setPatent_charge_expire_date(p.getPatent_charge_expire_date());
+								patent.setPatent_charge_duration_year(p.getPatent_charge_duration_year());
+								patent.setBusiness(dbBean.getBusiness());
+
+								if (patent.getPatent_appl_no() != null) {
+									log.info(patent.getPatent_appl_no());
+									if (patent.getBusiness() != null) {
+										patentDao.addPatent(patent);
+									}
+								}
+							} 
+						}
+
 						return Constants.INT_SUCCESS;
 					}else {
 						return Constants.INT_DATA_ERROR;
@@ -267,6 +309,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				return Constants.INT_CANNOT_FIND_DATA;
 			}
 		}catch (Exception e) {
+			e.printStackTrace();
 			log.error("Exception :"+e.getMessage());
 		}finally {
 			if(fileInputStream!=null) {
@@ -372,30 +415,42 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							//log.info("patent appl no:"+patent.getPatent_appl_no());
 							break;
 
+
+
 						case Constants.PATENT_COUNTRY_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								String countyName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue();
-								for (Country country : listCountry) {
-									if (country.getCountry_name().contains(countyName)|| country.getCountry_alias_name().contains(countyName)) {
-										patent.setPatent_appl_country(country.getCountry_id());
-										break;
+								
+								if(!StringUtils.isNULL(countyName)) {
+									for (Country country : listCountry) {
+										aaaa
+										//TODO null point
+										//錯誤訊息為：java.lang.NullPointerException
+	//									可能原因：資料庫country table的美國資料為null
+//										if(!StringUtils.isNULL(country.getCountry_name()) || !StringUtils.isNULL(country.getCountry_alias_name())) {
+//											if (!StringUtils.isNULL(country.getCountry_name())  && country.getCountry_name().contains(countyName){
+//												
+//											}
+//										}
+//										if (country.getCountry_name().contains(countyName)|| country.getCountry_alias_name().contains(countyName)) {
+//											patent.setPatent_appl_country(country.getCountry_id());
+//											break;
+//										}
 									}
 								}
 							}
 							break;
-							
 						case Constants.PATENT_NO_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								patent.setPatent_no(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
 							}
 							log.info("patent no:"+patent.getPatent_no());
 							break;
-							
+
 						case Constants.PATENT_APPL_NO_FIELD:
-							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-								patent.setPatent_appl_no(parseNumricCell(row.getCell(fieldMap.getExcel_field_index())));
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								patent.setPatent_appl_no(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
 							}
-							log.info("patent appl no:"+patent.getPatent_appl_no());
 							break;
 						case Constants.PATENT_APPL_DATE_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
@@ -419,8 +474,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								Date noticeDate = parseDateCell(cellNoticeDate);
 								patent.setPatent_notice_date(noticeDate);
 							}
-							break;
-							
+							break;			
 						case Constants.APPLIANT_NAME_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								Cell cellAppliant = row.getCell(fieldMap.getExcel_field_index());
@@ -497,18 +551,24 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 
 						default:
 							break;
-						}
-					}
 
+						}
+
+					}
+					listPatent.add(patent);
 				}
+
 				log.info("patent add");
 				if (patent.getPatent_appl_no() != null) {
 					patent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
 					listPatent.add(patent);
 				}
+
+				rowIndex++;
+
 			}
-			rowIndex++;
 		}
+
 		return listPatent;
 		
 
