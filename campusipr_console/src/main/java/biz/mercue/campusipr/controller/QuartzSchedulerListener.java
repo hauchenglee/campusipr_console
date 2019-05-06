@@ -132,26 +132,27 @@ public class QuartzSchedulerListener implements SchedulerListener{
 	public void schedulerStarted() {
 		
 		log.info("schedule started");
-		
-		List<ReminderTask> taskList = reminderService.getAvailableReminder();
-		log.info("un send task list size: " + taskList.size());
-		for(ReminderTask task: taskList) {
-			try {
-				quartzService.createJob(task);
-			} catch (Exception e) {
-				log.error(e);
-			}
-		}
-		
-		List<SynchronizeTask> syncList = synchronizeService.getAvailableSynchronize();
-		log.info("un sync task list size: " + syncList.size());
-		for(SynchronizeTask sync: syncList) {
-			try {
-				quartzService.createJob(sync);
-			} catch (Exception e) {
-				log.error(e);
-			}
-		}
+		log.info("schedule pause,for debug");
+		//TODO for debug
+//		List<ReminderTask> taskList = reminderService.getAvailableReminder();
+//		log.info("un send task list size: " + taskList.size());
+//		for(ReminderTask task: taskList) {
+//			try {
+//				quartzService.createJob(task);
+//			} catch (Exception e) {
+//				log.error(e);
+//			}
+//		}
+//		
+//		List<SynchronizeTask> syncList = synchronizeService.getAvailableSynchronize();
+//		log.info("un sync task list size: " + syncList.size());
+//		for(SynchronizeTask sync: syncList) {
+//			try {
+//				quartzService.createJob(sync);
+//			} catch (Exception e) {
+//				log.error(e);
+//			}
+//		}
 	}
 
 	@Override

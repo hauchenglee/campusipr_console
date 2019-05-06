@@ -1,7 +1,6 @@
 package biz.mercue.campusipr.configuration;
 
 
-import java.beans.PropertyVetoException;
 import java.util.Properties;
 
 import javax.sql.DataSource;

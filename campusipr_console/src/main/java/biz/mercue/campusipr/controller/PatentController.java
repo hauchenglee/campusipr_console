@@ -386,6 +386,7 @@ public class PatentController {
 		BeanResponseBody responseBody = new BeanResponseBody();
 		try {
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			//tokenBean = new AdminToken();
 			if (tokenBean != null) {
 				log.info("1");
 				if (file != null && !file.getOriginalFilename().isEmpty()) {
