@@ -47,6 +47,9 @@ public class PatentCost extends BaseBean {
 	private Date create_date;
 	
 	private Date update_date;
+	
+	@JsonView(View.PatentDetail.class)
+	private String business_id;
 
 	public String getCost_id() {
 		return cost_id;
@@ -127,6 +130,14 @@ public class PatentCost extends BaseBean {
 	public void setCost_unit(String cost_unit) {
 		this.cost_unit = cost_unit;
 	}
-	
+
+	public String getBusiness_id() {
+		return business_id;
+	}
+
+	public void setBusiness_id(String business_id) {
+		this.business_id = business_id;
+	}
+		
 
 }

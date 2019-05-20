@@ -623,7 +623,7 @@ public class PatentServiceImpl implements PatentService{
 			//handleAssignee(dbBean, patent);
 			//handleApplicant(dbBean, patent);
 			//handleInventor(dbBean, patent);
-			handleCost(dbBean, patent);
+			handleCost(dbBean, patent, businessId);
 			handleContact(dbBean, patent);
 			handleAnnuity(dbBean, patent);
 			handleExtension(dbBean, patent, businessId);
@@ -1430,7 +1430,7 @@ public class PatentServiceImpl implements PatentService{
 		return peh;
 	}
 	
-	private void handleCost(Patent dbPatent, Patent editPatent) {
+	private void handleCost(Patent dbPatent, Patent editPatent, String business_id) {
 		if (editPatent.getListCost() != null && editPatent.getListCost().size() > 0) {
 			List<PatentCost> listCost = editPatent.getListCost();
 			for (PatentCost cost : listCost) {
@@ -1438,6 +1438,9 @@ public class PatentServiceImpl implements PatentService{
 					cost.setCost_id(KeyGeneratorUtils.generateRandomString());
 				}
 				cost.setPatent(dbPatent);
+				if (!StringUtils.isNULL(cost.getBusiness_id())) {
+					cost.setBusiness_id(business_id);
+				}
 			}
 			patentDao.deletePatentCost(dbPatent.getPatent_id());
 			dbPatent.setListCost(editPatent.getListCost());
