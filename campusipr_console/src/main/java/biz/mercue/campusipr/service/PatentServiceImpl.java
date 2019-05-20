@@ -1637,6 +1637,8 @@ public class PatentServiceImpl implements PatentService{
 				case Constants.PATENT_PUBLISH_DATE_FIELD:
 				case Constants.PATENT_NAME_EN_FIELD:
 				case Constants.PATENT_NAME_FIELD:
+				case Constants.PATENT_COUNTRY_FIELD:
+				case Constants.PATENT_APPL_NO_FIELD:
 				case Constants.PATENT_NO_FIELD:
 				case Constants.PATENT_NOTICE_NO_FIELD:
 				case Constants.PATENT_PUBLISH_NO_FIELD:
