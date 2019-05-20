@@ -2,11 +2,13 @@ package biz.mercue.campusipr.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.ExcelTask;
+import biz.mercue.campusipr.model.Patent;
 
 
 
@@ -28,7 +30,7 @@ public interface ExcelTaskService {
 	
 	ExcelTask getTaskField(Admin admin, String id)throws IOException;
 
-	int submitTask(ExcelTask bean,Admin admin);
+	Map<Integer, List<Patent>> submitTask(ExcelTask bean,Admin admin);
 	
 	int previewTask(ExcelTask bean,Admin admin);
 

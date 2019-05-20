@@ -243,10 +243,11 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	
 	
 	@Override
-	public int submitTask(ExcelTask bean,Admin admin) {
+	public Map<Integer, List<Patent>> submitTask(ExcelTask bean,Admin admin) {
 		ExcelTask dbBean = dao.getByBusinessId(admin.getBusiness().getBusiness_id(), bean.getExcel_task_id());
 		boolean is_continue = true;
 		FileInputStream fileInputStream = null;
+		Map<Integer, List<Patent>> mapPatent = new HashMap<>();
 		try {
 			if(dbBean !=null) {
 				List<FieldMap> filedList = bean.getListMap();
@@ -256,30 +257,22 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						File excel = new File(Constants.FILE_UPLOAD_PATH+File.separator+dbBean.getTask_file_name());
 						fileInputStream = new FileInputStream(excel);
 					    Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
-//<<<<<<< HEAD
-//					    List<Patent>listPatent = readBook2Patent(book, filedList, 0);
-//					    log.info("listPatent:"+listPatent.size());
-//					    bean.setListPatent(listPatent);
-//=======
-					    List<Patent> list = this.readBook2Patent(book, filedList, 0);
-
-					    // TODO alex: add patent to dao
-						for (Patent p : list) {
-							p.setBusiness(dbBean.getBusiness());
-								patentDao.create(p);
-						}
-						// TODO end
-
-						return Constants.INT_SUCCESS;
+						List<Patent> listPatent = this.readBook2Patent(book, filedList, 0);
+						log.info("list patent size: " + listPatent.size());
+						mapPatent.put(Constants.INT_SUCCESS, listPatent);
+						return mapPatent;
 					}else {
-						return Constants.INT_DATA_ERROR;
+						mapPatent.put(Constants.INT_DATA_ERROR, null);
+						return mapPatent;
 					}
 				}else {
-					return Constants.INT_DATA_ERROR;
+					mapPatent.put(Constants.INT_DATA_ERROR, null);
+					return mapPatent;
 				}
 	
 			}else {
-				return Constants.INT_CANNOT_FIND_DATA;
+				mapPatent.put(Constants.INT_CANNOT_FIND_DATA, null);
+				return mapPatent;
 			}
 		}catch (Exception e) {
 			log.error("Exception :"+e.getMessage());
@@ -292,8 +285,9 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				}
 			}
 		}
-		return Constants.INT_SYSTEM_PROBLEM;
 		
+		mapPatent.put(Constants.INT_SYSTEM_PROBLEM, null);
+		return mapPatent;
 	}
 
 
@@ -353,7 +347,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		int cellIndex = 0;
 		
 		List<Country> listCountry = countryDao.getAll();
-		for (Row row : sheet) {
+		whenPatentApplNoIsNull: for (Row row : sheet) {
 			log.info("Row");
 			cellIndex = 0;
 			if (rowIndex == 0) {
@@ -395,14 +389,10 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								
 								if(!StringUtils.isNULL(countyName)) {
 									for (Country country : listCountry) {
-										//TODO alex: null point
-										if(!StringUtils.isNULL(country.getCountry_name()) || !StringUtils.isNULL(country.getCountry_alias_name())) {
-											if (country.getCountry_name().contains(countyName) && country.getCountry_name().contains(countyName)) {
-												patent.setPatent_appl_country(country.getCountry_id());
-												break;
-											}
-										}
-										// TODO end
+										if (country.getCountry_name().contains(countyName) || country.getCountry_alias_name().contains(countyName)) {
+	                                         patent.setPatent_appl_country(country.getCountry_id());
+	                                         break;
+	                                    }
 									}
 								}
 							}
@@ -522,18 +512,17 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						}
 
 					}
-					listPatent.add(patent);
 				}
 
 				log.info("patent add");
-				if (patent.getPatent_appl_no() != null) {
+				if (!StringUtils.isNULL(patent.getPatent_appl_no()) && !StringUtils.isNULL(patent.getPatent_appl_country())) {
 					patent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
 					listPatent.add(patent);
+				} else {
+						break whenPatentApplNoIsNull;
 				}
-
-				rowIndex++;
-
 			}
+			rowIndex++;
 		}
 
 		return listPatent;

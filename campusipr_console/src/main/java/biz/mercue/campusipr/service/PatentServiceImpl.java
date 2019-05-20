@@ -482,20 +482,24 @@ public class PatentServiceImpl implements PatentService{
 	@Override
 	public int importPatent(List<Patent> list, Admin admin,Business business) {
 		int taskResult= -1;
+		log.info("importPatent: ");
+		log.info("business id: " + business.getBusiness_id());
         for (Patent patent:list) {
             patent.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
             patent.setAdmin(admin);
             patent.setBusiness(business);
-            if(!StringUtils.isNULL(patent.getPatent_name()) || !StringUtils.isNULL(patent.getPatent_name_en())) {
+            if(!StringUtils.isNULL(patent.getPatent_appl_no()) && !StringUtils.isNULL(patent.getPatent_appl_country())) {
                 String applNo =  patent.getPatent_appl_no();
                 if (!StringUtils.isNULL(applNo)) {
                     Patent appNoPatent = patentDao.getByApplNo(applNo);
                     if(appNoPatent==null) {
                     	this.addPatent(patent);
+                    	log.info("add Patent");
                         taskResult = Constants.INT_SUCCESS;
                     } else {
                     	patent.setComparePatent(appNoPatent);
                         taskResult = updatePatent(patent, null);
+                        log.info("update Patent");
                     }
                 }else {
                    this.addPatent(patent);

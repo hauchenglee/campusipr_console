@@ -3,7 +3,9 @@ package biz.mercue.campusipr.controller;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -461,19 +463,41 @@ public class PatentController {
 	public String submitExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) {
 		log.info("submitExcelTask ");
 		BeanResponseBody responseBody = new BeanResponseBody();
+		Map<Integer, List<Patent>> mapPatent = new HashMap<>();
 		try {
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
 			if (tokenBean != null) {
 				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
-				int result = excelTaskService.submitTask(task,tokenBean.getAdmin());
-				patentService.importPatent(task.getListPatent(), tokenBean.getAdmin(), tokenBean.getBusiness());
-				responseBody.setCode(result);
+	               
+				mapPatent = excelTaskService.submitTask(task, tokenBean.getAdmin());
+				int responseBodyCode = Constants.INT_SYSTEM_PROBLEM;
+
+				for (Integer mapPatentKey : mapPatent.keySet()) {
+					log.info("mapPatentKey: " + mapPatentKey);
+					switch (mapPatentKey) {
+					case Constants.INT_SUCCESS:
+						log.info("Constants.INT_SUCCESS");
+						responseBodyCode = patentService.importPatent(mapPatent.get(mapPatentKey), tokenBean.getAdmin(),
+								tokenBean.getBusiness());
+						log.info("responseBodyCode: " + responseBodyCode);
+						break;
+					case Constants.INT_DATA_ERROR:
+						responseBodyCode = Constants.INT_DATA_ERROR;
+						break;
+					case Constants.INT_CANNOT_FIND_DATA:
+						responseBodyCode = Constants.INT_CANNOT_FIND_DATA;
+						break;
+					case Constants.INT_SYSTEM_PROBLEM:
+						responseBodyCode = Constants.INT_SYSTEM_PROBLEM;
+						break;
+					}
+				}
+				responseBody.setCode(responseBodyCode);
 				responseBody.setBean(task);
 			} else {
 				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			}
 			
-			responseBody.setCode(Constants.INT_SUCCESS);
 		} catch (Exception e) {
 			log.error("Exception :" + e.getMessage());
 			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
