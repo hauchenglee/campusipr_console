@@ -108,11 +108,8 @@ public class PatentController {
 		return responseBody.getJacksonString( View.Patent.class);
 	}
 	
-	
-	@RequestMapping(value="/api/addpatentbyapplno", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public String addPatentByApplNo(HttpServletRequest request,@RequestBody String receiveJSONString) {
-		log.info("addPatent ");
+	public String syncPatentData(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		log.info("syncPatentData ");
 		
 		BeanResponseBody responseBody  = new BeanResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
@@ -126,7 +123,37 @@ public class PatentController {
 			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
-			int taskResult = patentService.addPatentByApplNo(patent);
+			int taskResult = patentService.syncPatentData(patent, null);
+			
+			//TODO charles
+//			patentService.syncPatentStatus(patent);
+			responseBody.setCode(taskResult);
+			responseBody.setBean(patent);
+			
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString( View.PatentDetail.class);
+	}
+	
+	@RequestMapping(value="/api/addpatentbyapplno", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String addPatentByApplNo(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		log.info("addPatentByApplNo ");
+		
+		BeanResponseBody responseBody  = new BeanResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+			
+		if(tokenBean!=null) {
+			log.info(receiveJSONString);
+			String ip = request.getRemoteAddr();
+			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
+			Admin admin = adminService.getById(Constants.SYSTEM_ADMIN);
+			patent.setAdmin(admin);
+			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
+			patent.setBusiness(tokenBean.getBusiness());
+			patent.setAdmin_ip(ip);
+			int taskResult = patentService.addPatentByApplNo(patent, null, tokenBean.getAdmin(), tokenBean.getBusiness());
 			
 			//TODO charles
 //			patentService.syncPatentStatus(patent);
@@ -477,8 +504,13 @@ public class PatentController {
 					switch (mapPatentKey) {
 					case Constants.INT_SUCCESS:
 						log.info("Constants.INT_SUCCESS");
-						responseBodyCode = patentService.importPatent(mapPatent.get(mapPatentKey), tokenBean.getAdmin(),
-								tokenBean.getBusiness());
+//						responseBodyCode = patentService.importPatent(mapPatent.get(mapPatentKey), tokenBean.getAdmin(),
+//								tokenBean.getBusiness());
+						responseBodyCode = patentService.syncPatentData(null, mapPatent.get(mapPatentKey));
+
+						if (responseBodyCode == Constants.INT_SUCCESS) {
+							responseBodyCode = patentService.addPatentByApplNo(null, mapPatent.get(mapPatentKey), tokenBean.getAdmin(), tokenBean.getBusiness());
+						}
 						log.info("responseBodyCode: " + responseBodyCode);
 						break;
 					case Constants.INT_DATA_ERROR:

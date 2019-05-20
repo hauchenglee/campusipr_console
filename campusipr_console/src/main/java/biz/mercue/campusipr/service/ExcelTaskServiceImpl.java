@@ -258,9 +258,14 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						fileInputStream = new FileInputStream(excel);
 					    Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
 						List<Patent> listPatent = this.readBook2Patent(book, filedList, 0);
-						log.info("list patent size: " + listPatent.size());
+
+						if (listPatent == null || listPatent.size() == 0) {
+							mapPatent.put(Constants.INT_DATA_ERROR, null);
+							return mapPatent;
+						}
+
 						mapPatent.put(Constants.INT_SUCCESS, listPatent);
-						return mapPatent;
+					    return mapPatent;
 					}else {
 						mapPatent.put(Constants.INT_DATA_ERROR, null);
 						return mapPatent;
@@ -357,7 +362,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 					break;
 				}
 				
-				
+				String countryName = null;
 				Patent patent = new Patent();
 				for (FieldMap fieldMap : listField) {
 					log.info("fieldMap:"+fieldMap.getField_map_id());
@@ -385,14 +390,14 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 
 						case Constants.PATENT_COUNTRY_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-								String countyName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue();
+								countryName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue();
 								
-								if(!StringUtils.isNULL(countyName)) {
+								if(!StringUtils.isNULL(countryName)) {
 									for (Country country : listCountry) {
-										if (country.getCountry_name().contains(countyName) || country.getCountry_alias_name().contains(countyName)) {
-	                                         patent.setPatent_appl_country(country.getCountry_id());
-	                                         break;
-	                                    }
+										if (country.getCountry_name().contains(countryName) || country.getCountry_alias_name().contains(countryName)) {
+											patent.setPatent_appl_country(country.getCountry_id());
+											break;
+										}
 									}
 								}
 							}
@@ -406,7 +411,68 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 
 						case Constants.PATENT_APPL_NO_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-								patent.setPatent_appl_no(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
+								String patentApplNo = null;
+
+								// type is null --> jump out for loop
+								if (cellType == 3) {
+									log.info("type is 3");
+									break;
+								}
+								
+								// check country field value to detect add tw, us or cn etc
+								String countryAddName = null;
+								if(!StringUtils.isNULL(countryName)) {
+									for (Country country : listCountry) {
+										if (country.getCountry_name().contains(countryName) || country.getCountry_alias_name().contains(countryName)) {
+											countryAddName = country.getCountry_id().toUpperCase();
+											break;
+										}
+									}
+								}
+								
+								log.info("excelFieldIndex: " + excelFieldIndex);
+								log.info("country name: " + countryName);
+								log.info("countryAddName: " + countryAddName);
+								
+								if (StringUtils.isNULL(countryAddName)) {
+									listPatent = null;
+									break whenPatentApplNoIsNull;
+								}
+								
+								// type is numeric --> need to add country name
+								if (cellType == 0) {
+									log.info("type is 0");
+									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
+									patentApplNo = countryAddName + row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 0 of patentApplNo: " + patentApplNo);
+								}
+								
+								// type is string
+								if (cellType == 1) {
+									log.info("type is 1");
+									patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 1 of patentApplNo: " + patentApplNo);
+									
+									// resolve cell value is number but cell type is string
+									if (!patentApplNo.substring(0, 2).equalsIgnoreCase(countryAddName)) {
+										patentApplNo = countryAddName + row.getCell(excelFieldIndex).getStringCellValue();
+										log.info("patentApplNo after add country name: " + patentApplNo);
+									}
+								}
+								
+								// check country name equals patent appl no country name
+								String countryStartName = patentApplNo.substring(0, 2); // patent appl no start country name, e.g. tw, us or cn
+								log.info("countryStartName: " + countryStartName);
+
+								// check country field name is equals patent appl no or not
+								if (!countryAddName.equalsIgnoreCase(countryStartName)) {
+									// data is incorrect, thus set data is null
+									listPatent = null;
+									break whenPatentApplNoIsNull;
+								}
+								patent.setPatent_appl_no(patentApplNo);
 							}
 							break;
 						case Constants.PATENT_APPL_DATE_FIELD:
@@ -519,7 +585,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 					patent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
 					listPatent.add(patent);
 				} else {
-						break whenPatentApplNoIsNull;
+					break whenPatentApplNoIsNull;
 				}
 			}
 			rowIndex++;

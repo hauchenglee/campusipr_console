@@ -227,9 +227,9 @@ public class ServiceUSPatent {
 			getPatentInventorsApplcant(patent);
 			
 			JSONArray patentInventor = patentObj.optJSONArray("inventor");
-			List<Inventor> listInv = new ArrayList<Inventor>();
 			int orderIn = 1;
 			if (patent.getListInventor() == null && patentInventor != null) {
+				List<Inventor> listInv = new ArrayList<Inventor>();
 				for (int invIndex = 0; invIndex < patentInventor.length(); invIndex++) {
 					String inv = patentInventor.optString(invIndex);
 					Inventor inventor = new Inventor();
@@ -239,6 +239,7 @@ public class ServiceUSPatent {
 					listInv.add(inventor);
 					orderIn++;
 				}
+				patent.setListInventor(listInv);
 			}
 				
 			JSONArray patentApplicants = patentObj.optJSONArray("applicant");
@@ -271,7 +272,6 @@ public class ServiceUSPatent {
 				}
 			}
 			
-			patent.setListInventor(listInv);
 			patent.setListAssignee(listAssignee);
 			patent.setListApplicant(listAppl);
 				
