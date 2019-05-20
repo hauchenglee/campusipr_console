@@ -69,6 +69,10 @@ public class PatentExtension extends BaseBean {
 	//學校科系
 	@JsonView(View.PatentDetail.class)
 	private String extension_school_department;
+	
+	//專案管理其他資訊
+	@JsonView(View.PatentDetail.class)
+	private String extension_other_information;
 
 	public String getExtension_id() {
 		return extension_id;
@@ -198,4 +202,12 @@ public class PatentExtension extends BaseBean {
 		this.extension_school_department = extension_school_department;
 	}
 
+
+	public String getExtension_other_information() {
+		return extension_other_information;
+	}
+
+	public void setExtension_other_information(String extension_other_information) {
+		this.extension_other_information = extension_other_information;
+	}
 }
