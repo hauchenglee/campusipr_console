@@ -1645,6 +1645,9 @@ public class PatentServiceImpl implements PatentService{
 				case Constants.SCHOOL_NO_FIELD:
 				case Constants.SCHOOL_APPL_YEAR_FIELD:
 				case Constants.PATENT_MEMO:
+				case Constants.PATENT_STATUS_FIELD:
+				case Constants.PATENT_FAMILY_FIELD:
+				case Constants.PATENT_COST_FIELD:
 					history.setDisplay_data(history.getHistory_data());
 					history.setDisplay_data_en(history.getHistory_data());
 					break;
