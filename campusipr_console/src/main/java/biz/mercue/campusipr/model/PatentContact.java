@@ -51,6 +51,9 @@ public class PatentContact extends BaseBean{
 	@JsonView(View.PatentDetail.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date create_date;
+	
+	@JsonView(View.PatentDetail.class)
+	private String contact_character;
 
 	public String getPatent_contact_id() {
 		return patent_contact_id;
@@ -124,6 +127,12 @@ public class PatentContact extends BaseBean{
 		this.business = business;
 	}
 	
-	
+	public String getContact_character() {
+		return contact_character;
+	}
+
+	public void setContact_character(String contact_character) {
+		this.contact_character = contact_character;
+	}
 
 }
