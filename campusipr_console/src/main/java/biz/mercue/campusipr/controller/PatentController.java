@@ -125,7 +125,16 @@ public class PatentController {
 			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
-			int taskResult = patentService.syncPatentData(patent, null);
+			
+			int taskResult = Constants.INT_SYSTEM_PROBLEM;
+			
+			if (patentService.checkPatentData(patent) == Constants.INT_DATA_ERROR) {
+				taskResult = Constants.INT_DATA_ERROR;
+			}
+			
+			if (patentService.checkPatentData(patent) == Constants.INT_SUCCESS) {
+				taskResult = patentService.syncPatentData(patent);
+			}
 			
 			//TODO charles
 //			patentService.syncPatentStatus(patent);
@@ -155,7 +164,7 @@ public class PatentController {
 			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
-			int taskResult = patentService.addPatentByApplNo(patent, null, tokenBean.getAdmin(), tokenBean.getBusiness());
+			int taskResult = patentService.addPatentByApplNo(patent, tokenBean.getAdmin(), tokenBean.getBusiness());
 			
 			//TODO charles
 //			patentService.syncPatentStatus(patent);
@@ -497,7 +506,7 @@ public class PatentController {
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
 			if (tokenBean != null) {
 				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
-	               
+
 				mapPatent = excelTaskService.submitTask(task, tokenBean.getAdmin());
 				int responseBodyCode = Constants.INT_SYSTEM_PROBLEM;
 
@@ -505,14 +514,7 @@ public class PatentController {
 					log.info("mapPatentKey: " + mapPatentKey);
 					switch (mapPatentKey) {
 					case Constants.INT_SUCCESS:
-						log.info("Constants.INT_SUCCESS");
-//						responseBodyCode = patentService.importPatent(mapPatent.get(mapPatentKey), tokenBean.getAdmin(),
-//								tokenBean.getBusiness());
-						responseBodyCode = patentService.syncPatentData(null, mapPatent.get(mapPatentKey));
-
-						if (responseBodyCode == Constants.INT_SUCCESS) {
-							responseBodyCode = patentService.addPatentByApplNo(null, mapPatent.get(mapPatentKey), tokenBean.getAdmin(), tokenBean.getBusiness());
-						}
+						responseBodyCode = patentService.addPatentByImportExcel(mapPatent.get(mapPatentKey), tokenBean.getAdmin(), tokenBean.getBusiness());
 						log.info("responseBodyCode: " + responseBodyCode);
 						break;
 					case Constants.INT_DATA_ERROR:

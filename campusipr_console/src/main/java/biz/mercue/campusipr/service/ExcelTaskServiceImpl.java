@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -600,29 +601,44 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		log.info("parseDateCell");
 		Date date= null;
 		DecimalFormat df = new DecimalFormat("0");
-		switch (cell.getCellTypeEnum()) {
-        case STRING:
-        	date = DateUtils.parseMultipleFormat(cell.getRichStringCellValue().getString());
-        	
-            break;
-        case NUMERIC:
-            if("General".equals(cell.getCellStyle().getDataFormatString())){
-            	log.info("value 1 :"+cell.getNumericCellValue());
-            	//date = df.format(cell.getNumericCellValue());
-            }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
-            	date = cell.getDateCellValue();
-            	log.info("value 2:"+ DateUtils.getSimpleFormatDate(date));
-            }else{
-            	log.info("value 3:"+cell.getNumericCellValue());
-            	//date = df.format(cell.getNumericCellValue());
-            }
-            break;
+		try {
+			switch (cell.getCellTypeEnum()) {
+	        case STRING:
+	        	date = DateUtils.parseMultipleFormat(cell.getRichStringCellValue().getString());
+	        	
+	            break;
+	        case NUMERIC:
+	            if("General".equals(cell.getCellStyle().getDataFormatString())){
+	            	log.info("value 1 :"+cell.getNumericCellValue());
+	            	//date = df.format(cell.getNumericCellValue());
+	            	cell.setCellType(Cell.CELL_TYPE_STRING);
+	            	String cellValue = cell.getStringCellValue();
+	            	SimpleDateFormat originalFormat = new SimpleDateFormat("yyyyMMdd");
+	            	date = originalFormat.parse(cellValue);
+	            	log.info("date 1: " + date);
+	            }else if("m/d/yy".equals(cell.getCellStyle().getDataFormatString())){
+	            	date = cell.getDateCellValue();
+	            	log.info("value 2:"+ DateUtils.getSimpleFormatDate(date));
+	            }else{
+	            	log.info("value 3:"+cell.getNumericCellValue());
+	            	//date = df.format(cell.getNumericCellValue());
+	            	cell.setCellType(Cell.CELL_TYPE_STRING);
+	            	String cellValue = cell.getStringCellValue();
+	            	SimpleDateFormat originalFormat = new SimpleDateFormat("yyyyMMdd");
+	            	date = originalFormat.parse(cellValue);
+	            	log.info("date 3: " + date);
+	            }
+	            break;
 
-        default:
-           // value = cell.toString();
-            break;
+	        default:
+	           // value = cell.toString();
+	            break;
+			}
+			return date;
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			return null;
 		}
-		return  new Date ();
     }
 	
 	

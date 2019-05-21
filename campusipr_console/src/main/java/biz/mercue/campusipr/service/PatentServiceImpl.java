@@ -216,8 +216,9 @@ public class PatentServiceImpl implements PatentService{
 			patent.getPatentDesc().setPatent(patent);
 		}
 		
-		if (patent.getListPatentStatus() != null) {
-			for (PatentStatus ps:patent.getListPatentStatus()) {
+		List<PatentStatus> listPatentStatus = patent.getListPatentStatus();
+		if (listPatentStatus != null) {
+			for (PatentStatus ps : listPatentStatus) {
 				Status status = ps.getStatus();
 				Status statusDb = null;
 				if (patent.getEdit_source() == Patent.EDIT_SOURCE_SERVICE) {
@@ -233,6 +234,8 @@ public class PatentServiceImpl implements PatentService{
          	   	}
 				ps.setPatent(patent);
 				log.info(ps.getPrimaryKey());
+				log.info(ps.getStatus().getStatus_desc());
+				log.info(patent.getPatent_appl_no());
 			}
 		}
 
@@ -278,6 +281,7 @@ public class PatentServiceImpl implements PatentService{
 		List<Annuity> listAnnuity = patent.getListAnnuity();
 		if (listAnnuity != null && listAnnuity.size() > 0) {
 			for (Annuity mAnnuity : listAnnuity) {
+				log.info("mAnnuity.setAnnuity_id(KeyGeneratorUtils.generateRandomString());");
 				mAnnuity.setAnnuity_id(KeyGeneratorUtils.generateRandomString());
 				mAnnuity.setPatent(patent);
 			}
@@ -423,131 +427,153 @@ public class PatentServiceImpl implements PatentService{
 	}
 	
 	@Override
-	public int syncPatentData(Patent patent, List<Patent> patentList) {
-		if (patent != null) {
-			log.info("patent.getPatent_appl_no(): " + patent.getPatent_appl_no());
-			
-			 if ((patent.getPatent_appl_no().length() == 10 || patent.getPatent_appl_no().length() == 11) 
-					 && Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country())) {
-		         ServiceTaiwanPatent.getPatentRightByApplNo(patent);
-		         log.info("patent.getPatent_appl_no(): " + patent.getPatent_appl_no());
-		    }else if (patent.getPatent_appl_no().length() == 10 && Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
-		         ServiceUSPatent.getPatentRightByapplNo(patent);
-		         log.info("patent.getPatent_appl_no(): " + patent.getPatent_appl_no());
-		    }else if (Constants.APPL_COUNTRY_CN.equals(patent.getPatent_appl_country()) && 
-		    		"0".equals(patent.getPatent_appl_no().substring(8,9))  &&
-					"0".equals(patent.getPatent_appl_no().substring(9,10))) {
-		    	patent.setPatent_appl_no(patent.getPatent_appl_no().substring(0,9)+patent.getPatent_appl_no().substring(10,patent.getPatent_appl_no().length()));
-		        ServiceChinaPatent.getPatentRightByApplicantNo(patent);
-		        log.info("patent.getPatent_appl_no(): " + patent.getPatent_appl_no());
-		    } else {
-		    	return Constants.INT_DATA_ERROR;
-		    }
-			 
-		    //02/23更新停止同步api狀態資料
-//		    ServiceStatusPatent.getPatentStatus(patent);
-		    syncPatentStatus(patent);
-			
-			if(!StringUtils.isNULL(patent.getPatent_name()) || !StringUtils.isNULL(patent.getPatent_name_en())) {
-				patent.setIs_sync(true);
-				return Constants.INT_SUCCESS;
-			} else {
-				return Constants.INT_CANNOT_FIND_DATA;
-			}
-		}
+	public int checkPatentData(Patent patent) {
+		log.info("checkPatentData: ");
 		
-		if (patentList != null) {
-			for (Patent patentInList : patentList) {
-				log.info("patentInList.getPatent_appl_no(): " + patentInList.getPatent_appl_no());
-				
-				 if ((patentInList.getPatent_appl_no().length() == 10 || patentInList.getPatent_appl_no().length() == 11) 
-						 && Constants.APPL_COUNTRY_TW.endsWith(patentInList.getPatent_appl_country())) {
-			         ServiceTaiwanPatent.getPatentRightByApplNo(patentInList);
-			         log.info("patentInList.getPatent_appl_no(): " + patentInList.getPatent_appl_no());
-			    }else if (patentInList.getPatent_appl_no().length() == 10 && Constants.APPL_COUNTRY_US.endsWith(patentInList.getPatent_appl_country())) {
-			         ServiceUSPatent.getPatentRightByapplNo(patentInList);
-			         log.info("patentInList.getPatent_appl_no(): " + patentInList.getPatent_appl_no());
-			    }else if (Constants.APPL_COUNTRY_CN.equals(patentInList.getPatent_appl_country()) && 
-			    		"0".equals(patentInList.getPatent_appl_no().substring(8,9))  &&
-						"0".equals(patentInList.getPatent_appl_no().substring(9,10))) {
-			    	patentInList.setPatent_appl_no(patentInList.getPatent_appl_no().substring(0,9)+patentInList.getPatent_appl_no().substring(10,patentInList.getPatent_appl_no().length()));
-			        ServiceChinaPatent.getPatentRightByApplicantNo(patentInList);
-			        log.info("patentInList.getPatent_appl_no(): " + patentInList.getPatent_appl_no());
-			    } else {
-			    	return Constants.INT_DATA_ERROR;
-			    }
-				 
-			    //02/23更新停止同步api狀態資料
-//			    ServiceStatusPatent.getPatentStatus(patent);
-			    syncPatentStatus(patentInList);
-				
-				if(!StringUtils.isNULL(patentInList.getPatent_name()) || !StringUtils.isNULL(patentInList.getPatent_name_en())) {
-					patentInList.setIs_sync(true);
-					continue;
-				} else {
-					return Constants.INT_CANNOT_FIND_DATA;
-				}
-			}
-			return Constants.INT_SUCCESS;
-		}
-		return Constants.INT_SYSTEM_PROBLEM;
+		 if ((patent.getPatent_appl_no().length() == 10 || patent.getPatent_appl_no().length() == 11) && Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country())) {
+	         log.info("patent.getPatent_appl_no(): " + patent.getPatent_appl_no());
+	         return Constants.INT_SUCCESS;
+	    }else if (patent.getPatent_appl_no().length() == 10 && Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
+	         log.info("patent.getPatent_appl_no(): " + patent.getPatent_appl_no());
+	         return Constants.INT_SUCCESS;
+	    }else if (Constants.APPL_COUNTRY_CN.equals(patent.getPatent_appl_country()) && 
+	    		"0".equals(patent.getPatent_appl_no().substring(8,9))  &&
+				"0".equals(patent.getPatent_appl_no().substring(9,10))) {
+	    	patent.setPatent_appl_no(patent.getPatent_appl_no().substring(0,9)+patent.getPatent_appl_no().substring(10,patent.getPatent_appl_no().length()));
+	        log.info("patent.getPatent_appl_no(): " + patent.getPatent_appl_no());
+	        return Constants.INT_SUCCESS;
+	    } else {
+	    	return Constants.INT_DATA_ERROR;
+	    }
 	}
 	
 	@Override
-	public int addPatentByApplNo(Patent patent, List<Patent> patentList, Admin admin, Business business) {
+	public int syncPatentData(Patent patent) {
+		log.info("syncPatentData: ");
+		
+		 if (Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country())) {
+	         ServiceTaiwanPatent.getPatentRightByApplNo(patent);
+	         log.info("patent.getPatent_appl_no(): " + patent.getPatent_appl_no());
+	     }
+		 if (Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
+	         ServiceUSPatent.getPatentRightByapplNo(patent);
+	         log.info("patent.getPatent_appl_no(): " + patent.getPatent_appl_no());
+	     }
+		 if (Constants.APPL_COUNTRY_CN.equals(patent.getPatent_appl_country())) {
+	        ServiceChinaPatent.getPatentRightByApplicantNo(patent);
+	        log.info("patent.getPatent_appl_no(): " + patent.getPatent_appl_no());
+	    }
+		 
+	    //02/23更新停止同步api狀態資料
+//	    ServiceStatusPatent.getPatentStatus(patent);
+	    syncPatentStatus(patent);
+		
+		if(!StringUtils.isNULL(patent.getPatent_name()) || !StringUtils.isNULL(patent.getPatent_name_en())) {
+			patent.setIs_sync(true);
+			return Constants.INT_SUCCESS;
+		} else {
+			return Constants.INT_CANNOT_FIND_DATA;
+		}
+	}
+	
+	@Override
+	public int addPatentByApplNo(Patent patent, Admin admin, Business business) {
 		log.info("addPatentByApplNo: ");
-		int taskResult= -1;
-		if (patent != null) {
-			log.info("addPatentByApplNo patent: ");
-			if(!StringUtils.isNULL(patent.getPatent_name()) || !StringUtils.isNULL(patent.getPatent_name_en())) {
-				String applNo =  patent.getPatent_appl_no();
-				if (!StringUtils.isNULL(applNo)) {
-					Patent appNoPatent = patentDao.getByApplNo(applNo);
-					log.info("appNoPatent: " + appNoPatent);
-					patent.setSync_date(DateUtils.getDayStart(new Date()));
-					patent.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
-		            patent.setAdmin(admin);
-		            patent.setBusiness(business);
-					if(appNoPatent==null) {
-						this.addPatent(patent);
-						taskResult = Constants.INT_SUCCESS;
-					} else {
-						patent.setComparePatent(appNoPatent);
-						taskResult = updatePatent(patent, null);
-                    }
-				} else {
-					taskResult = Constants.INT_CANNOT_FIND_DATA;
-				}
-			} else {
-				taskResult = Constants.INT_CANNOT_FIND_DATA;
-			}
-			return taskResult;
+		
+		// step 1: check patent data
+		// step 2: sync patent data
+		// step 3: store patent in database
+		
+		if (patent == null) {
+			return Constants.INT_DATA_ERROR;
 		}
 		
-		if (patentList != null) {
-			log.info("addPatentByApplNo patentList: ");
-			for (Patent patentInList : patentList) {
-				Patent appNoPatent = patentDao.getByApplNo(patentInList.getPatent_appl_no());
-				log.info("appNoPatent: " + appNoPatent);
+		if (checkPatentData(patent) == Constants.INT_DATA_ERROR) {
+			return Constants.INT_DATA_ERROR;
+		}
+ 		
+		if (syncPatentData(patent) == Constants.INT_CANNOT_FIND_DATA) {
+			return Constants.INT_CANNOT_FIND_DATA;
+		}
+		
+		if (StringUtils.isNULL(patent.getPatent_name()) || StringUtils.isNULL(patent.getPatent_name_en())) {
+			return Constants.INT_CANNOT_FIND_DATA;
+		}
+
+		Patent appNoPatent = patentDao.getByApplNo(patent.getPatent_appl_no());
+		log.info("appNoPatent: " + appNoPatent);
+		patent.setSync_date(DateUtils.getDayStart(new Date()));
+		patent.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
+		patent.setAdmin(admin);
+		patent.setBusiness(business);
+
+		if (appNoPatent == null) {
+			log.info("patent.getPatent_id(): " + patent.getPatent_id());
+			return addPatent(patent);
+		} else {
+			patent.setComparePatent(appNoPatent);
+			return updatePatent(patent, null);
+		}
+	}
+	
+	@Override
+	public int addPatentByImportExcel(List<Patent> patentList, Admin admin, Business business) {
+		log.info("addPatentByApplNo patentList: ");
+		int taskResult = -1;
+
+		// step 1: check patent data
+		// step 2: store patent in database
+		// step 3: sync patent data
+		// step 4: if sync patent data is correct, then store patent in database
+
+		if (patentList == null) {
+			return Constants.INT_DATA_ERROR;
+		}
+
+		for (Patent patentInList : patentList) {
+			if (checkPatentData(patentInList) == Constants.INT_DATA_ERROR) {
+				return Constants.INT_DATA_ERROR;
+			}
+		}
+
+//		importPatent(patentList, admin, business);
+
+		for (Patent patentInList : patentList) {
+			Patent appNoPatent = patentDao.getByApplNo(patentInList.getPatent_appl_no());
+			log.info("appNoPatent: " + appNoPatent);
+			patentInList.setSync_date(DateUtils.getDayStart(new Date()));
+			patentInList.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
+			patentInList.setAdmin(admin);
+			patentInList.setBusiness(business);
+			if (appNoPatent == null) {
+				log.info("addPatent: ");
+				taskResult = this.addPatent(patentInList);
+			} else {
+				patentInList.setComparePatent(appNoPatent);
+				taskResult = updatePatent(patentInList, null);
+			}
+			
+//			if (syncPatentData(patentInList) == Constants.INT_CANNOT_FIND_DATA) {
+//				continue;
+//			}
+			if (syncPatentData(patentInList) == Constants.INT_SUCCESS) {
+				Patent appNoPatentAgain = patentDao.getByApplNo(patentInList.getPatent_appl_no());
+				log.info("appNoPatent again: " + appNoPatentAgain);
 				patentInList.setSync_date(DateUtils.getDayStart(new Date()));
 				patentInList.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
 				patentInList.setAdmin(admin);
 				patentInList.setBusiness(business);
-				if (appNoPatent == null) {
+				if (appNoPatentAgain == null) {
 					log.info("addPatent: ");
-					this.addPatent(patentInList);
-					taskResult = Constants.INT_SUCCESS;
+					taskResult = this.addPatent(patentInList);
 				} else {
-					patentInList.setComparePatent(appNoPatent);
+					patentInList.setComparePatent(appNoPatentAgain);
 					taskResult = updatePatent(patentInList, null);
 				}
 			}
-			return taskResult;
 		}
-		
-		return Constants.INT_SYSTEM_PROBLEM;
+		return taskResult;
 	}
-	
 	
 	@Override
 	public int importPatent(List<Patent> list, Admin admin,Business business) {
@@ -1718,9 +1744,9 @@ public class PatentServiceImpl implements PatentService{
 				case Constants.SCHOOL_NO_FIELD:
 				case Constants.SCHOOL_APPL_YEAR_FIELD:
 				case Constants.PATENT_MEMO:
-				case Constants.PATENT_STATUS_FIELD:
 				case Constants.PATENT_FAMILY_FIELD:
 				case Constants.PATENT_COST_FIELD:
+//				case Constants.PATENT_STATUS_FIELD:
 					history.setDisplay_data(history.getHistory_data());
 					history.setDisplay_data_en(history.getHistory_data());
 					break;
@@ -1773,6 +1799,21 @@ public class PatentServiceImpl implements PatentService{
 					}
 					break;
 
+//				case Constants.PATENT_STATUS_FIELD:
+//					List<PatentStatus> listPatentStatus = (List<PatentStatus>) JacksonJSONUtils.readValue(history.getHistory_data(), new TypeReference<List<PatentStatus>>(){});
+//					if(listPatentStatus != null && listPatentStatus.size() > 0 ) {
+//						List<String> name1 = new ArrayList<String>();
+//						List<String> name2 = new ArrayList<String>();
+//						for(PatentStatus patentStatus : listPatentStatus) {
+//							name1.add(patentStatus.getStatus().getStatus_desc());
+//							name2.add(patentStatus.getCreate_date().toString());
+//						}
+//						String result1 = String.join("\n", name1);
+//						String result2 = String.join("\n", name2);
+//						history.setDisplay_data(result1);
+//						history.setDisplay_data_en(result2);
+//					}
+//					break;
 				default:
 					break;
 				}
