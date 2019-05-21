@@ -108,6 +108,8 @@ public class PatentController {
 		return responseBody.getJacksonString( View.Patent.class);
 	}
 	
+	@RequestMapping(value="/api/syncpatentdata", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
 	public String syncPatentData(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("syncPatentData ");
 		
