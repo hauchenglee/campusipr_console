@@ -366,7 +366,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				String countryName = null;
 				Patent patent = new Patent();
 				for (FieldMap fieldMap : listField) {
-					log.info("fieldMap:"+fieldMap.getField_map_id());
 					if (fieldMap.getExcel_field_index() != -1) {
 						PatentField  field= fieldMap.getField();
 						if(field == null) {

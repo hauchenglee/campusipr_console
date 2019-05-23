@@ -110,7 +110,7 @@ public class PatentController {
 	
 	@RequestMapping(value="/api/syncpatentdata", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String syncPatentData(HttpServletRequest request,@RequestBody String receiveJSONString) {
+	public String syncPatentData(HttpServletRequest request, @RequestBody String receiveJSONString, @RequestParam(value = "no", required = false) String patentApplNo) {
 		log.info("syncPatentData ");
 		
 		BeanResponseBody responseBody  = new BeanResponseBody();
@@ -127,12 +127,9 @@ public class PatentController {
 			patent.setAdmin_ip(ip);
 			
 			int taskResult = Constants.INT_SYSTEM_PROBLEM;
+			taskResult = patentService.checkPatentPattern(patent);
 			
-			if (patentService.checkPatentData(patent) == Constants.INT_DATA_ERROR) {
-				taskResult = Constants.INT_DATA_ERROR;
-			}
-			
-			if (patentService.checkPatentData(patent) == Constants.INT_SUCCESS) {
+			if (taskResult == Constants.INT_SUCCESS) {
 				taskResult = patentService.syncPatentData(patent);
 			}
 			
@@ -514,7 +511,7 @@ public class PatentController {
 					log.info("mapPatentKey: " + mapPatentKey);
 					switch (mapPatentKey) {
 					case Constants.INT_SUCCESS:
-						responseBodyCode = patentService.addPatentByImportExcel(mapPatent.get(mapPatentKey), tokenBean.getAdmin(), tokenBean.getBusiness());
+						responseBodyCode = patentService.addPatentByExcel(mapPatent.get(mapPatentKey), tokenBean.getAdmin(), tokenBean.getBusiness());
 						log.info("responseBodyCode: " + responseBodyCode);
 						break;
 					case Constants.INT_DATA_ERROR:

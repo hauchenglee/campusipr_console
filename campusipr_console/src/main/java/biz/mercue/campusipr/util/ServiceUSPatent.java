@@ -141,6 +141,9 @@ public class ServiceUSPatent {
 	}
 	
 	private static void parserBilbo(Patent patent) {
+		if (StringUtils.isNULL(patent.getPatent_publish_no())) {
+			return;
+		}
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/publication/DOCDB/%s/biblio";
 		url = String.format(url, "US"+patent.getPatent_publish_no());
 		

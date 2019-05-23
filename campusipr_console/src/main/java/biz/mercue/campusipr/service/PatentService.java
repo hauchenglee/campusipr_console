@@ -17,14 +17,14 @@ public interface PatentService {
 	
 //	int syncPatentStatus(Patent patent);
 	
-	int checkPatentData(Patent patent);
+	int checkPatentPattern(Patent patent);
 	
 	int syncPatentData(Patent patent); 
 	
 	int addPatentByApplNo(Patent patent, Admin admin, Business business);
 	
-	int addPatentByImportExcel(List<Patent> patentList, Admin admin, Business business);
-	
+	int addPatentByExcel(List<Patent> patentList, Admin admin, Business business);
+
 	int syncPatentsByApplicant(List<Patent> list, String adminId, String businessId, String ip);
 
 	int updatePatent(Patent patent, String businessId);

@@ -323,10 +323,10 @@ public class Patent extends BaseBean{
 			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_CN)) {
 				patent_appl_no = Constants.APPL_COUNTRY_CN.toUpperCase()+(patent_appl_no.replace("TW", "").replace("US", "").replace("CN", ""));
 			}
-			if (patent_appl_no.contains(".")) {
-				patent_appl_no = patent_appl_no.substring(0, patent_appl_no.indexOf("."));
-			}
-			patent_appl_no = patent_appl_no.replaceAll("\\s+","").replaceAll("/", "").replaceAll(",", "").replaceAll("[\\pP\\p{Punct}]","");
+//			if (patent_appl_no.contains(".")) {
+//				patent_appl_no = patent_appl_no.substring(0, patent_appl_no.indexOf("."));
+//			}
+//			patent_appl_no = patent_appl_no.replaceAll("\\s+","").replaceAll("/", "").replaceAll(",", "").replaceAll("[\\pP\\p{Punct}]","");
 		}
 		this.patent_appl_no = patent_appl_no;
 	}
