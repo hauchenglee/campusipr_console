@@ -126,12 +126,7 @@ public class PatentController {
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
 			
-			int taskResult = Constants.INT_SYSTEM_PROBLEM;
-			taskResult = patentService.checkPatentPattern(patent);
-			
-			if (taskResult == Constants.INT_SUCCESS) {
-				taskResult = patentService.syncPatentData(patent);
-			}
+			int taskResult = patentService.syncPatentData(patent);
 			
 			//TODO charles
 //			patentService.syncPatentStatus(patent);
@@ -323,7 +318,7 @@ public class PatentController {
 	
 	@RequestMapping(value="/api/combinepatentfamily", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String combinePatentFamily(HttpServletRequest request,@RequestBody String receiveJSONString){
+	public String combinePatentFamily(HttpServletRequest request,@RequestBody String receiveJSONString, @RequestParam(value = "patent_id", required = false) String patentId){
 		log.info("combinePatentFamily ");
 		log.info(receiveJSONString);
 		BeanResponseBody responseBody  = new BeanResponseBody();
@@ -336,7 +331,7 @@ public class PatentController {
 				if(!tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)){
 					businessId  = tokenBean.getBusiness().getBusiness_id();
 				}
-				int taskResult = patentService.combinePatentFamily(family, businessId);
+				int taskResult = patentService.combinePatentFamily(family, businessId, patentId, tokenBean.getAdmin(), request.getRemoteAddr());
 				responseBody.setCode(taskResult);
 				if(taskResult == Constants.INT_SUCCESS) {
 					responseBody.setBean(family);

@@ -431,8 +431,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 										}
 									}
 								}
-								
-								log.info("excelFieldIndex: " + excelFieldIndex);
+
 								log.info("country name: " + countryName);
 								log.info("countryAddName: " + countryAddName);
 								
@@ -443,7 +442,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								
 								// type is numeric --> need to add country name
 								if (cellType == 0) {
-									log.info("type is 0");
 									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
 									patentApplNo = countryAddName + row.getCell(excelFieldIndex).getStringCellValue();
 									log.info("type 0 of patentApplNo: " + patentApplNo);
@@ -451,14 +449,13 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								
 								// type is string
 								if (cellType == 1) {
-									log.info("type is 1");
 									patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
 									log.info("type 1 of patentApplNo: " + patentApplNo);
 									
 									// resolve cell value is number but cell type is string
 									if (!patentApplNo.substring(0, 2).equalsIgnoreCase(countryAddName)) {
 										patentApplNo = countryAddName + row.getCell(excelFieldIndex).getStringCellValue();
-										log.info("patentApplNo after add country name: " + patentApplNo);
+										log.info("type 1 of patentApplNo after add country name: " + patentApplNo);
 									}
 								}
 								

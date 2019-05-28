@@ -17,8 +17,6 @@ public interface PatentService {
 	
 //	int syncPatentStatus(Patent patent);
 	
-	int checkPatentPattern(Patent patent);
-	
 	int syncPatentData(Patent patent); 
 	
 	int addPatentByApplNo(Patent patent, Admin admin, Business business);
@@ -53,7 +51,7 @@ public interface PatentService {
 	Patent getById(String id);
 	
 
-	int combinePatentFamily(PatentFamily family,String businessId); 
+	int combinePatentFamily(PatentFamily family, String businessId, String patentId, Admin tokenAdmin, String ip); 
 	
 	int importPatent(List<Patent> list, Admin admin,Business business);
 

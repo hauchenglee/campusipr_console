@@ -37,6 +37,9 @@ public class PatentStatus extends BaseBean {
 	@Temporal(TemporalType.DATE)
 	@JsonView(View.Patent.class)
 	private Date create_date;
+	
+	@JsonView(View.Patent.class)
+	private String business_id;
 
 	public PatentStatusId getPrimaryKey() {
         return primaryKey;
@@ -72,6 +75,14 @@ public class PatentStatus extends BaseBean {
 
 	public void setCreate_date(Date create_date) {
 		this.create_date = create_date;
+	}
+
+	public String getBusiness_id() {
+		return business_id;
+	}
+
+	public void setBusiness_id(String business_id) {
+		this.business_id = business_id;
 	}
 
 	

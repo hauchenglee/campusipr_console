@@ -58,7 +58,7 @@ public class Patent extends BaseBean{
 	private Date patent_appl_date;
 	
 	//all
-	@JsonView({View.Patent.class,View.PortfolioDetail.class})
+	@JsonView({View.Patent.class, View.PortfolioDetail.class, View.PatentIdApplNo.class})
 	private String patent_appl_no;
 	
 	//all
@@ -151,7 +151,7 @@ public class Patent extends BaseBean{
 	private List<Applicant> listApplicant;
 	
 	//all
-	@JsonView(View.PatentDetail.class)
+	@JsonView({View.Patent.class, View.PatentDetail.class})
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
 	@OrderBy("inventor_order")
 	private List<Inventor> listInventor;
@@ -547,7 +547,11 @@ public class Patent extends BaseBean{
 	}
 
 	public void setListCost(List<PatentCost> listCost) {
-		this.listCost = listCost;
+		if (this.listCost == null) {
+			this.listCost = new ArrayList<PatentCost>();
+		}
+		this.listCost.clear();
+		this.listCost.addAll(listCost);
 	}
 	
 	public void addCost(PatentCost cost) {

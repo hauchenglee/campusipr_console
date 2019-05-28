@@ -31,7 +31,7 @@ public class View {
 	
 	
 	public interface Message extends Public {}
-	
+	public interface PatentIdApplNo extends Public {}
 
 	
 
