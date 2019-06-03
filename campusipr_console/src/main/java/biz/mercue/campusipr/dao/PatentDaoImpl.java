@@ -21,6 +21,7 @@ import org.springframework.stereotype.Repository;
 
 
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentExtension;
 import biz.mercue.campusipr.util.StringUtils;
 
 
@@ -181,6 +182,15 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		}
 		criteria.add(Restrictions.in("patent_id", ids));
 		return criteria.list();
+	}
+	
+	public PatentExtension getPatentExtensionByPatentIdAndBusinessId (String patentId, String businessId) {
+	    String hql = "FROM PatentExtension where patent_id = :patent_id and business_id = :business_id";
+	    Session session = getSession();
+	    Query query = session.createQuery(hql);
+	    query.setParameter("patent_id", patentId);
+	    query.setParameter("business_id", businessId);
+	    return  (PatentExtension) query.getSingleResult();
 	}
 	
 	@Override
@@ -860,6 +870,15 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	       if (!StringUtils.isNULL(bussinessId)) {
 	    	   query.setParameter("business_id", bussinessId);
 	       }
+	       query.executeUpdate();
+	   }
+	   
+	   @Override
+	   public void deleteStatus(String statusId) {
+	       String hql = "Delete From Status where status_id = :status_id";
+	       Session session = getSession();
+	       Query query = session.createQuery(hql);
+	       query.setParameter("status_id", statusId);
 	       query.executeUpdate();
 	   }
 

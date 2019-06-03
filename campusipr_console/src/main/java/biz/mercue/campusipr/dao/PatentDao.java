@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentExtension;
 
 public interface PatentDao {
 
@@ -29,6 +30,8 @@ public interface PatentDao {
 	List<Patent> getByPatentIds(List<String> ids,String businessId);
 	
 	List<Patent> getByFamily(String familyId);
+	
+	PatentExtension getPatentExtensionByPatentIdAndBusinessId(String patentId, String businessId);
 	
 	
 	List<Patent> searchAllFieldPatent(String  searchText, String businessId, int page, int pageSize, String orderList, String orderFieldCode, int is_asc);
@@ -63,4 +66,5 @@ public interface PatentDao {
 	void deletePatentStatus(String patentId);
 	void deletePatentStatus(String patentId, String statusId, Date createTime);
 	void deletePatentExtension(String patentId, String bussinessId);
+	public void deleteStatus(String statusId);
 }

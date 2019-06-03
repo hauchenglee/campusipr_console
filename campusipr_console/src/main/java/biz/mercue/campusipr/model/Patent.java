@@ -266,6 +266,8 @@ public class Patent extends BaseBean{
 	@Transient
 	public static final int EDIT_SOURCE_IMPORT =3;
 	
+	@Transient
+	public String sourceFrom;
 
 	
 	public String getPatent_id() {
@@ -632,7 +634,11 @@ public class Patent extends BaseBean{
 	}
 
 	public void setListExtension(List<PatentExtension> listExtension) {
-		this.listExtension = listExtension;
+		if (this.listExtension == null) {
+			this.listExtension = new ArrayList<PatentExtension>();
+		}
+		this.listExtension.clear();
+		this.listExtension.addAll(listExtension);
 	}
 	
 	public String getAdmin_ip() {
@@ -779,5 +785,12 @@ public class Patent extends BaseBean{
 		this.sync_date = sync_date;
 	}
 
+	public String getSourceFrom() {
+		return sourceFrom;
+	}
+
+	public void setSourceFrom(String sourceFrom) {
+		this.sourceFrom = sourceFrom;
+	}
 
 }

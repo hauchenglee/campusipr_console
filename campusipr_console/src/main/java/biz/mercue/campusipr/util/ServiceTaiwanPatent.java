@@ -162,6 +162,7 @@ public class ServiceTaiwanPatent {
 		boolean isSync = false;
 		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s&applclass=%s";
 		String urlSend = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no().replace("TW", "").replace("tw", ""),1);
+		log.info("url send: " + urlSend);
 		
 		try {
 			String context = HttpRequestUtils.sendGet(urlSend);

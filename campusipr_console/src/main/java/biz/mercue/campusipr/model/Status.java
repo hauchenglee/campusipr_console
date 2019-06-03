@@ -44,9 +44,13 @@ public class Status extends BaseBean{
 	@JsonView({View.Patent.class})
 	private String status_color;
 	
-
+	@JsonView({View.Patent.class})
 	private String status_from;
 
+	@JsonView({View.Patent.class})
+	@Transient
+	private Date create_date;
+	
 	public String getStatus_id() {
 		return status_id;
 	}
@@ -133,6 +137,16 @@ public class Status extends BaseBean{
 
 	public void setStatus_from(String status_from) {
 		this.status_from = status_from;
+	}
+
+
+	public Date getCreate_date() {
+		return create_date;
+	}
+
+
+	public void setCreate_date(Date create_date) {
+		this.create_date = create_date;
 	}
 	
 	

@@ -64,7 +64,7 @@ public class MessageController {
 	@RequestMapping(value="/api/getlastestmessage", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getLastestMessage(HttpServletRequest request,@RequestBody String receiveJSONString) {
-		log.info("getLastestMessage ");
+//		log.info("getLastestMessage ");
 		
 		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));

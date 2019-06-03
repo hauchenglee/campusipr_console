@@ -177,7 +177,7 @@ public class PatentController {
 	
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		log.info("receiveJSONString :"+receiveJSONString);
+//		log.info("receiveJSONString :"+receiveJSONString);
 		if(tokenBean!=null) {
 			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
 			patent.setEdit_source(Patent.EDIT_SOURCE_HUMAN);

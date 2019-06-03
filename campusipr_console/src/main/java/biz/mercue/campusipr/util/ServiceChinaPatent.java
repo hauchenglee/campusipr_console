@@ -188,6 +188,26 @@ public class ServiceChinaPatent {
 		}
 	}
 	
+	public static void parseBilbo_byApplication(Patent patent) {
+		String formatType = "docdb";
+		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/application/%s/%s/biblio";
+		url = String.format(url, formatType, patent.getPatent_appl_no());
+		log.info("url parse: " + url);
+		
+		try {
+			String content = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));
+			if (!StringUtils.isNULL(content)) {
+				convertPatentInfoXml(patent ,content);
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	private static void parserBilbo(Patent patent, String formatType) {
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/publication/%s/%s/biblio";
 		url = String.format(url, formatType, patent.getPatent_appl_country().toUpperCase() + patent.getPatent_publish_no());

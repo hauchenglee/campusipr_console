@@ -365,6 +365,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				
 				String countryName = null;
 				Patent patent = new Patent();
+				PatentExtension patentExtension = new PatentExtension();
 				for (FieldMap fieldMap : listField) {
 					if (fieldMap.getExcel_field_index() != -1) {
 						PatentField  field= fieldMap.getField();
@@ -547,28 +548,63 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							
 						case Constants.SCHOOL_NO_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-								Cell cellBusinessNo = row.getCell(fieldMap.getExcel_field_index());
-								PatentExtension extension =  patent.getExtension();
-								if(extension == null) {
-									extension = new PatentExtension();
-									patent.setExtension(extension);
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
+								String cellValue = "";
+
+								// type is numeric --> need to add country name
+								if (cellType == 0) {
+									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
+									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 0 of cellValue: " + cellValue);
 								}
-								extension.setBusiness_num(parseNumricCell(cellBusinessNo));
+
+								// type is string
+								if (cellType == 1) {
+									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 1 of cellValue: " + cellValue);
+								}
+
+								log.info(cellValue);
+								if (!StringUtils.isNULL(cellValue)) {
+									patentExtension.setBusiness_num(cellValue);
+									patent.setExtension(patentExtension);
+								}
+							} else {
+								patentExtension.setBusiness_num("");
+								patent.setExtension(patentExtension);
 							}
 							break;
-							
 						case Constants.SCHOOL_MEMO_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-								Cell cellMemo = row.getCell(fieldMap.getExcel_field_index());
-								PatentExtension extensionMemo =  patent.getExtension();
-								if(extensionMemo == null) {
-									extensionMemo = new PatentExtension();
-									patent.setExtension(extensionMemo);
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
+								String cellValue = "";
+								
+								// type is numeric --> need to add country name
+								if (cellType == 0) {
+									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
+									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 0 of cellValue: " + cellValue);
 								}
-								extensionMemo.setBusiness_num(cellMemo.getStringCellValue());
+
+								// type is string
+								if (cellType == 1) {
+									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 1 of cellValue: " + cellValue);
+								}
+
+								log.info(cellValue);
+								if (!StringUtils.isNULL(cellValue)) {
+									log.info("cell is null");
+									patentExtension.setExtension_memo(cellValue);
+									patent.setExtension(patentExtension);
+								}
+							} else {
+								patentExtension.setExtension_memo("");
+								patent.setExtension(patentExtension);
 							}
 							break;
-
 						default:
 							break;
 
