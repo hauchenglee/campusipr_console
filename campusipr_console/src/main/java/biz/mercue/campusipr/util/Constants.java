@@ -277,6 +277,12 @@ public class Constants {
 	public static final String PATENT_FAMILY_FIELD = "ce47e85fa784fd2a4a681ccf572712c9";
 	public static final String SCHOOL_NO_FIELD = "71edfc0d2783857fefb360e574a90355";
 	public static final String SCHOOL_APPL_YEAR_FIELD = "78f94e6e1b246d9419faa044a1119cc7";
+	public static final String SCHOOL_DEPARTMENT_FIELD = "ab022983f82441ca165f667059761258";
+	public static final String SCHOOL_SUBSIDY_UNIT = "fcb331d04d95960a7a8fe469015343f8";
+	public static final String SCHOOL_SUBSIDY_NO = "895c8843a89248f98193dcb7ee81644b";
+	public static final String SCHOOL_SUBSIDY_PLAN = "c5baefafea5a98a6cbcb45820a9c78d6";
+	public static final String SCHOOL_AGENT = "853e5ab43383cc325c0b8fe18cb46014";
+	public static final String SCHOOL_AGENT_NO = "f8b56e61ee5e6e36abd538f71ae32c8f";
 	public static final String SCHOOL_MEMO_FIELD = "c53e8e4e240d9d7a0f1bcb956fbe7630";
 	public static final String PATENT_MEMO = "c53e8e4e240d9d7a0f1bcb956fbe7630";
 	

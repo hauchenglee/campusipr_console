@@ -188,7 +188,7 @@ public class ServiceChinaPatent {
 		}
 	}
 	
-	public static void parseBilbo_byApplication(Patent patent) {
+	public static int parseBilbo_byApplication(Patent patent) {
 		String formatType = "docdb";
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/application/%s/%s/biblio";
 		url = String.format(url, formatType, patent.getPatent_appl_no());
@@ -198,13 +198,18 @@ public class ServiceChinaPatent {
 			String content = (HttpRequestUtils.sendGetByToken(url, generateToken("Basic "+Constants.PATENT_TOKEN_EU)));
 			if (!StringUtils.isNULL(content)) {
 				convertPatentInfoXml(patent ,content);
+				return Constants.INT_SUCCESS;
+			} else {
+				return Constants.INT_CANNOT_FIND_DATA;
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return Constants.INT_SYSTEM_PROBLEM;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
 	

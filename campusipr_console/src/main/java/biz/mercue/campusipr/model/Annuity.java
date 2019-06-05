@@ -47,6 +47,9 @@ public class Annuity extends BaseBean{
 
 	@JsonView(View.PatentDetail.class)
 	private boolean is_reminder;
+	
+	@JsonView(View.PatentDetail.class)
+	private String business_id;
 
 	public Date getAnnuity_date() {
 		return annuity_date;
@@ -110,6 +113,14 @@ public class Annuity extends BaseBean{
 
 	public void setIs_reminder(boolean is_reminder) {
 		this.is_reminder = is_reminder;
+	}
+
+	public String getBusiness_id() {
+		return business_id;
+	}
+
+	public void setBusiness_id(String business_id) {
+		this.business_id = business_id;
 	}
 	
 

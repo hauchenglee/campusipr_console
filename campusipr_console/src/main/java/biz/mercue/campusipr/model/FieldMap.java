@@ -1,6 +1,7 @@
 package biz.mercue.campusipr.model;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -8,6 +9,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -39,6 +41,9 @@ public class FieldMap {
 
 	@JsonView(View.FieldMap.class)
 	private Date create_date;
+	
+	@Transient
+	private List<Integer> other_info_index;
 	
 	
 	private Date update_date;

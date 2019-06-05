@@ -438,6 +438,8 @@ public class PatentServiceImpl implements PatentService{
 			return Constants.INT_DATA_ERROR;
 		}
 
+		int syncResult = Constants.INT_SYSTEM_PROBLEM;
+		
 		// cn patent appl no
 		String originApplNo = patent.getPatent_appl_no();
 		String appl_cn_onlyNo = "";
@@ -460,7 +462,7 @@ public class PatentServiceImpl implements PatentService{
 		
 		if ((Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country()))) {
 			if (originApplNo.length() == 10 || originApplNo.length() == 11) {
-				ServiceTaiwanPatent.getPatentRightByApplNo(patent);
+				syncResult = ServiceTaiwanPatent.getPatentRightByApplNo(patent);
 			} else {
 				return Constants.INT_DATA_ERROR;
 			}
@@ -470,7 +472,7 @@ public class PatentServiceImpl implements PatentService{
 			if (originApplNo.length() == 10 || originApplNo.length() == 12) {
 				patent.setPatent_appl_no(appl_us_onlyNO);
 				log.info(patent == null);
-				ServiceUSPatent.getPatentRightByapplNo(patent);
+				syncResult = ServiceUSPatent.getPatentRightByapplNo(patent);
 			} else {
 				return Constants.INT_DATA_ERROR;
 			}
@@ -491,7 +493,7 @@ public class PatentServiceImpl implements PatentService{
 			}
 			
 			patent.setPatent_appl_no(changeApplNo);
-			ServiceChinaPatent.parseBilbo_byApplication(patent);
+			syncResult = ServiceChinaPatent.parseBilbo_byApplication(patent);
 			
 			patent.setPatent_appl_no(originApplNo);
 		}
@@ -500,7 +502,7 @@ public class PatentServiceImpl implements PatentService{
 		// ServiceStatusPatent.getPatentStatus(patent);
 		syncPatentStatus(patent);
 
-		if (!StringUtils.isNULL(patent.getPatent_name()) || !StringUtils.isNULL(patent.getPatent_name_en())) {
+		if (syncResult == Constants.INT_SUCCESS) {
 			patent.setIs_sync(true);
 			return Constants.INT_SUCCESS;
 		} else {

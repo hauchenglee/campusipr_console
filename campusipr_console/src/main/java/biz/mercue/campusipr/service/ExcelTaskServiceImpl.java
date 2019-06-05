@@ -545,7 +545,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								}
 							}
 							break;
-							
 						case Constants.SCHOOL_NO_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
@@ -572,6 +571,139 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								}
 							} else {
 								patentExtension.setBusiness_num("");
+								patent.setExtension(patentExtension);
+							}
+							break;
+						case Constants.SCHOOL_APPL_YEAR_FIELD:
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
+								String cellValue = "";
+								
+								// type is numeric --> need to add country name
+								if (cellType == 0) {
+									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
+									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 0 of cellValue: " + cellValue);
+								}
+
+								// type is string
+								if (cellType == 1) {
+									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 1 of cellValue: " + cellValue);
+								}
+
+								log.info(cellValue);
+								if (!StringUtils.isNULL(cellValue)) {
+									patentExtension.setExtension_appl_year(cellValue);
+									patent.setExtension(patentExtension);
+								}
+							} else {
+								patentExtension.setExtension_appl_year("");;
+								patent.setExtension(patentExtension);
+							}
+							break;
+						case Constants.SCHOOL_DEPARTMENT_FIELD:
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								String cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+								patentExtension.setExtension_school_department(cellValue);
+							} else {
+								patentExtension.setExtension_school_department("");;
+								patent.setExtension(patentExtension);
+							}
+							break;
+						case Constants.SCHOOL_SUBSIDY_UNIT:
+							// 補助單位
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								String cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+								patentExtension.setExtension_subsidy_unit(cellValue);
+								log.info(cellValue);
+							} else {
+								patentExtension.setExtension_school_department("");;
+								patent.setExtension(patentExtension);
+							}
+							break;
+						case Constants.SCHOOL_SUBSIDY_NO:
+							// 補助編號
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
+								String cellValue = "";
+								
+								// type is numeric --> need to add country name
+								if (cellType == 0) {
+									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
+									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 0 of cellValue: " + cellValue);
+								}
+
+								// type is string
+								if (cellType == 1) {
+									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 1 of cellValue: " + cellValue);
+								}
+
+								log.info(cellValue);
+								if (!StringUtils.isNULL(cellValue)) {
+									patentExtension.setExtension_subsidy_num(cellValue);
+									patent.setExtension(patentExtension);
+									log.info(cellValue);
+								}
+							} else {
+								patentExtension.setExtension_subsidy_num("");;
+								patent.setExtension(patentExtension);
+							}
+							break;
+						case Constants.SCHOOL_SUBSIDY_PLAN:
+							// 補助計劃名稱
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								String cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+								patentExtension.setExtension_subsidy_plan(cellValue);
+								log.info(cellValue);
+							} else {
+								patentExtension.setExtension_subsidy_plan("");;
+								patent.setExtension(patentExtension);
+							}
+							break;
+						case Constants.SCHOOL_AGENT:
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								String cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+								patentExtension.setExtension_agent(cellValue);
+							} else {
+								patentExtension.setExtension_agent("");;
+								patent.setExtension(patentExtension);
+							}
+							break;
+						case Constants.SCHOOL_AGENT_NO:
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
+								String cellValue = "";
+								
+								// type is numeric --> need to add country name
+								if (cellType == 0) {
+									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
+									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 0 of cellValue: " + cellValue);
+								}
+
+								// type is string
+								if (cellType == 1) {
+									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
+									log.info("type 1 of cellValue: " + cellValue);
+								}
+
+								log.info(cellValue);
+								if (!StringUtils.isNULL(cellValue)) {
+									patentExtension.setExtension_agent_num(cellValue);
+									patent.setExtension(patentExtension);
+								}
+							} else {
+								patentExtension.setExtension_agent_num("");;
 								patent.setExtension(patentExtension);
 							}
 							break;
@@ -607,7 +739,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							break;
 						default:
 							break;
-
 						}
 
 					}

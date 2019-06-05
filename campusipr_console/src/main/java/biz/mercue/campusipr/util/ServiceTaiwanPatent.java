@@ -158,7 +158,7 @@ public class ServiceTaiwanPatent {
 		return list;
 	}
 	
-	public static void getPatentRightByApplNo(Patent patent) {
+	public static int getPatentRightByApplNo(Patent patent) {
 		boolean isSync = false;
 		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s&applclass=%s";
 		String urlSend = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no().replace("TW", "").replace("tw", ""),1);
@@ -175,6 +175,9 @@ public class ServiceTaiwanPatent {
 						JSONObject contentObj = contentArray.optJSONObject(0);
 						convertPatentInfoChS(patent, contentObj);
 						isSync = true;
+					} else {
+						// cannot find data
+						return Constants.INT_CANNOT_FIND_DATA;
 					}
 				}
 			}
@@ -227,19 +230,21 @@ public class ServiceTaiwanPatent {
 					}
 				}
 			}
+			return Constants.INT_SUCCESS;
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			log.error(e.getMessage());
+			return Constants.INT_SYSTEM_PROBLEM;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			log.error(e.getMessage());
+			return Constants.INT_SYSTEM_PROBLEM;
 		} 
 	}
 	
 	private static void convertPatentInfoChS(Patent patent, JSONObject obj) {
-		
 		if (obj != null) {
 			JSONObject patentObj = obj;
 			patent.setPatent_name(patentObj.optJSONObject("patent-title").optString("patent-name-chinese"));

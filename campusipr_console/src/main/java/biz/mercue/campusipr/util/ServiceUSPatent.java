@@ -92,7 +92,7 @@ public class ServiceUSPatent {
 		return list;
 	}
 	
-	public static void getPatentRightByapplNo(Patent patent) {
+	public static int getPatentRightByapplNo(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_US+"?applicationNumber=%s";
 		url = String.format(url, patent.getPatent_appl_no());
 		
@@ -123,20 +123,27 @@ public class ServiceUSPatent {
 						e.printStackTrace();
 					}
 				}
-				log.info("indexPoint:"+indexPoint);
+				// sync correct
 				JSONObject patentObj = patentDocsObj.optJSONObject(indexPoint);
-				String appId = patentObj.optString("applicationNumber");
-				if (patent.getPatent_appl_no().equals(appId)) {
-					convertPatentInfoUS(patent, patentObj);
-					parserBilbo(patent);
+				if (patentObj != null) {
+					String appId = patentObj.optString("applicationNumber");
+					if (patent.getPatent_appl_no().equals(appId)) {
+						convertPatentInfoUS(patent, patentObj);
+						parserBilbo(patent);
+					}
+				} else {
+					return Constants.INT_CANNOT_FIND_DATA;
 				}
 			}
+			return Constants.INT_SUCCESS;
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return Constants.INT_SYSTEM_PROBLEM; 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return Constants.INT_SYSTEM_PROBLEM; 
 		}
 	}
 	
