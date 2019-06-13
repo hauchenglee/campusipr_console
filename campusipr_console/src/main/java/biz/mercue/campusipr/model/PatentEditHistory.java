@@ -68,6 +68,12 @@ public class PatentEditHistory {
 	@Transient
 	@JsonView(View.PatentHistory.class)
 	private String display_status_en;
+	
+	@JsonView(View.PatentHistory.class)
+	private String editor;
+	
+	@JsonView(View.PatentHistory.class)
+	private String business_id;
 
 	public String getHistory_id() {
 		return history_id;
@@ -163,6 +169,22 @@ public class PatentEditHistory {
 
 	public void setDisplay_status_en(String display_status_en) {
 		this.display_status_en = display_status_en;
+	}
+
+	public String getEditor() {
+		return editor;
+	}
+
+	public void setEditor(String editor) {
+		this.editor = editor;
+	}
+
+	public String getBusiness_id() {
+		return business_id;
+	}
+
+	public void setBusiness_id(String business_id) {
+		this.business_id = business_id;
 	}
 	
 	

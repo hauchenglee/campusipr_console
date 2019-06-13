@@ -156,7 +156,7 @@ public class PatentController {
 			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
-			int taskResult = patentService.addPatentByApplNo(patent, tokenBean.getAdmin(), tokenBean.getBusiness());
+			int taskResult = patentService.addPatentByApplNo(patent, tokenBean.getAdmin(), tokenBean.getBusiness(), patent.getSourceFrom());
 			
 			//TODO charles
 //			patentService.syncPatentStatus(patent);
@@ -270,6 +270,17 @@ public class PatentController {
 		}else {
 			return responseBody.getJacksonString(View.PatentEnhance.class);
 		}
+	}
+	
+	@RequestMapping(value="/api/getallpatentbyid/{patentId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String getAllPatentbyId(HttpServletRequest request,@PathVariable String patentId) {
+		log.info("getAllPatentbyId ");
+		BeanResponseBody responseBody  = new BeanResponseBody();
+		Patent patent = patentService.getById(null, patentId);
+		responseBody.setCode(Constants.INT_SUCCESS);
+		responseBody.setBean(patent);
+		return responseBody.getJacksonString(View.PatentDetail.class);
 	}
 	
 	@RequestMapping(value="/api/deletePatentbyId/{patentId}", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)

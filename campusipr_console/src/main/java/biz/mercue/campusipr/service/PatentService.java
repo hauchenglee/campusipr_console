@@ -19,7 +19,7 @@ public interface PatentService {
 	
 	int syncPatentData(Patent patent); 
 	
-	int addPatentByApplNo(Patent patent, Admin admin, Business business);
+	int addPatentByApplNo(Patent patent, Admin admin, Business business, int sourceFrom);
 	
 	int addPatentByExcel(List<Patent> patentList, Admin admin, Business business);
 
@@ -52,8 +52,6 @@ public interface PatentService {
 	
 
 	int combinePatentFamily(PatentFamily family, String businessId, String patentId, Admin tokenAdmin, String ip); 
-	
-	int importPatent(List<Patent> list, Admin admin,Business business);
 
 	Patent getByPatentNo(String patentNo);
 	

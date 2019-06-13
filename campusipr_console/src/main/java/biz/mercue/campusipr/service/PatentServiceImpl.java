@@ -503,7 +503,7 @@ public class PatentServiceImpl implements PatentService{
 		syncPatentStatus(patent);
 
 		if (syncResult == Constants.INT_SUCCESS) {
-			patent.setIs_sync(true);
+			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 			return Constants.INT_SUCCESS;
 		} else {
 			return Constants.INT_CANNOT_FIND_DATA;
@@ -511,42 +511,51 @@ public class PatentServiceImpl implements PatentService{
 	}
 	
 	@Override
-	public int addPatentByApplNo(Patent patent, Admin admin, Business business) {
+	public int addPatentByApplNo(Patent patent, Admin admin, Business business, int sourceFrom) {
 		try {
 			log.info("addPatentByApplNo: ");
-			int taskResult= -1;
-			
+			int taskResult = Constants.INT_SYSTEM_PROBLEM;
+
 			if (patent == null) {
 				return Constants.INT_DATA_ERROR;
 			}
-			
+
 			String applNo = patent.getPatent_appl_no();
 			if (StringUtils.isNULL(applNo)) {
 				return Constants.INT_CANNOT_FIND_DATA;
 			}
 
-			Patent appNoPatent = patentDao.getByApplNo(applNo);
+			Patent dbPatent = patentDao.getByApplNo(applNo);
 			patent.setSync_date(DateUtils.getDayStart(new Date()));
-			patent.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
 			patent.setAdmin(admin);
 			patent.setBusiness(business);
-			if (appNoPatent == null) {
+			
+			if (dbPatent == null) {
 				this.addPatent(patent);
 				taskResult = Constants.INT_SUCCESS;
 			} else {
 				boolean isDuplicate = false;
-				
-				for (Business dbBusinessInList : appNoPatent.getListBusiness()) {
-					if (business.getBusiness_id().equals(dbBusinessInList.getBusiness_id())) {
-						isDuplicate = true;
-						break;
+
+				switch (sourceFrom) {
+				case Constants.PATENT_APPL_SYNC:
+					for (Business dbBusinessInList : dbPatent.getListBusiness()) {
+						if (business.getBusiness_id().equals(dbBusinessInList.getBusiness_id())) {
+							isDuplicate = true;
+							break;
+						}
 					}
+					break;
+				case Constants.PATENT_DETAIL_SYNC:
+					isDuplicate = false;
+					break;
+				default:
+					break;
 				}
-				
+
 				if (isDuplicate) {
-					taskResult =  Constants.INT_DATA_DUPLICATE;
+					taskResult = Constants.INT_DATA_DUPLICATE;
 				} else {
-					patent.setComparePatent(appNoPatent);
+					patent.setComparePatent(dbPatent);
 					taskResult = updatePatent(patent, null);
 				}
 			}
@@ -562,32 +571,48 @@ public class PatentServiceImpl implements PatentService{
 	public int addPatentByExcel(List<Patent> patentList, Admin admin, Business business) {
 		try {
 			log.info("addPatentByExcel: ");
-			int taskResult = -1;
+			int taskResult = Constants.INT_SYSTEM_PROBLEM;
 			if (patentList == null) {
 				return Constants.INT_DATA_ERROR;
 			}
 
-			for (Patent patentInList : patentList) {
-				if (syncPatentData(patentInList) == Constants.INT_DATA_ERROR) {
+			for (Patent editPatent : patentList) {
+				if (syncPatentData(editPatent) == Constants.INT_DATA_ERROR) {
 					return Constants.INT_DATA_ERROR;
 				}
 
-				log.info("patentInList.getPatent_appl_no(): " + patentInList.getPatent_appl_no());
-				Patent appNoPatent = patentDao.getByApplNo(patentInList.getPatent_appl_no());
-				patentInList.setSync_date(DateUtils.getDayStart(new Date()));
-				patentInList.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
-				patentInList.setAdmin(admin);
-				patentInList.setBusiness(business);
-				handleExtension_addAsList(patentInList, business.getBusiness_id());
+				log.info("editPatent.getPatent_appl_no(): " + editPatent.getPatent_appl_no());
+				if (editPatent.getPatentDesc() != null) {
+					String context_desc_all = editPatent.getPatentDesc().getContext_desc();
+					editPatent.getPatentDesc().setPatent_desc_id(KeyGeneratorUtils.generateRandomString());
+					
+					if (context_desc_all.length() > 5000) {
+						String context_desc_5000 = context_desc_all.substring(0, 5000);
+						context_desc_5000 += "...(完整內容請由官方專利局取得)";
+						editPatent.getPatentDesc().setContext_desc(context_desc_5000);
+					}
+					
+					editPatent.getPatentDesc().setPatent(editPatent);
+				}
+				Patent dbPatent = patentDao.getByApplNo(editPatent.getPatent_appl_no());
+				editPatent.setSync_date(DateUtils.getDayStart(new Date()));
+				editPatent.setAdmin(admin);
+				editPatent.setBusiness(business);
 				
-				if (appNoPatent == null) {
-					this.addPatent(patentInList);
+				if (editPatent.getEdit_source() != Patent.EDIT_SOURCE_SERVICE) {
+					editPatent.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
+				}
+				
+				handleExtension_addAsList(editPatent, business.getBusiness_id());
+				
+				if (dbPatent == null) {
+					this.addPatent(editPatent);
 					taskResult = Constants.INT_SUCCESS;
 				} else {
-					patentInList.setComparePatent(appNoPatent);
-					handleExtension_excelCompare(appNoPatent, patentInList, business.getBusiness_id());
-					patentInList.setSourceFrom("excel");
-					taskResult = updatePatent(patentInList, null);
+					editPatent.setComparePatent(dbPatent);
+					handleExtension_excelCompare(dbPatent, editPatent, business.getBusiness_id());
+					editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
+					taskResult = updatePatent(editPatent, null);
 				}
 			}
 			return taskResult;
@@ -672,43 +697,6 @@ public class PatentServiceImpl implements PatentService{
 			dbPatent.setListExtension(editPatent.getListExtension());
 		}
 	}
-	
-	@Override
-	public int importPatent(List<Patent> list, Admin admin,Business business) {
-		int taskResult= -1;
-		log.info("importPatent: ");
-		log.info("business id: " + business.getBusiness_id());
-        for (Patent patent:list) {
-            patent.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
-            patent.setAdmin(admin);
-            patent.setBusiness(business);
-            if(!StringUtils.isNULL(patent.getPatent_appl_no()) && !StringUtils.isNULL(patent.getPatent_appl_country())) {
-                String applNo =  patent.getPatent_appl_no();
-                if (!StringUtils.isNULL(applNo)) {
-                    Patent appNoPatent = patentDao.getByApplNo(applNo);
-                    if(appNoPatent==null) {
-                    	this.addPatent(patent);
-                    	log.info("add Patent");
-                        taskResult = Constants.INT_SUCCESS;
-                    } else {
-                    	patent.setComparePatent(appNoPatent);
-                        taskResult = updatePatent(patent, null);
-                        log.info("update Patent");
-                    }
-                }else {
-                   this.addPatent(patent);
-                }
-            } else {
-                
-                taskResult = Constants.INT_CANNOT_FIND_DATA;
-            }
-        }
-        
-        //TODO how many success imported patent
-        return taskResult;
-	}
-	
-	
 	
 	@Override
 	public int authorizedUpdatePatent(String businessId,Patent patent) {
@@ -821,7 +809,7 @@ public class PatentServiceImpl implements PatentService{
 			handleContact(dbBean, patent);
 			handleAnnuity(dbBean, patent);
 			
-			if (StringUtils.isNULL(patent.getSourceFrom())) {
+			if (patent.getSourceFrom() != Constants.PATENT_EXCEL_IMPORT) {
 				// source from != excel
 				handleExtension(dbBean, patent, businessId);
 			}
@@ -891,6 +879,8 @@ public class PatentServiceImpl implements PatentService{
 			}
 			inputFamilyListData.add(JacksonJSONUtils.mapObjectWithView(patent, View.PatentIdApplNo.class));
 		}
+		
+		// family edit history
 		try {
 			Patent currentPatent = patentDao.getById(patentId);
 			currentPatent.setAdmin(tokenAdmin);
@@ -910,6 +900,7 @@ public class PatentServiceImpl implements PatentService{
 			family.setPatent_family_id(KeyGeneratorUtils.generateRandomString());
 			family.setCreate_date(new Date ());
 			family.setUpdate_date(new Date());
+			family.setBusiness_id(inputFamily.getBusiness_id());
 			familyDao.create(family);
 			for(Patent patent : list) {
 				family.addPatent(patent);
@@ -921,9 +912,9 @@ public class PatentServiceImpl implements PatentService{
 				log.info("patent :"+patent.getPatent_id());
 				if(patent.getFamily() == null) {
 					family.addPatent(patent);
-					
 				}
 			}
+			family.setBusiness_id(inputFamily.getBusiness_id());
 		}
 		
 		//check patent family if not in inputFamily and remove it
@@ -1909,6 +1900,67 @@ public class PatentServiceImpl implements PatentService{
 		}
 	}
 	
+	private void handlePatentStatus(Patent dbPatent, Patent editPatent) {
+		HashMap<String, PatentStatus> newMapping = new HashMap<String, PatentStatus>();
+		HashMap<String, PatentStatus> dbMapping = new HashMap<String, PatentStatus>();
+		if (editPatent.getListPatentStatus() != null) {
+			for (PatentStatus patentStatus : editPatent.getListPatentStatus()) {
+				Status status = patentStatus.getStatus();
+				if (StringUtils.isNULL(status.getStatus_id())) {
+					status.setStatus_id(KeyGeneratorUtils.generateRandomString());
+					statusDao.create(status);
+				}
+				patentStatus.setStatus(status);
+				patentStatus.setPatent(editPatent);
+				if (patentStatus.getCreate_date() != null) {
+					String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
+					newMapping.put(patentStatus.getStatus().getStatus_id() + "-" + dateStr, patentStatus);
+				}
+			}
+
+			for (PatentStatus patentStatus : dbPatent.getListPatentStatus()) {
+				Status status = patentStatus.getStatus();
+				if (patentStatus.getCreate_date() != null) {
+					String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
+					dbMapping.put(status.getStatus_id() + "-" + dateStr, patentStatus);
+				}
+			}
+
+			for (PatentStatus patentStatus : editPatent.getListPatentStatus()) {
+				Status status = patentStatus.getStatus();
+				if (patentStatus.getCreate_date() != null) {
+					String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
+					if (!dbMapping.containsKey(status.getStatus_id() + "-" + dateStr)) {
+						dbPatent.addPatentStatus(patentStatus);
+					}
+				}
+			}
+		}
+		if (dbPatent.getListPatentStatus() != null) {
+			Iterator<PatentStatus> iterator = dbPatent.getListPatentStatus().iterator();
+			while (iterator.hasNext()) {
+				PatentStatus patentStatus = iterator.next();
+				Status status = patentStatus.getStatus();
+				String dateStr = DateUtils.getDashFormatDate(patentStatus.getCreate_date());
+				if (!newMapping.containsKey(status.getStatus_id() + "-" + dateStr)) {
+					if (editPatent.getEdit_source() == Patent.EDIT_SOURCE_HUMAN) {
+						if ("user".equals(status.getStatus_from())) {
+							iterator.remove();
+						} else {
+							// human
+							editPatent.addStatus(status);
+						}
+					} else if (editPatent.getEdit_source() == Patent.EDIT_SOURCE_SERVICE) {
+						if ("uspto".equals(status.getStatus_from()) || "epo".equals(status.getStatus_from())) {
+							iterator.remove();
+						} else {
+							editPatent.addStatus(status);
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	private void getDisplayEditHistory(List<PatentEditHistory> list) {
 		for(PatentEditHistory history : list) {

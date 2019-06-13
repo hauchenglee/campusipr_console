@@ -283,7 +283,7 @@ public class Constants {
 	public static final String SCHOOL_SUBSIDY_PLAN = "c5baefafea5a98a6cbcb45820a9c78d6";
 	public static final String SCHOOL_AGENT = "853e5ab43383cc325c0b8fe18cb46014";
 	public static final String SCHOOL_AGENT_NO = "f8b56e61ee5e6e36abd538f71ae32c8f";
-	public static final String SCHOOL_MEMO_FIELD = "c53e8e4e240d9d7a0f1bcb956fbe7630";
+	public static final String SCHOOL_MEMO_FIELD = "8e04eb78ced23ee1d7f7b0ac2e86ee45";
 	public static final String PATENT_MEMO = "c53e8e4e240d9d7a0f1bcb956fbe7630";
 	
 	public static final String APPL_COUNTRY_TW = "tw";
@@ -357,4 +357,8 @@ public class Constants {
 	public static String URL_PATENT_CONTENT  = "";
 	
 	public static final List<Integer> defaultReminderDays = Arrays.asList(90, 30, 7, -1); 
+	
+	public static final int PATENT_APPL_SYNC = 1;
+	public static final int PATENT_DETAIL_SYNC = 2;
+	public static final int PATENT_EXCEL_IMPORT = 3;
 }

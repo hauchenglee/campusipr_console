@@ -11,8 +11,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,6 +52,8 @@ import biz.mercue.campusipr.util.FileUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.StringUtils;
 
+import static java.util.Map.Entry.comparingByValue;
+import static java.util.stream.Collectors.toMap;
 
 
 
@@ -214,7 +220,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						File excel = new File(Constants.FILE_UPLOAD_PATH+File.separator+dbBean.getTask_file_name());
 						fileInputStream = new FileInputStream(excel);
 					    Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
-					    List<Patent>listPatent = readBook2Patent(book, filedList, 1);
+					    List<Patent>listPatent = readBook2Patent(book, filedList, null, 1);
 					    log.info("listPatent:"+listPatent.size());
 					    bean.setListPatent(listPatent);
 						return Constants.INT_SUCCESS;
@@ -252,13 +258,14 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		try {
 			if(dbBean !=null) {
 				List<FieldMap> filedList = bean.getListMap();
+				List<Integer> other_info_index = bean.getOther_info_index();				
 				if(filedList.size() > 0) {
 					Map<String, FieldMap> maps = convertFieldList2Map(filedList);
 					if(checkRequiredField(maps)) {
 						File excel = new File(Constants.FILE_UPLOAD_PATH+File.separator+dbBean.getTask_file_name());
 						fileInputStream = new FileInputStream(excel);
 					    Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
-						List<Patent> listPatent = this.readBook2Patent(book, filedList, 0);
+						List<Patent> listPatent = this.readBook2Patent(book, filedList, other_info_index, 0);
 
 						if (listPatent == null || listPatent.size() == 0) {
 							mapPatent.put(Constants.INT_DATA_ERROR, null);
@@ -345,17 +352,15 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	}
 	
 	
-	private List<Patent> readBook2Patent(Workbook book, List<FieldMap> listField, int size) {
+	private List<Patent> readBook2Patent(Workbook book, List<FieldMap> listField, List<Integer> other_info_index, int size) {
 		log.info("readBook2Patent");
 		List<Patent> listPatent = new ArrayList<Patent>();
 		Sheet sheet = book.getSheetAt(0);
 		int rowIndex = 0;
-		int cellIndex = 0;
 		
 		List<Country> listCountry = countryDao.getAll();
 		whenPatentApplNoIsNull: for (Row row : sheet) {
 			log.info("Row");
-			cellIndex = 0;
 			if (rowIndex == 0) {
 				log.info("Title Row");
 			} else {
@@ -366,6 +371,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				String countryName = null;
 				Patent patent = new Patent();
 				PatentExtension patentExtension = new PatentExtension();
+				boolean isApplNoNull = true;
 				for (FieldMap fieldMap : listField) {
 					if (fieldMap.getExcel_field_index() != -1) {
 						PatentField  field= fieldMap.getField();
@@ -375,21 +381,35 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						log.info("index:"+fieldMap.getExcel_field_index());
 						switch (fieldMap.getField().getField_id()) {
 						case Constants.PATENT_NAME_FIELD:
-							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-								patent.setPatent_name(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
+							log.info(fieldMap.getExcel_field_index());
+//							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
+//								patent.setPatent_name(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
+//							}
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
+								if (!StringUtils.isNULL(cellValue)) {
+									patent.setPatent_name(cellValue);
+								}
 							}
 							log.info("patent name:"+patent.getPatent_name());
 							break;
 						case Constants.PATENT_NAME_EN_FIELD:
-							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-								patent.setPatent_name_en(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
+							log.info(fieldMap.getExcel_field_index());
+//							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
+//								patent.setPatent_name_en(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
+//							}
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
+								if (!StringUtils.isNULL(cellValue)) {
+									patent.setPatent_name_en(cellValue);
+								}
 							}
 							//log.info("patent appl no:"+patent.getPatent_appl_no());
 							break;
-
-
-
 						case Constants.PATENT_COUNTRY_FIELD:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								countryName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue();
 								
@@ -404,13 +424,21 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;
 						case Constants.PATENT_NO_FIELD:
-							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-								patent.setPatent_no(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
+							log.info(fieldMap.getExcel_field_index());
+//							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
+//								patent.setPatent_no(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
+//							}
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
+								if (!StringUtils.isNULL(cellValue)) {
+									patent.setPatent_no(cellValue);
+								}
 							}
 							log.info("patent no:"+patent.getPatent_no());
 							break;
-
 						case Constants.PATENT_APPL_NO_FIELD:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
 								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
@@ -418,7 +446,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 
 								// type is null --> jump out for loop
 								if (cellType == 3) {
-									log.info("type is 3");
+									isApplNoNull = true;
 									break;
 								}
 								
@@ -432,9 +460,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 										}
 									}
 								}
-
-								log.info("country name: " + countryName);
-								log.info("countryAddName: " + countryAddName);
 								
 								if (StringUtils.isNULL(countryAddName)) {
 									listPatent = null;
@@ -445,24 +470,19 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								if (cellType == 0) {
 									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
 									patentApplNo = countryAddName + row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 0 of patentApplNo: " + patentApplNo);
 								}
 								
 								// type is string
 								if (cellType == 1) {
 									patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 1 of patentApplNo: " + patentApplNo);
-									
 									// resolve cell value is number but cell type is string
 									if (!patentApplNo.substring(0, 2).equalsIgnoreCase(countryAddName)) {
 										patentApplNo = countryAddName + row.getCell(excelFieldIndex).getStringCellValue();
-										log.info("type 1 of patentApplNo after add country name: " + patentApplNo);
 									}
 								}
 								
 								// check country name equals patent appl no country name
 								String countryStartName = patentApplNo.substring(0, 2); // patent appl no start country name, e.g. tw, us or cn
-								log.info("countryStartName: " + countryStartName);
 
 								// check country field name is equals patent appl no or not
 								if (!countryAddName.equalsIgnoreCase(countryStartName)) {
@@ -471,25 +491,27 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 									break whenPatentApplNoIsNull;
 								}
 								patent.setPatent_appl_no(patentApplNo);
+								isApplNoNull = false;
 							}
 							break;
 						case Constants.PATENT_APPL_DATE_FIELD:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								Cell cellApplDate = row.getCell(fieldMap.getExcel_field_index());
 								Date applDate = parseDateCell(cellApplDate);
 								patent.setPatent_appl_date(applDate);
 							}
 							break;
-							
 						case Constants.PATENT_PUBLISH_DATE_FIELD:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								Cell cellPublishDate = row.getCell(fieldMap.getExcel_field_index());
 								Date pubDate = parseDateCell(cellPublishDate);
 								patent.setPatent_publish_date(pubDate);
 							}
 							break;
-							
 						case Constants.PATENT_NOTICE_DATE_FIELD:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								Cell cellNoticeDate = row.getCell(fieldMap.getExcel_field_index());
 								Date noticeDate = parseDateCell(cellNoticeDate);
@@ -497,6 +519,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;			
 						case Constants.APPLIANT_NAME_FIELD:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								Cell cellAppliant = row.getCell(fieldMap.getExcel_field_index());
 								List<String[]> listAppliantName = parseHumanCell(cellAppliant);
@@ -513,6 +536,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;
 						case Constants.ASSIGNEE_NAME_FIELD:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								Cell cellAssignee = row.getCell(fieldMap.getExcel_field_index());
 								List<String[]> listAssigneeName = parseHumanCell(cellAssignee);
@@ -530,6 +554,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							break;
 							
 						case Constants.INVENTOR_NAME_FIELD:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								Cell cellInventor = row.getCell(fieldMap.getExcel_field_index());
 								List<String[]> listInventorName = parseHumanCell(cellInventor);
@@ -546,54 +571,24 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;
 						case Constants.SCHOOL_NO_FIELD:
-							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
+							log.info(fieldMap.getExcel_field_index());
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
-								String cellValue = "";
-
-								// type is numeric --> need to add country name
-								if (cellType == 0) {
-									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
-									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 0 of cellValue: " + cellValue);
-								}
-
-								// type is string
-								if (cellType == 1) {
-									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 1 of cellValue: " + cellValue);
-								}
-
-								log.info(cellValue);
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
 								if (!StringUtils.isNULL(cellValue)) {
 									patentExtension.setBusiness_num(cellValue);
 									patent.setExtension(patentExtension);
 								}
 							} else {
-								patentExtension.setBusiness_num("");
+								patentExtension.setBusiness_num("");;
 								patent.setExtension(patentExtension);
 							}
 							break;
 						case Constants.SCHOOL_APPL_YEAR_FIELD:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
-								String cellValue = "";
-								
-								// type is numeric --> need to add country name
-								if (cellType == 0) {
-									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
-									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 0 of cellValue: " + cellValue);
-								}
-
-								// type is string
-								if (cellType == 1) {
-									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 1 of cellValue: " + cellValue);
-								}
-
-								log.info(cellValue);
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
 								if (!StringUtils.isNULL(cellValue)) {
 									patentExtension.setExtension_appl_year(cellValue);
 									patent.setExtension(patentExtension);
@@ -604,52 +599,43 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;
 						case Constants.SCHOOL_DEPARTMENT_FIELD:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-								String cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-								patentExtension.setExtension_school_department(cellValue);
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
+								if (!StringUtils.isNULL(cellValue)) {
+									patentExtension.setExtension_school_department(cellValue);
+									patent.setExtension(patentExtension);
+								}
 							} else {
 								patentExtension.setExtension_school_department("");;
 								patent.setExtension(patentExtension);
 							}
 							break;
 						case Constants.SCHOOL_SUBSIDY_UNIT:
+							log.info(fieldMap.getExcel_field_index());
 							// 補助單位
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-								String cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-								patentExtension.setExtension_subsidy_unit(cellValue);
-								log.info(cellValue);
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
+								if (!StringUtils.isNULL(cellValue)) {
+									patentExtension.setExtension_subsidy_unit(cellValue);
+									patent.setExtension(patentExtension);
+								}
 							} else {
-								patentExtension.setExtension_school_department("");;
+								patentExtension.setExtension_subsidy_unit("");;
 								patent.setExtension(patentExtension);
 							}
 							break;
 						case Constants.SCHOOL_SUBSIDY_NO:
+							log.info(fieldMap.getExcel_field_index());
 							// 補助編號
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
-								String cellValue = "";
-								
-								// type is numeric --> need to add country name
-								if (cellType == 0) {
-									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
-									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 0 of cellValue: " + cellValue);
-								}
-
-								// type is string
-								if (cellType == 1) {
-									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 1 of cellValue: " + cellValue);
-								}
-
-								log.info(cellValue);
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
 								if (!StringUtils.isNULL(cellValue)) {
 									patentExtension.setExtension_subsidy_num(cellValue);
 									patent.setExtension(patentExtension);
-									log.info(cellValue);
 								}
 							} else {
 								patentExtension.setExtension_subsidy_num("");;
@@ -657,47 +643,39 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;
 						case Constants.SCHOOL_SUBSIDY_PLAN:
+							log.info(fieldMap.getExcel_field_index());
 							// 補助計劃名稱
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-								String cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-								patentExtension.setExtension_subsidy_plan(cellValue);
-								log.info(cellValue);
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
+								if (!StringUtils.isNULL(cellValue)) {
+									patentExtension.setExtension_subsidy_plan(cellValue);
+									patent.setExtension(patentExtension);
+								}
 							} else {
 								patentExtension.setExtension_subsidy_plan("");;
 								patent.setExtension(patentExtension);
 							}
 							break;
 						case Constants.SCHOOL_AGENT:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-								String cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-								patentExtension.setExtension_agent(cellValue);
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
+								if (!StringUtils.isNULL(cellValue)) {
+									patentExtension.setExtension_agent(cellValue);
+									patent.setExtension(patentExtension);
+								}
 							} else {
 								patentExtension.setExtension_agent("");;
 								patent.setExtension(patentExtension);
 							}
 							break;
 						case Constants.SCHOOL_AGENT_NO:
+							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
-								String cellValue = "";
-								
-								// type is numeric --> need to add country name
-								if (cellType == 0) {
-									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
-									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 0 of cellValue: " + cellValue);
-								}
-
-								// type is string
-								if (cellType == 1) {
-									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 1 of cellValue: " + cellValue);
-								}
-
-								log.info(cellValue);
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
 								if (!StringUtils.isNULL(cellValue)) {
 									patentExtension.setExtension_agent_num(cellValue);
 									patent.setExtension(patentExtension);
@@ -708,27 +686,12 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;
 						case Constants.SCHOOL_MEMO_FIELD:
-							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
+							log.info(fieldMap.getExcel_field_index());
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
-								String cellValue = "";
-								
-								// type is numeric --> need to add country name
-								if (cellType == 0) {
-									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
-									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 0 of cellValue: " + cellValue);
-								}
-
-								// type is string
-								if (cellType == 1) {
-									cellValue = row.getCell(excelFieldIndex).getStringCellValue();
-									log.info("type 1 of cellValue: " + cellValue);
-								}
-
-								log.info(cellValue);
+								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
 								if (!StringUtils.isNULL(cellValue)) {
-									log.info("cell is null");
+									log.info(cellValue);
 									patentExtension.setExtension_memo(cellValue);
 									patent.setExtension(patentExtension);
 								}
@@ -742,6 +705,32 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						}
 
 					}
+				} // close for (FieldMap fieldMap : listField)
+				
+				// handle not select title and index, and iterator field not select value
+				Map<String, Integer> sorted = handleTitleMap(book, other_info_index);
+				String appendOtherInfo = "";
+
+				if (other_info_index.size() > 0 && !isApplNoNull) {
+					for (Map.Entry map : sorted.entrySet()) {
+						Integer fieldIndex = (Integer) map.getValue();
+						String fieldTitle = (String) map.getKey();
+						if (row.getCell(fieldIndex) != null) {
+							String cellValue = getCellValue_byInputString(row, fieldIndex);
+							if (!StringUtils.isNULL(cellValue)) {
+								appendOtherInfo += fieldTitle + "：" + cellValue + "\n";
+							}
+						}
+					}
+				} // close if (other_info_index.size() > 0 && !isApplNoNull)
+				log.info(appendOtherInfo);
+
+				if (!StringUtils.isNULL(appendOtherInfo)) {
+					patentExtension.setExtension_other_information(appendOtherInfo);
+					patent.setExtension(patentExtension);
+				} else {
+					patentExtension.setExtension_other_information("");
+					patent.setExtension(patentExtension);
 				}
 
 				log.info("patent add");
@@ -758,6 +747,76 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		return listPatent;
 		
 
+	}
+	
+	private String getCellValue_byInputString(Row row, int fieldIndex) {
+		int cellType = row.getCell(fieldIndex).getCellType(); // cell type
+		String cellValue = "";
+		
+		/**
+		 * CELL_TYPE_NUMERIC -> 0
+		 * CELL_TYPE_STRING -> 1
+		 * CELL_TYPE_FORMULA -> 2
+		 * CELL_TYPE_BLANK -> 3
+		 * CELL_TYPE_BOOLEAN -> 4
+		 * CELL_TYPE_ERROR -> 5
+		 */
+		switch(cellType) {
+		case 0:
+			row.getCell(fieldIndex).setCellType(Cell.CELL_TYPE_STRING);
+			cellValue = row.getCell(fieldIndex).getStringCellValue();
+			break;
+		case 1:
+			cellValue = row.getCell(fieldIndex).getStringCellValue();
+			break;
+		case 2:
+			break;
+		case 3:
+			break;
+		case 4:
+			row.getCell(fieldIndex).setCellType(Cell.CELL_TYPE_STRING);
+			cellValue = row.getCell(fieldIndex).getStringCellValue();
+			break;
+		case 5:
+			break;
+		}
+		
+		return cellValue;
+	}
+	
+	private Map<String, Integer> handleTitleMap(Workbook book, List<Integer> other_info_index) {
+		Map<String, Integer> otherInfoTitleMap = new TreeMap<>();
+		Map<String, Integer> readExcelTitleMap;
+		try {
+			readExcelTitleMap = ExcelUtils.readExcelTitle(book);
+			for (Integer fieldIndex : other_info_index) {
+				for (Map.Entry map : readExcelTitleMap.entrySet()) {
+		            if (fieldIndex == (Integer) map.getValue()) {
+		            	otherInfoTitleMap.put((String) map.getKey(), fieldIndex);
+		            }
+		        }
+			}
+			
+		    Map<String, Integer> sorted = otherInfoTitleMap
+		            .entrySet()
+		            .stream()
+		            .sorted(comparingByValue())
+		            .collect(
+		                toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2,
+		                    LinkedHashMap::new));
+		    
+		    sorted = otherInfoTitleMap
+		            .entrySet()
+		            .stream()
+		            .sorted(comparingByValue())
+		            .collect(
+		                toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2,
+		                    LinkedHashMap::new));
+		    return sorted;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new HashMap<>();
+		}
 	}
 	
 	private Date parseDateCell(Cell cell) {
@@ -914,20 +973,4 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		}
 		return resultStr;
 	}
-
-	
-	
-
-
-	
-
-	
-
-
-
-
-
-
-
-	
 }

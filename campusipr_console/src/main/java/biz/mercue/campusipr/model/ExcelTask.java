@@ -57,6 +57,10 @@ public class ExcelTask extends BaseBean {
 	@JsonView(View.ExcelTask.class)
 	@Transient
 	private List<Patent> listPatent;
+	
+	
+	@Transient
+	private List<Integer> other_info_index;
 
 	public String getExcel_task_id() {
 		return excel_task_id;
@@ -138,4 +142,12 @@ public class ExcelTask extends BaseBean {
 		this.listPatent = listPatent;
 	}
 
+	public List<Integer> getOther_info_index() {
+		return other_info_index;
+	}
+
+	public void setOther_info_index(List<Integer> other_info_index) {
+		this.other_info_index = other_info_index;
+	}
+	
 }

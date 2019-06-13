@@ -42,9 +42,6 @@ public class FieldMap {
 	@JsonView(View.FieldMap.class)
 	private Date create_date;
 	
-	@Transient
-	private List<Integer> other_info_index;
-	
 	
 	private Date update_date;
 
