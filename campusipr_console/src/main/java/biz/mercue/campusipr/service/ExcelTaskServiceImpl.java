@@ -881,8 +881,9 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		
 		String s1 = cellValue.replaceAll("、", "，");
 		String s2 = s1.replaceAll("；", "，");
-		String s3 = s2.replaceAll("\n", "，");
-		String[] newLineName = s3.split("，");
+		String s3 = s2.replaceAll(";", "，");
+		String s4 = s3.replaceAll("\n", "，");
+		String[] newLineName = s4.split("，");
 		
 		for (String s : newLineName) {
 			listName.add(s);
