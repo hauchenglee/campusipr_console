@@ -372,24 +372,23 @@ public class ServiceTaiwanPatent {
 			patent.setListAssignee(listAssignee);
 					
 			getPatentAlteration(patent);
-					
-			if (patent.getListApplicant() == null) {
-				List<Applicant> listAppl = new ArrayList<Applicant>();
-				JSONArray appl = patentObj.optJSONObject("parties").optJSONArray("applicants");
-						
-				for (int applIndex = 0; applIndex < appl.length(); applIndex++) {
-					JSONObject applObj = appl.optJSONObject(applIndex);
-					Applicant applicant = new Applicant();
-					applicant.setApplicant_name(applObj.optString("chinese-name"));
-					applicant.setApplicant_name_en(applObj.optString("english-name"));
-					applicant.setCountry_id(applObj.optString("english-country"));
-					applicant.setCountry_name(applObj.optString("chinese-country"));
-					applicant.setApplicant_address(applObj.optString("address"));
-					applicant.setApplicant_address_en(applObj.optString("english-address"));
-					applicant.setApplicant_order(applObj.optInt("-sequence"));
-					applicant.setPatent(patent);
-					listAppl.add(applicant);
-				}
+
+			List<Applicant> listAppl = new ArrayList<Applicant>();
+			JSONArray appl = patentObj.optJSONObject("parties").optJSONArray("applicants");
+
+			for (int applIndex = 0; applIndex < appl.length(); applIndex++) {
+				JSONObject applObj = appl.optJSONObject(applIndex);
+				Applicant applicant = new Applicant();
+				applicant.setApplicant_name(applObj.optString("chinese-name"));
+				applicant.setApplicant_name_en(applObj.optString("english-name"));
+				applicant.setCountry_id(applObj.optString("english-country"));
+				applicant.setCountry_name(applObj.optString("chinese-country"));
+				applicant.setApplicant_address(applObj.optString("address"));
+				applicant.setApplicant_address_en(applObj.optString("english-address"));
+				applicant.setApplicant_order(applObj.optInt("-sequence"));
+				applicant.setPatent(patent);
+				listAppl.add(applicant);
+				log.info(applicant.getApplicant_name());
 				patent.setListApplicant(listAppl);
 			}
 					

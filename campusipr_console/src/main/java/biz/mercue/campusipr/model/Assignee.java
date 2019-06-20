@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 public class Assignee extends BaseBean {
 	
 	@Id
-	@JsonView(View.PatentDetail.class)
+	@JsonView({View.PatentDetail.class, View.PatentHistoryExcel.class})
 	private String assignee_id;
 	
 	@ManyToOne
@@ -24,7 +24,7 @@ public class Assignee extends BaseBean {
 	private Patent patent;
 	
 	
-	@JsonView(View.PatentDetail.class)
+	@JsonView({View.PatentDetail.class, View.PatentHistoryExcel.class})
 	private String assignee_name;
 	
 	

@@ -21,11 +21,13 @@ public interface PatentService {
 	
 	int addPatentByApplNo(Patent patent, Admin admin, Business business, int sourceFrom);
 	
-	int addPatentByExcel(List<Patent> patentList, Admin admin, Business business);
+	int addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip);
 
 	int syncPatentsByApplicant(List<Patent> list, String adminId, String businessId, String ip);
 
 	int updatePatent(Patent patent, String businessId);
+	
+	void patentHistoryFirstAdd(Patent patent, String businessId);
 	
 	int authorizedUpdatePatent(String businessId,Patent patent);
 

@@ -381,35 +381,27 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						log.info("index:"+fieldMap.getExcel_field_index());
 						switch (fieldMap.getField().getField_id()) {
 						case Constants.PATENT_NAME_FIELD:
-							log.info(fieldMap.getExcel_field_index());
-//							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-//								patent.setPatent_name(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
-//							}
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
 								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
 								if (!StringUtils.isNULL(cellValue)) {
 									patent.setPatent_name(cellValue);
+									patent.setPatent_excel_name(cellValue);
 								}
 							}
 							log.info("patent name:"+patent.getPatent_name());
 							break;
 						case Constants.PATENT_NAME_EN_FIELD:
-							log.info(fieldMap.getExcel_field_index());
-//							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-//								patent.setPatent_name_en(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
-//							}
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
 								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
 								if (!StringUtils.isNULL(cellValue)) {
 									patent.setPatent_name_en(cellValue);
+									patent.setPatent_excel_name_en(cellValue);
 								}
 							}
-							//log.info("patent appl no:"+patent.getPatent_appl_no());
 							break;
 						case Constants.PATENT_COUNTRY_FIELD:
-							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								countryName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue();
 								
@@ -424,10 +416,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;
 						case Constants.PATENT_NO_FIELD:
-							log.info(fieldMap.getExcel_field_index());
-//							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-//								patent.setPatent_no(row.getCell(fieldMap.getExcel_field_index()).getStringCellValue());
-//							}
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
 								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
@@ -438,7 +426,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							log.info("patent no:"+patent.getPatent_no());
 							break;
 						case Constants.PATENT_APPL_NO_FIELD:
-							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
 								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
@@ -495,7 +482,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;
 						case Constants.PATENT_APPL_DATE_FIELD:
-							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								Cell cellApplDate = row.getCell(fieldMap.getExcel_field_index());
 								Date applDate = parseDateCell(cellApplDate);
@@ -503,7 +489,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;
 						case Constants.PATENT_PUBLISH_DATE_FIELD:
-							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								Cell cellPublishDate = row.getCell(fieldMap.getExcel_field_index());
 								Date pubDate = parseDateCell(cellPublishDate);
@@ -511,7 +496,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;
 						case Constants.PATENT_NOTICE_DATE_FIELD:
-							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								Cell cellNoticeDate = row.getCell(fieldMap.getExcel_field_index());
 								Date noticeDate = parseDateCell(cellNoticeDate);
@@ -519,55 +503,51 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;			
 						case Constants.APPLIANT_NAME_FIELD:
-							log.info(fieldMap.getExcel_field_index());
-							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-								Cell cellAppliant = row.getCell(fieldMap.getExcel_field_index());
-								List<String[]> listAppliantName = parseHumanCell(cellAppliant);
-								if(listAppliantName !=  null && listAppliantName.size() >0) {
-									List<Applicant> listApplicant = new ArrayList<Applicant>();
-									for(String[] array : listAppliantName) {
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
+								List<String> list_name = parseHumanCellNewPattern(cellValue);
+								List<Applicant> listApplicant = new ArrayList<Applicant>();
+								if (list_name != null && list_name.size() > 0) {
+									for (String name : list_name) {
 										Applicant applicant = new Applicant();
-										applicant.setApplicant_name(array[0]);
-										applicant.setApplicant_name_en(array[1]);
+										applicant.setApplicant_name(name);
 										listApplicant.add(applicant);
 									}
-									patent.setListApplicant(listApplicant);
 								}
+								patent.setListApplicant(listApplicant);
+								patent.setPatent_excel_applicant(listApplicant);
 							}
 							break;
 						case Constants.ASSIGNEE_NAME_FIELD:
-							log.info(fieldMap.getExcel_field_index());
-							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-								Cell cellAssignee = row.getCell(fieldMap.getExcel_field_index());
-								List<String[]> listAssigneeName = parseHumanCell(cellAssignee);
-								if(listAssigneeName !=  null && listAssigneeName.size() >0) {
-									List<Assignee> listAssignee = new ArrayList<Assignee>();
-									for(String[] array : listAssigneeName) {
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
+								List<String> list_name = parseHumanCellNewPattern(cellValue);
+								List<Assignee> listAssignee = new ArrayList<Assignee>();
+								if (list_name != null && list_name.size() > 0) {
+									for (String name : list_name) {
 										Assignee assignee = new Assignee();
-										assignee.setAssignee_name(array[0]);
-										assignee.setAssignee_name_en(array[1]);
+										assignee.setAssignee_name(name);
 										listAssignee.add(assignee);
 									}
-									patent.setListAssignee(listAssignee);
 								}
+								patent.setListAssignee(listAssignee);
+								patent.setPatent_excel_assignee(listAssignee);
 							}
 							break;
-							
 						case Constants.INVENTOR_NAME_FIELD:
-							log.info(fieldMap.getExcel_field_index());
-							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
-								Cell cellInventor = row.getCell(fieldMap.getExcel_field_index());
-								List<String[]> listInventorName = parseHumanCell(cellInventor);
-								if(listInventorName !=  null && listInventorName.size() >0) {
-									List<Inventor> listInventor = new ArrayList<Inventor>();
-									for(String[] array : listInventorName) {
-										Inventor inventor = new Inventor();
-										inventor.setInventor_name(array[0]);
-										inventor.setInventor_name_en(array[1]);
-										listInventor.add(inventor);
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+								Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
+								List<String> list_name = parseHumanCellNewPattern(cellValue);
+								List<Inventor> listInventor = new ArrayList<Inventor>();
+								if (list_name != null && list_name.size() > 0) {
+									for (String name : list_name) {
+										Inventor inv = new Inventor();
+										inv.setInventor_name(name);
+										listInventor.add(inv);
 									}
-									patent.setListInventor(listInventor);
 								}
+								patent.setListInventor(listInventor);
+								patent.setPatent_excel_inventor(listInventor);
 							}
 							break;
 						case Constants.SCHOOL_NO_FIELD:
@@ -578,6 +558,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								if (!StringUtils.isNULL(cellValue)) {
 									patentExtension.setBusiness_num(cellValue);
 									patent.setExtension(patentExtension);
+									patent.setPatent_excel_school_no(cellValue);
 								}
 							} else {
 								patentExtension.setBusiness_num("");;
@@ -592,6 +573,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								if (!StringUtils.isNULL(cellValue)) {
 									patentExtension.setExtension_appl_year(cellValue);
 									patent.setExtension(patentExtension);
+									patent.setPatent_excel_school_appl_year(cellValue);
 								}
 							} else {
 								patentExtension.setExtension_appl_year("");;
@@ -694,6 +676,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 									log.info(cellValue);
 									patentExtension.setExtension_memo(cellValue);
 									patent.setExtension(patentExtension);
+									patent.setPatent_excel_memo(cellValue);
 								}
 							} else {
 								patentExtension.setExtension_memo("");
@@ -892,6 +875,21 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		return  data;
     }
 	
+	private List<String> parseHumanCellNewPattern(Cell cell) {
+		List<String> listName = new ArrayList<String>();
+		String cellValue = cell.getStringCellValue();
+		
+		String s1 = cellValue.replaceAll("、", "，");
+		String s2 = s1.replaceAll("；", "，");
+		String s3 = s2.replaceAll("\n", "，");
+		String[] newLineName = s3.split("，");
+		
+		for (String s : newLineName) {
+			listName.add(s);
+		}
+		
+		return listName;
+	}
 	
 	private List<String[]>  parseHumanCell(Cell cell) {
 		List<String[]> list = new ArrayList<String[]>();

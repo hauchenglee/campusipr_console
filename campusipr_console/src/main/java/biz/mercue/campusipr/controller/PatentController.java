@@ -505,6 +505,7 @@ public class PatentController {
 		log.info("submitExcelTask ");
 		BeanResponseBody responseBody = new BeanResponseBody();
 		Map<Integer, List<Patent>> mapPatent = new HashMap<>();
+		String ip = request.getRemoteAddr();
 		try {
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
 			if (tokenBean != null) {
@@ -517,7 +518,7 @@ public class PatentController {
 					log.info("mapPatentKey: " + mapPatentKey);
 					switch (mapPatentKey) {
 					case Constants.INT_SUCCESS:
-						responseBodyCode = patentService.addPatentByExcel(mapPatent.get(mapPatentKey), tokenBean.getAdmin(), tokenBean.getBusiness());
+						responseBodyCode = patentService.addPatentByExcel(mapPatent.get(mapPatentKey), tokenBean.getAdmin(), tokenBean.getBusiness(), ip);
 						log.info("responseBodyCode: " + responseBodyCode);
 						break;
 					case Constants.INT_DATA_ERROR:

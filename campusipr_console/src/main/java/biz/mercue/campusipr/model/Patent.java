@@ -254,7 +254,7 @@ public class Patent extends BaseBean{
 	private String admin_ip;
 	
 	@Transient
-	private int edit_source;
+	private int edit_source; // use for server sync or human -> Patent.xxx
 	
 	@Transient
 	public static final int EDIT_SOURCE_HUMAN = 1;
@@ -267,8 +267,48 @@ public class Patent extends BaseBean{
 	public static final int EDIT_SOURCE_IMPORT =3;
 	
 	@Transient
-	public int sourceFrom;
+	public int sourceFrom; // use for patent source from excel or not -> Constants.xxx
+	
+	@Transient
+	public boolean isFirstAddEditHistory;
+	
+	@Transient
+	public boolean isApplNoDuplicate_diffBusiness;
+	
+	@Transient
+	public String patent_excel_name;
+	
+	@Transient
+	public String patent_excel_name_en;
+	
+	@Transient
+	@JsonView(View.PatentHistoryExcel.class)
+	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
+	@OrderBy("assignee_order")
+	private List<Assignee> patent_excel_assignee;
+	
+	//all
+	@Transient
+	@JsonView(View.PatentHistoryExcel.class)
+	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
+	@OrderBy("applicant_order")
+	private List<Applicant> patent_excel_applicant;
+	
+	//all
+	@Transient
+	@JsonView(View.PatentHistoryExcel.class)
+	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
+	@OrderBy("inventor_order")
+	private List<Inventor> patent_excel_inventor;
 
+	@Transient
+	private String patent_excel_school_no;
+	
+	@Transient
+	private String patent_excel_school_appl_year;
+	
+	@Transient
+	private String patent_excel_memo;
 	
 	public String getPatent_id() {
 		return patent_id;
@@ -793,4 +833,83 @@ public class Patent extends BaseBean{
 		this.sourceFrom = sourceFrom;
 	}
 
+	public boolean isFirstAddEditHistory() {
+		return isFirstAddEditHistory;
+	}
+
+	public void setFirstAddEditHistory(boolean isFirstAddEditHistory) {
+		this.isFirstAddEditHistory = isFirstAddEditHistory;
+	}
+
+	public boolean isApplNoDuplicate_diffBusiness() {
+		return isApplNoDuplicate_diffBusiness;
+	}
+
+	public void setApplNoDuplicate_diffBusiness(boolean isApplNoDuplicate_diffBusiness) {
+		this.isApplNoDuplicate_diffBusiness = isApplNoDuplicate_diffBusiness;
+	}
+
+	public String getPatent_excel_name() {
+		return patent_excel_name;
+	}
+
+	public void setPatent_excel_name(String patent_excel_name) {
+		this.patent_excel_name = patent_excel_name;
+	}
+
+	public List<Assignee> getPatent_excel_assignee() {
+		return patent_excel_assignee;
+	}
+
+	public void setPatent_excel_assignee(List<Assignee> patent_excel_assignee) {
+		this.patent_excel_assignee = patent_excel_assignee;
+	}
+
+	public List<Applicant> getPatent_excel_applicant() {
+		return patent_excel_applicant;
+	}
+
+	public void setPatent_excel_applicant(List<Applicant> patent_excel_applicant) {
+		this.patent_excel_applicant = patent_excel_applicant;
+	}
+
+	public List<Inventor> getPatent_excel_inventor() {
+		return patent_excel_inventor;
+	}
+
+	public void setPatent_excel_inventor(List<Inventor> patent_excel_inventor) {
+		this.patent_excel_inventor = patent_excel_inventor;
+	}
+
+	public String getPatent_excel_name_en() {
+		return patent_excel_name_en;
+	}
+
+	public void setPatent_excel_name_en(String patent_excel_name_en) {
+		this.patent_excel_name_en = patent_excel_name_en;
+	}
+
+	public String getPatent_excel_school_no() {
+		return patent_excel_school_no;
+	}
+
+	public void setPatent_excel_school_no(String patent_excel_school_no) {
+		this.patent_excel_school_no = patent_excel_school_no;
+	}
+
+	public String getPatent_excel_school_appl_year() {
+		return patent_excel_school_appl_year;
+	}
+
+	public void setPatent_excel_school_appl_year(String patent_excel_school_appl_year) {
+		this.patent_excel_school_appl_year = patent_excel_school_appl_year;
+	}
+
+	public String getPatent_excel_memo() {
+		return patent_excel_memo;
+	}
+
+	public void setPatent_excel_memo(String patent_excel_memo) {
+		this.patent_excel_memo = patent_excel_memo;
+	}
 }
