@@ -1,7 +1,5 @@
 package biz.mercue.campusipr.service;
 
-
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -75,27 +73,27 @@ import biz.mercue.campusipr.util.StringUtils;
 
 @Service("patentService")
 @Transactional
-public class PatentServiceImpl implements PatentService{
+public class PatentServiceImpl implements PatentService {
 	private Logger log = Logger.getLogger(this.getClass().getName());
 
 	@Autowired
 	private AdminDao adminDao;
-	
+
 	@Autowired
 	private BusinessDao businessDao;
-	
+
 	@Autowired
 	private CountryDao countryDao;
-	
+
 	@Autowired
 	private PatentDao patentDao;
-	
+
 	@Autowired
 	private StatusDao statusDao;
-	
+
 	@Autowired
 	private PatentEditHistoryDao pehDao;
-	
+
 	@Autowired
 	private PatentFamilyDao familyDao;
 	
@@ -104,10 +102,10 @@ public class PatentServiceImpl implements PatentService{
 	
 	@Autowired
 	private IPCClassDao ipcDao;
-	
+
 	@Autowired
 	private ReminderDao reminderDao;
-	
+
 	@Autowired
 	private QuartzService quartzService;
 
@@ -172,8 +170,8 @@ public class PatentServiceImpl implements PatentService{
 		List<PatentEditHistory> listpeh = pehDao.getByPatentAndField(patentId, fieldId, businessId,page,Constants.SYSTEM_PAGE_SIZE);
 		getDisplayEditHistory(listpeh);
 		int count = pehDao.countByPatentAndField(patentId, fieldId, businessId);
-		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,listpeh);
-		
+		ListQueryForm form = new ListQueryForm(count, Constants.SYSTEM_PAGE_SIZE, listpeh);
+
 		return form;
 	}
 	
@@ -220,10 +218,10 @@ public class PatentServiceImpl implements PatentService{
 				context_desc_5000 += "...(完整內容請由官方專利局取得)";
 				patent.getPatentDesc().setContext_desc(context_desc_5000);
 			}
-			
+
 			patent.getPatentDesc().setPatent(patent);
 		}
-		
+
 		if (patent.getListPatentStatus() != null) {
 			for (PatentStatus ps:patent.getListPatentStatus()) {
 				Status status = ps.getStatus();
@@ -282,7 +280,7 @@ public class PatentServiceImpl implements PatentService{
 				mInventor.setPatent(patent);
 			}
 		}
-		
+
 		List<Annuity> listAnnuity = patent.getListAnnuity();
 		if (listAnnuity != null && listAnnuity.size() > 0) {
 			for (Annuity mAnnuity : listAnnuity) {
@@ -299,14 +297,14 @@ public class PatentServiceImpl implements PatentService{
 				}
 			}
 		}
-		
-		if (Patent.EDIT_SOURCE_SERVICE   == patent.getEdit_source()) {
+
+		if (Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
 			patent.setIs_public(true);
 			patent.setIs_sync(true);
 		}
-		
-		//同步時同時新增預設聯絡人
-		if (Patent.EDIT_SOURCE_SERVICE   == patent.getEdit_source()) {
+
+		// 同步時同時新增預設聯絡人
+		if (Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
 			if (patent.getBusiness() != null) {
 				Business business = patent.getBusiness();
 				if (!StringUtils.isNULL(business.getContact_name()) ||
@@ -320,18 +318,40 @@ public class PatentServiceImpl implements PatentService{
 					pContact.setContact_name(business.getContact_name());
 					pContact.setContact_email(business.getContact_email());
 					pContact.setContact_phone(business.getContact_phone());
+					pContact.setContact_character("聯絡人");
 					pContact.setContact_order(0);
 					patent.addContact(pContact);
 				}
 			}
 		}
-		
+
 		handleReminder(patent, patent.getListBusiness());
-		
+		contactData(patent);
 		patentDao.create(patent);
 		return Constants.INT_SUCCESS;
 	}
-	
+
+//	// 自動新增聯絡人資料
+	public void contactData(Patent patent) {
+		if (patent.getBusiness() != null) {
+			Business business = patent.getBusiness();
+			PatentContact pContact = new PatentContact();
+			if (!StringUtils.isNULL(business.getContact_name()) || !StringUtils.isNULL(business.getContact_email())
+					|| !StringUtils.isNULL(business.getContact_phone())) {
+				pContact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
+				pContact.setPatent(patent);
+				pContact.setBusiness(business);
+				pContact.setCreate_date(new Date());
+				pContact.setContact_name(business.getContact_name());
+				pContact.setContact_email(business.getContact_email());
+				pContact.setContact_phone(business.getContact_phone());
+				pContact.setContact_character("聯絡人");
+				pContact.setContact_order(0);
+				patent.addContact(pContact);
+			}
+		}
+	}
+
 	@Override
 	public int syncPatentsByApplicant(List<Patent> list, String adminId, String businessId, String ip) {
 	          int taskResult= -1;
@@ -429,7 +449,7 @@ public class PatentServiceImpl implements PatentService{
 	          
 	          return taskResult;
 	}
-	
+
 	@Override
 	public int syncPatentData(Patent patent) {
 		log.info("syncPatentData: ");
@@ -439,7 +459,7 @@ public class PatentServiceImpl implements PatentService{
 		}
 
 		int syncResult = Constants.INT_SYSTEM_PROBLEM;
-		
+
 		// cn patent appl no
 		String originApplNo = patent.getPatent_appl_no();
 		String appl_cn_onlyNo = "";
@@ -454,7 +474,7 @@ public class PatentServiceImpl implements PatentService{
 		String appl_indexOf0to4 = appl_cn_onlyNo.substring(0, 5);
 		String appl_indexOf5toEnd = appl_cn_onlyNo.substring(5, appl_cn_onlyNo.length());
 		String changeApplNo = "";
-		
+
 		// us patent appl no
 		String appl_us_onlyNO = originApplNo.replace("/", "").replace(",", "");
 		log.info("appl_us_onlyNO: " + appl_us_onlyNO);
@@ -467,7 +487,7 @@ public class PatentServiceImpl implements PatentService{
 				return Constants.INT_DATA_ERROR;
 			}
 		}
-		
+
 		if (Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
 			if (originApplNo.length() == 10 || originApplNo.length() == 12) {
 				patent.setPatent_appl_no(appl_us_onlyNO);
@@ -477,7 +497,7 @@ public class PatentServiceImpl implements PatentService{
 				return Constants.INT_DATA_ERROR;
 			}
 		}
-		
+
 		if (Constants.APPL_COUNTRY_CN.equals(patent.getPatent_appl_country())) {
 			if (appl_cn_onlyNo.length() == 12) {
 				changeApplNo = "CN" + appl_cn_onlyNo;
@@ -491,10 +511,10 @@ public class PatentServiceImpl implements PatentService{
 			if (appl_cn_onlyNo.length() == 8) {
 				changeApplNo = "CN" + appl_cn_onlyNo;
 			}
-			
+
 			patent.setPatent_appl_no(changeApplNo);
 			syncResult = ServiceChinaPatent.parseBilbo_byApplication(patent);
-			
+
 			patent.setPatent_appl_no(originApplNo);
 		}
 
@@ -506,13 +526,13 @@ public class PatentServiceImpl implements PatentService{
 			if (patent.getPatentDesc() != null) {
 				String context_desc_all = patent.getPatentDesc().getContext_desc();
 				patent.getPatentDesc().setPatent_desc_id(KeyGeneratorUtils.generateRandomString());
-				
+
 				if (context_desc_all.length() > 5000) {
 					String context_desc_5000 = context_desc_all.substring(0, 5000);
 					context_desc_5000 += "...(完整內容請由官方專利局取得)";
 					patent.getPatentDesc().setContext_desc(context_desc_5000);
 				}
-				
+
 				patent.getPatentDesc().setPatent(patent);
 			}
 			
@@ -522,7 +542,7 @@ public class PatentServiceImpl implements PatentService{
 			return Constants.INT_CANNOT_FIND_DATA;
 		}
 	}
-	
+
 	@Override
 	public int addPatentByApplNo(Patent editPatent, Admin admin, Business business, int sourceFrom) {
 		try {
@@ -537,12 +557,12 @@ public class PatentServiceImpl implements PatentService{
 			if (StringUtils.isNULL(applNo)) {
 				return Constants.INT_CANNOT_FIND_DATA;
 			}
-			
+
 			Patent dbPatent = patentDao.getByApplNo(applNo);
 			editPatent.setSync_date(DateUtils.getDayStart(new Date()));
 			editPatent.setAdmin(admin);
 			editPatent.setBusiness(business);
-			
+
 			if (dbPatent == null) {
 				this.addPatent(editPatent);
 				patentHistoryFirstAdd(editPatent, business.getBusiness_id());
@@ -584,7 +604,7 @@ public class PatentServiceImpl implements PatentService{
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
-	
+
 	@Override
 	public int addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip) {
 		try {
@@ -605,18 +625,18 @@ public class PatentServiceImpl implements PatentService{
 				editPatent.setAdmin(admin);
 				editPatent.setAdmin_ip(ip);
 				editPatent.setBusiness(business);
-				
+
 				if (editPatent.getEdit_source() != Patent.EDIT_SOURCE_SERVICE) {
 					editPatent.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
 				}
-				
+
 				handleExtensionAddAsList(editPatent, business.getBusiness_id());
 
 				if (dbPatent == null) {
 					editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
 					this.addPatent(editPatent);
 					patentHistoryFirstAdd(editPatent, business.getBusiness_id());
-					
+
 					taskResult = Constants.INT_SUCCESS;
 				} else {
 					for (Business dbBusinessInList : dbPatent.getListBusiness()) {
@@ -627,7 +647,7 @@ public class PatentServiceImpl implements PatentService{
 							editPatent.setFirstAddEditHistory(true);
 						}
 					}
-					
+
 					editPatent.setComparePatent(dbPatent);
 					handleExtensionExcelCompare(dbPatent, editPatent, business.getBusiness_id());
 					editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
@@ -641,7 +661,7 @@ public class PatentServiceImpl implements PatentService{
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
-	
+
 	public void handleExtensionAddAsList(Patent editPatent, String businessId) {
 		if (editPatent.getExtension() != null) {
 			List<PatentExtension> extensionList = new ArrayList<>();
@@ -657,12 +677,12 @@ public class PatentServiceImpl implements PatentService{
 		boolean isDbExtensionAdd = true;
 		List<PatentExtension> editExtensionList = editPatent.getListExtension();
 		List<PatentExtension> dbExtensionList = dbPatent.getListExtension();
-		
+
 		// excel not select (is null)
 		if (editPatent.getExtension() == null) {
 			return;
 		}
-		
+
 		// excel selected (is not null)
 		if (dbExtensionList != null && dbExtensionList.size() > 0) {
 			// update
@@ -707,7 +727,7 @@ public class PatentServiceImpl implements PatentService{
 			}
 			dbPatent.setListExtension(editPatent.getListExtension()); // a different object
 		}
-		
+
 		if (isDbExtensionAdd) {
 			for (PatentExtension extension : editPatent.getListExtension()) {
 				extension.setExtension_id(KeyGeneratorUtils.generateRandomString());
@@ -716,32 +736,32 @@ public class PatentServiceImpl implements PatentService{
 			dbPatent.setListExtension(editPatent.getListExtension());
 		}
 	}
-	
+
 	@Override
 	public int authorizedUpdatePatent(String businessId,Patent patent) {
 		
 		Patent dbBean = patentDao.getById(businessId,patent.getPatent_id());
 		if(dbBean != null) {
 			return updatePatent(patent, businessId);
-		}else {
+		} else {
 			return Constants.INT_CANNOT_FIND_DATA;
 		}
-	
+
 	}
 
 	@Override
-	public int  updatePatent(Patent patent, String businessId){
-		log.info("updatePatent:"+patent.getPatent_id());
-		List<PatentEditHistory> editList = new ArrayList<PatentEditHistory>(); 
+	public int updatePatent(Patent patent, String businessId) {
+		log.info("updatePatent:" + patent.getPatent_id());
+		List<PatentEditHistory> editList = new ArrayList<PatentEditHistory>();
 		Patent dbBean = patent.getComparePatent();
-		if(dbBean == null) {
+		if (dbBean == null) {
 			log.info("Compare Patent is null");
 			dbBean = patentDao.getById(patent.getPatent_id());
 		}
 
-		if(dbBean!=null){
+		if (dbBean != null) {
 			log.info("db patent is not  null");
-			//TODO save edit history
+			// TODO save edit history
 			if (patent.isFirstAddEditHistory()) {
 				log.info("is first add");
 				patentHistoryFirstAdd(patent, businessId);
@@ -750,15 +770,15 @@ public class PatentServiceImpl implements PatentService{
 				comparePatent(dbBean, patent, businessId);
 			}
 
-			if((Constants.APPL_COUNTRY_TW.equals(dbBean.getPatent_appl_country())
+			if ((Constants.APPL_COUNTRY_TW.equals(dbBean.getPatent_appl_country())
 					&& Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source())
-					|| Patent.EDIT_SOURCE_HUMAN   == patent.getEdit_source()) {
+					|| Patent.EDIT_SOURCE_HUMAN == patent.getEdit_source()) {
 				dbBean.setPatent_bdate(patent.getPatent_bdate());
 				dbBean.setPatent_edate(patent.getPatent_edate());
-			
+
 				dbBean.setPatent_cancel_date(patent.getPatent_cancel_date());
 				dbBean.setPatent_charge_expire_date(patent.getPatent_charge_expire_date());
-			
+
 				dbBean.setPatent_charge_duration_year(patent.getPatent_charge_duration_year());
 			}
 
@@ -791,7 +811,7 @@ public class PatentServiceImpl implements PatentService{
 					dbBean.setPatentAbstract(patent.getPatentAbstract());
 				}
 			}
-			
+
 			if (patent.getPatentClaim() != null) {
 				if (dbBean.getPatentClaim() != null) {
 					PatentClaim pcDb = dbBean.getPatentClaim();
@@ -804,7 +824,7 @@ public class PatentServiceImpl implements PatentService{
 					dbBean.setPatentClaim(patent.getPatentClaim());
 				}
 			}
-			
+
 			if (patent.getPatentDesc() != null) {
 				String descStr = patent.getPatentDesc().getContext_desc();
 				if (dbBean.getPatentDesc() != null) {
@@ -834,7 +854,7 @@ public class PatentServiceImpl implements PatentService{
 			handleContact(dbBean, patent);
 			handleAnnuity(dbBean, patent);
 			handlePatentStatus(dbBean, patent);
-			
+
 			if (patent.getSourceFrom() != Constants.PATENT_EXCEL_IMPORT) {
 				// source from != excel
 				handleExtension(dbBean, patent, businessId);
@@ -844,9 +864,9 @@ public class PatentServiceImpl implements PatentService{
 				dbBean.setFamily(patent.getFamily());
 				dbBean.setListPortfolio(patent.getListPortfolio());
 			}
-			
+
 			List<String> checkBusinessIds = new ArrayList<>();
-			for (Business bussiness:dbBean.getListBusiness()) {
+			for (Business bussiness : dbBean.getListBusiness()) {
 				checkBusinessIds.add(bussiness.getBusiness_id());
 			}
 			log.info(checkBusinessIds);
@@ -859,7 +879,7 @@ public class PatentServiceImpl implements PatentService{
 			}
 			handleReminder(patent, dbBean.getListBusiness());
 			return Constants.INT_SUCCESS;
-		}else {
+		} else {
 			return Constants.INT_CANNOT_FIND_DATA;
 		}
 	}
@@ -871,10 +891,10 @@ public class PatentServiceImpl implements PatentService{
 			
 		}
 		List<String> ids = inputFamily.getListPatentIds();
-		
+
 		// family edit history
 		List<String> inputFamilyListData = new ArrayList<>();
-		
+
 		if (ids.isEmpty()) {
 			//delete family
 			List<Patent> checkPatentList = patentDao.getByFamily(inputFamily.getPatent_family_id());
@@ -900,12 +920,12 @@ public class PatentServiceImpl implements PatentService{
 			}else {
 				if(family!=null) {
 					family.addPatent(patent);
-					//patent.setFamily(family);
+					// patent.setFamily(family);
 				}
 			}
 			inputFamilyListData.add(JacksonJSONUtils.mapObjectWithView(patent, View.PatentIdApplNo.class));
 		}
-		
+
 		// family edit history
 		try {
 			String editor = tokenAdmin.getAdmin_name();
@@ -920,20 +940,20 @@ public class PatentServiceImpl implements PatentService{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		if(family == null) {
+
+		if (family == null) {
 			log.info("no family");
 			family = new PatentFamily();
 			family.setPatent_family_id(KeyGeneratorUtils.generateRandomString());
-			family.setCreate_date(new Date ());
+			family.setCreate_date(new Date());
 			family.setUpdate_date(new Date());
 			family.setBusiness_id(inputFamily.getBusiness_id());
 			familyDao.create(family);
-			for(Patent patent : list) {
+			for (Patent patent : list) {
 				family.addPatent(patent);
-				//patent.setFamily(family);
+				// patent.setFamily(family);
 			}
-		}else {
+		} else {
 			log.info("set family");
 			for(Patent patent : list) {
 				log.info("patent :"+patent.getPatent_id());
@@ -966,7 +986,7 @@ public class PatentServiceImpl implements PatentService{
 		}else {
 			return Constants.INT_CANNOT_FIND_DATA;
 		}
-		
+
 	}
 
 	
@@ -1017,7 +1037,7 @@ public class PatentServiceImpl implements PatentService{
 		
 		return form;
 	}
-	
+
 	@Override
 	public List<Patent> getExcelByPatentIds(List<String> idList,String businessId){
 		List<Patent> patentList = patentDao.getByPatentIds(idList,businessId);
@@ -1031,11 +1051,11 @@ public class PatentServiceImpl implements PatentService{
 			patent.getListExtension().size();
 			patent.getListBusiness().size();
 			patent.getListAnnuity().size();
-			
+
 		}
 		return patentList;
 	}
-	
+
 	@Override
 	public List<Patent> getByPatentIds(List<String> idList,String businessId){
 		List<Patent> list = patentDao.getByPatentIds(idList,businessId);
@@ -1046,9 +1066,9 @@ public class PatentServiceImpl implements PatentService{
 		}
 		return list;
 	}
-	
+
 	@Override
-	public Patent getByPatentNo(String patentNo){
+	public Patent getByPatentNo(String patentNo) {
 		return patentDao.getByPatentNo(patentNo);
 	}
 
@@ -1108,7 +1128,7 @@ public class PatentServiceImpl implements PatentService{
 			switch (fieldId) {
 			case Constants.PATENT_NAME_FIELD:
 			case Constants.PATENT_NAME_EN_FIELD:
-			case Constants.PATENT_NO_FIELD:	
+			case Constants.PATENT_NO_FIELD:
 			case Constants.PATENT_APPL_NO_FIELD:
 			case Constants.PATENT_NOTICE_NO_FIELD:
 			case Constants.PATENT_PUBLISH_NO_FIELD:
@@ -1142,7 +1162,7 @@ public class PatentServiceImpl implements PatentService{
 				list = patentDao.searchFieldPatent(sd, ed, field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
 				count = patentDao.countSearchFieldPatent(sd, ed, field.getField_code(), businessId);
 				break;
-				
+
 			case Constants.ASSIGNEE_NAME_FIELD:
 			case Constants.APPLIANT_NAME_FIELD:
 			case Constants.INVENTOR_NAME_FIELD:
@@ -1150,7 +1170,7 @@ public class PatentServiceImpl implements PatentService{
 				list = patentDao.searchFieldHumanListPatent('%'+name+'%',field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
 				count = patentDao.countSearchFieldHumanListPatent('%'+name+'%',field.getField_code(), businessId);
 				break;
-				
+
 			case Constants.PATENT_STATUS_FIELD:
 				String statusStr = (String) searchObj;
 				//parse to json
@@ -1161,7 +1181,7 @@ public class PatentServiceImpl implements PatentService{
 				list = patentDao.searchFieldStatusListPatent(status_desc,status_desc_en, businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
 				count = patentDao.countSearchFieldStatusPatent(status_desc,status_desc_en, businessId);
 				break;
-				
+
 			case Constants.SCHOOL_NO_FIELD:
 				String num = (String) searchObj;
 				list = patentDao.searchFieldExtensionListPatent('%'+num+'%',field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
@@ -1203,7 +1223,7 @@ public class PatentServiceImpl implements PatentService{
 	public void patentHistoryFirstAdd(Patent patent, String businessId) {
 		log.info("patentHistory:");
 		Patent dbBean = patentDao.getByApplNo(patent.getPatent_appl_no());
-		
+
 		String editor = null;
 		if (patent.getEdit_source() == Patent.EDIT_SOURCE_SERVICE) {
 			editor = "Official";
@@ -1211,7 +1231,7 @@ public class PatentServiceImpl implements PatentService{
 			editor = patent.getAdmin().getAdmin_name();
 		}
 		String editor_excel = patent.getAdmin().getAdmin_name();
-		
+
 		List<PatentField> fieldList = fieldDao.getAllFields();
 		for (PatentField field : fieldList) {
 			if (Constants.PATENT_NAME_FIELD.equals(field.getField_id())) {
@@ -1258,7 +1278,7 @@ public class PatentServiceImpl implements PatentService{
 						assigneeAddData_excel.add(JacksonJSONUtils.mapObjectWithView(assignee, View.PatentHistoryExcel.class));
 						log.info(JacksonJSONUtils.mapObjectWithView(assignee, View.PatentHistoryExcel.class));
 					}
-					
+
 					if (!assigneeAddData_excel.isEmpty()) {
 						PatentEditHistory peh = insertFieldHistoryFirstAdd(patent, assigneeAddData_excel, "create", field.getField_id(), editor_excel, businessId);
 						if (peh != null) {
@@ -1385,17 +1405,17 @@ public class PatentServiceImpl implements PatentService{
 			}
 		}
 	}
-	
+
 	private void comparePatent(Patent dbBean, Patent patent, String businessId) {
 		List<PatentField> fieldList = fieldDao.getAllFields();
-		
+
 		String editor = null;
 		if (patent.getEdit_source() == Patent.EDIT_SOURCE_SERVICE) {
 			editor = "Official";
 		} else {
 			editor = patent.getAdmin().getAdmin_name();
 		}
-		
+
 		String editor_excel = patent.getAdmin().getAdmin_name();
 		
 		for (PatentField field:fieldList) {
@@ -1407,7 +1427,7 @@ public class PatentServiceImpl implements PatentService{
 				if (peh_excel != null) {
 					dbBean.addHistory(peh_excel);
 				}
-				
+
 				// update data
 				String sourceField = dbBean.getPatent_name();
 				String newField = patent.getPatent_name();
@@ -1425,7 +1445,7 @@ public class PatentServiceImpl implements PatentService{
 				if (peh_excel != null) {
 					dbBean.addHistory(peh_excel);
 				}
-				
+
 				// update data
 				String sourceField = dbBean.getPatent_name_en();
 				String newField = patent.getPatent_name_en();
@@ -1525,7 +1545,7 @@ public class PatentServiceImpl implements PatentService{
 					dbBean.setPatent_publish_date(patent.getPatent_publish_date());
 				}
 			}
-			
+
 			if (Constants.PATENT_STATUS_FIELD.equals(field.getField_id())) {
 				List<String> statusAddData = new ArrayList<>();
 				if (dbBean.getListPatentStatus() != null) {
@@ -1558,10 +1578,10 @@ public class PatentServiceImpl implements PatentService{
 						assignee.setAssignee_id(KeyGeneratorUtils.generateRandomString());
 						assignee.setPatent(patent);
 						dbBean.addAssignee(assignee);
-						assigneeAddData.add(JacksonJSONUtils.mapObjectWithView(assignee,  View.PatentDetail.class));
+						assigneeAddData.add(JacksonJSONUtils.mapObjectWithView(assignee, View.PatentDetail.class));
 					}
 					mapping.put(assignee.getAssignee_id(), assignee);
-					
+
 				}
 				if (!assigneeAddData.isEmpty()) {
 					PatentEditHistory peh = insertFieldHistory(patent, assigneeAddData, "create", field.getField_id(), editor, businessId);
@@ -1622,10 +1642,10 @@ public class PatentServiceImpl implements PatentService{
 						appl.setApplicant_id(KeyGeneratorUtils.generateRandomString());
 						appl.setPatent(patent);
 						dbBean.addApplicant(appl);
-						applAddData.add(JacksonJSONUtils.mapObjectWithView(appl,  View.PatentDetail.class));
-					} 
+						applAddData.add(JacksonJSONUtils.mapObjectWithView(appl, View.PatentDetail.class));
+					}
 					mapping.put(appl.getApplicant_id(), appl);
-					
+
 				}
 				if (!applAddData.isEmpty()) {
 					PatentEditHistory peh = insertFieldHistory(patent, applAddData, "create", field.getField_id(), editor, businessId);
@@ -1633,7 +1653,7 @@ public class PatentServiceImpl implements PatentService{
 				}
 				List<String> applUpdateData = new ArrayList<>();
 				List<String> applRemoveData = new ArrayList<>();
-				
+
 				if (dbBean.getListApplicant() != null) {
 					Iterator<Applicant> iterator = dbBean.getListApplicant().iterator();
 					while (iterator.hasNext()) {
@@ -1690,7 +1710,7 @@ public class PatentServiceImpl implements PatentService{
 						invAddData.add(JacksonJSONUtils.mapObjectWithView(inv,  View.PatentDetail.class));
 					} 
 					mapping.put(inv.getInventor_id(), inv);
-					
+
 				}
 				if (!invAddData.isEmpty()) {
 					PatentEditHistory peh = insertFieldHistory(patent, invAddData, "create", field.getField_id(), editor, businessId);
@@ -1698,7 +1718,7 @@ public class PatentServiceImpl implements PatentService{
 				}
 				List<String> invUpdateData = new ArrayList<>();
 				List<String> invRemoveData = new ArrayList<>();
-				
+
 				if (dbBean.getListInventor() != null) {
 					Iterator<Inventor> iterator = dbBean.getListInventor().iterator();
 					while (iterator.hasNext()) {
@@ -1728,11 +1748,11 @@ public class PatentServiceImpl implements PatentService{
 								inv.setInventor_name_en(invNameEnMap);
 								invUpdateData.add(JacksonJSONUtils.mapObjectWithView(mapping.get(inv.getInventor_id()),  View.PatentDetail.class));
 							}
-						}else {
+						} else {
 							log.info("going to remove");
 							inv.setPatent(null);
 							iterator.remove();
-							invRemoveData.add(JacksonJSONUtils.mapObjectWithView(inv,  View.PatentDetail.class));
+							invRemoveData.add(JacksonJSONUtils.mapObjectWithView(inv, View.PatentDetail.class));
 						}
 					}
 				}
@@ -1746,7 +1766,7 @@ public class PatentServiceImpl implements PatentService{
 					if (peh != null) {dbBean.addHistory(peh);}
 				}
 			}
-			
+
 			// TODO
 			if (Constants.PATENT_COST_FIELD.equals(field.getField_id())) {
 				List<String> costAddData = new ArrayList<>();
@@ -1773,7 +1793,7 @@ public class PatentServiceImpl implements PatentService{
 				if (peh_excel != null) {
 					dbBean.addHistory(peh_excel);
 				}
-				
+
 				// update data
 				String sourceField = null;
 				List<PatentExtension> dbExtensionList = dbBean.getListExtension();
@@ -1782,7 +1802,7 @@ public class PatentServiceImpl implements PatentService{
 						sourceField = dbExtension.getBusiness_num();
 					}
 				}
-				
+
 				if (patent.getListExtension() != null) {
 					for (PatentExtension editExtension : patent.getListExtension()) {
 						String newField = editExtension.getBusiness_num();
@@ -1802,7 +1822,7 @@ public class PatentServiceImpl implements PatentService{
 				if (peh_excel != null) {
 					dbBean.addHistory(peh_excel);
 				}
-				
+
 				// update data
 				String sourceField = null;
 				List<PatentExtension> dbExtensionList = dbBean.getListExtension();
@@ -1811,7 +1831,7 @@ public class PatentServiceImpl implements PatentService{
 						sourceField = dbExtension.getExtension_appl_year();
 					}
 				}
-				
+
 				if (patent.getListExtension() != null) {
 					for (PatentExtension editExtension : patent.getListExtension()) {
 						String newField = editExtension.getExtension_appl_year();
@@ -1831,7 +1851,7 @@ public class PatentServiceImpl implements PatentService{
 				if (peh_excel != null) {
 					dbBean.addHistory(peh_excel);
 				}
-				
+
 				// update data
 				String sourceField = null;
 				List<PatentExtension> dbExtensionList = dbBean.getListExtension();
@@ -1840,7 +1860,7 @@ public class PatentServiceImpl implements PatentService{
 						sourceField = dbExtension.getExtension_memo();
 					}
 				}
-				
+
 				if (patent.getListExtension() != null) {
 					for (PatentExtension editExtension : patent.getListExtension()) {
 						String newField = editExtension.getExtension_memo();
@@ -1874,7 +1894,7 @@ public class PatentServiceImpl implements PatentService{
 		if (StringUtils.isNULL(newData)) {
 			return null;
 		}
-		
+
 		Date now = new Date();
 		PatentEditHistory peh = null;
 		peh = new PatentEditHistory();
@@ -1953,13 +1973,13 @@ public class PatentServiceImpl implements PatentService{
 					peh.setEditor(editor);
 					peh.setBusiness_id(businessId);
 				}
-			}else {
+			} else {
 				log.info("ignore update  when import or sync from service");
 			}
 		}
 		return peh;
 	}
-	
+
 	private void handleCost(Patent dbPatent, Patent editPatent, String business_id) {
 		if (editPatent.getListCost() != null && editPatent.getListCost().size() > 0) {
 			List<PatentCost> listCost = editPatent.getListCost();
@@ -1971,7 +1991,7 @@ public class PatentServiceImpl implements PatentService{
 			dbPatent.setListCost(editPatent.getListCost());
 		}
 	}
-	
+
 	private void handleContact(Patent dbPatent, Patent editPatent) {
 		if (editPatent.getListContact() != null && editPatent.getListContact().size() > 0) {
 			List<PatentContact> listContact = editPatent.getListContact();
@@ -1983,7 +2003,7 @@ public class PatentServiceImpl implements PatentService{
 				if (Patent.EDIT_SOURCE_HUMAN == editPatent.getEdit_source()) {
 					contact.setBusiness(editPatent.getAdmin().getBusiness());
 				}
-				
+
 				if (Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()) {
 					contact.setBusiness(editPatent.getBusiness());
 				}
@@ -1991,13 +2011,13 @@ public class PatentServiceImpl implements PatentService{
 			}
 			patentDao.deletePatentContact(dbPatent.getPatent_id());
 			dbPatent.setListContact(editPatent.getListContact());
-		}else {
+		} else {
 			if (dbPatent.getListContact() != null) {
 				patentDao.deletePatentContact(dbPatent.getPatent_id());
 			}
 		}
 	}
-	 
+
 	private void handleAnnuity(Patent dbPatent, Patent editPatent) {
 		if (editPatent.getListAnnuity() != null && editPatent.getListAnnuity().size() > 0) {
 			List<Annuity> listAnnuity = editPatent.getListAnnuity();
@@ -2016,13 +2036,13 @@ public class PatentServiceImpl implements PatentService{
 			}
 			patentDao.deletePatentAnnuity(dbPatent.getPatent_id());
 			dbPatent.setListAnnuity(editPatent.getListAnnuity());
-		}else {
+		} else {
 			if (dbPatent.getListAnnuity() != null) {
 				patentDao.deletePatentAnnuity(dbPatent.getPatent_id());
 			}
 		}
 	}
-	
+
 	private void handleReminder(Patent patent, List<Business> listBusiness) {
 		try {
 			List<ReminderTask> reminderList = reminderDao.getAvailableReminderByPatentId(patent.getPatent_id());
@@ -2039,12 +2059,12 @@ public class PatentServiceImpl implements PatentService{
 						log.info(annuityReminderList.size());
 						List<AnnuityReminder> listARSendRightNow = new ArrayList<>();
 						Date now = DateUtils.getDayStart(new Date());
-						for (AnnuityReminder annuityReminder:annuityReminderList) {
+						for (AnnuityReminder annuityReminder : annuityReminderList) {
 							if (annuityReminder.isAvailable()) {
 								Calendar calendar = Calendar.getInstance();
 								calendar.setTime(annuity.getAnnuity_end_date());
 								calendar.add(Calendar.DATE, -annuityReminder.getEmail_day());
-									
+
 								ReminderTask reminder = new ReminderTask();
 								reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
 								reminder.setPatent_id(patent.getPatent_id());
@@ -2065,21 +2085,21 @@ public class PatentServiceImpl implements PatentService{
 										quartzService.createJob(reminder);
 									}
 								}
-								
-								if (reminder.getTask_date().equals(now) ||
-										(now.compareTo(reminder.getTask_date()) >= 0 && now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
+
+								if (reminder.getTask_date().equals(now) || (now.compareTo(reminder.getTask_date()) >= 0
+										&& now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
 									listARSendRightNow.add(annuityReminder);
-									log.info("send right now List:"+listARSendRightNow.size());
+									log.info("send right now List:" + listARSendRightNow.size());
 								}
 							}
 						}
 						// get last expire reminder but annuity not expire
 						if (listARSendRightNow.size() > 0) {
-							AnnuityReminder sendRemindInfo = listARSendRightNow.get(listARSendRightNow.size()-1);
+							AnnuityReminder sendRemindInfo = listARSendRightNow.get(listARSendRightNow.size() - 1);
 							Calendar calendarNowSend = Calendar.getInstance();
 							calendarNowSend.setTime(annuity.getAnnuity_end_date());
 							calendarNowSend.add(Calendar.DATE, -sendRemindInfo.getEmail_day());
-							
+
 							ReminderTask reminder = new ReminderTask();
 							reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
 							reminder.setPatent_id(patent.getPatent_id());
@@ -2089,9 +2109,9 @@ public class PatentServiceImpl implements PatentService{
 							reminder.setReminder_day(sendRemindInfo.getEmail_day());
 							reminder.setIs_send(false);
 							reminder.setIs_remind(annuity.is_reminder());
-							
-							if (reminder.getTask_date().equals(now) ||
-									(now.compareTo(reminder.getTask_date()) >= 0 && now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
+
+							if (reminder.getTask_date().equals(now) || (now.compareTo(reminder.getTask_date()) >= 0
+									&& now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
 								if (reminder.is_remind()) {
 									log.info("send right now");
 									reminder.setIs_send(true);
@@ -2126,7 +2146,7 @@ public class PatentServiceImpl implements PatentService{
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void handleExtension(Patent dbPatent, Patent editPatent, String businessId) {
 		if (editPatent.getListExtension() != null && editPatent.getListExtension().size() > 0) {
 			List<PatentExtension> listExtension = editPatent.getListExtension();
@@ -2141,13 +2161,13 @@ public class PatentServiceImpl implements PatentService{
 			log.info(businessId);
 			patentDao.deletePatentExtension(dbPatent.getPatent_id(), businessId);
 			dbPatent.setListExtension(editPatent.getListExtension());
-		}else {
+		} else {
 			if (dbPatent.getListExtension() != null) {
 				patentDao.deletePatentExtension(dbPatent.getPatent_id(), businessId);
 			}
 		}
 	}
-	
+
 	private void handlePatentStatus(Patent dbPatent, Patent editPatent) {
 		HashMap<String, PatentStatus> newMapping = new HashMap<String, PatentStatus>();
 		HashMap<String, PatentStatus> dbMapping = new HashMap<String, PatentStatus>();
@@ -2209,11 +2229,11 @@ public class PatentServiceImpl implements PatentService{
 			}
 		}
 	}
-	
+
 	private void getDisplayEditHistory(List<PatentEditHistory> list) {
-		for(PatentEditHistory history : list) {
+		for (PatentEditHistory history : list) {
 			String fieldId = history.getField_id();
-			if(!StringUtils.isNULL(fieldId)) {
+			if (!StringUtils.isNULL(fieldId)) {
 				switch (fieldId) {
 				case Constants.PATENT_APPL_DATE_FIELD:
 				case Constants.PATENT_NOTICE_DATE_FIELD:
@@ -2240,7 +2260,7 @@ public class PatentServiceImpl implements PatentService{
 					if(listInventor!=null && listInventor.size() > 0 ) {
 						List<String> name1 = new ArrayList<String>();
 						List<String> name2 = new ArrayList<String>();
-						for(Inventor inventor : listInventor) {
+						for (Inventor inventor : listInventor) {
 							name1.add(inventor.getInventor_name());
 							name2.add(inventor.getInventor_name_en());
 						}
@@ -2272,7 +2292,7 @@ public class PatentServiceImpl implements PatentService{
 					if(listApplicant!=null && listApplicant.size() > 0 ) {
 						List<String> name1 = new ArrayList<String>();
 						List<String> name2 = new ArrayList<String>();
-						for(Applicant applicant : listApplicant) {
+						for (Applicant applicant : listApplicant) {
 							name1.add(applicant.getApplicant_name());
 							name2.add(applicant.getApplicant_name_en());
 						}
@@ -2289,9 +2309,9 @@ public class PatentServiceImpl implements PatentService{
 			
 		}
 	}
-	
+
 	private void syncPatentStatus(Patent patent) {
-		//02/23新增根據日期同步狀態
+		// 02/23新增根據日期同步狀態
 		List<Status> ListStatus = statusDao.getEditable();
 		for (Status status:ListStatus) {
 			switch (status.getStatus_id()) {

@@ -14,7 +14,10 @@
   {
      name: "Ian",
      path: "/buki.yml" 
+  },
+  {
+     name: "User",
+     path: "/zoe.yml" 
   }
-
 ]
   
