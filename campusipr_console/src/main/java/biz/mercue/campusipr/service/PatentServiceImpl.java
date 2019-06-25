@@ -327,10 +327,11 @@ public class PatentServiceImpl implements PatentService {
 		}
 
 		// 自動新增聯絡人資料
-		if (StringUtils.isNULL(applNo)) {
+		if (StringUtils.isNULL(applNo) || StringUtils.isNULL(patent.getPatent_name())) {
+			log.info("無申請號或有申請號無資料新增聯絡人，如果在資料庫搜尋時找不到申請號，請改用相似(like)查詢");
 			contactData(patent);
 		}
-		
+				
 		handleReminder(patent, patent.getListBusiness());
 		patentDao.create(patent);
 		return Constants.INT_SUCCESS;
