@@ -1,6 +1,12 @@
 package biz.mercue.campusipr.controller;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 
 import org.apache.log4j.Logger;
@@ -160,6 +167,58 @@ public class PatentController {
 			
 			//TODO charles
 //			patentService.syncPatentStatus(patent);
+			responseBody.setCode(taskResult);
+			responseBody.setBean(patent);
+			
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString( View.PatentDetail.class);
+	}
+	
+	@RequestMapping(value="/api/checknopublicapplno", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String checkNoPublicApplNo(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		log.info("checknopublicapplno:");
+		
+		BeanResponseBody responseBody  = new BeanResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+
+		if(tokenBean!=null) {
+			String ip = request.getRemoteAddr();
+			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
+			Admin admin = adminService.getById(Constants.SYSTEM_ADMIN);
+			patent.setAdmin(admin);
+			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
+			patent.setBusiness(tokenBean.getBusiness());
+			patent.setAdmin_ip(ip);
+			int taskResult = patentService.checkNoPublicApplNo(patent, tokenBean.getBusiness());
+			
+			responseBody.setCode(taskResult);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString( View.PatentDetail.class);
+	}
+	
+	@RequestMapping(value="/api/mergepatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String mergePatent(HttpServletRequest request,@RequestBody String receiveJSONString) {
+		log.info("mergePatent ");
+		
+		BeanResponseBody responseBody  = new BeanResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+			
+		if(tokenBean!=null) {
+			String ip = request.getRemoteAddr();
+			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
+			Admin admin = adminService.getById(Constants.SYSTEM_ADMIN);
+			patent.setAdmin(admin);
+			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
+			patent.setBusiness(tokenBean.getBusiness());
+			patent.setAdmin_ip(ip);
+			int taskResult = patentService.addPatentByNoPublicApplNo(patent, tokenBean.getBusiness());
+			
 			responseBody.setCode(taskResult);
 			responseBody.setBean(patent);
 			
@@ -644,6 +703,42 @@ public class PatentController {
 		
 
 		return responseBody.getJacksonString(View.Patent.class);
+	}
+	
+	// Exportfile download
+	@RequestMapping(value = "/downloadExport", method = RequestMethod.GET)
+	public void downloadFile(HttpServletResponse response, @RequestParam(value = "path") String path, @RequestParam(value = "fileName") String fileName) throws IOException {
+		System.out.println("fileout");
+		final String EXTERNAL_FILE_PATH = path;
+		File file = null;
+		file = new File(EXTERNAL_FILE_PATH);
+		if (!file.exists()) {
+			String errorMessage = "Sorry. The file you are looking for does not exist";
+			System.out.println(errorMessage);
+			OutputStream outputStream = response.getOutputStream();
+			outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+			outputStream.close();
+			return;
+		}
+		String mimeType = URLConnection.guessContentTypeFromName(file.getName());
+		if (mimeType == null) {
+			System.out.println("mimetype is not detectable, will take default");
+			mimeType = "application/octet-stream";
+		}
+		System.out.println("mimetype : " + mimeType);
+		response.setContentType(mimeType);
+		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
+		response.setContentLength((int) file.length());
+		OutputStream os = response.getOutputStream();
+		FileInputStream fis = new FileInputStream(file);
+		byte[] buffer = new byte[4096];
+		int b = -1;
+		while ((b = fis.read(buffer)) != -1) {
+			os.write(buffer, 0, b);
+		}
+
+		fis.close();
+		os.close();
 	}
 
 }

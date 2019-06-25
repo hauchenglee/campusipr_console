@@ -54,6 +54,7 @@ import biz.mercue.campusipr.model.PatentExtension;
 import biz.mercue.campusipr.model.PatentFamily;
 import biz.mercue.campusipr.model.PatentField;
 import biz.mercue.campusipr.model.PatentStatus;
+import biz.mercue.campusipr.model.Portfolio;
 import biz.mercue.campusipr.model.ReminderTask;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
@@ -325,6 +326,7 @@ public class PatentServiceImpl implements PatentService {
 			}
 		}
 
+		// 自動新增聯絡人資料
 		if (StringUtils.isNULL(applNo)) {
 			contactData(patent);
 		}
@@ -334,8 +336,7 @@ public class PatentServiceImpl implements PatentService {
 		return Constants.INT_SUCCESS;
 	}
 
-//	自動新增聯絡人資料
-	public void contactData(Patent patent) {
+	private void contactData(Patent patent) {
 		if (patent.getBusiness() != null) {
 			Business business = patent.getBusiness();
 			PatentContact pContact = new PatentContact();
@@ -618,8 +619,12 @@ public class PatentServiceImpl implements PatentService {
 			}
 
 			for (Patent editPatent : patentList) {
-				if (syncPatentData(editPatent) == Constants.INT_DATA_ERROR) {
+				int syncResult = syncPatentData(editPatent);
+				if (syncResult == Constants.INT_DATA_ERROR) {
 					return Constants.INT_DATA_ERROR;
+				}
+				if (syncResult == Constants.INT_CANNOT_FIND_DATA) {
+					editPatent.setPatent_appl_no(editPatent.getPatent_appl_no() + "@" + KeyGeneratorUtils.generateRandomString());
 				}
 
 				log.info("editPatent.getPatent_appl_no(): " + editPatent.getPatent_appl_no());
@@ -739,17 +744,229 @@ public class PatentServiceImpl implements PatentService {
 			dbPatent.setListExtension(editPatent.getListExtension());
 		}
 	}
+	
+	@Override
+	public int checkNoPublicApplNo(Patent editPatent, Business business) {
+		try {
+			log.info("addPatentByNoPublicApplNo:");
+			String editPatentApplNo = editPatent.getPatent_appl_no();
+
+			List<Patent> dbPatentList = patentDao.getPatentListByApplNo(editPatentApplNo);
+			if (dbPatentList.isEmpty()) {
+				// update new patent
+				return Constants.INT_SUCCESS;
+			} else {
+				log.info("!dbPatentList.isEmpty()");
+				// 判斷是否同一間學校新增
+				int sameBusinessCount = 0;
+				for (Patent dbPatent : dbPatentList) {
+					for (Business dbBusiness : dbPatent.getListBusiness()) {
+						String editBusinessId = business.getBusiness_id();
+						String dbBusinessId = dbBusiness.getBusiness_id();
+						if (editBusinessId.equals(dbBusinessId)) {
+							sameBusinessCount++;
+						}
+					}
+				}
+				log.info("sameBusinessCount: " + sameBusinessCount);
+				if (sameBusinessCount >= 2) {
+					// 同一間學校：禁止新增
+					return Constants.INT_DATA_DUPLICATE;
+				} else {
+					// 可新增：存入or合併關聯
+					return Constants.INT_SUCCESS;
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			return Constants.INT_SYSTEM_PROBLEM;
+		}
+	}
 
 	@Override
-	public int authorizedUpdatePatent(String businessId,Patent patent) {
-		
-		Patent dbBean = patentDao.getById(businessId,patent.getPatent_id());
-		if(dbBean != null) {
+	public int addPatentByNoPublicApplNo(Patent editPatent, Business business) {
+		try {
+			log.info("addPatentByNoPublicApplNo:");
+			boolean isSync = false;
+
+			String editPatentApplNo = editPatent.getPatent_appl_no();
+			String editApplNoWithoutAt = StringUtils.getApplNoWithoutAt(editPatentApplNo);
+
+			log.info(editApplNoWithoutAt);
+
+			String dbPatentId = null;
+			List<Patent> dbPatentList = patentDao.getPatentListByApplNo(editPatentApplNo);
+			if (dbPatentList.isEmpty()) {
+				// update new patent
+				editPatent.setPatent_appl_no(editApplNoWithoutAt + "@" + KeyGeneratorUtils.generateRandomString());
+				log.info(editPatent.getPatent_appl_no());
+				return patentDao.updatePatentApplNo(editPatent.getPatent_id(), editPatent.getPatent_appl_no());
+			} else {
+				log.info("!dbPatentList.isEmpty()");
+				// 判斷是否同一間學校新增
+				int sameBusinessCount = 0;
+				for (Patent dbPatent : dbPatentList) {
+					for (Business dbBusiness : dbPatent.getListBusiness()) {
+						String editBusinessId = business.getBusiness_id();
+						String dbBusinessId = dbBusiness.getBusiness_id();
+						if (editBusinessId.equals(dbBusinessId)) {
+							sameBusinessCount++;
+						}
+					}
+				}
+				log.info("sameBusinessCount: " + sameBusinessCount);
+				if (sameBusinessCount >= 2) {
+					log.info("sameBusinessCount: " + sameBusinessCount);
+					return Constants.INT_DATA_DUPLICATE;
+				}
+
+				// 不同學校新增情況下，db資料是否已經同步
+				for (Patent dbPatent : dbPatentList) {
+					if (!dbPatent.isIs_sync()) {
+						// 都沒同步 -> 存入資料庫，申請號random
+						isSync = false;
+						log.info("確認是否同步isSync = false;");
+					} else {
+						// 合併關聯
+						dbPatentId = dbPatent.getPatent_id();
+						isSync = true;
+						log.info("確認是否同步issync = true; break");
+						break;
+					}
+				}
+
+				if (!isSync) {
+					log.info("!is sync -> 存入資料庫，申請號random");
+					editPatent.setPatent_appl_no(editPatent.getPatent_appl_no() + "@" + KeyGeneratorUtils.generateRandomString());
+					return patentDao.updatePatentApplNo(editPatent.getPatent_id(), editPatent.getPatent_appl_no());
+				} else {
+					log.info("is sync -> 合併關聯");
+					return mergeDiffPatent("44100767fa71b9b896b564545ee81503", editPatent);
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			return Constants.INT_SYSTEM_PROBLEM;
+		}
+	}
+	
+	@Override
+	public int mergeDiffPatent(String dbPatentId, Patent editPatent) {
+		try {
+			Patent dbPatent = patentDao.getById(dbPatentId);
+
+			List<String> checkBusinessIds = new ArrayList<>();
+			for (Business dbBussiness : dbPatent.getListBusiness()) {
+				checkBusinessIds.add(dbBussiness.getBusiness_id());
+			}
+
+			if (editPatent.getBusiness() != null) {
+				if (!checkBusinessIds.contains(editPatent.getBusiness().getBusiness_id())) {
+					dbPatent.addBusiness(editPatent.getBusiness());
+				}
+			}
+
+			List<PatentStatus> psList = new ArrayList<>();
+			if (editPatent.getListPatentStatus() != null) {
+				for (PatentStatus editPs : editPatent.getListPatentStatus()) {
+					Status status = editPs.getStatus();
+					if (status.getStatus_from().equals("user")) {
+						status.setStatus_id(KeyGeneratorUtils.generateRandomString());
+						editPs.setPatent(dbPatent);
+						psList.add(editPs);
+						dbPatent.addPatentStatus(editPs);
+					}
+				}
+			}
+
+			List<PatentContact> patentConstactList = new ArrayList<>();
+			if (editPatent.getListContact() != null) {
+				for (PatentContact editPc : editPatent.getListContact()) {
+					editPc.setPatent(dbPatent);
+					patentConstactList.add(editPc);
+				}
+			}
+			patentConstactList.addAll(dbPatent.getListContact());
+			if (patentConstactList != null && !patentConstactList.isEmpty()) {
+				dbPatent.setListContact(patentConstactList);
+			}
+
+			List<PatentCost> patentCostList = new ArrayList<>();
+			if (editPatent.getListCost() != null) {
+				for (PatentCost editPc : editPatent.getListCost()) {
+					editPc.setPatent(dbPatent);
+					patentCostList.add(editPc);
+				}
+			}
+			patentCostList.addAll(dbPatent.getListCost());
+			if (patentCostList != null && !patentCostList.isEmpty()) {
+				dbPatent.setListCost(patentCostList);
+			}
+
+			List<PatentExtension> extensionList = new ArrayList<>();
+			if (editPatent.getListExtension() != null) {
+				for (PatentExtension editPe : editPatent.getListExtension()) {
+					editPe.setExtension_id(KeyGeneratorUtils.generateRandomString());
+					editPe.setPatent(dbPatent);
+					extensionList.add(editPe);
+				}
+			}
+			extensionList.addAll(dbPatent.getListExtension());
+			if (extensionList != null && !extensionList.isEmpty()) {
+				dbPatent.setListExtension(extensionList);
+			}
+
+			List<PatentEditHistory> patentHistoryList = new ArrayList<>();
+			if (editPatent.getListHistory() != null) {
+				for (PatentEditHistory editPh : editPatent.getListHistory()) {
+					editPh.setPatent(dbPatent);
+					patentHistoryList.add(editPh);
+				}
+			}
+			patentHistoryList.addAll(dbPatent.getListHistory());
+			if (patentHistoryList != null && !patentHistoryList.isEmpty()) {
+				dbPatent.setListHistory(patentHistoryList);
+			}
+
+			List<Annuity> annuityList = new ArrayList<>();
+			if (editPatent.getListHistory() != null) {
+				for (Annuity editAnnuity : editPatent.getListAnnuity()) {
+					editAnnuity.setPatent(dbPatent);
+					annuityList.add(editAnnuity);
+				}
+			}
+			annuityList.addAll(dbPatent.getListAnnuity());
+			if (annuityList != null && !annuityList.isEmpty()) {
+				dbPatent.setListAnnuity(annuityList);
+			}
+
+			List<Portfolio> portfolioList = new ArrayList<>();
+			if (editPatent.getListHistory() != null) {
+				for (Portfolio editPh : editPatent.getListPortfolio()) {
+					portfolioList.add(editPh);
+				}
+			}
+			portfolioList.addAll(dbPatent.getListPortfolio());
+			if (portfolioList != null && portfolioList.isEmpty()) {
+				dbPatent.setListPortfolio(portfolioList);
+			}
+
+			return Constants.INT_SUCCESS;
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			e.printStackTrace();
+			return Constants.INT_SYSTEM_PROBLEM;
+		}
+	}
+	
+	@Override
+	public int authorizedUpdatePatent(String businessId, Patent patent) {
+		Patent dbBean = patentDao.getById(businessId, patent.getPatent_id());
+		if (dbBean != null) {
 			return updatePatent(patent, businessId);
 		} else {
 			return Constants.INT_CANNOT_FIND_DATA;
 		}
-
 	}
 
 	@Override
@@ -1551,7 +1768,7 @@ public class PatentServiceImpl implements PatentService {
 
 			if (Constants.PATENT_STATUS_FIELD.equals(field.getField_id())) {
 				List<String> statusAddData = new ArrayList<>();
-				if (dbBean.getListPatentStatus() != null) {
+				if (dbBean.getListPatentStatus() != null && patent.getListPatentStatus() != null) {
 					for (PatentStatus patentStatus : patent.getListPatentStatus()) {
 						Status status = patentStatus.getStatus();
 						if (patentStatus.getCreate_date() != null) {

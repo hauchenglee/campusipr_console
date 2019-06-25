@@ -14,6 +14,10 @@ public interface PatentDao {
 	Patent getById(String businessId,String id);
 	
 	Patent getByApplNo(String applNo);
+	
+	List<Patent> getPatentListByApplNo(String applNo);
+	
+	int updatePatentApplNo(String patentId, String patentApplNo);
 
 	void create(Patent patent);
 	

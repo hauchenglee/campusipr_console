@@ -183,6 +183,20 @@ public class StringUtils {
 	    return false;
 	}
 
+	public static String getApplNoWithoutAt(String sourceString) {
+		String patentApplNoWithoutAt = "";
+		int indexOfAtEdit = sourceString.indexOf("@");
+		if (indexOfAtEdit != -1) {
+			patentApplNoWithoutAt = sourceString.substring(0, indexOfAtEdit);
+		} else {
+			patentApplNoWithoutAt = sourceString;
+		}
+		return patentApplNoWithoutAt;
+	}
+
+	public static String getApplNoWithoutDot(String sourceString) {
+		return "";
+	}
 
 
 }

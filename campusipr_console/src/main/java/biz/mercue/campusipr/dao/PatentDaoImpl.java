@@ -10,6 +10,7 @@ import org.hibernate.FetchMode;
 import org.hibernate.Filter;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
@@ -60,6 +61,23 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		Criteria criteria =  createEntityCriteria();
 		criteria.add(Restrictions.eq("patent_appl_no", applNo));
 		return (Patent) criteria.uniqueResult();
+	}
+	
+	@Override
+	public List<Patent> getPatentListByApplNo(String applNo) {
+		Criteria criteria =  createEntityCriteria();
+		criteria.add(Restrictions.like("patent_appl_no", applNo, MatchMode.START));
+		return criteria.list();
+	}
+	
+	@Override
+	public int updatePatentApplNo(String patentId, String patentApplNo) {
+		String hql = "Update Patent p set p.patent_appl_no = :patentApplNo where patent_id = :patent_id";
+	    Session session = getSession();
+	    Query query = session.createQuery(hql);
+	    query.setParameter("patentApplNo", patentApplNo);
+	    query.setParameter("patent_id", patentId);
+	    return query.executeUpdate();
 	}
 	
 	@Override
