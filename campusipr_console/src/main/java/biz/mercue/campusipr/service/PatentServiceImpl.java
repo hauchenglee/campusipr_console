@@ -325,13 +325,16 @@ public class PatentServiceImpl implements PatentService {
 			}
 		}
 
+		if (StringUtils.isNULL(applNo)) {
+			contactData(patent);
+		}
+		
 		handleReminder(patent, patent.getListBusiness());
-		contactData(patent);
 		patentDao.create(patent);
 		return Constants.INT_SUCCESS;
 	}
 
-//	// 自動新增聯絡人資料
+//	自動新增聯絡人資料
 	public void contactData(Patent patent) {
 		if (patent.getBusiness() != null) {
 			Business business = patent.getBusiness();
