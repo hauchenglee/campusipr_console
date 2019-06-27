@@ -304,34 +304,56 @@ public class PatentServiceImpl implements PatentService {
 			patent.setIs_sync(true);
 		}
 
-		// 同步時同時新增預設聯絡人
+//		// 同步時同時新增預設聯絡人
+//		if (Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
+//			if (patent.getBusiness() != null) {
+//				Business business = patent.getBusiness();
+//				if (!StringUtils.isNULL(business.getContact_name()) ||
+//						!StringUtils.isNULL(business.getContact_email()) ||
+//								!StringUtils.isNULL(business.getContact_phone())) {
+//					PatentContact pContact = new PatentContact();
+//					pContact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
+//					pContact.setPatent(patent);
+//					pContact.setBusiness(business);
+//					pContact.setCreate_date(new Date());
+//					pContact.setContact_name(business.getContact_name());
+//					pContact.setContact_email(business.getContact_email());
+//					pContact.setContact_phone(business.getContact_phone());
+//					pContact.setContact_character("聯絡人");
+//					pContact.setContact_order(0);
+//					patent.addContact(pContact);
+//					log.info("同步時同時新增預設聯絡人");
+//				}
+//			}
+//		}
+
+		// 自動新增聯絡人資料
+		Patent dbPatent = new Patent();
+		PatentContact dbContact =new PatentContact() ;
+		//for 新增專利/技術
+		if (StringUtils.isNULL(applNo)) {
+			log.info("無申請號時新增聯絡人");
+			contactData(patent);
+		}
+		
+		//for 申請號新增 & Excel
 		if (Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
-			if (patent.getBusiness() != null) {
-				Business business = patent.getBusiness();
-				if (!StringUtils.isNULL(business.getContact_name()) ||
-						!StringUtils.isNULL(business.getContact_email()) ||
-								!StringUtils.isNULL(business.getContact_phone())) {
-					PatentContact pContact = new PatentContact();
-					pContact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
-					pContact.setPatent(patent);
-					pContact.setBusiness(business);
-					pContact.setCreate_date(new Date());
-					pContact.setContact_name(business.getContact_name());
-					pContact.setContact_email(business.getContact_email());
-					pContact.setContact_phone(business.getContact_phone());
-					pContact.setContact_character("聯絡人");
-					pContact.setContact_order(0);
-					patent.addContact(pContact);
+			if (!StringUtils.isNULL(applNo)) {
+				if (dbPatent.getPatent_id() == null) {
+					log.info("有申請號時新增聯絡人，且db無PatentId");
+					contactData(patent);
 				}
 			}
 		}
-
-		// 自動新增聯絡人資料
-		if (StringUtils.isNULL(applNo) || StringUtils.isNULL(patent.getPatent_name())) {
-			log.info("無申請號或有申請號無資料時新增聯絡人，如果在資料庫搜尋時找不到申請號，請改用相似(like)查詢");
-			contactData(patent);
+		
+		//for Excel
+		if (Patent.EDIT_SOURCE_SERVICE != patent.getEdit_source()) {
+			if (StringUtils.isNULL(patent.getPatent_id()) || StringUtils.isNULL(dbContact.getPatent_contact_id())) {
+				contactData(patent);
+				log.info("申請號未公開或亂打時新增聯絡人，在資料庫搜尋時找不到申請號，請改用相似(like)查詢");
+			}
 		}
-				
+		
 		handleReminder(patent, patent.getListBusiness());
 		patentDao.create(patent);
 		return Constants.INT_SUCCESS;
@@ -792,9 +814,9 @@ public class PatentServiceImpl implements PatentService {
 
 			String editPatentApplNo = editPatent.getPatent_appl_no();
 			String editApplNoWithoutAt = StringUtils.getApplNoWithoutAt(editPatentApplNo);
-
+			
 			log.info(editApplNoWithoutAt);
-
+			
 			String dbPatentId = null;
 			List<Patent> dbPatentList = patentDao.getPatentListByApplNo(editPatentApplNo);
 			if (dbPatentList.isEmpty()) {
@@ -1072,7 +1094,7 @@ public class PatentServiceImpl implements PatentService {
 			//handleApplicant(dbBean, patent);
 			//handleInventor(dbBean, patent);
 			handleCost(dbBean, patent, businessId);
-			handleContact(dbBean, patent);
+//			handleContact(dbBean, patent);
 			handleAnnuity(dbBean, patent);
 			handlePatentStatus(dbBean, patent);
 
@@ -2213,31 +2235,31 @@ public class PatentServiceImpl implements PatentService {
 		}
 	}
 
-	private void handleContact(Patent dbPatent, Patent editPatent) {
-		if (editPatent.getListContact() != null && editPatent.getListContact().size() > 0) {
-			List<PatentContact> listContact = editPatent.getListContact();
-			for (PatentContact contact : listContact) {
-				if (StringUtils.isNULL(contact.getPatent_contact_id())) {
-					contact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
-				}
-				contact.setPatent(dbPatent);
-				if (Patent.EDIT_SOURCE_HUMAN == editPatent.getEdit_source()) {
-					contact.setBusiness(editPatent.getAdmin().getBusiness());
-				}
-
-				if (Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()) {
-					contact.setBusiness(editPatent.getBusiness());
-				}
-				contact.setCreate_date(new Date());
-			}
-			patentDao.deletePatentContact(dbPatent.getPatent_id());
-			dbPatent.setListContact(editPatent.getListContact());
-		} else {
-			if (dbPatent.getListContact() != null) {
-				patentDao.deletePatentContact(dbPatent.getPatent_id());
-			}
-		}
-	}
+//	private void handleContact(Patent dbPatent, Patent editPatent) {
+//		if (editPatent.getListContact() != null && editPatent.getListContact().size() > 0) {
+//			List<PatentContact> listContact = editPatent.getListContact();
+//			for (PatentContact contact : listContact) {
+//				if (StringUtils.isNULL(contact.getPatent_contact_id())) {
+//					contact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
+//				}
+//				contact.setPatent(dbPatent);
+//				if (Patent.EDIT_SOURCE_HUMAN == editPatent.getEdit_source()) {
+//					contact.setBusiness(editPatent.getAdmin().getBusiness());
+//				}
+//
+//				if (Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()) {
+//					contact.setBusiness(editPatent.getBusiness());
+//				}
+//				contact.setCreate_date(new Date());
+//			}
+//			patentDao.deletePatentContact(dbPatent.getPatent_id());
+//			dbPatent.setListContact(editPatent.getListContact());
+//		} else {
+//			if (dbPatent.getListContact() != null) {
+//				patentDao.deletePatentContact(dbPatent.getPatent_id());
+//			}
+//		}
+//	}
 
 	private void handleAnnuity(Patent dbPatent, Patent editPatent) {
 		if (editPatent.getListAnnuity() != null && editPatent.getListAnnuity().size() > 0) {
