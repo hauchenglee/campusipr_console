@@ -12,6 +12,8 @@ import biz.mercue.campusipr.model.Status;
 
 
 public interface PatentService {
+	
+	int demo(String applNo, String businessId, String patentId);
 
 	int addPatent(Patent patent);
 	
@@ -32,10 +34,10 @@ public interface PatentService {
 	int mergeDiffPatent(String dbPatentId, Patent editPatent);
 
 	int updatePatent(Patent patent, String businessId);
-	
-	void patentHistoryFirstAdd(Patent patent, String businessId);
-	
-	int authorizedUpdatePatent(String businessId,Patent patent);
+
+	void patentHistoryFirstAdd(Patent patent, String patentId, String businessId);
+
+	int authorizedUpdatePatent(String businessId, Patent patent);
 
 	int deletePatent(Patent patent);
 	
@@ -53,8 +55,8 @@ public interface PatentService {
 	
 	
 	//Patent getByApplNo(String applNo,String businessId);
-		
-	Patent getById(String businessId,String id);
+
+	Patent getById(String businessId, String id);
 	
 	Patent getById(String id);
 	

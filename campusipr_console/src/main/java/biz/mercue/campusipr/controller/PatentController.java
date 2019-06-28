@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+import biz.mercue.campusipr.service.*;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,11 +51,6 @@ import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.model.View.PatentDetail;
-import biz.mercue.campusipr.service.AdminService;
-import biz.mercue.campusipr.service.AdminTokenService;
-import biz.mercue.campusipr.service.ExcelTaskService;
-import biz.mercue.campusipr.service.PatentService;
-import biz.mercue.campusipr.service.PermissionService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.DateUtils;
@@ -86,6 +82,9 @@ public class PatentController {
 	
 	@Autowired
 	ExcelTaskService excelTaskService;
+
+	@Autowired
+    FieldService fieldService;
 	
 	
 	
@@ -104,6 +103,7 @@ public class PatentController {
 			patent.setAdmin(tokenBean.getAdmin());
 			patent.setAdmin_ip(ip);
 			int taskResult = patentService.addPatent(patent);
+			patentService.patentHistoryFirstAdd(patent, patent.getPatent_id(), businessId);
 			responseBody.setCode(taskResult);
 			if(taskResult == Constants.INT_SUCCESS) {
 				responseBody.setBean(patent);
@@ -218,7 +218,7 @@ public class PatentController {
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
 			int taskResult = patentService.addPatentByNoPublicApplNo(patent, tokenBean.getBusiness());
-			
+
 			responseBody.setCode(taskResult);
 			responseBody.setBean(patent);
 			
@@ -448,14 +448,17 @@ public class PatentController {
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
 			
 			if(tokenBean.checkPermission(permission.getPermission_id())) {
-				List<String> ids = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});	
+
+                JSONObject jsonObject = new JSONObject(receiveJSONString);
+				List<String> patent_ids = (List<String>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("patent_ids").toString(), new TypeReference<List<String>>(){});
+				List<String> field_ids = (List<String>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("field_ids").toString(), new TypeReference<List<String>>(){});
 
 				String bussinessId = tokenBean.getBusiness().getBusiness_id();
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 					bussinessId = null;
 				}
 				
-				List<Patent> listPatent = patentService.getExcelByPatentIds(ids, bussinessId);
+				List<Patent> listPatent = patentService.getExcelByPatentIds(patent_ids, bussinessId);
 				
 				String fileName = tokenBean.getBusiness().getBusiness_name();
 				ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, bussinessId);
@@ -478,6 +481,28 @@ public class PatentController {
 			return null;
 		}
 	}
+
+    @RequestMapping(value = "/api/getallexcelfield", method = {RequestMethod.GET }, produces = Constants.CONTENT_TYPE_JSON)
+    @ResponseBody
+    public String getAllExcelField(HttpServletRequest request) {
+        log.info("getAllExcelField");
+        ListResponseBody responseBody  = new ListResponseBody();
+        try {
+            AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+            //tokenBean = new AdminToken();
+            if (tokenBean != null) {
+                responseBody.setCode(Constants.INT_SUCCESS);
+                responseBody.setList(fieldService.getAllFields());
+            } else {
+                responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("Exception :" + e.getMessage());
+            responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+        }
+
+        return responseBody.getJacksonString(View.FieldMap.class);
+    }
 		
 	@RequestMapping(value = "/api/importpatentexcel", method = {
 			RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed",

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import biz.mercue.campusipr.model.Patent;
+import biz.mercue.campusipr.model.PatentEditHistory;
 import biz.mercue.campusipr.model.PatentExtension;
 
 public interface PatentDao {
@@ -14,6 +15,8 @@ public interface PatentDao {
 	Patent getById(String businessId,String id);
 	
 	Patent getByApplNo(String applNo);
+	
+	Patent getByApplNoAndBusinessId(String applNo, String businessId);
 	
 	List<Patent> getPatentListByApplNo(String applNo);
 	
@@ -32,7 +35,9 @@ public interface PatentDao {
 
 	
 	List<Patent> getByPatentIds(List<String> ids,String businessId);
-	
+
+	int updatePatentHistory(String dbPatentId, String editPatentId);
+
 	List<Patent> getByFamily(String familyId);
 	
 	PatentExtension getPatentExtensionByPatentIdAndBusinessId(String patentId, String businessId);

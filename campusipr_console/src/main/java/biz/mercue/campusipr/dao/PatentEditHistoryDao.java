@@ -13,8 +13,10 @@ import biz.mercue.campusipr.model.Status;
 public interface PatentEditHistoryDao {
 
 	PatentEditHistory getById(String id);
-	
-	List<PatentEditHistory> getByPatentAndField(String patentId,String fieldId, String businessId,int page,int pageSize);
+
+    List<PatentEditHistory> getByPatentId(String patentId);
+
+    List<PatentEditHistory> getByPatentAndField(String patentId, String fieldId, String businessId, int page, int pageSize);
 	
 	int countByPatentAndField(String patentId,String fieldId, String businessId);
 }
