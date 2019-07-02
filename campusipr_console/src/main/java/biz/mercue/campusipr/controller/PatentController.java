@@ -1,9 +1,12 @@
 package biz.mercue.campusipr.controller;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
@@ -18,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -50,15 +54,18 @@ import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.model.View.PatentDetail;
+import biz.mercue.campusipr.model.View.Reminder;
 import biz.mercue.campusipr.service.AdminService;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.ExcelTaskService;
+import biz.mercue.campusipr.service.ExcelTaskServiceImpl;
 import biz.mercue.campusipr.service.PatentService;
 import biz.mercue.campusipr.service.PermissionService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.DateUtils;
 import biz.mercue.campusipr.util.ExcelUtils;
+import biz.mercue.campusipr.util.FileUtils;
 import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
@@ -706,39 +713,47 @@ public class PatentController {
 	}
 	
 	// Exportfile download
-	@RequestMapping(value = "/downloadExport", method = RequestMethod.GET)
-	public void downloadFile(HttpServletResponse response, @RequestParam(value = "path") String path, @RequestParam(value = "fileName") String fileName) throws IOException {
-		System.out.println("fileout");
-		final String EXTERNAL_FILE_PATH = path;
-		File file = null;
-		file = new File(EXTERNAL_FILE_PATH);
-		if (!file.exists()) {
-			String errorMessage = "Sorry. The file you are looking for does not exist";
-			System.out.println(errorMessage);
-			OutputStream outputStream = response.getOutputStream();
-			outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-			outputStream.close();
-			return;
-		}
-		String mimeType = URLConnection.guessContentTypeFromName(file.getName());
-		if (mimeType == null) {
-			System.out.println("mimetype is not detectable, will take default");
-			mimeType = "application/octet-stream";
-		}
-		System.out.println("mimetype : " + mimeType);
-		response.setContentType(mimeType);
-		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
-		response.setContentLength((int) file.length());
-		OutputStream os = response.getOutputStream();
-		FileInputStream fis = new FileInputStream(file);
-		byte[] buffer = new byte[4096];
-		int b = -1;
-		while ((b = fis.read(buffer)) != -1) {
-			os.write(buffer, 0, b);
-		}
+	@RequestMapping(value = "/api/downloadexport", method = RequestMethod.POST, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request,
+			@RequestBody String receiveJSONString) throws IOException {
+		log.info("downloadExport");
+		int responseBodyCode = Constants.INT_DATA_ERROR;
 
-		fis.close();
-		os.close();
+//		File f = (Constants.FILE_LOAD_URL + .getExcel_task_id() + "fix"+"xls");
+//		{ file_name : "12345" }
+
+		try {
+			JSONObject dataJSON = new JSONObject(receiveJSONString);
+			String fileName = dataJSON.optString("file_name");
+			File f = new File(Constants.FILE_UPLOAD_PATH + fileName);
+
+			InputStream fis = new FileInputStream(f);
+			byte[] buffer = new byte[4096];
+
+			int bytesRead = 0;
+			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+
+			while ((bytesRead = fis.read(buffer)) != -1) {
+				bao.write(buffer, 0, bytesRead);
+			}
+
+			byte[] data = bao.toByteArray();
+			ByteArrayInputStream fileOut = new ByteArrayInputStream(data);
+
+			HttpHeaders headers = new HttpHeaders();
+//			String fileName = "錯誤回報";
+			headers.add("Content-disposition", "attachment;");
+			log.info("回報成功");
+			return ResponseEntity
+					.ok()
+					.headers(headers)
+					.contentType(MediaType.parseMediaType("application/ms-excel"))
+					.body(new InputStreamResource(fileOut));
+			
+		} catch (Exception e) {
+			log.error("Exception :" + e.getMessage());
+			return null;
+		}
 	}
-
 }
