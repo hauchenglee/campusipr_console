@@ -469,7 +469,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 										errorColumnList.add(fieldMap.getExcel_field_index());
 									}
 
-								}
+								} 
 								if (StringUtils.isNULL(countryName)) {
 									if (!StringUtils.isNULL(patent.getPatent_appl_no())) {
 										errorRowList.add(rowIndex);
