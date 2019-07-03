@@ -29,9 +29,9 @@ public interface PatentService {
 	
 	int checkNoPublicApplNo(Patent editPatent, Business business);
 	
-	int addPatentByNoPublicApplNo(Patent editPatent, Business business);
+	int addPatentByNoPublicApplNo(Patent editPatent, Business business, Admin admin);
 	
-	int mergeDiffPatent(String dbPatentId, Patent editPatent);
+	int mergeDiffPatent(String dbPatentId, Patent editPatent, Admin admin, Business business);
 
 	int updatePatent(Patent patent, String businessId);
 

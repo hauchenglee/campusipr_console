@@ -227,7 +227,7 @@ public class PatentController {
 			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
-			int taskResult = patentService.addPatentByNoPublicApplNo(patent, tokenBean.getBusiness());
+			int taskResult = patentService.addPatentByNoPublicApplNo(patent, tokenBean.getBusiness(), admin);
 
 			responseBody.setCode(taskResult);
 			responseBody.setBean(patent);
