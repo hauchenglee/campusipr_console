@@ -76,7 +76,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	
 	@Override
 	public List<Patent> getPatentListByApplNo(String applNo) {
-		log.info(applNo);
 		Criteria criteria =  createEntityCriteria();
 		criteria.add(Restrictions.like("patent_appl_no", applNo, MatchMode.START));
 		return criteria.list();
