@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import biz.mercue.campusipr.model.PatentEditHistory;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
@@ -64,7 +65,18 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 	
 	@Override
+	public Patent getByApplNoAndBusinessId(String applNo, String businessId) {
+		String hql = "from Patent p inner join p.listBusiness as plb where p.patent_appl_no = :applNo and plb = :businessId";
+		Session session = getSession();
+		Query q = session.createQuery(hql);
+		q.setParameter("applNo", applNo);
+		q.setParameter("businessId", businessId);
+		return (Patent) q.uniqueResult();
+	}
+	
+	@Override
 	public List<Patent> getPatentListByApplNo(String applNo) {
+		log.info(applNo);
 		Criteria criteria =  createEntityCriteria();
 		criteria.add(Restrictions.like("patent_appl_no", applNo, MatchMode.START));
 		return criteria.list();
@@ -78,6 +90,16 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	    query.setParameter("patentApplNo", patentApplNo);
 	    query.setParameter("patent_id", patentId);
 	    return query.executeUpdate();
+	}
+
+	@Override
+	public int updatePatentHistory(String dbPatentId, String editPatentId) {
+		String hql = "Update PatentEditHistory peh set peh.patent_id = :dbPatent_id where peh.patent_id = :editPatent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("dbPatent_id", dbPatentId);
+		query.setParameter("editPatent_id", editPatentId);
+		return query.executeUpdate();
 	}
 	
 	@Override

@@ -284,8 +284,20 @@ public class Constants {
 	public static final String SCHOOL_AGENT = "853e5ab43383cc325c0b8fe18cb46014";
 	public static final String SCHOOL_AGENT_NO = "f8b56e61ee5e6e36abd538f71ae32c8f";
 	public static final String SCHOOL_MEMO_FIELD = "8e04eb78ced23ee1d7f7b0ac2e86ee45";
+	public static final String SCHOOL_OTHER_INFO = "a14fca6ef3c18045116175bb23532feb";
 	public static final String PATENT_MEMO = "c53e8e4e240d9d7a0f1bcb956fbe7630";
-	
+
+	public static final String CONSERVANCY = "0cd33801e82d0912ba1b0297573ec361";
+	public static final String ANNUITY_DATE = "5907b02544155369f79c37c4ff0bc777";
+	public static final String ANNUITY_CHARGE_YEAR = "9c48e4dec6c90736de097b4237da33b1";
+	public static final String PATENT_CANCEL_DATE = "e14e7d4ca475479f11e47f52a0063f7f";
+	public static final String PATENT_ABSTRACT = "86cd0dd6691fe69c97af8ebf6cff199c";
+	public static final String PATENT_CLAIM = "382c9ca7af04c5362e1f24f1bf38249b";
+	public static final String PATENT_DESC = "006b70bc72595d46bed73899fb557bb1";
+	public static final String PATENT_IPC = "785c0e398eca15f96476fceafeb11598";
+	public static final String PATENT_BDATE = "e1309a9e14bec907470006a901803a24";
+	public static final String PATENT_EDATE = "39083412af3b51bf9a33a9a2b5f8b916";
+
 	public static final String APPL_COUNTRY_TW = "tw";
 	public static final String APPL_COUNTRY_US = "us";
 	public static final String APPL_COUNTRY_CN = "cn";
@@ -293,42 +305,43 @@ public class Constants {
 	public static final String BUSSINESS_PLATFORM = "04ea692278889b6621409d68c88aab17";
 	
 	public static final String SYSTEM_ADMIN = "40w9dse0277455f634fw40439sd";
-	
-	public static final String EXCEL_COLUMN_FILE_NO = "檔號";
-	public static final String EXCEL_COLUMN_BUSSINESS = "單位";
-	public static final String EXCEL_COLUMN_SCHOOL_NO = "校內編號";
+
+	public static final String EXCEL_COLUMN_BUSINESS = "管理單位";
 	public static final String EXCEL_COLUMN_PATENT_NAME = "專利名稱";
-	public static final String EXCEL_COLUMN_PATENT_NAME_EN = "專利英文名稱";
+	public static final String EXCEL_COLUMN_PATENT_NAME_EN = "專利名稱(英文)";
 	public static final String EXCEL_COLUMN_APPLICANT_COUNTRY = "申請國家";
 	public static final String EXCEL_COLUMN_PATENT_STATUS = "專利狀態";
 	public static final String EXCEL_COLUMN_APPLICANT = "申請人";
 	public static final String EXCEL_COLUMN_ASSIGNEE = "專利權人";
 	public static final String EXCEL_COLUMN_INVENTOR = "發明人";
-	public static final String EXCEL_COLUMN_APPLICATION_DATE = "專利申請日期";
-	public static final String EXCEL_COLUMN_APPLICATION_NO = "專利申請號";
-	public static final String EXCEL_COLUMN_NOTICE_DATE = "專利公開日期";
-	public static final String EXCEL_COLUMN_NOTICE_NO = "專利公開號";
-	public static final String EXCEL_COLUMN_PUBLIC_DATE = "專利公告日期";
-	public static final String EXCEL_COLUMN_PUBLIC_NO = "專利公告號";
-	public static final String EXCEL_COLUMN_PATENT_NO = "專利號";
+	public static final String EXCEL_COLUMN_APPLICATION_DATE = "申請日";
+	public static final String EXCEL_COLUMN_APPLICATION_NO = "申請號";
+	public static final String EXCEL_COLUMN_PUBLIC_DATE = "公開日";
+	public static final String EXCEL_COLUMN_PUBLIC_NO = "公開號";
+	public static final String EXCEL_COLUMN_NOTICE_DATE = "公告日";
+	public static final String EXCEL_COLUMN_NOTICE_NO = "公告號";
+	public static final String EXCEL_COLUMN_PATENT_NO = "證書號";
 	
 	public static final String EXCEL_COLUMN_PAY_VAILD_DATE = "年費有效日期";
 	public static final String EXCEL_COLUMN_PAY_EXPIRE_YEAR = "年費有效年次";
-	public static final String EXCEL_COLUMN_PATENT_GEGIN_DATE = "專利起始日";
-	public static final String EXCEL_COLUMN_PATENT_END_DATE = "專利截止日";
-	public static final String EXCEL_COLUMN_PATENT_CANEL_DATE = "專利取消日期";
-	public static final String EXCEL_COLUMN_PATENT_EXPIRE_DATE = "專利到期日期";
-	public static final String EXCEL_COLUMN_PATENT_VAILD_DATE = "專利有效年份";
+	public static final String EXCEL_COLUMN_PATENT_GEGIN_DATE = "專利權始日";
+	public static final String EXCEL_COLUMN_PATENT_END_DATE = "估算專利截止日";
+	public static final String EXCEL_COLUMN_PATENT_CANEL_DATE = "消滅日期";
 	public static final String EXCEL_COLUMN_PATENT_ABSTRACT = "專利摘要";
-	public static final String EXCEL_COLUMN_PATENT_CLAIM = "專利claim";
-	public static final String EXCEL_COLUMN_PATENT_CLASSIFICATION = "國際專利分類";
+	public static final String EXCEL_COLUMN_PATENT_CLAIM = "專利權利範圍";
 	public static final String EXCEL_COLUMN_PATENT_DESC = "專利描述";
-	public static final String EXCEL_COLUMN_PATENT_BUILD_DATE = "建檔時間";
-	public static final String EXCEL_COLUMN_PATENT_BUILD_PERSON = "建檔人員";
+	public static final String EXCEL_COLUMN_PATENT_IPC = "國際專利分類";
 
+	public static final String EXCEL_COLUMN_SCHOOL_NUM_FIELD = "學校編號";
 	public static final String EXCEL_COLUMN_SCHOOL_APPL_YEAR = "申請年度";
-	public static final String EXCEL_COLUMN_SCHOOL_NOTE = "學校備註";
-	
+	public static final String EXCEL_COLUMN_SCHOOL_SUBSIDY_UNIT = "補助單位";
+	public static final String EXCEL_COLUMN_SCHOOL_SUBSIDY_NO = "補助編號";
+	public static final String EXCEL_COLUMN_SCHOOL_SUBSIDY_PLAN = "補助計劃名稱";
+	public static final String EXCEL_COLUMN_SCHOOL_AGENT = "事務所";
+	public static final String EXCEL_COLUMN_SCHOOL_AGENT_NO = "事務所編號";
+	public static final String EXCEL_COLUMN_SCHOOL_MEMO_FIELD = "學校備註";
+	public static final String EXCEL_COLUMN_SCHOOL_OTHER_INFO = "其他資訊";
+
 	public static final String STATUS_FROM_USPTO = "uspto";
 	public static final String STATUS_FROM_EPO = "epo";
 	public static final String STATUS_FROM_SYSTM = "sys";

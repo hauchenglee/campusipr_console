@@ -1,12 +1,9 @@
 package biz.mercue.campusipr.controller;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
@@ -20,8 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+import biz.mercue.campusipr.service.*;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -65,7 +62,6 @@ import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.DateUtils;
 import biz.mercue.campusipr.util.ExcelUtils;
-import biz.mercue.campusipr.util.FileUtils;
 import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
@@ -93,6 +89,9 @@ public class PatentController {
 	
 	@Autowired
 	ExcelTaskService excelTaskService;
+
+	@Autowired
+    FieldService fieldService;
 	
 	
 	
@@ -111,6 +110,7 @@ public class PatentController {
 			patent.setAdmin(tokenBean.getAdmin());
 			patent.setAdmin_ip(ip);
 			int taskResult = patentService.addPatent(patent);
+			patentService.patentHistoryFirstAdd(patent, patent.getPatent_id(), businessId);
 			responseBody.setCode(taskResult);
 			if(taskResult == Constants.INT_SUCCESS) {
 				responseBody.setBean(patent);
@@ -225,7 +225,7 @@ public class PatentController {
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
 			int taskResult = patentService.addPatentByNoPublicApplNo(patent, tokenBean.getBusiness());
-			
+
 			responseBody.setCode(taskResult);
 			responseBody.setBean(patent);
 			
@@ -455,17 +455,20 @@ public class PatentController {
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
 			
 			if(tokenBean.checkPermission(permission.getPermission_id())) {
-				List<String> ids = (List<String>) JacksonJSONUtils.readValue(receiveJSONString, new TypeReference<List<String>>(){});	
+
+                JSONObject jsonObject = new JSONObject(receiveJSONString);
+				List<String> patent_ids = (List<String>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("patent_ids").toString(), new TypeReference<List<String>>(){});
+				List<String> field_ids = (List<String>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("field_ids").toString(), new TypeReference<List<String>>(){});
 
 				String bussinessId = tokenBean.getBusiness().getBusiness_id();
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 					bussinessId = null;
 				}
 				
-				List<Patent> listPatent = patentService.getExcelByPatentIds(ids, bussinessId);
+				List<Patent> listPatent = patentService.getExcelByPatentIds(patent_ids, bussinessId);
 				
 				String fileName = tokenBean.getBusiness().getBusiness_name();
-				ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, bussinessId);
+				ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(field_ids, listPatent, bussinessId);
 				
 				HttpHeaders headers = new HttpHeaders();
 				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
@@ -485,6 +488,28 @@ public class PatentController {
 			return null;
 		}
 	}
+
+    @RequestMapping(value = "/api/getallexcelfield", method = {RequestMethod.GET }, produces = Constants.CONTENT_TYPE_JSON)
+    @ResponseBody
+    public String getAllExcelField(HttpServletRequest request) {
+        log.info("getAllExcelField");
+        ListResponseBody responseBody  = new ListResponseBody();
+        try {
+            AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+            //tokenBean = new AdminToken();
+            if (tokenBean != null) {
+                responseBody.setCode(Constants.INT_SUCCESS);
+                responseBody.setList(fieldService.getAllFields());
+            } else {
+                responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("Exception :" + e.getMessage());
+            responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+        }
+
+        return responseBody.getJacksonString(View.FieldMap.class);
+    }
 		
 	@RequestMapping(value = "/api/importpatentexcel", method = {
 			RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed",
@@ -713,47 +738,39 @@ public class PatentController {
 	}
 	
 	// Exportfile download
-	@RequestMapping(value = "/api/downloadexport", method = RequestMethod.POST, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request,
-			@RequestBody String receiveJSONString) throws IOException {
-		log.info("downloadExport");
-		int responseBodyCode = Constants.INT_DATA_ERROR;
-
-//		File f = (Constants.FILE_LOAD_URL + .getExcel_task_id() + "fix"+"xls");
-//		{ file_name : "12345" }
-
-		try {
-			JSONObject dataJSON = new JSONObject(receiveJSONString);
-			String fileName = dataJSON.optString("file_name");
-			File f = new File(Constants.FILE_UPLOAD_PATH + fileName);
-
-			InputStream fis = new FileInputStream(f);
-			byte[] buffer = new byte[4096];
-
-			int bytesRead = 0;
-			ByteArrayOutputStream bao = new ByteArrayOutputStream();
-
-			while ((bytesRead = fis.read(buffer)) != -1) {
-				bao.write(buffer, 0, bytesRead);
-			}
-
-			byte[] data = bao.toByteArray();
-			ByteArrayInputStream fileOut = new ByteArrayInputStream(data);
-
-			HttpHeaders headers = new HttpHeaders();
-//			String fileName = "錯誤回報";
-			headers.add("Content-disposition", "attachment;");
-			log.info("回報成功");
-			return ResponseEntity
-					.ok()
-					.headers(headers)
-					.contentType(MediaType.parseMediaType("application/ms-excel"))
-					.body(new InputStreamResource(fileOut));
-			
-		} catch (Exception e) {
-			log.error("Exception :" + e.getMessage());
-			return null;
+	@RequestMapping(value = "/downloadExport", method = RequestMethod.GET)
+	public void downloadFile(HttpServletResponse response, @RequestParam(value = "path") String path, @RequestParam(value = "fileName") String fileName) throws IOException {
+		System.out.println("fileout");
+		final String EXTERNAL_FILE_PATH = path;
+		File file = null;
+		file = new File(EXTERNAL_FILE_PATH);
+		if (!file.exists()) {
+			String errorMessage = "Sorry. The file you are looking for does not exist";
+			System.out.println(errorMessage);
+			OutputStream outputStream = response.getOutputStream();
+			outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+			outputStream.close();
+			return;
 		}
+		String mimeType = URLConnection.guessContentTypeFromName(file.getName());
+		if (mimeType == null) {
+			System.out.println("mimetype is not detectable, will take default");
+			mimeType = "application/octet-stream";
+		}
+		System.out.println("mimetype : " + mimeType);
+		response.setContentType(mimeType);
+		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
+		response.setContentLength((int) file.length());
+		OutputStream os = response.getOutputStream();
+		FileInputStream fis = new FileInputStream(file);
+		byte[] buffer = new byte[4096];
+		int b = -1;
+		while ((b = fis.read(buffer)) != -1) {
+			os.write(buffer, 0, b);
+		}
+
+		fis.close();
+		os.close();
 	}
+
 }

@@ -37,6 +37,15 @@ public class PatentEditHistoryDaoImpl extends AbstractDao<String,  PatentEditHis
 	}
 
 	@Override
+	public List<PatentEditHistory> getByPatentId(String patentId) {
+		Criteria criteria =  createEntityCriteria();
+		criteria.createAlias("patent","patent");
+		criteria.add(Restrictions.eq("patent.patent_id", patentId));
+		criteria.addOrder(Order.asc("create_date"));
+		return criteria.list();
+	}
+
+	@Override
 	public List<PatentEditHistory> getByPatentAndField(String patentId, String fieldId, String businessId,int page,int pageSize) {
 		// TODO Auto-generated method stub
 		Criteria criteria =  createEntityCriteria();

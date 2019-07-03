@@ -79,7 +79,13 @@ public class TestController {
 	
 	@Autowired
 	ServletContext servletContext;
-	
+
+	@RequestMapping(value="/api/demo", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String demo() {
+		patentService.demo("", "", "");
+		return "{\"aaa\": \"bbb\"}";
+	}
 	
 	@RequestMapping(value="/gettestid", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody

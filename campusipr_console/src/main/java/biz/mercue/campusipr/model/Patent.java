@@ -309,6 +309,9 @@ public class Patent extends BaseBean{
 	
 	@Transient
 	private String patent_excel_memo;
+
+	@Transient
+	private boolean isMerged;
 	
 	public String getPatent_id() {
 		return patent_id;
@@ -911,5 +914,13 @@ public class Patent extends BaseBean{
 
 	public void setPatent_excel_memo(String patent_excel_memo) {
 		this.patent_excel_memo = patent_excel_memo;
+	}
+
+	public boolean isMerged() {
+		return isMerged;
+	}
+
+	public void setMerged(boolean merged) {
+		isMerged = merged;
 	}
 }

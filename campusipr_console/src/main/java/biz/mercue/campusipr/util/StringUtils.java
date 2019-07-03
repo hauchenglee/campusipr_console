@@ -194,8 +194,15 @@ public class StringUtils {
 		return patentApplNoWithoutAt;
 	}
 
-	public static String getApplNoWithoutDot(String sourceString) {
-		return "";
+	public static String generateApplNoRandom(String sourceString) {
+		String newApplNo = "";
+		int indexOfAtEdit = sourceString.indexOf("@");
+		if (indexOfAtEdit != -1) {
+			newApplNo = sourceString.substring(0, indexOfAtEdit) + "@" + KeyGeneratorUtils.generateRandomString();
+		} else {
+			newApplNo = sourceString + "@" + KeyGeneratorUtils.generateRandomString();
+		}
+		return newApplNo;
 	}
 
 
