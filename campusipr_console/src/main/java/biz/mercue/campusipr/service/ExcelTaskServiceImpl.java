@@ -1,7 +1,5 @@
 package biz.mercue.campusipr.service;
 
-
-
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.Collectors.toMap;
 import java.io.File;
