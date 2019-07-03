@@ -331,37 +331,28 @@ public class PatentServiceImpl implements PatentService {
 //		}
 
 		// 自動新增聯絡人資料
-		Patent dbPatent = new Patent();
-		PatentContact dbContact = new PatentContact();
 		//for 新增專利/技術
-		if (StringUtils.isNULL(applNo)) {
-			log.info("無申請號時新增聯絡人");
-			contactData(patent);
-		}
+//		if (StringUtils.isNULL(applNo)) {
+//			if(StringUtils.isNULL(patent.getPatent_appl_country())) {
+//				log.info("無申請號時新增聯絡人");
+//				contactData(patent);
+//			}
+//		}
 
 		//for 申請號新增 & Excel
 		if (Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
 			if (!StringUtils.isNULL(applNo)) {
-				log.info("for 申請號新增 & Excel 申請號存在：" + !StringUtils.isNULL(applNo));
-				if (StringUtils.isNULL(dbPatent.getPatent_id())) {
-					log.info("for 申請號新增 & Excel PatentID不存在：" + StringUtils.isNULL(dbPatent.getPatent_id()));
-					if (StringUtils.isNULL(dbContact.getPatent_contact_id())) {
-						log.info("有申請號時新增聯絡人，且db無PatentId");
-						contactData(patent);
-					}
-				}
+				log.info("有申請號時新增聯絡人");
+				contactData(patent);
 			}
 		}
 
 		//for Excel
-		int syncResult = Constants.INT_SYSTEM_PROBLEM;
-		if (syncResult == Constants.INT_CANNOT_FIND_DATA) {
-			if (Patent.EDIT_SOURCE_SERVICE != patent.getEdit_source()) {
-				if (StringUtils.isNULL(patent.getPatent_id()) || StringUtils.isNULL(dbContact.getPatent_contact_id())) {
-					contactData(patent);
-					log.info("申請號未公開或亂打時新增聯絡人，在資料庫搜尋時找不到申請號，請改用相似(like)查詢");
-				}
-			}
+		if (Patent.EDIT_SOURCE_SERVICE != patent.getEdit_source()) {
+			contactData(patent);
+			log.info("EXCEL匯入中申請號未公開時新增聯絡人，在資料庫搜尋時找不到申請號，請改用相似(like)查詢");
+//			if (!StringUtils.isNULL(applNo)||!StringUtils.isNULL(patent.getPatent_appl_country())) {
+//			}
 		}
 		handleReminder(patent, patent.getListBusiness());
 		patentDao.create(patent);

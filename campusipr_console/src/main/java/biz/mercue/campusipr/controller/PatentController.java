@@ -51,6 +51,13 @@ import biz.mercue.campusipr.model.Permission;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.model.View.PatentDetail;
+import biz.mercue.campusipr.model.View.Reminder;
+import biz.mercue.campusipr.service.AdminService;
+import biz.mercue.campusipr.service.AdminTokenService;
+import biz.mercue.campusipr.service.ExcelTaskService;
+import biz.mercue.campusipr.service.ExcelTaskServiceImpl;
+import biz.mercue.campusipr.service.PatentService;
+import biz.mercue.campusipr.service.PermissionService;
 import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.DateUtils;
@@ -461,7 +468,7 @@ public class PatentController {
 				List<Patent> listPatent = patentService.getExcelByPatentIds(patent_ids, bussinessId);
 				
 				String fileName = tokenBean.getBusiness().getBusiness_name();
-				ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(listPatent, bussinessId);
+				ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(field_ids, listPatent, bussinessId);
 				
 				HttpHeaders headers = new HttpHeaders();
 				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );

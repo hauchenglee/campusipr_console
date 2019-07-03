@@ -2,6 +2,8 @@ package biz.mercue.campusipr.service;
 
 
 
+import static java.util.Map.Entry.comparingByValue;
+import static java.util.stream.Collectors.toMap;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -19,22 +21,26 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import biz.mercue.campusipr.dao.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.poifs.filesystem.DocumentOutputStream;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.sun.xml.bind.v2.runtime.reflect.opt.Const;
-
+import biz.mercue.campusipr.dao.CountryDao;
+import biz.mercue.campusipr.dao.ExcelTaskDao;
+import biz.mercue.campusipr.dao.FieldDao;
+import biz.mercue.campusipr.dao.FieldMapDao;
+import biz.mercue.campusipr.dao.PatentDao;
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Applicant;
 import biz.mercue.campusipr.model.Assignee;
@@ -51,11 +57,6 @@ import biz.mercue.campusipr.util.ExcelUtils;
 import biz.mercue.campusipr.util.FileUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.StringUtils;
-
-import static java.util.Map.Entry.comparingByValue;
-import static java.util.stream.Collectors.toMap;
-
-
 
 
 @Service("excelTaskService")
@@ -269,6 +270,8 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 
 						if (listPatent == null || listPatent.size() == 0) {
 							mapPatent.put(Constants.INT_DATA_ERROR, null);
+							book2File(book, admin, dbBean.getExcel_task_id());
+							log.info(book);
 							return mapPatent;
 						}
 
@@ -288,6 +291,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				return mapPatent;
 			}
 		}catch (Exception e) {
+			e.printStackTrace();
 			log.error("Exception :"+e.getMessage());
 		}finally {
 			if(fileInputStream!=null) {
@@ -303,6 +307,21 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		return mapPatent;
 	}
 
+	public void book2File(Workbook book, Admin admin, String excelTaskId) {
+		ExcelTask task = null;
+		task = dao.getByBusinessId(admin.getBusiness().getBusiness_id(), excelTaskId);
+		File f = new File(Constants.FILE_UPLOAD_PATH + task.getExcel_task_id()+".xlsx");
+//		File fileName = new File("https://api.mercue.biz:663/imageservice/campusipr/file/");
+//		File f = new File("C:/mercue/errFile.xls");
+		try {
+			FileOutputStream fos = new FileOutputStream(f);
+			book.write(fos);
+			fos.close();
+			log.info("匯出結束");
+			} catch (Exception e) {
+			e.printStackTrace();
+			}
+	}
 
 	@Override
 	public List<ExcelTask> getByBusiness(String businessId){
@@ -357,6 +376,10 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		List<Patent> listPatent = new ArrayList<Patent>();
 		Sheet sheet = book.getSheetAt(0);
 		int rowIndex = 0;
+		List<Integer> errorRowList = new ArrayList<Integer>();
+		List<Integer> errorColumnList = new ArrayList<Integer>();
+		boolean columnEmpty = errorColumnList.isEmpty();
+		boolean rowEmpty = errorRowList.isEmpty();
 		
 		List<Country> listCountry = countryDao.getAll();
 		whenPatentApplNoIsNull: for (Row row : sheet) {
@@ -372,7 +395,10 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				Patent patent = new Patent();
 				PatentExtension patentExtension = new PatentExtension();
 				boolean isApplNoNull = true;
-				for (FieldMap fieldMap : listField) {
+				
+				Map<Integer, Integer> errorIndexMap = new HashMap<>();
+				columnError: for (FieldMap fieldMap : listField) {
+					
 					if (fieldMap.getExcel_field_index() != -1) {
 						PatentField  field= fieldMap.getField();
 						if(field == null) {
@@ -402,7 +428,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							break;
 						case Constants.PATENT_COUNTRY_FIELD:
-							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
+							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								countryName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue();
 								
 								if(!StringUtils.isNULL(countryName)) {
@@ -412,9 +438,21 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 											break;
 										}
 									}
+									
+									if (StringUtils.isNULL(patent.getPatent_appl_country())) {
+										errorIndexMap.put(rowIndex, fieldMap.getExcel_field_index());
+										errorRowList.add(rowIndex);
+										errorColumnList.add(fieldMap.getExcel_field_index());
+									}
+									
+								} else {
+									errorIndexMap.put(rowIndex, fieldMap.getExcel_field_index());
+									errorRowList.add(rowIndex);
+									errorColumnList.add(fieldMap.getExcel_field_index());
 								}
 							}
-							break;
+								log.info(row.getCell(fieldMap.getExcel_field_index()));
+								break;
 						case Constants.PATENT_NO_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
@@ -433,8 +471,13 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 
 								// type is null --> jump out for loop
 								if (cellType == 3) {
-									isApplNoNull = true;
-									break;
+									if(StringUtils.isNULL(countryName)) {										
+										isApplNoNull = true;
+										log.info("終止");
+										break;
+									}
+									errorRowList.add(rowIndex);
+									errorColumnList.add(fieldMap.getExcel_field_index());
 								}
 								
 								// check country field value to detect add tw, us or cn etc
@@ -449,8 +492,11 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								}
 								
 								if (StringUtils.isNULL(countryAddName)) {
-									listPatent = null;
-									break whenPatentApplNoIsNull;
+//									listPatent = null;
+									errorRowList.add(rowIndex);
+									errorColumnList.add(fieldMap.getExcel_field_index());
+//									break whenPatentApplNoIsNull;
+									break columnError;
 								}
 								
 								// type is numeric --> need to add country name
@@ -474,12 +520,19 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								// check country field name is equals patent appl no or not
 								if (!countryAddName.equalsIgnoreCase(countryStartName)) {
 									// data is incorrect, thus set data is null
-									listPatent = null;
-									break whenPatentApplNoIsNull;
+//									listPatent = null;
+									errorRowList.add(rowIndex);
+									errorColumnList.add(fieldMap.getExcel_field_index());
+									log.info("row:" + rowIndex + "col" + fieldMap.getExcel_field_index());
+//									break whenPatentApplNoIsNull;
+									log.info(""+patentApplNo);
+									break columnError;
 								}
+								log.info(patentApplNo);
 								patent.setPatent_appl_no(patentApplNo);
 								isApplNoNull = false;
 							}
+							log.info(row.getCell(fieldMap.getExcel_field_index()));
 							break;
 						case Constants.PATENT_APPL_DATE_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
@@ -686,7 +739,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						default:
 							break;
 						}
-
+						log.info("errorList: Column" + errorColumnList + "Row" + errorRowList);
 					}
 				} // close for (FieldMap fieldMap : listField)
 				
@@ -715,27 +768,63 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 					patentExtension.setExtension_other_information("");
 					patent.setExtension(patentExtension);
 				}
-
+			
 				log.info("patent add");
 				if (!StringUtils.isNULL(patent.getPatent_appl_no()) && !StringUtils.isNULL(patent.getPatent_appl_country())) {
 					patent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
 					listPatent.add(patent);
-				} else {
-					break whenPatentApplNoIsNull;
 				}
 			}
 			rowIndex++;
 		}
+		
+		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
+			return listPatent;
+		} else {
+//			errorMsg(excel, book, errorColumnList, errorRowList); // x y
+			log.info("Errorlist is not Empty");
+			setColorOnError(book,errorColumnList , errorRowList);
+			log.info("Color Set");
+			return null;
+		}
+	}
 
-		return listPatent;
+	private void setColorOnError(Workbook book, List<Integer> errorColumnList, List<Integer> errorRowList) {
+		int x = 0;
+		int y = 0;
+		try {
+			String sheetName = "錯誤回報";
+			book.getSheet(sheetName);
+//			XSSFWorkbook outputWb = new XSSFWorkbook();
+//			XSSFSheet outputSheet = (XSSFSheet) book.createSheet(sheetName);
+			CellStyle style = book.createCellStyle();
+			XSSFCell cell = null;
+			XSSFRow row = null;
+			for (x = 0; x < errorRowList.size(); x++) {
+				int errorRowIndex = errorRowList.get(x);
+				int errorColIndex = errorColumnList.get(y);
+				row = (XSSFRow) book.getSheetAt(0).getRow(errorRowIndex);
+				cell = row.getCell(errorColIndex);
+				cell.setCellStyle(style);
+				style.setFillForegroundColor(IndexedColors.LIGHT_ORANGE.getIndex());
+				style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+				cell.setCellStyle(style);
+				y++;
+//				log.info("上色");
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
 		
 
 	}
 	
+
+	
 	private String getCellValue_byInputString(Row row, int fieldIndex) {
 		int cellType = row.getCell(fieldIndex).getCellType(); // cell type
 		String cellValue = "";
-		
 		/**
 		 * CELL_TYPE_NUMERIC -> 0
 		 * CELL_TYPE_STRING -> 1
@@ -766,7 +855,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		
 		return cellValue;
 	}
-	
+
 	private Map<String, Integer> handleTitleMap(Workbook book, List<Integer> other_info_index) {
 		Map<String, Integer> otherInfoTitleMap = new TreeMap<>();
 		Map<String, Integer> readExcelTitleMap;

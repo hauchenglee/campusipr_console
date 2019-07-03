@@ -162,6 +162,7 @@ public class ServiceTaiwanPatent {
 		boolean isSync = false;
 		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentRights?format=json&tk=%s&applno=%s&applclass=%s";
 		String urlSend = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no().replace("TW", "").replace("tw", ""),1);
+		log.info("url: " + url);
 		log.info("url send: " + urlSend);
 		
 		try {
@@ -175,9 +176,6 @@ public class ServiceTaiwanPatent {
 						JSONObject contentObj = contentArray.optJSONObject(0);
 						convertPatentInfoChS(patent, contentObj);
 						isSync = true;
-					} else {
-						// cannot find data
-						return Constants.INT_CANNOT_FIND_DATA;
 					}
 				}
 			}
@@ -217,6 +215,7 @@ public class ServiceTaiwanPatent {
 				url = Constants.PATENT_WEB_SERVICE_TW+"/PatentPub?format=json&tk=%s&applno=%s";
 				url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no().replace("TW", "").replace("tw", ""));
 				context = HttpRequestUtils.sendGet(url);
+				log.info("url: " + url);
 				if (!StringUtils.isNULL(context)) {
 					JSONObject getObject = new JSONObject(context);
 					JSONObject obj = getObject.optJSONObject("tw-patent-pub");
@@ -229,6 +228,9 @@ public class ServiceTaiwanPatent {
 						}
 					}
 				}
+			}
+			if (isSync == false) {
+				return Constants.INT_CANNOT_FIND_DATA;
 			}
 			return Constants.INT_SUCCESS;
 		} catch (JSONException e) {
@@ -421,6 +423,7 @@ public class ServiceTaiwanPatent {
 	private static void getAllHistoryAnnuity(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentAnnuity?format=json&tk=%s&applno=%s";
 		url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no().replace("TW", "").replace("tw", ""));
+		log.info("url: " + url);
 		try {
 			String context = HttpRequestUtils.sendGet(url);
 			if (!StringUtils.isNULL(context)) {
@@ -472,6 +475,7 @@ public class ServiceTaiwanPatent {
 	private static void getPatentAlteration(Patent patent) {
 		String url = Constants.PATENT_WEB_SERVICE_TW+"/PatentAlteration?format=json&tk=%s&applno=%s";
 		url = String.format(url, Constants.PATENT_KEY_TW ,patent.getPatent_appl_no().replace("TW", "").replace("tw", ""));
+		log.info("url: " + url);
 		
 		try {
 			String context = HttpRequestUtils.sendGet(url);
