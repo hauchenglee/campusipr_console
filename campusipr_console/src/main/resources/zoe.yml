@@ -14,9 +14,9 @@ hibernate:
     connection_character_encoding: utf8
   
 path:
-    image: /Users/User/Documents/image/campusipr
-    video: /Users/User/Documents/image/campusipr
-    file:  /Users/User/Documents/image/campusipr/file
+    image: /Users/Zoe/Documents/image/campusipr
+    video: /Users/Zoe/Documents/image/campusipr
+    file:  /Users/Zoe/Documents/image/campusipr/file
     imagemagick: /usr/local/Cellar/imagemagick/7.0.7-25/bin
     graphicsmagick: /usr/local/Cellar/graphicsmagick/1.3.28_1/bin
    

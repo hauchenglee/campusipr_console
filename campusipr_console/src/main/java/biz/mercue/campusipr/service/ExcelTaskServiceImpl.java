@@ -401,6 +401,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	
 	private List<Patent> readBook2Patent(Workbook book, List<FieldMap> listField, List<Integer> other_info_index, String excelTaskId) {
 		log.info("readBook2Patent");
+		String pattern = "[0-9]";
 		List<Patent> listPatent = new ArrayList<Patent>();
 		Sheet sheet = book.getSheetAt(0);
 		int rowIndex = 0;
@@ -462,23 +463,16 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 											break;
 										}
 									}
-									if (StringUtils.isNULL(patent.getPatent_appl_country())) {
-										errorRowList.add(rowIndex);
-										errorColumnList.add(fieldMap.getExcel_field_index());
-									}
-
 								} 
-								if (StringUtils.isNULL(countryName)) {
-									if (!StringUtils.isNULL(patent.getPatent_appl_no())) {
-										errorRowList.add(rowIndex);
-										errorColumnList.add(fieldMap.getExcel_field_index());
-									}
-									errorRowList.add(rowIndex);
-									errorColumnList.add(fieldMap.getExcel_field_index());
-								}
 							}
-//								log.info(row.getCell(fieldMap.getExcel_field_index()));
-								break;
+							log.info(row.getCell(fieldMap.getExcel_field_index())==null);
+							if(row.getCell(fieldMap.getExcel_field_index())==null) {
+								errorRowList.add(rowIndex);
+								errorColumnList.add(fieldMap.getExcel_field_index());
+								log.info("ErrorIndex:無國家");
+								break columnError;
+							}
+							break columnError;
 						case Constants.PATENT_NO_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
@@ -497,13 +491,14 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 
 								// type is null --> jump out for loop
 								if (cellType == 3) {
+									errorRowList.add(rowIndex);
+									errorColumnList.add(fieldMap.getExcel_field_index());
+									log.info("ErrorIndex:申請號為null，cellType == 3");
 									if(StringUtils.isNULL(countryName)) {										
 										isApplNoNull = true;
 										log.info("終止");
-										break;
+										break whenPatentApplNoIsNull;
 									}
-									errorRowList.add(rowIndex);
-									errorColumnList.add(fieldMap.getExcel_field_index());
 								}
 								
 								// check country field value to detect add tw, us or cn etc
@@ -521,6 +516,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 //									listPatent = null;
 									errorRowList.add(rowIndex);
 									errorColumnList.add(fieldMap.getExcel_field_index());
+									log.info("ErrorIndex:countryAddName is null");
 //									break whenPatentApplNoIsNull;
 									break columnError;
 								}
@@ -535,26 +531,35 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 								if (cellType == 1) {
 									patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
 									// resolve cell value is number but cell type is string
-									if (!patentApplNo.substring(0, 2).equalsIgnoreCase(countryAddName)) {
+									if (patentApplNo.matches(pattern)) {
 										patentApplNo = countryAddName + row.getCell(excelFieldIndex).getStringCellValue();
 									}
+									if(StringUtils.isNULL(patentApplNo)) {
+										errorRowList.add(rowIndex);
+										errorColumnList.add(fieldMap.getExcel_field_index());
+										log.info("row:" + rowIndex + "col" + fieldMap.getExcel_field_index() + "patentApplNo為null");
+									}
+									log.info(patentApplNo==null);
+									if(!StringUtils.isNULL(patentApplNo)) {
+										// check country name equals patent appl no country name
+										String countryStartName = patentApplNo.substring(0, 2); // patent appl no start country name, e.g. tw, us or cn
+//										// check country field name is equals patent appl no or not
+										if(countryAddName ==(countryStartName.toUpperCase())) {
+											errorRowList.add(rowIndex);
+											errorColumnList.add(fieldMap.getExcel_field_index());
+											log.info("row:" + rowIndex + "col" + fieldMap.getExcel_field_index() + "國家與申請號不相等");
+										}
+										if (!countryAddName.equalsIgnoreCase(countryStartName.toUpperCase())) {
+											// data is incorrect, thus set data is null
+											log.info("到底有沒有用");
+											errorRowList.add(rowIndex);
+											errorColumnList.add(fieldMap.getExcel_field_index());
+											log.info("row:" + rowIndex + "col" + fieldMap.getExcel_field_index() + "國家與申請號不相等");
+											break columnError;
+										}
+										
+									}
 								}
-								
-								// check country name equals patent appl no country name
-								String countryStartName = patentApplNo.substring(0, 2); // patent appl no start country name, e.g. tw, us or cn
-
-								// check country field name is equals patent appl no or not
-								if (!countryAddName.equalsIgnoreCase(countryStartName)) {
-									// data is incorrect, thus set data is null
-//									listPatent = null;
-									errorRowList.add(rowIndex);
-									errorColumnList.add(fieldMap.getExcel_field_index());
-									log.info("row:" + rowIndex + "col" + fieldMap.getExcel_field_index());
-//									break whenPatentApplNoIsNull;
-									log.info(""+patentApplNo);
-									break columnError;
-								}
-//								log.info(patentApplNo);
 								patent.setPatent_appl_no(patentApplNo);
 								isApplNoNull = false;
 							}
@@ -802,29 +807,28 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				}
 			}
 			rowIndex++;
+			log.info(rowIndex);
 		}
-		
+		log.info(rowIndex);
 		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
 			return listPatent;
 		} else {
 //			errorMsg(excel, book, errorColumnList, errorRowList); // x y
 			log.info("Errorlist is not Empty");
-			setColorOnError(book,errorColumnList , errorRowList, excelTaskId );
+			setColorOnError(book,errorColumnList , errorRowList);
 			log.info("Color Set");
 			return null;
 		}
 	}
 
-	private void setColorOnError(Workbook book, List<Integer> errorColumnList, List<Integer> errorRowList,
-			String excelTaskId) {
+	private void setColorOnError(Workbook book, List<Integer> errorColumnList, List<Integer> errorRowList) {
 		int x = 0;
 		int y = 0;
-		String extensionName = FilenameUtils.getExtension(excelTaskId);
+//		String extensionName = FilenameUtils.getExtension(excelTaskId);
 		try {
 			String sheetName = "錯誤回報";
 			book.getSheet(sheetName);
 			CellStyle style = book.createCellStyle();
-			log.info(excelTaskId);
 			XSSFCell cell = null;
 			XSSFRow row = null;
 			for (x = 0; x < errorRowList.size(); x++) {

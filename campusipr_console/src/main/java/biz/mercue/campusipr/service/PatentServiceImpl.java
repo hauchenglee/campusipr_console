@@ -497,18 +497,7 @@ public class PatentServiceImpl implements PatentService {
 
 		// cn patent appl no
 		String originApplNo = patent.getPatent_appl_no();
-		String appl_cn_onlyNo = "";
-		int indexOfDot = originApplNo.indexOf(".");
 
-		if (indexOfDot != -1) {
-			appl_cn_onlyNo = originApplNo.substring(2, indexOfDot);
-		} else {
-			appl_cn_onlyNo = originApplNo.substring(2, originApplNo.length());
-		}
-
-		String appl_indexOf0to4 = appl_cn_onlyNo.substring(0, 5);
-		String appl_indexOf5toEnd = appl_cn_onlyNo.substring(5, appl_cn_onlyNo.length());
-		String changeApplNo = "";
 
 		// us patent appl no
 		String appl_us_onlyNO = originApplNo.replace("/", "").replace(",", "");
@@ -533,6 +522,25 @@ public class PatentServiceImpl implements PatentService {
 		}
 
 		if (Constants.APPL_COUNTRY_CN.equals(patent.getPatent_appl_country())) {
+			String appl_cn_onlyNo = "";
+			int indexOfDot = originApplNo.indexOf(".");
+
+			if (indexOfDot != -1) {
+				appl_cn_onlyNo = originApplNo.substring(2, indexOfDot);
+			} else {
+				appl_cn_onlyNo = originApplNo.substring(2, originApplNo.length());
+			}
+
+			String appl_indexOf0to4 = "";
+			if (appl_cn_onlyNo.length() > 5) {
+				appl_indexOf0to4 = appl_cn_onlyNo.substring(0, 5);
+			} else {
+				appl_indexOf0to4 = appl_cn_onlyNo.substring(0, appl_cn_onlyNo.length());
+			}
+			String appl_indexOf5toEnd = appl_cn_onlyNo.substring(5, appl_cn_onlyNo.length());
+			String changeApplNo = "";
+			
+			
 			if (appl_cn_onlyNo.length() == 12) {
 				changeApplNo = "CN" + appl_cn_onlyNo;
 			}
@@ -557,6 +565,7 @@ public class PatentServiceImpl implements PatentService {
 		syncPatentStatus(patent);
 
 		if (syncResult == Constants.INT_SUCCESS) {
+			patent.setIs_sync(true);
 			if (patent.getPatentDesc() != null) {
 				String context_desc_all = patent.getPatentDesc().getContext_desc();
 				patent.getPatentDesc().setPatent_desc_id(KeyGeneratorUtils.generateRandomString());
@@ -671,10 +680,10 @@ public class PatentServiceImpl implements PatentService {
 
 			for (Patent editPatent : patentList) {
 				int syncResult = syncPatentData(editPatent);
-				if (syncResult == Constants.INT_DATA_ERROR) {
-					return Constants.INT_DATA_ERROR;
-				}
-				if (syncResult == Constants.INT_CANNOT_FIND_DATA) {
+//				if (syncResult == Constants.INT_DATA_ERROR) {
+//					return Constants.INT_DATA_ERROR;
+//				}
+				if (!editPatent.isIs_sync()) {
 					editPatent.setPatent_appl_no(StringUtils.generateApplNoRandom(editPatent.getPatent_appl_no()));
 				}
 
