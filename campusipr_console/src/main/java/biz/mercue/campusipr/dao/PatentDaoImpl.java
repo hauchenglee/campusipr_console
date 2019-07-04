@@ -810,115 +810,141 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		long count = (long)criteria.uniqueResult();
 		return (int)count;
 	}
-	
+
 	@Override
-	public Patent getByPatentNo(String patentNo){
-		Criteria criteria =  createEntityCriteria();
+	public Patent getByPatentNo(String patentNo) {
+		Criteria criteria = createEntityCriteria();
 		criteria.add(Restrictions.eq("patent_no", patentNo));
 		return (Patent) criteria.uniqueResult();
 	}
-	   
-	
-	   @Override
-	   public void deletePatentAnnuity(String patentId) {
-	       String hql = "Delete From Annuity where patent_id = :patent_id";
-	       Session session = getSession();
-	       Query query = session.createQuery(hql);
-	       query.setParameter("patent_id", patentId);
-	       query.executeUpdate();
-	   }
-	
-	   @Override
-	   public void deletePatentCost(String patentId) {
-	       String hql = "Delete From PatentCost where patent_id = :patent_id";
-	       Session session = getSession();
-	       Query query = session.createQuery(hql);
-	       query.setParameter("patent_id", patentId);
-	       query.executeUpdate();
-	   }
-	   
-	   @Override
-	   public void deletePatentContact(String patentId) {
-	       String hql = "Delete From PatentContact where patent_id = :patent_id";
-	       Session session = getSession();
-	       Query query = session.createQuery(hql);
-	       query.setParameter("patent_id", patentId);
-	       query.executeUpdate();
-	   }
-	   
-	   
-	   @Override
-	   public void deleteInventor(String patentId) {
-	       String hql = "Delete From Inventor where patent_id = :patent_id";
-	       Session session = getSession();
-	       Query query = session.createQuery(hql);
-	       query.setParameter("patent_id", patentId);
-	       query.executeUpdate();
-	   }
-	   
-	   
-	   @Override
-	   public void deleteAssignee(String patentId) {
-	       String hql = "Delete From Assignee where patent_id = :patent_id";
-	       Session session = getSession();
-	       Query query = session.createQuery(hql);
-	       query.setParameter("patent_id", patentId);
-	       query.executeUpdate();
-	   }
-	   
-	   
-	   
-	   @Override
-	   public void deleteApplicant(String patentId) {
-	       String hql = "Delete From Applicant where patent_id = :patent_id";
-	       Session session = getSession();
-	       Query query = session.createQuery(hql);
-	       query.setParameter("patent_id", patentId);
-	       query.executeUpdate();
-	   }
 
-	   @Override
-	   public void deletePatentStatus(String patentId) {
-	       String hql = "Delete From PatentStatus where primaryKey.patent.patent_id = :patent_id";
-	       Session session = getSession();
-	       Query query = session.createQuery(hql);
-	       query.setParameter("patent_id", patentId);
-	       query.executeUpdate();
-	   }
-	   
-	   @Override
-	   public void deletePatentStatus(String patentId, String statusId, Date createTime) {
-	       String hql = "Delete From PatentStatus where primaryKey.patent.patent_id = :patent_id and primaryKey.status.status_id = :status_id and create_date = :create_date";
-	       Session session = getSession();
-	       Query query = session.createQuery(hql);
-	       query.setParameter("patent_id", patentId);
-	       query.setParameter("status_id", statusId);
-	       query.setParameter("create_date", createTime);
-	       query.executeUpdate();
-	   }
-	   
-	   @Override
-	   public void deletePatentExtension(String patentId, String bussinessId) {
-	       String hql = "Delete From PatentExtension where patent_id = :patent_id";
-	       if (!StringUtils.isNULL(bussinessId)) {
-	    	   hql += " and business_id = :business_id";
-	       }
-	       Session session = getSession();
-	       Query query = session.createQuery(hql);
-	       query.setParameter("patent_id", patentId);
-	       if (!StringUtils.isNULL(bussinessId)) {
-	    	   query.setParameter("business_id", bussinessId);
-	       }
-	       query.executeUpdate();
-	   }
-	   
-	   @Override
-	   public void deleteStatus(String statusId) {
-	       String hql = "Delete From Status where status_id = :status_id";
-	       Session session = getSession();
-	       Query query = session.createQuery(hql);
-	       query.setParameter("status_id", statusId);
-	       query.executeUpdate();
-	   }
+
+	@Override
+	public void deletePatentAnnuity(String patentId) {
+		String hql = "Delete From Annuity where patent_id = :patent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deletePatentCost(String patentId) {
+		String hql = "Delete From PatentCost where patent_id = :patent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deletePatentContact(String patentId) {
+		String hql = "Delete From PatentContact where patent_id = :patent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+
+
+	@Override
+	public void deleteInventor(String patentId) {
+		String hql = "Delete From Inventor where patent_id = :patent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+
+
+	@Override
+	public void deleteAssignee(String patentId) {
+		String hql = "Delete From Assignee where patent_id = :patent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+
+
+	@Override
+	public void deleteApplicant(String patentId) {
+		String hql = "Delete From Applicant where patent_id = :patent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deletePatentStatus(String patentId) {
+		String hql = "Delete From PatentStatus where primaryKey.patent.patent_id = :patent_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deletePatentStatus(String patentId, String statusId, Date createTime) {
+		String hql = "Delete From PatentStatus where primaryKey.patent.patent_id = :patent_id and primaryKey.status.status_id = :status_id and create_date = :create_date";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.setParameter("status_id", statusId);
+		query.setParameter("create_date", createTime);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deletePatentExtension(String patentId, String bussinessId) {
+		String hql = "Delete From PatentExtension where patent_id = :patent_id";
+		if (!StringUtils.isNULL(bussinessId)) {
+			hql += " and business_id = :business_id";
+		}
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		if (!StringUtils.isNULL(bussinessId)) {
+			query.setParameter("business_id", bussinessId);
+		}
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deleteStatus(String statusId) {
+		String hql = "Delete From Status where status_id = :status_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("status_id", statusId);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deleteCostByBusinessId(String costId) {
+		String hql = "Delete From PatentCost where cost_id = :cost_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("cost_id", costId);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deleteExtensionByBusinessId(String extensionId) {
+		String hql = "Delete From PatentExtension where extension_id = :extension_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("extension_id", extensionId);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deleteHistoryByBusinessId(String historyId) {
+		String hql = "Delete From PatentEditHistory where history_id = :history_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("history_id", historyId);
+		query.executeUpdate();
+	}
 
 }

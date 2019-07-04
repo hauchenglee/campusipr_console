@@ -70,5 +70,5 @@ public interface PatentService {
 	
 	List<Status> getEditStatus();
 
-	void deleteById(String id);
+	void deleteById(String id, String businessId);
 }

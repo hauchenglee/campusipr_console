@@ -58,6 +58,7 @@ public class PatentEditHistoryDaoImpl extends AbstractDao<String,  PatentEditHis
 		criteria.createAlias("patent","patent");
 		criteria.add(Restrictions.eq("patent.patent_id", patentId));
 		criteria.add(Restrictions.eq("field_id", fieldId));
+		criteria.add(Restrictions.eq("business_id", businessId));
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
 		criteria.addOrder(Order.desc("create_date"));
@@ -77,6 +78,7 @@ public class PatentEditHistoryDaoImpl extends AbstractDao<String,  PatentEditHis
 		criteria.createAlias("patent","patent");
 		criteria.add(Restrictions.eq("patent.patent_id", patentId));
 		criteria.add(Restrictions.eq("field_id", fieldId));
+		criteria.add(Restrictions.eq("business_id", businessId));
 		criteria.setProjection(Projections.rowCount());
 		long count = (long)criteria.uniqueResult();
 		return (int)count;
