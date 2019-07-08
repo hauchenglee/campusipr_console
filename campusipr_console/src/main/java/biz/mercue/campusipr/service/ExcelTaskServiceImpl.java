@@ -27,9 +27,11 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.poifs.filesystem.DocumentOutputStream;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -401,15 +403,17 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	private List<Patent> readBook2Patent(Workbook book, List<FieldMap> listField, List<Integer> other_info_index, String excelTaskId) {
 		log.info("readBook2Patent");
 		String pattern = "[0-9]";
+
 		List<Patent> listPatent = new ArrayList<Patent>();
 		Sheet sheet = book.getSheetAt(0);
 		int rowIndex = 0;
+		int emptyRow = 0;
+		int emptyCell = 0;
 		List<Integer> errorRowList = new ArrayList<Integer>();
 		List<Integer> errorColumnList = new ArrayList<Integer>();
-		boolean columnEmpty = errorColumnList.isEmpty();
-		boolean rowEmpty = errorRowList.isEmpty();
-		
 		List<Country> listCountry = countryDao.getAll();
+		
+		
 		whenPatentApplNoIsNull: for (Row row : sheet) {
 			log.info("Row");
 			if (rowIndex == 0) {
@@ -420,9 +424,19 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				PatentExtension patentExtension = new PatentExtension();
 				boolean isApplNoNull = true;
 				
-				Map<Integer, Integer> errorIndexMap = new HashMap<>();
-				columnError: for (FieldMap fieldMap : listField) {
-					
+//				String cellV = row.getCell((short) 0).getStringCellValue();
+//				Matcher m = Pattern.compile("\\s+").matcher(cellV);
+//				m.matches();
+////				log.info(m.matches()==false);
+//				emptyRowFor: for (int c = row.getFirstCellNum(); c < row.getLastCellNum(); c++) {
+//					Cell cell = row.getCell(c);
+//					log.info("->row.getLastCellNum():" + row.getLastCellNum());
+//					if (cell != null && cell.getCellType() != Cell.CELL_TYPE_BLANK && m.matches()==false) { 
+//						emptyRow++;
+//						log.info("emptyRow: "+emptyRow);
+//					}
+//				}
+				columnError: for (FieldMap fieldMap : listField) {				
 					if (fieldMap.getExcel_field_index() != -1) {
 						PatentField  field= fieldMap.getField();
 						if(field == null) {
@@ -496,7 +510,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						case Constants.PATENT_APPL_NO_FIELD:
 							if(row.getCell(fieldMap.getExcel_field_index())==null) {
 								Cell forNullCell = row.createCell(fieldMap.getExcel_field_index());
-								row.createCell(fieldMap.getExcel_field_index()).setCellValue(" ");
+								row.createCell(fieldMap.getExcel_field_index()).setCellValue("");
 								errorRowList.add(rowIndex);
 								errorColumnList.add(fieldMap.getExcel_field_index());
 								log.info("patentApplNo補空");
@@ -549,15 +563,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
 									patentApplNo = countryAddName + row.getCell(excelFieldIndex).getStringCellValue();
 								}
-//								if(cellType ==5) {
-//									log.info("type is error");
-//								}
-//								if(cellType ==2) {
-//									log.info("type is FORMULA");
-//								}
-//								if(cellType ==4) {
-//									log.info("type is BOOLEAN");
-//								}
 								// type is string
 								if (cellType == 1) {
 									patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
@@ -577,18 +582,29 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 									}
 									if(!StringUtils.isNULL(patentApplNo)) {
 										// check country name equals patent appl no country name
-										String countryStartName = patentApplNo.substring(0, 2); // patent appl no start country name, e.g. tw, us or cn
-//										// check country field name is equals patent appl no or not
-										if(countryAddName ==(countryStartName.toUpperCase())) {
+//										log.info("patentApplNo:"+patentApplNo+ "。");
+										patentApplNo =patentApplNo.replaceAll(" ", "");
+//										log.info("patentApplNo:"+patentApplNo+ "。");
+										
+										if(StringUtils.isNULL(patentApplNo)) {
+											row.createCell(fieldMap.getExcel_field_index()).setCellValue("");
 											errorRowList.add(rowIndex);
 											errorColumnList.add(fieldMap.getExcel_field_index());
-											log.info("國家與申請號不相等- row:" + rowIndex + "col" + fieldMap.getExcel_field_index());
+											log.info("遇到patentApplNo只有空白格的情形- row:"+ rowIndex + "、col:" + fieldMap.getExcel_field_index());
+											break;
 										}
+										String countryStartName = patentApplNo.substring(0, 2); // patent appl no start country name, e.g. tw, us or cn
+//										// check country field name is equals patent appl no or not
+//										if(countryAddName ==(countryStartName.toUpperCase())) {
+//											errorRowList.add(rowIndex);
+//											errorColumnList.add(fieldMap.getExcel_field_index());
+//											log.info("國家與申請號不相等- row:" + rowIndex + "、col" + fieldMap.getExcel_field_index());
+//										}
 										if (!countryAddName.equalsIgnoreCase(countryStartName.toUpperCase())) {
 											// data is incorrect, thus set data is null
 											errorRowList.add(rowIndex);
 											errorColumnList.add(fieldMap.getExcel_field_index());
-											log.info("國家與申請號不相等- row:" + rowIndex + "col" + fieldMap.getExcel_field_index());
+											log.info("國家與申請號不相等- row:" + rowIndex + "、col" + fieldMap.getExcel_field_index());
 											break columnError;
 										}
 										
@@ -839,15 +855,20 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 					patent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
 					listPatent.add(patent);
 				}
+				
 			}
 			rowIndex++;
-			log.info(rowIndex);
+			log.info("rowIndex: "+rowIndex);
+			//設定遇到幾行空白停止，目前設定5行
+//			log.info(emptyRow);
+//			while(emptyRow==21) {
+//				break whenPatentApplNoIsNull;
+//			}
 		}
 		log.info(rowIndex);
 		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
 			return listPatent;
 		} else {
-//			errorMsg(excel, book, errorColumnList, errorRowList); // x y
 			log.info("Errorlist is not Empty");
 			log.info("errorList: Column" + errorColumnList + "Row" + errorRowList);
 			setColorOnError(book,errorColumnList , errorRowList);
@@ -870,16 +891,14 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 			XSSFCell cell = null;
 			XSSFRow row = null;
-
 			for (x = 0; x < errorRowList.size(); x++) {
 				int errorRowIndex = errorRowList.get(x);
 				int errorColIndex = errorColumnList.get(y);
 				row = (XSSFRow) book.getSheetAt(0).getRow(errorRowIndex);
 				cell = row.getCell(errorColIndex);
 				if(cell==null) {
-					Cell forNullCell = row.createCell(errorColIndex);
-					row.createCell(errorColIndex).setCellValue(" ");
-					forNullCell.setCellStyle(style);
+					row.createCell(errorColIndex).setCellValue("");
+					row.createCell(errorColIndex).setCellStyle(style);
 				}else {
 					cell.setCellStyle(style);
 				}
@@ -902,13 +921,33 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				int errorRowIndex = errorRowList.get(x);
 				int errorColIndex = errorColumnList.get(y);
 				row = (HSSFRow) book.getSheetAt(0).getRow(errorRowIndex);
+//				log.info("Row: "+errorRowIndex);
+//				log.info("eCol, eRow: "+errorColIndex+", " +errorRowIndex);
 				cell = row.getCell(errorColIndex);
 				if(cell==null) {
-					Cell forNullCell = row.createCell(errorColIndex);
-					row.createCell(errorColIndex).setCellValue(" ");
-					forNullCell.setCellStyle(style);
+					row.createCell(errorColIndex).setCellValue("");
+					cell = row.getCell(errorColIndex);
+					row.createCell(errorColIndex).setCellStyle(style);
+//					log.info("cell=null eCol, eRow: "+errorColIndex+", " +errorRowIndex);
 				}else {
-					cell.setCellStyle(style);
+//					log.info(cell.getCellType());
+//					log.info(cell.getCellTypeEnum());
+					switch(cell.getCellTypeEnum()) {
+					case STRING:
+//						log.info("cellTypeEnum = STRING, eCol, eRow: "+errorColIndex+", " +errorRowIndex);
+						cell.setCellStyle(style);
+						break;
+					case BLANK:	
+//						log.info("cellTypeEnum = BLANK, eCol, eRow: "+errorColIndex+", " +errorRowIndex);
+						row.createCell(errorColIndex).setCellValue("");
+						row.createCell(errorColIndex).setCellStyle(style);
+						cell = row.getCell(errorColIndex);
+						cell.setCellStyle(style);
+						break;
+					default:
+						break;
+					}
+
 				}
 				y++;
 			}
