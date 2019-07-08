@@ -357,7 +357,8 @@ public class PatentController {
 	public String deletePatentbyId(HttpServletRequest request,@PathVariable String patentId) {
 		log.info("deletePatentbyId ");
 		BeanResponseBody responseBody  = new BeanResponseBody();
-		patentService.deleteById(patentId);
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		patentService.deleteById(patentId, tokenBean.getBusiness_id());
 		responseBody.setCode(Constants.INT_SUCCESS);
 		return responseBody.getJacksonString(View.PatentDetail.class);
 	}

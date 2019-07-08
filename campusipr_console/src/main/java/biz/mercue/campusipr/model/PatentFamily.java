@@ -56,6 +56,9 @@ public class PatentFamily extends BaseBean{
 	@JsonView({View.PatentDetail.class})
 	private String business_id;
 
+//	@JsonView({View.PatentDetail.class})
+//	private String listPatent_ids;
+
 	public String getPatent_family_id() {
 		return patent_family_id;
 	}
@@ -156,6 +159,14 @@ public class PatentFamily extends BaseBean{
 	public void setBusiness_id(String business_id) {
 		this.business_id = business_id;
 	}
+
+//	public String getListPatent_ids() {
+//		return listPatent_ids;
+//	}
+//
+//	public void setListPatent_ids(String listPatent_ids) {
+//		this.listPatent_ids = listPatent_ids;
+//	}
 	
 	
 

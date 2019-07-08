@@ -11,6 +11,8 @@ import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
+import biz.mercue.campusipr.model.AdminToken;
+import biz.mercue.campusipr.util.*;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
@@ -36,15 +39,6 @@ import biz.mercue.campusipr.service.PermissionService;
 import biz.mercue.campusipr.service.RoleService;
 import biz.mercue.campusipr.service.StatusService;
 import biz.mercue.campusipr.service.SysRolePermissionService;
-import biz.mercue.campusipr.util.BeanResponseBody;
-import biz.mercue.campusipr.util.Constants;
-import biz.mercue.campusipr.util.FileUtils;
-import biz.mercue.campusipr.util.JacksonJSONUtils;
-import biz.mercue.campusipr.util.KeyGeneratorUtils;
-import biz.mercue.campusipr.util.ListResponseBody;
-import biz.mercue.campusipr.util.MailSender;
-import biz.mercue.campusipr.util.MapResponseBody;
-import biz.mercue.campusipr.util.StringUtils;
 
 @Controller
 public class TestController {
@@ -77,8 +71,9 @@ public class TestController {
 
 	@RequestMapping(value="/api/demo/{patentId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String demo(@PathVariable String patentId) {
-		patentService.demo("", "", patentId);
+	public String demo(HttpServletRequest request, @PathVariable String patentId) {
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		patentService.demo("", tokenBean.getBusiness_id(), patentId);
 		return "{\"aaa\": \"bbb\"}";
 	}
 	
