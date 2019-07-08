@@ -311,7 +311,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				}
 			}
 		}
-		
 		mapPatent.put(Constants.INT_SYSTEM_PROBLEM, null);
 		return mapPatent;
 	}
