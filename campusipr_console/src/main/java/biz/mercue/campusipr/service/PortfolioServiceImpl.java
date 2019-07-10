@@ -101,12 +101,12 @@ public class PortfolioServiceImpl implements PortfolioService{
 				dbBean.setPortfolio_patent_num(portfolio.getListPatent().size());
 				Map<String, PatentFamily> familyMap = new HashMap<String, PatentFamily>();
 				for (Patent patent : portfolio.getListPatent()) {
-					PatentFamily family = patent.getFamily();
-					if(family != null) {
-						if(familyMap.get(family.getPatent_family_id()) == null) {
-							familyMap.put(family.getPatent_family_id(), family);
-						}
-					}
+//					PatentFamily family = patent.getFamily();
+//					if(family != null) {
+//						if(familyMap.get(family.getPatent_family_id()) == null) {
+//							familyMap.put(family.getPatent_family_id(), family);
+//						}
+//					}
 				}
 				dbBean.setPortfolio_family_num(portfolio.getListPatent().size());
 			}else {

@@ -5,16 +5,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
+import org.hibernate.annotations.Filter;
 import org.json.JSONArray;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -23,7 +16,7 @@ import com.google.gson.reflect.TypeToken;
 
 
 @Entity
-@Table(name="patent_family")
+@Table(name="patentfamily")
 public class PatentFamily extends BaseBean{
 	
 	@Transient
@@ -36,15 +29,12 @@ public class PatentFamily extends BaseBean{
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String country_list;
 	
-	@Transient
-	private List<String> listCountry;
-	
-	@JsonView({View.Patent.class})
-	@Transient
-	private List<String> listPatentIds;
-	
 	@JsonView({View.PatentFamily.class})
-	@OneToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY,mappedBy ="family")
+	@ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+	@JoinTable(name = "patent_family",
+			joinColumns = { @JoinColumn(name = "family_id") },
+			inverseJoinColumns = { @JoinColumn(name = "patent_id") })
+//	@Filter(name = "businessFilter",condition=" business_id= :business_id")
 	private List<Patent> listPatent;
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -56,8 +46,15 @@ public class PatentFamily extends BaseBean{
 	@JsonView({View.PatentDetail.class})
 	private String business_id;
 
-//	@JsonView({View.PatentDetail.class})
-//	private String listPatent_ids;
+	@Transient
+	private List<String> listCountry;
+
+	@JsonView({View.Patent.class})
+	@Transient
+	private List<String> listPatentIds;
+
+	@Transient
+	private List<String> deletePatentIds;
 
 	public String getPatent_family_id() {
 		return patent_family_id;
@@ -115,7 +112,7 @@ public class PatentFamily extends BaseBean{
 	
 	public void addPatent(Patent patent) {
 		
-		patent.setFamily(this);
+//		patent.setFamily(this);
 		
 		if(this.listPatent == null) {
 			this.listPatent = new ArrayList<Patent>();
@@ -160,14 +157,11 @@ public class PatentFamily extends BaseBean{
 		this.business_id = business_id;
 	}
 
-//	public String getListPatent_ids() {
-//		return listPatent_ids;
-//	}
-//
-//	public void setListPatent_ids(String listPatent_ids) {
-//		this.listPatent_ids = listPatent_ids;
-//	}
-	
-	
+	public List<String> getDeletePatentIds() {
+		return deletePatentIds;
+	}
 
+	public void setDeletePatentIds(List<String> deletePatentIds) {
+		this.deletePatentIds = deletePatentIds;
+	}
 }

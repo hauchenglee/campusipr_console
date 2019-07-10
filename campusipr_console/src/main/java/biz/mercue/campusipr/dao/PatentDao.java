@@ -73,6 +73,7 @@ public interface PatentDao {
 	void deleteAssignee(String patentId);
 	void deleteApplicant(String patentId);
 	void deletePatentStatus(String patentId);
+	void deletePatentStatus(String patentId, String statusId);
 	void deletePatentStatus(String patentId, String statusId, Date createTime);
 	void deletePatentExtension(String patentId, String bussinessId);
 	public void deleteStatus(String statusId);

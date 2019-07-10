@@ -428,7 +428,7 @@ public class PatentController {
 	@RequestMapping(value="/api/getpatentbyfamily/{familyId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String gePatentbyFamily(HttpServletRequest request,@PathVariable String familyId) {
-		log.info("getPatentbyId ");
+		log.info("getpatentbyfamily");
 		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {

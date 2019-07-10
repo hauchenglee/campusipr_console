@@ -103,10 +103,11 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	
 	@Override
 	public List<Patent> getByFamily(String familyId){
-		Criteria criteria =  createEntityCriteria();
-		criteria.createAlias("family","family");
-		criteria.add(Restrictions.eq("family.patent_family_id", familyId));
-		return criteria.list();
+		String hql = "from Patent p inner join p.listFamily as plf where plf = :familyId";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("familyId", familyId);
+		return query.list();
 	}
 
 
@@ -882,6 +883,16 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		Session session = getSession();
 		Query query = session.createQuery(hql);
 		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deletePatentStatus(String patentId, String statusId) {
+		String hql = "Delete From PatentStatus where primaryKey.patent.patent_id = :patent_id and primaryKey.status.status_id = :status_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patent_id", patentId);
+		query.setParameter("status_id", statusId);
 		query.executeUpdate();
 	}
 

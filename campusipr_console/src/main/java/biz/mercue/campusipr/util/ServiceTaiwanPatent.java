@@ -599,6 +599,7 @@ public class ServiceTaiwanPatent {
 			
 			String claimStr = "";
 			NodeList claimList = doc.getElementsByTagName("claim");
+			int indexCount = 1;
 			for (int temp = 0; temp < claimList.getLength(); temp++) {
 				Node nNode = claimList.item(temp);
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
@@ -606,7 +607,8 @@ public class ServiceTaiwanPatent {
 					NodeList childNodeList = eElement.getChildNodes();
 					for (int childIndex = 0; childIndex < childNodeList.getLength(); childIndex++) {
 						Node cNode = childNodeList.item(childIndex);
-						claimStr += cNode.getTextContent() + "\n";
+						claimStr += indexCount +"、" + cNode.getTextContent() + "\n";
+						indexCount++;
 					}
 				}
 			}

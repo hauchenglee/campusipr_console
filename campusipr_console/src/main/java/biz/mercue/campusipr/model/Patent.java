@@ -212,10 +212,12 @@ public class Patent extends BaseBean{
 		inverseJoinColumns = { @JoinColumn(name = "portfolio_id") })
 	private List<Portfolio> listPortfolio;
 	
-	@ManyToOne
-	@JsonView({View.Patent.class,View.PortfolioDetail.class})
-	@JoinColumn(name="patent_family_id")
-	private PatentFamily family;
+	@JsonView({View.Patent.class, View.PortfolioDetail.class})
+	@ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+	@JoinTable(name="patent_family",
+			joinColumns = {@JoinColumn(name = "patent_id")},
+			inverseJoinColumns = {@JoinColumn(name = "family_id")})
+	private List<PatentFamily> listFamily;
 	
 	private boolean is_public = false;
 	
@@ -566,14 +568,13 @@ public class Patent extends BaseBean{
 		}
 		listHistory.addAll(list);
 	}
-	
 
-	public PatentFamily getFamily() {
-		return family;
+	public List<PatentFamily> getListFamily() {
+		return listFamily;
 	}
 
-	public void setFamily(PatentFamily family) {
-		this.family = family;
+	public void setListFamily(List<PatentFamily> listFamily) {
+		this.listFamily = listFamily;
 	}
 
 	public List<Portfolio> getListPortfolio() {
