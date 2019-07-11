@@ -47,7 +47,7 @@ public class BusinessController {
 		ListResponseBody responseBody = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-			ListQueryForm form  = businessService.getAll(page);
+			ListQueryForm form  = businessService.getAll();
 		
 			responseBody.setCode(Constants.INT_SUCCESS);
 			responseBody.setListQuery(form);
