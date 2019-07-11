@@ -326,38 +326,32 @@ public class PatentServiceImpl implements PatentService {
 			patent.setIs_public(true);
 			patent.setIs_sync(true);
 		}
-
-//		// 同步時同時新增預設聯絡人
-//		if (Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
-//			if (patent.getBusiness() != null) {
-//				Business business = patent.getBusiness();
-//				if (!StringUtils.isNULL(business.getContact_name()) ||
-//						!StringUtils.isNULL(business.getContact_email()) ||
-//								!StringUtils.isNULL(business.getContact_phone())) {
-//					PatentContact pContact = new PatentContact();
-//					pContact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
-//					pContact.setPatent(patent);
-//					pContact.setBusiness(business);
-//					pContact.setCreate_date(new Date());
-//					pContact.setContact_name(business.getContact_name());
-//					pContact.setContact_email(business.getContact_email());
-//					pContact.setContact_phone(business.getContact_phone());
-//					pContact.setContact_character("聯絡人");
-//					pContact.setContact_order(0);
-//					patent.addContact(pContact);
-//				}
-//			}
-//		}
+		
+//		//同步時同步US、CN專利權使日及估算專利權止日
+		if(Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
+			if(Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
+				log.info("patent.getPatent_appl_date() : "+patent.getPatent_appl_date());
+				Calendar calendar = Calendar.getInstance();
+				patent.setPatent_bdate(patent.getPatent_publish_date());
+				calendar.setTime(patent.getPatent_appl_date());
+				calendar.add(Calendar.DATE, -1);
+				calendar.add(Calendar.YEAR, 20);
+				Date edate=calendar.getTime();
+				patent.setPatent_edate(edate);
+			}
+			if(Constants.APPL_COUNTRY_CN.endsWith(patent.getPatent_appl_country())) {
+				log.info("patent.getPatent_appl_date() : "+patent.getPatent_appl_date());
+				Calendar calendar = Calendar.getInstance();
+				patent.setPatent_bdate(patent.getPatent_publish_date());
+				calendar.setTime(patent.getPatent_appl_date());
+				calendar.add(Calendar.DATE, -1);
+				calendar.add(Calendar.YEAR, 20);
+				Date edate=calendar.getTime();
+				patent.setPatent_edate(edate);
+			}
+		}
 
 		// 自動新增聯絡人資料
-		//for 新增專利/技術
-//		if (StringUtils.isNULL(applNo)) {
-//			if(StringUtils.isNULL(patent.getPatent_appl_country())) {
-//				log.info("無申請號時新增聯絡人");
-//				contactData(patent);
-//			}
-//		}
-
 		//for 申請號新增 & Excel
 		if (Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
 			if (!StringUtils.isNULL(applNo)) {
@@ -369,7 +363,7 @@ public class PatentServiceImpl implements PatentService {
 		//for Excel
 		if (Patent.EDIT_SOURCE_SERVICE != patent.getEdit_source()) {
 			contactData(patent);
-			log.info("EXCEL匯入中申請號未公開時新增聯絡人，在資料庫搜尋時找不到申請號，請改用相似(like)查詢");
+			log.info("申請號未公開時新增聯絡人，在資料庫搜尋時找不到申請號，請改用相似(like)查詢");
 //			if (!StringUtils.isNULL(applNo)||!StringUtils.isNULL(patent.getPatent_appl_country())) {
 //			}
 		}
@@ -624,7 +618,6 @@ public class PatentServiceImpl implements PatentService {
 				taskResult = Constants.INT_SUCCESS;
 			} else {
 				boolean isDuplicate = false;
-
 				// 儲存editPatent在資料庫的目標dbPatent
 				Patent dbTargetPatent = new Patent();
 				switch (sourceFrom) {
@@ -1145,13 +1138,36 @@ public class PatentServiceImpl implements PatentService {
 					|| Patent.EDIT_SOURCE_HUMAN == patent.getEdit_source()) {
 				dbBean.setPatent_bdate(patent.getPatent_bdate());
 				dbBean.setPatent_edate(patent.getPatent_edate());
-
 				dbBean.setPatent_cancel_date(patent.getPatent_cancel_date());
 				dbBean.setPatent_charge_expire_date(patent.getPatent_charge_expire_date());
-
 				dbBean.setPatent_charge_duration_year(patent.getPatent_charge_duration_year());
 			}
-
+			if (Constants.APPL_COUNTRY_US.equals(dbBean.getPatent_appl_country())){
+				if(Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
+					log.info("US 始日、止日輸入");
+					dbBean.setPatent_bdate(patent.getPatent_publish_date());
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(patent.getPatent_appl_date());
+					calendar.add(Calendar.DATE, -1);
+					calendar.add(Calendar.YEAR, 20);
+					Date edate=calendar.getTime();
+					dbBean.setPatent_edate(edate);
+				}
+			}
+			if (Constants.APPL_COUNTRY_CN.equals(dbBean.getPatent_appl_country())){
+				if(Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
+					log.info("CN 始日、止日輸入");
+					log.info("publish_date"+patent.getPatent_publish_date());
+					log.info("appl_date"+patent.getPatent_appl_date());
+					dbBean.setPatent_bdate(patent.getPatent_publish_date());
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(patent.getPatent_appl_date());
+					calendar.add(Calendar.DATE, -1);
+					calendar.add(Calendar.YEAR, 20);
+					Date edate=calendar.getTime();
+					dbBean.setPatent_edate(edate);
+				}
+			}
 			
 			if(Patent.EDIT_SOURCE_SERVICE   == patent.getEdit_source()) {
 				dbBean.setIs_public(true);
@@ -1334,7 +1350,7 @@ public class PatentServiceImpl implements PatentService {
 			List<Patent> diffFamilyPatentList = new ArrayList<>();
 
 			// if have delete ids, then remove all contain ids
-			if (!deleteIds.isEmpty()) {
+			if (deleteIds != null && !deleteIds.isEmpty()) {
 				diffPatentIdsList.removeAll(deleteIds);
 			}
 

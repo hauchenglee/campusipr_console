@@ -138,7 +138,7 @@ public class AdminController {
 		return response.getJacksonString(View.Public.class);
 	}
 	
-	//平台 管理者清單
+	//中心 管理者清單
 	@RequestMapping(value="/api/getadminlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String getAdminList(HttpServletRequest request,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {

@@ -264,19 +264,48 @@ public class ServiceChinaPatent {
 							Element cElement = (Element) cNode;
 							if ("docdb".equals(cElement.getAttribute("document-id-type"))) {
 								Node pubNode = cElement.getElementsByTagName("doc-number").item(0);
+								Node pubKindNode = cElement.getElementsByTagName("kind").item(0);
 								Node pubDateNode = cElement.getElementsByTagName("date").item(0);
+								String pubKindNo = pubKindNode.getTextContent().toString().toUpperCase();
 								String publicateNo = pubNode.getTextContent().substring(0, pubNode.getTextContent().length());
-								if (publicateNo.length() > 9) {
-									publicateNo = publicateNo.substring(0, publicateNo.length()-1);
+								log.info(pubKindNo);
+								if ("A".equals(pubKindNo)) {
+									log.info("發明類型Kind A 公開號: "+publicateNo);
+									patent.setPatent_notice_no(publicateNo);
 								}
-								patent.setPatent_publish_no(publicateNo);
-								patent.setPatent_notice_no(publicateNo);
+								if ("B".equals(pubKindNo)) {
+									log.info("發明類型Kind B 公告號: "+publicateNo);
+									if (publicateNo.length() > 9) {
+										publicateNo = publicateNo.substring(0, publicateNo.length()-1);
+									}
+									patent.setPatent_publish_no(publicateNo);
+								}
+								//實用新型只需放公告號/日
+								if ("U".equals(pubKindNo)) {
+									log.info("實用新型 kind U 公告號: "+publicateNo);
+									if (publicateNo.length() > 9) {
+										publicateNo = publicateNo.substring(0, publicateNo.length()-1);
+									}
+									patent.setPatent_publish_no(publicateNo);
+								}
+								
 								try {
 									String publishDateStr =pubDateNode.getTextContent();
 									if (!StringUtils.isNULL(publishDateStr)) {
 										Date publishDate = DateUtils.parserSimpleDateFormatDate(publishDateStr);
-										patent.setPatent_publish_date(publishDate);
-										patent.setPatent_notice_date(publishDate);
+										if("A".equals(pubKindNo)) {
+											log.info("發明類型Kind A 公開日: "+publishDate);
+											patent.setPatent_notice_date(publishDate);
+										}
+										if ("B".equals(pubKindNo)) {
+											log.info("發明類型Kind B 公告日: "+publishDate);
+											patent.setPatent_publish_date(publishDate);
+										}
+										if ("U".equals(pubKindNo)) {
+											log.info("實用新型 kind U 公告日: "+publishDate);
+											patent.setPatent_publish_date(publishDate);
+										}
+										
 									}
 								} catch (ParseException e) {
 									// TODO Auto-generated catch block
