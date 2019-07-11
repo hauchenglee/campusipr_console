@@ -1381,13 +1381,14 @@ public class PatentServiceImpl implements PatentService {
 			newFamily.setListPatent(diffFamilyPatentList);
 
 			// family edit history
-			String editor = tokenAdmin.getAdmin_name();
-			Patent currentPatent = patentDao.getById(patentId);
-			currentPatent.setAdmin(tokenAdmin);
-			currentPatent.setAdmin_ip(ip);
-			PatentEditHistory peh = insertFieldHistory(currentPatent, inputFamilyListData, "create", Constants.PATENT_FAMILY_FIELD, editor, businessId);
-			if (peh != null) {
-				currentPatent.addHistory(peh);
+			for (Patent diffPatent : diffFamilyPatentList) {
+				String editor = tokenAdmin.getAdmin_name();
+				diffPatent.setAdmin(tokenAdmin);
+				diffPatent.setAdmin_ip(ip);
+				PatentEditHistory peh = insertFieldHistory(diffPatent, inputFamilyListData, "create", Constants.PATENT_FAMILY_FIELD, editor, businessId);
+				if (peh != null) {
+					diffPatent.addHistory(peh);
+				}
 			}
 
 

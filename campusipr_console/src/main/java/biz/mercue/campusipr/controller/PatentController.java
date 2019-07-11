@@ -415,7 +415,11 @@ public class PatentController {
 				int taskResult = patentService.combinePatentFamily(family, businessId, patentId, tokenBean.getAdmin(), request.getRemoteAddr());
 				responseBody.setCode(taskResult);
 				if(taskResult == Constants.INT_SUCCESS) {
-					responseBody.setBean(family);
+					if (family.getListPatentIds().size() == 1) {
+						responseBody.setBean(null);
+					} else {
+						responseBody.setBean(family);
+					}
 				}
 			}
 		}else {

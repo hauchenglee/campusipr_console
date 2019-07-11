@@ -267,8 +267,17 @@ public class BusinessServiceImpl implements BusinessService{
 	
 	
 	@Override
-	public ListQueryForm getAll(int page){
-		List<Business> businessesList = businessDao.getAll(page,Constants.SYSTEM_PAGE_SIZE);
+	public ListQueryForm getAllByPage(int page){
+		List<Business> businessesList = businessDao.getAllByPage(page,Constants.SYSTEM_PAGE_SIZE);
+		int count = businessDao.getAllCount();
+		log.info("count:"+count);
+		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,businessesList);
+		return form;
+	}
+
+	@Override
+	public ListQueryForm getAll(){
+		List<Business> businessesList = businessDao.getAll();
 		int count = businessDao.getAllCount();
 		log.info("count:"+count);
 		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,businessesList);

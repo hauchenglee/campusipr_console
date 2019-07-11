@@ -83,10 +83,16 @@ public class BusinessDaoImpl extends AbstractDao<String,  Business> implements B
 	
 	
 	@Override
-	public List<Business> getAll(int page,int pageSize){
+	public List<Business> getAllByPage(int page,int pageSize){
 		Criteria criteria =  createEntityCriteria();
 		criteria.setFirstResult((page - 1) * pageSize);
 		criteria.setMaxResults(pageSize);
+		return criteria.list();
+	}
+
+	@Override
+	public List<Business> getAll() {
+		Criteria criteria =  createEntityCriteria();
 		return criteria.list();
 	}
 	
