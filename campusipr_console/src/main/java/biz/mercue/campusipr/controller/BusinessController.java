@@ -47,8 +47,25 @@ public class BusinessController {
 		ListResponseBody responseBody = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
-			ListQueryForm form  = businessService.getAll();
+			ListQueryForm form  = businessService.getAllByPage(page);
 		
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setListQuery(form);
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString(View.Business.class);
+	}
+
+	@RequestMapping(value="/api/getallbusinesslist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String getAllBusinessList(HttpServletRequest request) {
+
+		ListResponseBody responseBody = new ListResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			ListQueryForm form  = businessService.getAll();
+
 			responseBody.setCode(Constants.INT_SUCCESS);
 			responseBody.setListQuery(form);
 		}else {
