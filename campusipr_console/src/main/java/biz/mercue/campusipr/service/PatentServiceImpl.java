@@ -499,15 +499,7 @@ public class PatentServiceImpl implements PatentService {
 		}
 
 		int syncResult = Constants.INT_SYSTEM_PROBLEM;
-
-		// cn patent appl no
 		String originApplNo = patent.getPatent_appl_no();
-
-
-		// us patent appl no
-		String appl_us_onlyNO = originApplNo.replace("/", "").replace(",", "");
-		log.info("appl_us_onlyNO: " + appl_us_onlyNO);
-		
 		
 		if ((Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country()))) {
 			if (originApplNo.length() == 10 || originApplNo.length() == 11) {
@@ -518,6 +510,10 @@ public class PatentServiceImpl implements PatentService {
 		}
 
 		if (Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
+			// us patent appl no
+			String appl_us_onlyNO = originApplNo.replace("/", "").replace(",", "");
+			log.info("appl_us_onlyNO: " + appl_us_onlyNO);
+
 			if (originApplNo.length() == 10 || originApplNo.length() == 12) {
 				patent.setPatent_appl_no(appl_us_onlyNO);
 				syncResult = ServiceUSPatent.getPatentRightByapplNo(patent);
@@ -1376,6 +1372,8 @@ public class PatentServiceImpl implements PatentService {
 			newFamily.setPatent_family_id(KeyGeneratorUtils.generateRandomString());
 			inputFamily.setPatent_family_id(newFamily.getPatent_family_id());
 			newFamily.setBusiness_id(businessId);
+			newFamily.setCreate_date(new Date());
+			newFamily.setUpdate_date(new Date());
 			newFamily.setListPatent(diffFamilyPatentList);
 
 			// family edit history

@@ -184,7 +184,11 @@ public class Patent extends BaseBean{
 	@JsonView(View.PatentDetail.class)
 	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private PatentDescription patentDesc;
-	
+
+//	@JsonView(View.PatentDetail.class)
+//	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//	private Department department;
+
 	//manual + import
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -212,7 +216,7 @@ public class Patent extends BaseBean{
 		inverseJoinColumns = { @JoinColumn(name = "portfolio_id") })
 	private List<Portfolio> listPortfolio;
 	
-	@JsonView({View.Patent.class, View.PortfolioDetail.class})
+	@JsonView({View.Patent.class})
 	@ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
 	@JoinTable(name="patent_family",
 			joinColumns = {@JoinColumn(name = "patent_id")},
@@ -913,4 +917,12 @@ public class Patent extends BaseBean{
 	public void setPatent_excel_memo(String patent_excel_memo) {
 		this.patent_excel_memo = patent_excel_memo;
 	}
+//
+//	public Department getDepartment() {
+//		return department;
+//	}
+//
+//	public void setDepartment(Department department) {
+//		this.department = department;
+//	}
 }
