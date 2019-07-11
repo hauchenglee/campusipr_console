@@ -355,7 +355,6 @@ public class ServiceChinaPatent {
 				Node nNode = ipcrList.item(temp);
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
 					Element eElement = (Element) nNode;
-
 					String ipcId = eElement.getTextContent().replaceAll("\\s+","")
 							.substring(0, eElement.getTextContent().replaceAll("\\s+","").length()-2);
 					ipcId = ipcId.substring(0,4)+" "+ipcId.substring(4,ipcId.length());

@@ -1157,8 +1157,6 @@ public class PatentServiceImpl implements PatentService {
 			if (Constants.APPL_COUNTRY_CN.equals(dbBean.getPatent_appl_country())){
 				if(Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
 					log.info("CN 始日、止日輸入");
-					log.info("publish_date"+patent.getPatent_publish_date());
-					log.info("appl_date"+patent.getPatent_appl_date());
 					dbBean.setPatent_bdate(patent.getPatent_publish_date());
 					Calendar calendar = Calendar.getInstance();
 					calendar.setTime(patent.getPatent_appl_date());
