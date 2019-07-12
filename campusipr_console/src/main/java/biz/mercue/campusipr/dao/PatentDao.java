@@ -75,12 +75,10 @@ public interface PatentDao {
 	void deletePatentStatus(String patentId);
 	void deletePatentStatus(String patentId, String statusId);
 	void deletePatentStatus(String patentId, String statusId, Date createTime);
-	void deletePatentExtension(String patentId, String bussinessId);
-	public void deleteStatus(String statusId);
-
-	void deleteCostByBusinessId(String costId);
-
-	void deleteExtensionByBusinessId(String extensionId);
-
-	void deleteHistoryByBusinessId(String extensionId);
+	void deleteStatus(String statusId);
+	void deletePatentExtension(String extensionId);
+	void deletePatentExtension(String patentId, String businessId);
+	void deleteCost(String costId);
+	void deleteHistory(String extensionId);
+	void deleteDepartment(String departmentId);
 }

@@ -185,15 +185,15 @@ public class Patent extends BaseBean{
 	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private PatentDescription patentDesc;
 
-//	@JsonView(View.PatentDetail.class)
-//	@OneToOne(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//	private Department department;
-
 	//manual + import
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@Filter(name = "businessFilter",condition=" business_id= :business_id")
 	private List<PatentExtension> listExtension;
+
+	@JsonView(View.PatentDetail.class)
+	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<Department> listDepartment;
 	
 	
 	@JsonView(View.PatentHistory.class)
@@ -282,7 +282,7 @@ public class Patent extends BaseBean{
 	public boolean isApplNoDuplicate_diffBusiness;
 	
 	@Transient
-	public String patent_excel_name;
+	public String patent_excel_name; // use for patent history
 	
 	@Transient
 	public String patent_excel_name_en;
@@ -917,12 +917,12 @@ public class Patent extends BaseBean{
 	public void setPatent_excel_memo(String patent_excel_memo) {
 		this.patent_excel_memo = patent_excel_memo;
 	}
-//
-//	public Department getDepartment() {
-//		return department;
-//	}
-//
-//	public void setDepartment(Department department) {
-//		this.department = department;
-//	}
+
+	public List<Department> getListDepartment() {
+		return listDepartment;
+	}
+
+	public void setListDepartment(List<Department> listDepartment) {
+		this.listDepartment = listDepartment;
+	}
 }

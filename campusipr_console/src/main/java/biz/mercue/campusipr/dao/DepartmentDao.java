@@ -6,7 +6,9 @@ import biz.mercue.campusipr.model.Department;
 
 public interface DepartmentDao {
 	Department getById(String id);
-	
+
+	void delete(String patentId, String businessId);
+
 	List<Department> getByPatentId(String patentId);
 	
 	void create(Department department);

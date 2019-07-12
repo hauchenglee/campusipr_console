@@ -9,18 +9,13 @@ import javax.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonView;
 
 
-//@Entity
-//@Table(name="department")
+@Entity
+@Table(name="department")
 public class Department extends BaseBean {
 
 	@Id
 	@JsonView(View.Public.class)
 	private String department_id;
-
-	@ManyToOne
-	@JsonView(View.Public.class)
-	@JoinColumn(name = "business_id")
-	private Business business;
 
 	@JsonView(View.Public.class)
 	private String department_name;
@@ -32,20 +27,15 @@ public class Department extends BaseBean {
 	@JoinColumn(name = "patent_id")
 	private Patent patent;
 
+	@JsonView()
+	private String business_id;
+
 	public String getDepartment_id() {
 		return department_id;
 	}
 
 	public void setDepartment_id(String department_id) {
 		this.department_id = department_id;
-	}
-
-	public Business getBusiness() {
-		return business;
-	}
-
-	public void setBusiness(Business business) {
-		this.business = business;
 	}
 
 	public String getDepartment_name() {
@@ -70,5 +60,13 @@ public class Department extends BaseBean {
 
 	public void setPatent(Patent patent) {
 		this.patent = patent;
+	}
+
+	public String getBusiness_id() {
+		return business_id;
+	}
+
+	public void setBusiness_id(String business_id) {
+		this.business_id = business_id;
 	}
 }

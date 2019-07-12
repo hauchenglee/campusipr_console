@@ -908,16 +908,25 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 
 	@Override
-	public void deletePatentExtension(String patentId, String bussinessId) {
+	public void deletePatentExtension(String extensionId) {
+		String hql = "Delete From PatentExtension where extension_id = :extension_id";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("extension_id", extensionId);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deletePatentExtension(String patentId, String businessId) {
 		String hql = "Delete From PatentExtension where patent_id = :patent_id";
-		if (!StringUtils.isNULL(bussinessId)) {
+		if (!StringUtils.isNULL(businessId)) {
 			hql += " and business_id = :business_id";
 		}
 		Session session = getSession();
 		Query query = session.createQuery(hql);
 		query.setParameter("patent_id", patentId);
-		if (!StringUtils.isNULL(bussinessId)) {
-			query.setParameter("business_id", bussinessId);
+		if (!StringUtils.isNULL(businessId)) {
+			query.setParameter("business_id", businessId);
 		}
 		query.executeUpdate();
 	}
@@ -932,7 +941,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 
 	@Override
-	public void deleteCostByBusinessId(String costId) {
+	public void deleteCost(String costId) {
 		String hql = "Delete From PatentCost where cost_id = :cost_id";
 		Session session = getSession();
 		Query query = session.createQuery(hql);
@@ -941,20 +950,20 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 
 	@Override
-	public void deleteExtensionByBusinessId(String extensionId) {
-		String hql = "Delete From PatentExtension where extension_id = :extension_id";
-		Session session = getSession();
-		Query query = session.createQuery(hql);
-		query.setParameter("extension_id", extensionId);
-		query.executeUpdate();
-	}
-
-	@Override
-	public void deleteHistoryByBusinessId(String historyId) {
+	public void deleteHistory(String historyId) {
 		String hql = "Delete From PatentEditHistory where history_id = :history_id";
 		Session session = getSession();
 		Query query = session.createQuery(hql);
 		query.setParameter("history_id", historyId);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deleteDepartment(String departmentId) {
+		String hql = "Delete From Department where department_id = :departmentId";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("departmentId", departmentId);
 		query.executeUpdate();
 	}
 

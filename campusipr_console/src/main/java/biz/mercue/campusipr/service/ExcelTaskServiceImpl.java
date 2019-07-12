@@ -19,6 +19,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import biz.mercue.campusipr.model.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -46,16 +48,6 @@ import biz.mercue.campusipr.dao.ExcelTaskDao;
 import biz.mercue.campusipr.dao.FieldDao;
 import biz.mercue.campusipr.dao.FieldMapDao;
 import biz.mercue.campusipr.dao.PatentDao;
-import biz.mercue.campusipr.model.Admin;
-import biz.mercue.campusipr.model.Applicant;
-import biz.mercue.campusipr.model.Assignee;
-import biz.mercue.campusipr.model.Country;
-import biz.mercue.campusipr.model.ExcelTask;
-import biz.mercue.campusipr.model.FieldMap;
-import biz.mercue.campusipr.model.Inventor;
-import biz.mercue.campusipr.model.Patent;
-import biz.mercue.campusipr.model.PatentExtension;
-import biz.mercue.campusipr.model.PatentField;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.DateUtils;
 import biz.mercue.campusipr.util.ExcelUtils;
@@ -642,7 +634,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						case Constants.APPLIANT_NAME_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
-								List<String> list_name = parseHumanCellNewPattern(cellValue);
+								List<String> list_name = parseCellPattern(cellValue);
 								List<Applicant> listApplicant = new ArrayList<Applicant>();
 								if (list_name != null && list_name.size() > 0) {
 									for (String name : list_name) {
@@ -658,7 +650,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						case Constants.ASSIGNEE_NAME_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
-								List<String> list_name = parseHumanCellNewPattern(cellValue);
+								List<String> list_name = parseCellPattern(cellValue);
 								List<Assignee> listAssignee = new ArrayList<Assignee>();
 								if (list_name != null && list_name.size() > 0) {
 									for (String name : list_name) {
@@ -674,7 +666,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						case Constants.INVENTOR_NAME_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
-								List<String> list_name = parseHumanCellNewPattern(cellValue);
+								List<String> list_name = parseCellPattern(cellValue);
 								List<Inventor> listInventor = new ArrayList<Inventor>();
 								if (list_name != null && list_name.size() > 0) {
 									for (String name : list_name) {
@@ -721,14 +713,17 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							log.info(fieldMap.getExcel_field_index());
 							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-								String cellValue = getCellValue_byInputString(row, excelFieldIndex);
-								if (!StringUtils.isNULL(cellValue)) {
-									patentExtension.setExtension_school_department(cellValue);
-									patent.setExtension(patentExtension);
+								Cell cellValue = row.getCell(excelFieldIndex);
+								List<String> list_name = parseCellPattern(cellValue);
+								List<Department> listDepartment = new ArrayList<>();
+								if (list_name != null && list_name.size() > 0) {
+									for (String name : list_name) {
+										Department department = new Department();
+										department.setDepartment_name(name);
+										listDepartment.add(department);
+									}
 								}
-							} else {
-								patentExtension.setExtension_school_department("");;
-								patent.setExtension(patentExtension);
+								patent.setListDepartment(listDepartment);
 							}
 							break;
 						case Constants.SCHOOL_SUBSIDY_UNIT:
@@ -862,16 +857,16 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			log.info("rowIndex: "+rowIndex);
 
 		}
-		log.info(rowIndex);
-		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
+//		log.info(rowIndex);
+//		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
 			return listPatent;
-		} else {
-			log.info("Errorlist is not Empty");
-			log.info("errorList: Column" + errorColumnList + "Row" + errorRowList);
-			setColorOnError(book,errorColumnList , errorRowList);
-			log.info("Color Set");
-			return null;
-		}
+//		} else {
+//			log.info("Errorlist is not Empty");
+//			log.info("errorList: Column" + errorColumnList + "Row" + errorRowList);
+//			setColorOnError(book,errorColumnList , errorRowList);
+//			log.info("Color Set");
+//			return null;
+//		}
 	}
 
 	private void setColorOnError(Workbook book, List<Integer> errorColumnList, List<Integer> errorRowList) {
@@ -1083,7 +1078,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		return  data;
     }
 	
-	private List<String> parseHumanCellNewPattern(Cell cell) {
+	private List<String> parseCellPattern(Cell cell) {
 		List<String> listName = new ArrayList<String>();
 		String cellValue = cell.getStringCellValue();
 		
