@@ -338,11 +338,24 @@ public class ServiceTaiwanPatent {
 			}	
 			getAllHistoryAnnuity(patent);
 			
-			String contextUrl = patentObj.optJSONObject("link").optString("patentpubxml-url");
-			if (!StringUtils.isNULL(contextUrl)) {
-				getContext(patent, contextUrl);
+			String contextUrlPub = patentObj.optJSONObject("link").optString("patentpubxml-url");
+			int taskResultPub = Constants.INT_SYSTEM_PROBLEM;
+			if (!StringUtils.isNULL(contextUrlPub)) {
+				taskResultPub = getContext(patent, contextUrlPub);
 			}
-					
+			log.info(taskResultPub);
+			log.info(contextUrlPub);
+
+			int taskResultIsu = Constants.INT_SYSTEM_PROBLEM;
+			if (taskResultPub == Constants.INT_SYSTEM_PROBLEM) {
+				String contextUrlIus = patentObj.optJSONObject("link").optString("patentisuregspecxmla-url");
+				if (!StringUtils.isNULL(contextUrlIus)) {
+					taskResultIsu = getContext(patent, contextUrlIus);
+				}
+				log.info(taskResultIsu);
+				log.info(contextUrlIus);
+			}
+
 			List<Inventor> listInventor = new ArrayList<Inventor>();
 			JSONArray inventors = patentObj.optJSONObject("parties").optJSONArray("inventors");
 			for (int inventorIndex = 0; inventorIndex < inventors.length(); inventorIndex++) {
@@ -595,6 +608,19 @@ public class ServiceTaiwanPatent {
 					}
 				}
 			}
+
+			NodeList drawingDescriptionList = doc.getElementsByTagName("drawing-description");
+			for (int temp = 0; temp < drawingDescriptionList.getLength(); temp++) {
+				Node nNode = drawingDescriptionList.item(temp);
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element eElement = (Element) nNode;
+					NodeList childNodeList = eElement.getChildNodes();
+					for (int childIndex = 0; childIndex < childNodeList.getLength(); childIndex++) {
+						Node cNode = childNodeList.item(childIndex);
+						descStr += cNode.getTextContent() + "\n";
+					}
+				}
+			}
 			pd.setContext_desc(descStr);
 			
 			String claimStr = "";
@@ -607,12 +633,14 @@ public class ServiceTaiwanPatent {
 					NodeList childNodeList = eElement.getChildNodes();
 					for (int childIndex = 0; childIndex < childNodeList.getLength(); childIndex++) {
 						Node cNode = childNodeList.item(childIndex);
-						claimStr += indexCount +"、" + cNode.getTextContent() + "\n";
-						indexCount++;
+						if (cNode.getNodeType() == Node.ELEMENT_NODE) {
+							claimStr += indexCount +"、" + cNode.getTextContent() + "\n";
+							indexCount++;
+						}
 					}
 				}
 			}
-			
+
 			pc.setContext_claim(claimStr);
 			
 			if (!StringUtils.isNULL(pa.getContext_abstract())) {
@@ -631,23 +659,23 @@ public class ServiceTaiwanPatent {
 			}
 			
 		}catch(Exception e){
+			e.printStackTrace();
 			log.error(e.getMessage());
 		}
 	}
 	
-	private static void getContext(Patent patent, String link) {
+	private static int getContext(Patent patent, String link) {
 		try {
 			String content = FtpRequestUtils.sendGet(link);
-			if ("XML".equals(getCtxType(content))) {
-				convertPatentContextXmlCh(patent, content);
+			String newContent = UTF8BomRemover.remove(content);
+			if ("XML".equals(getCtxType(newContent))) {
+				convertPatentContextXmlCh(patent, newContent);
 			}
-			
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return Constants.INT_SUCCESS;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
 	
