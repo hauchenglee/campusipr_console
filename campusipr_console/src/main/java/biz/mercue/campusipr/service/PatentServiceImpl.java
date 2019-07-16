@@ -731,7 +731,7 @@ public class PatentServiceImpl implements PatentService {
 					if (dbBusinessId.equals(editBusinessId)) {
 						dbDepartment.setDepartment_name(editDepartment.getDepartment_name());
 						isDbExtensionAdd = false;
-						break;
+//						break;
 					}
 				}
 			}
@@ -1242,10 +1242,10 @@ public class PatentServiceImpl implements PatentService {
 			handleContact(dbBean, patent);
 			handleAnnuity(dbBean, patent);
 			handlePatentStatus(dbBean, patent);
-			handleDepartment(dbBean, patent, businessId);
 
 			if (patent.getSourceFrom() != Constants.PATENT_EXCEL_IMPORT) {
 				// source from != excel
+				handleDepartment(dbBean, patent, businessId);
 				handleExtension(dbBean, patent, businessId);
 			}
 			
