@@ -813,6 +813,15 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 
 	@Override
+	public List<Patent> analysisPatent(String fieldCode, String businessId){
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct p.patent_id) from Patent as p where patent_appl_country = :TW" ;
+
+		Query q = session.createQuery(queryStr);
+		return q.list();
+	}
+	
+	@Override
 	public Patent getByPatentNo(String patentNo) {
 		Criteria criteria = createEntityCriteria();
 		criteria.add(Restrictions.eq("patent_no", patentNo));
