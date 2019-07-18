@@ -38,11 +38,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 			q.setParameter("businessId", businessId);
 		}
 		long count = (long)q.uniqueResult();
+		log.info(count);
 		return (int)count;
 	}
 	
-	//預設：該BusinessID從以前到現在各年度專利申請數量
-	public List<String> countAllYearPatent(String businessId) {
+	//預設：各年度專利申請數量
+	public List<Analysis> countAllYearPatent(String businessId) {
 		log.info("各年度的專利總數");
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct p.patent_id), date_format(p.patent_appl_date, '%Y')"
@@ -57,11 +58,11 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		if(!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
-		log.info(q.list().isEmpty());
+		log.info(q.list().size());
 		return q.list();
 	}
 	//預設：年度合計專利總數
-	public List<String> countPatentTotal(String businessId) {
+	public int countPatentTotal(String businessId) {
 		log.info("年度合計專利總數");
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct p.patent_id)"
@@ -74,11 +75,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		if(!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
-		log.info(q.list().isEmpty());
-		return q.list();
+		long count = (long)q.uniqueResult();
+		log.info(count);
+		return (int)count;
 	}
 	//預設：年度合計專利家族總數
-	public List<String> countPatentFamilyTotal(String businessId) {
+	public int countPatentFamilyTotal(String businessId) {
 		log.info("年度合計專利家族總數");
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct lf.patent_family_id)"
@@ -91,13 +93,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		if(!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
-		log.info(q.list().isEmpty());
-		return q.list();
+		long count = (long)q.uniqueResult();
+		log.info(count);
+		return (int)count;
 	}
 	//預設：年度合計技術總數
 	
 	//預設：年度合計科系總數
-	public List<String> countDepartmentTotal(String businessId){
+	public int countDepartmentTotal(String businessId){
 		log.info("年度合計科系總數");
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct ld.department_name)"
@@ -110,12 +113,13 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		if(!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
-		log.info(q.list().isEmpty());
-		return q.list();
+		long count = (long)q.uniqueResult();
+		log.info(count);
+		return (int)count;
 	}
-	//預設：年度合計發明人總數
-	public List<String> countInventorTotal(String businessId){
-		log.info("年度合計發明人總數");
+	//預設：年度合計發明人總數-中
+	public int countInventorTotal(String businessId){
+		log.info("年度合計發明人總數-中");
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct li.inventor_name)"
 				+ "FROM Patent as p "
@@ -128,8 +132,30 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		if(!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
-		log.info(q.list().isEmpty());
-		return q.list();
+		long count = (long)q.uniqueResult();
+		log.info(count);
+		return (int)count;
+	}
+	//預設：年度合計發明人總數-英
+	public int countInventorEnTotal(String businessId){
+		log.info("年度合計發明人總數-英");
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct li.inventor_name_en)"
+				+ "FROM Patent as p "
+				+ "JOIN p.listInventor as li "
+				+ "JOIN p.listBusiness as lb "
+				+ "WHERE p.patent_appl_no Not like '%@%' "
+				+ "and patent_appl_date IS NOT NULL "
+				+ "and li.inventor_name_en is not NULL "
+				+ "and li.inventor_name is Null "
+				+ "and lb.business_id = :businessId ";
+		Query q = session.createQuery(queryStr);
+		if(!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		long count = (long)q.uniqueResult();
+		log.info(count);
+		return (int)count;
 	}
 	
 	//特定年度區間合計專利總數
@@ -221,9 +247,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		return q.list();
 	}
 	
-	//特定年度合計發明人總數
+	//特定年度合計發明人總數-中
 	public List<String> countInventor(String businessId, Long beginDate, Long endDate){
-		log.info("特定年度合計發明人總數");
+		log.info("特定年度合計發明人總數-中");
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct li.inventor_name)"
 				+ "FROM Patent as p "
@@ -250,6 +276,39 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
+	
+	//特定年度合計發明人總數-英
+	public List<String> countInventorEn(String businessId, Long beginDate, Long endDate){
+		log.info("特定年度合計發明人總數-英");
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct li.inventor_name_en)"
+				+ "FROM Patent as p "
+				+ "JOIN p.listInventor as li "
+				+ "JOIN p.listBusiness as lb "
+				+ "WHERE p.patent_appl_no Not like '%@%' "
+				+ "and patent_appl_date IS NOT NULL "
+				+ "and li.inventor_name_en is not NULL "
+				+ "and li.inventor_name is Null "
+				+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+				+ "and lb.business_id = :businessId ";
+		Query q = session.createQuery(queryStr);
+		if(!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy"); 
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info(beginDateFormat);
+		log.info(endDateFormat);
+		
+		q.setParameter("beginDate",beginDateFormat);     
+		q.setParameter("endDate",endDateFormat);  
+		log.info(q.list().isEmpty());
+		return q.list();
+	}
+	
 	//特定年度區間的各年度的專利總數
 	@Override
 	public List<String> countYearPatent(String businessId, Long beginDate, Long endDate){

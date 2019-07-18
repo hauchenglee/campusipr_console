@@ -16,6 +16,7 @@ import biz.mercue.campusipr.dao.AnalysisDao;
 import biz.mercue.campusipr.dao.CountryDao;
 import biz.mercue.campusipr.dao.FieldDao;
 import biz.mercue.campusipr.dao.PatentDao;
+import biz.mercue.campusipr.model.Analysis;
 import biz.mercue.campusipr.model.Country;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
@@ -25,56 +26,86 @@ import biz.mercue.campusipr.util.Constants;
 @Service("analysisService")
 @Transactional
 public class AnalysisServiceImpl implements AnalysisService {
-	
+
 	private Logger log = Logger.getLogger(this.getClass().getName());
-	
+
 	@Autowired
 	private CountryDao countryDao;
-	
+
 	@Autowired
 	private FieldDao fieldDao;
-	
+
 	@Autowired
 	private PatentDao patentDao;
-	
+
 	@Autowired
 	private AnalysisDao analysisDao;
-	
+
+	// 未完成：預計以For迴圈在無專利的年份補零
 	@Override
-	public ListQueryForm countCountry(String businessId, Long beginDate, Long endDate) {
+	public ListQueryForm analysisAll(String businessId, Long beginDate, Long endDate) {
 		log.info("analysisPatent");
-		List<String> countList = new ArrayList<String>();
-		countList = analysisDao.countYearPatent(businessId, beginDate, endDate);
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy"); 
-		Timestamp bd = new Timestamp(beginDate);
-		Timestamp ed = new Timestamp(endDate);
-		String beginDateFormat = sdf.format(bd);
-		String endDateFormat = sdf.format(ed);
-		int bdint = Integer.parseInt(beginDateFormat);
-		int edint = Integer.parseInt(endDateFormat);
-		log.info("beginDate: "+beginDateFormat);
-		log.info("endDate: "+endDateFormat);
-		//已成功得到各年份資料
-		//預計以For迴圈在無專利的年份補零
-		//並將結果相加回傳(這個項目可能要再開一個方法)
-//		((JSONObject) countList).getJSONObject(beginDateFormat);
-		log.info("countList size:" +countList.size());
-		ListQueryForm form = new ListQueryForm(0, 0, countList);
+		int unApplPatent = 0;
+		int analYearsTotal = 0;
+		int analFamilyTotal;
+		int analDepartmentTotal;
+		int analInventorToltal;
+		unApplPatent = analysisDao.countUnApplPatent(businessId);
+		analYearsTotal = analysisDao.countPatentTotal(businessId);
+		analFamilyTotal = analysisDao.countPatentFamilyTotal(businessId);
+		analDepartmentTotal = analysisDao.countDepartmentTotal(businessId);
+		analInventorToltal = analysisDao.countInventorTotal(businessId) + analysisDao.countInventorEnTotal(businessId);
+
+		List<Analysis> analAllYearsList = new ArrayList<Analysis>();
+		analAllYearsList = analysisDao.countAllYearPatent(businessId);
+		log.info(unApplPatent);
+		log.info(analYearsTotal);
+		log.info(analFamilyTotal);
+		log.info(analDepartmentTotal);
+		log.info(analInventorToltal);
+		
+		log.info("analAllYearsList: " + analAllYearsList.size());
+		ListQueryForm form = new ListQueryForm(unApplPatent, analYearsTotal, analFamilyTotal, analDepartmentTotal, analInventorToltal, analAllYearsList);
+		log.info(form);
 		return form;
 	}
-	public ListQueryForm testAnalysis (String businessId) {
-		List<String> countList = new ArrayList<String>();
-//		countList = analysisDao.testPatent(businessId);
-		countList = analysisDao.countInventorTotal(businessId);
-//		log.info(countList.isEmpty());
-		log.info(countList);
-		ListQueryForm form = new ListQueryForm(0, 0, countList);
-		return form;
+
+	@Override
+	public ListQueryForm analysisByYears(String businessId, Long beginDate, Long endDate) {
+		return null;
 	}
+
+	@Override
+	public ListQueryForm analysisAllCountry(String businessId, Long beginDate, Long endDate) {
+		return null;
+	}
+
+	@Override
+	public ListQueryForm analysisCountryByYears(String businessId, Long beginDate, Long endDate) {
+		return null;
+	}
+
+	@Override
+	public ListQueryForm analysisAllDepartment(String businessId, Long beginDate, Long endDate) {
+		return null;
+	}
+
+	@Override
+	public ListQueryForm analysisDepartmentByYears(String businessId, Long beginDate, Long endDate) {
+		return null;
+	}
+
+	public int testAnalysis(String businessId) {
+		int unApplPatent = 0;
+		unApplPatent = analysisDao.countUnApplPatent(businessId);
+		log.info(unApplPatent);
+		return unApplPatent;
+	}
+
 	@Override
 	public ListQueryForm testAnalysis(String businessId, Long beginDate, Long endDate) {
 		List<String> countList = new ArrayList<String>();
-		countList = analysisDao.countInventor(businessId, beginDate, endDate);
+		countList = analysisDao.countInventorEn(businessId, beginDate, endDate);
 		log.info(countList);
 		ListQueryForm form = new ListQueryForm(0, 0, countList);
 		return form;

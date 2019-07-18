@@ -63,13 +63,16 @@ public class AnalysisController {
 		Long beginTime = jsonObject.getLong("beginTime");
 		Long endTime = jsonObject.getLong("endTime");
 		ListQueryForm form =  analysisService.testAnalysis(businessId, beginTime, endTime);
+		int ccount = analysisService.testAnalysis(businessId);
 		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setListQuery(form);
+		responseBody.setListQuery(form); //沒顯示??
+		responseBody.setTotal_count(ccount);
 		log.info("patentList:"+responseBody.getJacksonString(View.Patent.class));
 		return responseBody.getJacksonString(View.Patent.class);
 	}
-	
 
+	
+	//學校端 分析總覽預設畫面
 	@RequestMapping(value="/api/analysisplatformoverview", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String analysisPlatformOverview(HttpServletRequest request,
@@ -84,20 +87,18 @@ public class AnalysisController {
 		String businessId = jsonObject.optString("business_id");
 		Long beginTime = jsonObject.getLong("beginTime");
 		Long endTime = jsonObject.getLong("endTime");
-//		String fieldStr = jsonObject.getJSONObject("field").toString();
-//		PatentField field = (PatentField) JacksonJSONUtils.readValue(fieldStr, PatentField.class);
-//		Object searchText = jsonObject.get("searchText");
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
 			if(tokenBean.checkPermission(permission.getPermission_id())) {
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					ListQueryForm form =  analysisService.countCountry(businessId, beginTime, endTime);
+					ListQueryForm form =  analysisService.analysisAll(businessId, beginTime, endTime);
+					log.info(form.getAnalDepartmentTotal());
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				} else {
 					log.info("else1?");
-					ListQueryForm form =  analysisService.countCountry(businessId, beginTime, endTime);
+					ListQueryForm form =  analysisService.analysisAll(businessId, beginTime, endTime);
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				}
@@ -109,8 +110,8 @@ public class AnalysisController {
 			log.info("else3?");
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
-		log.info("patentList:"+responseBody.getJacksonString(View.Patent.class));
-		return responseBody.getJacksonString(View.Patent.class);
+		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
+		return responseBody.getJacksonString(View.Analysis.class);
 		
 	}
 	

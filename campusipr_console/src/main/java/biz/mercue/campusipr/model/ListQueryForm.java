@@ -12,6 +12,18 @@ public class ListQueryForm {
 	private int total_count;
 	
 	private List list;
+
+	private int unApplPatent ;
+
+	private int analYearsTotal;
+
+	private int analFamilyTotal;
+
+	private int analDepartmentTotal;
+
+	private int analInventorToltal;
+
+	private List<Analysis> analAllYearsList;
 	
 	
 	public ListQueryForm() {
@@ -19,6 +31,24 @@ public class ListQueryForm {
 	
 	
 	
+	public ListQueryForm(int task_result, int page_size, int total_count, List list, int unApplPatent,
+			int analYearsTotal, int analFamilyTotal, int analDepartmentTotal, int analInventorToltal,
+			List<Analysis> analAllYearsList) {
+		super();
+		this.task_result = task_result;
+		this.page_size = page_size;
+		this.total_count = total_count;
+		this.list = list;
+		this.unApplPatent = unApplPatent;
+		this.analYearsTotal = analYearsTotal;
+		this.analFamilyTotal = analFamilyTotal;
+		this.analDepartmentTotal = analDepartmentTotal;
+		this.analInventorToltal = analInventorToltal;
+		this.analAllYearsList = analAllYearsList;
+	}
+
+
+
 	public ListQueryForm(int taskResult ,int totalCount,int pageSize,List list) {
 		
 		this.task_result = taskResult;
@@ -37,6 +67,18 @@ public class ListQueryForm {
 		
 		this.list = list;
 	}
+
+	public ListQueryForm(int unApplPatent, int analYearsTotal, int analFamilyTotal, int analDepartmentTotal,
+			int analInventorToltal, List<Analysis> analAllYearsList) {
+		this.unApplPatent = unApplPatent;
+		this.analYearsTotal = analYearsTotal;
+		this.analFamilyTotal =analFamilyTotal;
+		this.analDepartmentTotal = analDepartmentTotal;
+		this.analInventorToltal= analInventorToltal;
+		this.analAllYearsList = analAllYearsList;
+	}
+
+
 
 	public int getPage_size() {
 		return page_size;
@@ -72,6 +114,78 @@ public class ListQueryForm {
 
 	public void setTask_result(int task_result) {
 		this.task_result = task_result;
+	}
+
+
+
+	public int getUnApplPatent() {
+		return unApplPatent;
+	}
+
+
+
+	public void setUnApplPatent(int unApplPatent) {
+		this.unApplPatent = unApplPatent;
+	}
+
+
+
+	public int getAnalYearsTotal() {
+		return analYearsTotal;
+	}
+
+
+
+	public void setAnalYearsTotal(int analYearsTotal) {
+		this.analYearsTotal = analYearsTotal;
+	}
+
+
+
+	public int getAnalFamilyTotal() {
+		return analFamilyTotal;
+	}
+
+
+
+	public void setAnalFamilyTotal(int analFamilyTotal) {
+		this.analFamilyTotal = analFamilyTotal;
+	}
+
+
+
+	public int getAnalDepartmentTotal() {
+		return analDepartmentTotal;
+	}
+
+
+
+	public void setAnalDepartmentTotal(int analDepartmentTotal) {
+		this.analDepartmentTotal = analDepartmentTotal;
+	}
+
+
+
+	public int getAnalInventorToltal() {
+		return analInventorToltal;
+	}
+
+
+
+	public void setAnalInventorToltal(int analInventorToltal) {
+		this.analInventorToltal = analInventorToltal;
+	}
+
+
+
+	public List<Analysis> getAnalAllYearsList() {
+		return analAllYearsList;
+	}
+
+
+
+	public void setAnalAllYearsList(List<Analysis> analAllYearsList) {
+		this.analAllYearsList = analAllYearsList;
 	}
 
 }
