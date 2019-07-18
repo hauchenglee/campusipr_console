@@ -20,7 +20,7 @@ public interface AdminDao {
 	
 	//List<Admin> getAvailableByBusinessId(String businessId);
 	
-	//List<Admin> getAllAdminList();
+	List<Admin> getAllAdminList();
 	
 	//List<Admin> getByBusinessId(String businessId);
 	
@@ -32,7 +32,9 @@ public interface AdminDao {
 	
 	List<Admin> searchRoleAdminList(String roleId,String businessId,String text,int page,int pageSize);
 	int searchRoleAdminListCount(String roleId,String businessId,String text);
-	
 
 
+	List<Admin> getPlatformAdminList();
+
+	List<Admin> getSchoolAdminList();
 }

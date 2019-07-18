@@ -288,16 +288,10 @@ public class PatentController {
 			log.info("token :"+tokenBean.getAdmin_token_id());
 			
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			if(tokenBean.checkPermission(permission.getPermission_id())) {
-				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					form = patentService.getByBusinessId(null, page,fieldId,is_asc);
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListQuery(form);
-				}else {
-					form = patentService.getByBusinessId(tokenBean.getBusiness().getBusiness_id(), page,fieldId,is_asc);
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListQuery(form);
-				}
+			if (tokenBean.checkPermission(permission.getPermission_id())) {
+				form = patentService.getByBusinessId(tokenBean.getBusiness().getBusiness_id(), page, fieldId, is_asc);
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setListQuery(form);
 			}else {
 				responseBody.setCode(Constants.INT_NO_PERMISSION);
 			}
@@ -667,18 +661,11 @@ public class PatentController {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if(tokenBean!=null) {
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			
-			if(tokenBean.checkPermission(permission.getPermission_id())) {
-				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					ListQueryForm form =  patentService.fieldSearchPatent(searchText, field.getField_id(), null, page,fieldId,is_asc);
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListQuery(form);
-				} else {
-					ListQueryForm form =  patentService.fieldSearchPatent(searchText, field.getField_id(), tokenBean.getBusiness().getBusiness_id(), page,fieldId,is_asc);
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListQuery(form);
-				}
-			}else {
+			if (tokenBean.checkPermission(permission.getPermission_id())) {
+				ListQueryForm form = patentService.fieldSearchPatent(searchText, field.getField_id(), tokenBean.getBusiness().getBusiness_id(), page, fieldId, is_asc);
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setListQuery(form);
+			} else {
 				responseBody.setCode(Constants.INT_NO_PERMISSION);
 			}
 		}else {

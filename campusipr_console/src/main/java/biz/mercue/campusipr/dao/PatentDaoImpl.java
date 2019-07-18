@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import biz.mercue.campusipr.model.PatentEditHistory;
+import biz.mercue.campusipr.util.Constants;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
@@ -145,7 +146,13 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 				queryStr +=  " LEFT JOIN OLS.primaryKey.status as OPA";
 			}
 		}
-		if(!StringUtils.isNULL(businessId)) {
+		if (businessId.equals(Constants.BUSINESS_PLATFORM)) {
+			// platform
+			log.info("platform: " + businessId);
+			queryStr += " JOIN p.listBusiness as lb WHERE (lb.business_id = :businessId)" +
+					" or (lb.business_id not in :businessId and p.is_sync = 1)";
+		} else {
+			// school
 			Filter filter = session.enableFilter("businessFilter");
 			filter.setParameter("business_id",businessId);
 			queryStr += " JOIN p.listBusiness as lb WHERE lb.business_id = :businessId";
@@ -249,7 +256,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 				queryStr +=  " LEFT JOIN OLS.primaryKey.status as OPA";
 			}
 		}
-		if(!StringUtils.isNULL(businessId)) {
+		if(!businessId.equals(Constants.BUSINESS_PLATFORM)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE lb.business_id = :businessId and (" +
 					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" + 
 					" p.patent_appl_country like :searchText or p.patent_appl_no like :searchText or" + 
@@ -259,8 +266,8 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 					" p.patent_id in (SELECT las.patent FROM las where las.assignee_name like :searchText or las.assignee_name_en like :searchText ) or" + 
 					" p.patent_id in (SELECT lap.patent FROM lap where lap.applicant_name like :searchText or lap.applicant_name_en like :searchText ))";
 		}else {
-			queryStr += " WHERE" + 
-					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" + 
+			queryStr += " JOIN p.listBusiness as lb WHERE (lb.business_id not in :businessId and p.is_sync = 1) and" +
+					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" +
 					" p.patent_appl_country like :searchText or p.patent_appl_no like :searchText or" + 
 					" p.patent_notice_no like :searchText or p.patent_publish_no like :searchText or" + 
 					" p.patent_no like :searchText or pa.context_abstract like :searchText) or" + 
@@ -313,7 +320,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 				" LEFT JOIN p.listAssignee as las " + 
 				" LEFT JOIN p.listApplicant as lap " + 
 				" LEFT JOIN p.listInventor as lin ";
-		if(!StringUtils.isNULL(businessId)) {
+		if(!businessId.equals(Constants.BUSINESS_PLATFORM)) {
 			queryStr += " JOIN p.listBusiness as lb WHERE lb.business_id = :businessId and (" +
 					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" + 
 					" p.patent_appl_country like :searchText or p.patent_appl_no like :searchText or" + 
@@ -323,7 +330,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 					" p.patent_id in (SELECT las.patent FROM las where las.assignee_name like :searchText or las.assignee_name_en like :searchText )or" + 
 					" p.patent_id in (SELECT lap.patent FROM lap where lap.applicant_name like :searchText or lap.applicant_name_en like :searchText ))";
 		}else {
-			queryStr += " WHERE" + 
+			queryStr += " JOIN p.listBusiness as lb WHERE (lb.business_id not in :businessId and p.is_sync = 1) and" +
 					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" + 
 					" p.patent_appl_country like :searchText or p.patent_appl_no like :searchText or" + 
 					" p.patent_notice_no like :searchText or p.patent_publish_no like :searchText or" + 
@@ -855,6 +862,15 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		Session session = getSession();
 		Query query = session.createQuery(hql);
 		query.setParameter("patent_id", patentId);
+		query.executeUpdate();
+	}
+
+	@Override
+	public void deletePatentContactByKey(String contactId) {
+		String hql = "Delete From PatentContact c where c.patent_contact_id = :contactId";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("contactId", contactId);
 		query.executeUpdate();
 	}
 

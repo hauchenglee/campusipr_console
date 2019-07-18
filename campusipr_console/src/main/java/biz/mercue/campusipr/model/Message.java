@@ -19,64 +19,67 @@ import com.fasterxml.jackson.annotation.JsonView;
 @Entity
 @Table(name="message")
 public class Message extends BaseBean{
-	
+
 	@Id
 	@JsonView(View.Message.class)
 	private String message_id;
-	
+
 	@JsonView(View.Message.class)
 	private String message_type;
-	
-	
-	@JsonView(View.Public.class)
+
+
+	@JsonView(View.Message.class)
 	private String business_id;
-	
-	
-	@JsonView(View.Public.class)
+
+
+	@JsonView(View.Message.class)
 	private String channel_id;
-	
-	@JsonView(View.Public.class)
+
+	@JsonView(View.Message.class)
 	private String sender_id;
-	
+
 
 	@Transient
-	@JsonView(View.Public.class)
+	@JsonView(View.Message.class)
 	private String sender_name;
-	
-	
-	@JsonView(View.Public.class)
-	private String receiver_id;
-	
-	@Transient
-	@JsonView(View.Public.class)
-	private String receiver_name;
-	
 
-	
+
+	@JsonView(View.Message.class)
+	private String receiver_id;
+
+	@Transient
+	@JsonView(View.Message.class)
+	private String receiver_name;
+
+
+
 	//Line max length 2000
 	//Facebook max length 640
-	@JsonView(View.Public.class)
+	@JsonView(View.Message.class)
 	private String message_text;
-	
 
-	@JsonView(View.Public.class)
+
+	@JsonView(View.Message.class)
 	private String attachment_url;
-	
-	@JsonView(View.Public.class)
+
+	@JsonView(View.Message.class)
 	private String attachment_thumbnail_url;
-	
-	@JsonView(View.Public.class)
+
+	@JsonView(View.Message.class)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date message_date;
-			
+
+	@JsonView(View.Message.class)
+	private boolean is_read;
+
 	public String getMessage_id() {
 		return message_id;
 	}
-	
+
 	public String getMessage_type() {
 		return message_type;
 	}
-	
+
 	public String getMessage_text() {
 		return message_text;
 	}
@@ -89,11 +92,11 @@ public class Message extends BaseBean{
 	public void setMessage_id(String message_id) {
 		this.message_id = message_id;
 	}
-	
+
 	public void setMessage_type(String message_type) {
 		this.message_type = message_type;
 	}
-	
+
 	public void setMessage_text(String message_text) {
 		this.message_text = message_text;
 	}
@@ -124,7 +127,7 @@ public class Message extends BaseBean{
 	public void setAttachment_thumbnail_url(String attachment_thumbnail_url) {
 		this.attachment_thumbnail_url = attachment_thumbnail_url;
 	}
-	
+
 	public String getBusiness_id() {
 		return business_id;
 	}
@@ -171,5 +174,13 @@ public class Message extends BaseBean{
 
 	public void setReceiver_name(String receiver_name) {
 		this.receiver_name = receiver_name;
+	}
+
+	public boolean isIs_read() {
+		return is_read;
+	}
+
+	public void setIs_read(boolean is_read) {
+		this.is_read = is_read;
 	}
 }

@@ -321,23 +321,37 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	private void contactData(Patent patent) {
-		if (patent.getBusiness() != null) {
-			Business business = patent.getBusiness();
-			PatentContact pContact = new PatentContact();
-			if (!StringUtils.isNULL(business.getContact_name()) || !StringUtils.isNULL(business.getContact_email())
-					|| !StringUtils.isNULL(business.getContact_phone())) {
-				pContact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
-				pContact.setPatent(patent);
-				pContact.setBusiness(business);
-				pContact.setCreate_date(new Date());
-				pContact.setContact_name(business.getContact_name());
-				pContact.setContact_email(business.getContact_email());
-				pContact.setContact_phone(business.getContact_phone());
-				pContact.setContact_character("聯絡人");
-				pContact.setContact_order(0);
-				patent.addContact(pContact);
+		try {
+			List<PatentContact> editContactList = patent.getListContact();
+			if (editContactList != null) {
+				for (PatentContact contact : editContactList) {
+					if (!StringUtils.isNULL(contact.getPatent_contact_id())) {
+						patentDao.deletePatentContactByKey(contact.getPatent_contact_id());
+					}
+				}
 			}
+
+			if (patent.getBusiness() != null) {
+				Business business = patent.getBusiness();
+				PatentContact pContact = new PatentContact();
+				if (!StringUtils.isNULL(business.getContact_name()) || !StringUtils.isNULL(business.getContact_email())
+						|| !StringUtils.isNULL(business.getContact_phone())) {
+					pContact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
+					pContact.setPatent(patent);
+					pContact.setBusiness(business);
+					pContact.setCreate_date(new Date());
+					pContact.setContact_name(business.getContact_name());
+					pContact.setContact_email(business.getContact_email());
+					pContact.setContact_phone(business.getContact_phone());
+					pContact.setContact_character("聯絡人");
+					pContact.setContact_order(0);
+					patent.addContact(pContact);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+
 	}
 
 	@Override
@@ -606,7 +620,8 @@ public class PatentServiceImpl implements PatentService {
 					taskResult = Constants.INT_DATA_DUPLICATE;
 				} else {
 					editPatent.setComparePatent(dbTargetPatent);
-					taskResult = updatePatent(editPatent, null);
+					contactData(editPatent);
+					taskResult = updatePatent(editPatent, business.getBusiness_id());
 				}
 			}
 			return taskResult;

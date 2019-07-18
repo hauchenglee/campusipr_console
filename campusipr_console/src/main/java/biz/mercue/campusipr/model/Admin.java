@@ -75,6 +75,10 @@ public class Admin extends BaseBean {
 	@Transient
 	private String admin_ip;
 
+	@Transient
+	@JsonView(View.Admin.class)
+	private Message message;
+
 	public String getAdmin_id() {
 		return admin_id;
 	}
@@ -187,7 +191,11 @@ public class Admin extends BaseBean {
 		this.token = token;
 	}
 
+	public Message getMessage() {
+		return message;
+	}
 
-	
-
+	public void setMessage(Message message) {
+		this.message = message;
+	}
 }

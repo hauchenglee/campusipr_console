@@ -27,7 +27,7 @@ public class Department extends BaseBean {
 	@JoinColumn(name = "patent_id")
 	private Patent patent;
 
-	@JsonView()
+	@JsonView(View.Public.class)
 	private String business_id;
 
 	public String getDepartment_id() {

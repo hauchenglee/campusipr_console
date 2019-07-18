@@ -38,7 +38,7 @@ public class Patent extends BaseBean{
 	
 	
 	@Id
-	@JsonView({View.Patent.class,View.PortfolioDetail.class})
+	@JsonView({View.Patent.class,View.PortfolioDetail.class, View.PatentDetail.class})
 	private String patent_id;
 	
 	//all

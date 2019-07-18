@@ -2,11 +2,14 @@ package biz.mercue.campusipr.dao;
 
 import java.util.List;
 
+import biz.mercue.campusipr.util.Constants;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import com.mysql.cj.api.log.Log;
@@ -155,13 +158,35 @@ public class AdminDaoImpl extends AbstractDao<String,  Admin> implements AdminDa
 //		return criteria.list();
 //	}
 	
-	
-//	@Override
-//	public List<Admin> getAllAdminList(){
-//		Criteria criteria = createEntityCriteria();	
-//		return criteria.list();
-//	}
 
+	@Override
+	public List<Admin> getAllAdminList(){
+		Criteria criteria = createEntityCriteria();
+		return criteria.list();
+	}
+
+	@Override
+	public List<Admin> getPlatformAdminList() {
+		String hql = "select adm from Admin adm where adm.role.role_id = :ROLE_PLATFORM_MANAGER or adm.role.role_id = :ROLE_PLATFORM_PATENT";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("ROLE_PLATFORM_MANAGER", Constants.ROLE_PLATFORM_MANAGER);
+		query.setParameter("ROLE_PLATFORM_PATENT", Constants.ROLE_PLATFORM_PATENT);
+		return query.list();
+	}
+
+	@Override
+	public List<Admin> getSchoolAdminList() {
+		String hql = "select adm from Admin adm where adm.role.role_id = :ROLE_BUSINESS_MANAGER" +
+				" or adm.role.role_id = :ROLE_BUSINESS_PATENT" +
+				" or adm.role.role_id = :ROLE_COMMON_USER";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("ROLE_BUSINESS_MANAGER", Constants.ROLE_BUSINESS_MANAGER);
+		query.setParameter("ROLE_BUSINESS_PATENT", Constants.ROLE_BUSINESS_PATENT);
+		query.setParameter("ROLE_COMMON_USER", Constants.ROLE_COMMON_USER);
+		return query.list();
+	}
 
 
 
