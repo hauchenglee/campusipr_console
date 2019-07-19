@@ -34,5 +34,7 @@ public class View {
 	public interface PatentIdApplNo extends Public {}
 
 	public interface PatentHistoryExcel extends Public {}
+	
+	public interface Analysis extends Public {}
 
 }

@@ -62,11 +62,9 @@ public class AnalysisController {
 		String businessId = jsonObject.optString("business_id");
 		Long beginTime = jsonObject.getLong("beginTime");
 		Long endTime = jsonObject.getLong("endTime");
-		ListQueryForm form =  analysisService.testAnalysis(businessId, beginTime, endTime);
-		int ccount = analysisService.testAnalysis(businessId);
+		ListQueryForm form = analysisService.testAnalysis(businessId);
 		responseBody.setCode(Constants.INT_SUCCESS);
 		responseBody.setListQuery(form); //沒顯示??
-		responseBody.setTotal_count(ccount);
 		log.info("patentList:"+responseBody.getJacksonString(View.Patent.class));
 		return responseBody.getJacksonString(View.Patent.class);
 	}
@@ -79,7 +77,7 @@ public class AnalysisController {
 			@RequestBody String receiveJSONString,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysispatent ");
+		log.info("analysisAllpatent ");
 		log.info("order_field:"+fieldId);
 		log.info("asc:"+is_asc);
 		ListResponseBody responseBody  = new ListResponseBody();
@@ -99,6 +97,49 @@ public class AnalysisController {
 				} else {
 					log.info("else1?");
 					ListQueryForm form =  analysisService.analysisAll(businessId, beginTime, endTime);
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setListQuery(form);
+				}
+			}else {
+				log.info("else2?");
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
+		}else {
+			log.info("else3?");
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
+		return responseBody.getJacksonString(View.Analysis.class);
+		
+	}
+	
+	//學校端 依年分析總覽
+	@RequestMapping(value="/api/analysisplatformbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String analysisPlatformByYear(HttpServletRequest request,
+			@RequestBody String receiveJSONString,
+			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+		log.info("analysispatentByYears ");
+		log.info("order_field:"+fieldId);
+		log.info("asc:"+is_asc);
+		ListResponseBody responseBody  = new ListResponseBody();
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		String businessId = jsonObject.optString("business_id");
+		Long beginTime = jsonObject.getLong("beginTime");
+		Long endTime = jsonObject.getLong("endTime");
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+					ListQueryForm form =  analysisService.analysisByYear(businessId, beginTime, endTime);
+					log.info(form.getAnalDepartmentTotal());
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setListQuery(form);
+				} else {
+					log.info("else1?");
+					ListQueryForm form =  analysisService.analysisByYear(businessId, beginTime, endTime);
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				}

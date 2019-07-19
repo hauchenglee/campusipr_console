@@ -44,9 +44,9 @@ public class AnalysisServiceImpl implements AnalysisService {
 	// 未完成：預計以For迴圈在無專利的年份補零
 	@Override
 	public ListQueryForm analysisAll(String businessId, Long beginDate, Long endDate) {
-		log.info("analysisPatent");
-		int unApplPatent = 0;
-		int analYearsTotal = 0;
+		log.info("analysisAllPatent");
+		int unApplPatent;
+		int analYearsTotal;
 		int analFamilyTotal;
 		int analDepartmentTotal;
 		int analInventorToltal;
@@ -63,7 +63,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 		log.info(analFamilyTotal);
 		log.info(analDepartmentTotal);
 		log.info(analInventorToltal);
-		
+
 		log.info("analAllYearsList: " + analAllYearsList.size());
 		ListQueryForm form = new ListQueryForm(unApplPatent, analYearsTotal, analFamilyTotal, analDepartmentTotal, analInventorToltal, analAllYearsList);
 		log.info(form);
@@ -71,8 +71,27 @@ public class AnalysisServiceImpl implements AnalysisService {
 	}
 
 	@Override
-	public ListQueryForm analysisByYears(String businessId, Long beginDate, Long endDate) {
-		return null;
+	public ListQueryForm analysisByYear(String businessId, Long beginDate, Long endDate) {
+		log.info("analysisPatentByYear");
+		int unApplPatent;
+		int analYearsTotal ;
+		int analFamilyTotal;
+		int analDepartmentTotal;
+		int analInventorToltal;
+		
+		unApplPatent = analysisDao.countUnApplPatent(businessId);
+		analYearsTotal= analysisDao.countPatent(businessId, beginDate, endDate);
+		analFamilyTotal = analysisDao.countPatentFamily(businessId, beginDate, endDate);
+		analDepartmentTotal = analysisDao.countDepartment(businessId, beginDate, endDate);
+		analInventorToltal = analysisDao.countInventor(businessId, beginDate, endDate) + analysisDao.countInventorEn(businessId, beginDate, endDate);
+		
+		List<Analysis> countPatentByYear = new ArrayList<Analysis>();
+		countPatentByYear = analysisDao.countPatentByYear(businessId, beginDate, endDate);
+		
+		log.info("countPatentByYear: " + countPatentByYear.size());
+		ListQueryForm form = new ListQueryForm(unApplPatent, analYearsTotal, analFamilyTotal, analDepartmentTotal, analInventorToltal, countPatentByYear);
+		
+		return form;
 	}
 
 	@Override
@@ -95,20 +114,26 @@ public class AnalysisServiceImpl implements AnalysisService {
 		return null;
 	}
 
-	public int testAnalysis(String businessId) {
-		int unApplPatent = 0;
-		unApplPatent = analysisDao.countUnApplPatent(businessId);
-		log.info(unApplPatent);
-		return unApplPatent;
+	public ListQueryForm testAnalysis(String businessId) {
+//		int unApplPatent = 0;
+//		unApplPatent = analysisDao.countUnApplPatent(businessId);
+//		log.info(unApplPatent);
+//		return unApplPatent;
+		List<Analysis> countList = new ArrayList<Analysis>();
+		countList = analysisDao.countCountryApplStatusTotal(businessId);
+		log.info(countList);
+		ListQueryForm form = new ListQueryForm(0, 0, countList);
+		return form;
 	}
 
 	@Override
 	public ListQueryForm testAnalysis(String businessId, Long beginDate, Long endDate) {
-		List<String> countList = new ArrayList<String>();
-		countList = analysisDao.countInventorEn(businessId, beginDate, endDate);
-		log.info(countList);
-		ListQueryForm form = new ListQueryForm(0, 0, countList);
-		return form;
+		return null;
+//		List<Analysis> countList = new ArrayList<Analysis>();
+//		countList = analysisDao.countInventorEn(businessId, beginDate, endDate);
+//		log.info(countList);
+//		ListQueryForm form = new ListQueryForm(0, 0, countList);
+//		return form;
 	}
 
 }
