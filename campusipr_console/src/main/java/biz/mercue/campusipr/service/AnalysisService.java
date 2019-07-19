@@ -11,8 +11,8 @@ public interface AnalysisService {
 	ListQueryForm testAnalysis (String businessId, Long beginDate, Long endDate);
 	ListQueryForm analysisAll(String businessId, Long beginDate, Long endDate);
 	ListQueryForm analysisByYear(String businessId, Long beginDate, Long endDate);
-	ListQueryForm analysisAllCountry(String businessId, Long beginDate, Long endDate);
-	ListQueryForm analysisCountryByYears(String businessId, Long beginDate, Long endDate);
+	ListQueryForm analysisAllCountry(String businessId, Long beginDate, Long endDate, Object searchText);
+	ListQueryForm analysisCountryByYear(String businessId, Long beginDate, Long endDate, Object searchText);
 	ListQueryForm analysisAllDepartment(String businessId, Long beginDate, Long endDate);
 	ListQueryForm analysisDepartmentByYears(String businessId, Long beginDate, Long endDate);
 
