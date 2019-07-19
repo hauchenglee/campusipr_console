@@ -71,9 +71,9 @@ public class AnalysisController {
 
 	
 	//學校端 分析總覽預設畫面
-	@RequestMapping(value="/api/analysisplatformoverview", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/analysisschooloverview", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String analysisPlatformOverview(HttpServletRequest request,
+	public String analysisSchoolOverview(HttpServletRequest request,
 			@RequestBody String receiveJSONString,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
@@ -95,32 +95,28 @@ public class AnalysisController {
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				} else {
-					log.info("else1?");
 					ListQueryForm form =  analysisService.analysisAll(businessId, beginTime, endTime);
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				}
 			}else {
-				log.info("else2?");
 				responseBody.setCode(Constants.INT_NO_PERMISSION);
 			}
 		}else {
-			log.info("else3?");
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
 		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
 		return responseBody.getJacksonString(View.Analysis.class);
-		
 	}
 	
 	//學校端 依年分析總覽
-	@RequestMapping(value="/api/analysisplatformbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/analysisschoolbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String analysisPlatformByYear(HttpServletRequest request,
+	public String analysisSchoolByYear(HttpServletRequest request,
 			@RequestBody String receiveJSONString,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysispatentByYears ");
+		log.info("analysispatentByYear ");
 		log.info("order_field:"+fieldId);
 		log.info("asc:"+is_asc);
 		ListResponseBody responseBody  = new ListResponseBody();
@@ -138,48 +134,208 @@ public class AnalysisController {
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				} else {
-					log.info("else1?");
 					ListQueryForm form =  analysisService.analysisByYear(businessId, beginTime, endTime);
 					responseBody.setCode(Constants.INT_SUCCESS);
 					responseBody.setListQuery(form);
 				}
 			}else {
-				log.info("else2?");
 				responseBody.setCode(Constants.INT_NO_PERMISSION);
 			}
 		}else {
-			log.info("else3?");
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
 		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
 		return responseBody.getJacksonString(View.Analysis.class);
-		
 	}
 	
-	@RequestMapping(value="/api/analysisplatformschool", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	//學校端 國家分析預設畫面
+	@RequestMapping(value="/api/analysisschoolcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String analysisPlatformSchool(HttpServletRequest request,
+	public String analysisSchoolCountry(HttpServletRequest request,
 			@RequestBody String receiveJSONString,
 			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		return null;
+		log.info("analysisplatformcountry ");
+		log.info("order_field:"+fieldId);
+		log.info("asc:"+is_asc);
+		ListResponseBody responseBody  = new ListResponseBody();
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		String businessId = jsonObject.optString("business_id");
+		Long beginTime = jsonObject.getLong("beginTime");
+		Long endTime = jsonObject.getLong("endTime");
+		Object searchText = jsonObject.get("searchText");
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+					ListQueryForm form =  analysisService.analysisAllCountry(businessId, beginTime, endTime, searchText);
+					log.info(form.getAnalDepartmentTotal());
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setListCountryQuery(form);
+				} else {
+					ListQueryForm form =  analysisService.analysisAllCountry(businessId, beginTime, endTime, searchText);
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setListCountryQuery(form);
+				}
+			}else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
+		return responseBody.getJacksonString(View.Analysis.class);
 	}
-	
-	@RequestMapping(value="/api/analysisplatformcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+
+	//學校端 國家分析依年度
+	@RequestMapping(value="/api/analysisschoolcountrybyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String analysisPlatformCountry(HttpServletRequest request,
+	public String analysisSchoolCountryByYear(HttpServletRequest request,
 			@RequestBody String receiveJSONString,
 			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		return null;
+		log.info("analysisplatformcountry ");
+		log.info("order_field:"+fieldId);
+		log.info("asc:"+is_asc);
+		ListResponseBody responseBody  = new ListResponseBody();
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		String businessId = jsonObject.optString("business_id");
+		Long beginTime = jsonObject.getLong("beginTime");
+		Long endTime = jsonObject.getLong("endTime");
+		Object searchText = jsonObject.get("searchText");
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+					ListQueryForm form =  analysisService.analysisCountryByYear(businessId, beginTime, endTime, searchText);
+					log.info(form.getAnalDepartmentTotal());
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setListCountryQuery(form);
+				} else {
+					ListQueryForm form =  analysisService.analysisCountryByYear(businessId, beginTime, endTime, searchText);
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setListCountryQuery(form);
+				}
+			}else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
+		return responseBody.getJacksonString(View.Analysis.class);
 	}
 	
-	@RequestMapping(value="/api/exportplatformtotal", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	//學校端 預設科系分析
+	@RequestMapping(value="/api/analysisschooldepartment", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<InputStreamResource> exportPlatformTotal(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("exportpatent ");
+	public String analysisSchoolDepartment(HttpServletRequest request,
+			@RequestBody String receiveJSONString,
+			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+		log.info("analysisplatformcountry ");
+		log.info("order_field:"+fieldId);
+		log.info("asc:"+is_asc);
+		ListResponseBody responseBody  = new ListResponseBody();
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		String businessId = jsonObject.optString("business_id");
+		Long beginTime = jsonObject.getLong("beginTime");
+		Long endTime = jsonObject.getLong("endTime");
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			if(tokenBean.checkPermission(permission.getPermission_id())) {
+				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+					ListQueryForm form =  analysisService.analysisAllDepartment(businessId, beginTime, endTime);
+					log.info(form.getAnalDepartmentTotal());
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setListDepartmentQuery(form);
+				} else {
+					ListQueryForm form =  analysisService.analysisAllDepartment(businessId, beginTime, endTime);
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setListDepartmentQuery(form);
+				}
+			}else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			}
+		}else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
+		return responseBody.getJacksonString(View.Analysis.class);
+	}
+	
+//	@RequestMapping(value="/api/exportschooltotal", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public ResponseEntity<InputStreamResource> exportSchoolTotal(HttpServletRequest request,@RequestBody String receiveJSONString){
+//		log.info("exportpatent ");
+//		return null;
+//	}
+	
+//	@RequestMapping(value="/api/exportschoolcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public ResponseEntity<InputStreamResource> exportSchoolCountry(HttpServletRequest request,@RequestBody String receiveJSONString){
+//		log.info("exportpatent ");
+//		return null;
+//	}
+//	
+//	@RequestMapping(value="/api/exportplatformdepartment", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public ResponseEntity<InputStreamResource> exportSchoolDepartment(HttpServletRequest request,@RequestBody String receiveJSONString){
+//		log.info("exportpatent ");
+//		return null;
+//	}
+//	
+//	@RequestMapping(value="/api/analysisplatformoverview", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public String analysisPlatformOverview(HttpServletRequest request,
+//			@RequestBody String receiveJSONString,
+//			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+//			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+//			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+//		return null;
+//	}
+//	
+//	@RequestMapping(value="/api/analysisplatformbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public String analysisPlatformByYear(HttpServletRequest request,
+//			@RequestBody String receiveJSONString,
+//			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+//			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+//			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+//		return null;
+//	}
+//	
+//	@RequestMapping(value="/api/analysisschoolcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public String analysisPLCountry(HttpServletRequest request,
+//			@RequestBody String receiveJSONString,
+//			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+//			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+//			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+//		return null;
+//	}
+//	
+//	@RequestMapping(value="/api/analysisplatformdepartment", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public String analysisPlatformDepartment(HttpServletRequest request,
+//			@RequestBody String receiveJSONString,
+//			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+//			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+//			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+//		return null;
+//	}
+
+	
+//	@RequestMapping(value="/api/exportplatformtotal", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public ResponseEntity<InputStreamResource> exportPlatformTotal(HttpServletRequest request,@RequestBody String receiveJSONString){
+//		log.info("exportpatent ");
 //		StringResponseBody responseBody  = new StringResponseBody();
 //		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 //		if(tokenBean!=null) {
@@ -218,71 +374,20 @@ public class AnalysisController {
 //			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 //			return null;
 //		}
-		return null;
-	}
+//		return null;
+//	}
 	
-	@RequestMapping(value="/api/exportplatformschool", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<InputStreamResource> exportPlatformSchool(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("exportpatent ");
-		return null;
-	}
-	
-	@RequestMapping(value="/api/exportplatformcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<InputStreamResource> exportPlatformCountry(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("exportpatent ");
-		return null;
-	}
-	
-	@RequestMapping(value="/api/analysisschooltotal", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public String analysisSchoolTotal(HttpServletRequest request,
-			@RequestBody String receiveJSONString,
-			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
-			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		return null;
-	}
-	
-	@RequestMapping(value="/api/analysisschoolcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public String analysisSchoolCountry(HttpServletRequest request,
-			@RequestBody String receiveJSONString,
-			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
-			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		return null;
-	}
-	
-	@RequestMapping(value="/api/analysisschooldepartment", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public String analysisSchoolDepartment(HttpServletRequest request,
-			@RequestBody String receiveJSONString,
-			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
-			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		return null;
-	}
-	
-	@RequestMapping(value="/api/exportschooltotal", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<InputStreamResource> exportSchoolTotal(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("exportpatent ");
-		return null;
-	}
-	
-	@RequestMapping(value="/api/exportschoolcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<InputStreamResource> exportSchoolCountry(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("exportpatent ");
-		return null;
-	}
-	
-	@RequestMapping(value="/api/exportplatformdepartment", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<InputStreamResource> exportSchoolDepartment(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("exportpatent ");
-		return null;
-	}
+//	@RequestMapping(value="/api/exportplatformschool", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public ResponseEntity<InputStreamResource> exportPlatformSchool(HttpServletRequest request,@RequestBody String receiveJSONString){
+//		log.info("exportpatent ");
+//		return null;
+//	}
+//	
+//	@RequestMapping(value="/api/exportplatformcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public ResponseEntity<InputStreamResource> exportPlatformCountry(HttpServletRequest request,@RequestBody String receiveJSONString){
+//		log.info("exportpatent ");
+//		return null;
+//	}
 }

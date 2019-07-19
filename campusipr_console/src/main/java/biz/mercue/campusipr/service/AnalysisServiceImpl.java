@@ -95,23 +95,94 @@ public class AnalysisServiceImpl implements AnalysisService {
 	}
 
 	@Override
-	public ListQueryForm analysisAllCountry(String businessId, Long beginDate, Long endDate) {
-		return null;
+	public ListQueryForm analysisAllCountry(String businessId, Long beginDate, Long endDate, Object searchText) {
+		log.info("analysisAllCountry");
+		List<Analysis> countCountryTotal = new ArrayList<Analysis>();
+		List<Analysis> countCountryApplStatusTotal = new ArrayList<Analysis>();
+		List<Analysis> countCountryNoticeStatusTotal = new ArrayList<Analysis>();
+		List<Analysis> countCountryPublishStatusTotal= new ArrayList<Analysis>();
+		List<Analysis> countCountryByYearTotal= new ArrayList<Analysis>();
+		
+		String countryName = (String) searchText;
+		List<Country> countryList = countryDao.getListByFuzzy(countryName);
+		List<String> coutryIdList = new ArrayList<>();
+		for (Country country:countryList) {
+			if (!coutryIdList.contains(country.getCountry_id())) {
+				coutryIdList.add(country.getCountry_id());
+			}
+		}
+		
+		countCountryTotal = analysisDao.countCountryTotal(businessId);
+		countCountryApplStatusTotal = analysisDao.countCountryApplStatusTotal(businessId);
+		countCountryNoticeStatusTotal = analysisDao.countCountryNoticeStatusTotal(businessId);
+		countCountryPublishStatusTotal = analysisDao.countCountryPublishStatusTotal(businessId);
+		countCountryByYearTotal = analysisDao.countCountryByYearTotal(businessId, coutryIdList);
+		
+		ListQueryForm form = new ListQueryForm(countCountryTotal, countCountryApplStatusTotal, countCountryNoticeStatusTotal, countCountryPublishStatusTotal, countCountryByYearTotal);
+		return form;
 	}
 
 	@Override
-	public ListQueryForm analysisCountryByYears(String businessId, Long beginDate, Long endDate) {
-		return null;
+	public ListQueryForm analysisCountryByYear(String businessId, Long beginDate, Long endDate, Object searchText) {
+		log.info("analysisCountryByYears");
+		List<Analysis> countCountry = new ArrayList<Analysis>();
+		List<Analysis> countCountryApplStatus = new ArrayList<Analysis>();
+		List<Analysis> countCountryNoticeStatus = new ArrayList<Analysis>();
+		List<Analysis> countCountryPublishStatus= new ArrayList<Analysis>();
+		List<Analysis> countCountryByYear= new ArrayList<Analysis>();
+		
+		String countryName = (String) searchText;
+		List<Country> countryList = countryDao.getListByFuzzy(countryName);
+		List<String> coutryIdList = new ArrayList<>();
+		for (Country country:countryList) {
+			if (!coutryIdList.contains(country.getCountry_id())) {
+				coutryIdList.add(country.getCountry_id());
+			}
+		}
+		
+		countCountry = analysisDao.countCountryTotal(businessId);
+		countCountryApplStatus = analysisDao.countCountryApplStatusTotal(businessId);
+		countCountryNoticeStatus= analysisDao.countCountryNoticeStatusTotal(businessId);
+		countCountryPublishStatus = analysisDao.countCountryPublishStatusTotal(businessId);
+		countCountryByYear = analysisDao.countCountryByYearTotal(businessId, coutryIdList);
+		
+		ListQueryForm form = new ListQueryForm(countCountry, countCountryApplStatus, countCountryNoticeStatus, countCountryPublishStatus, countCountryByYear);
+		return form;
 	}
 
 	@Override
 	public ListQueryForm analysisAllDepartment(String businessId, Long beginDate, Long endDate) {
-		return null;
+		log.info("analysisCountryByYears");
+		List<Analysis> countEachDepartmentTotal = new ArrayList<Analysis>();
+		List<Analysis> countTWEachDepartmentTotal = new ArrayList<Analysis>();
+		List<Analysis> countCNEachDepartmentTotal = new ArrayList<Analysis>();
+		List<Analysis> countUSEachDepartmentTotal = new ArrayList<Analysis>();
+		
+		countEachDepartmentTotal = analysisDao.countEachDepartmentTotal(businessId);
+		countTWEachDepartmentTotal = analysisDao.countTWEachDepartmentTotal(businessId);
+		countCNEachDepartmentTotal = analysisDao.countCNEachDepartmentTotal(businessId);
+		countUSEachDepartmentTotal = analysisDao.countUSEachDepartmentTotal(businessId);
+		
+		ListQueryForm form = new ListQueryForm(countEachDepartmentTotal, countTWEachDepartmentTotal, countCNEachDepartmentTotal, countUSEachDepartmentTotal);
+		return form;
 	}
 
+	//多寫的 科系依年度查詢
 	@Override
 	public ListQueryForm analysisDepartmentByYears(String businessId, Long beginDate, Long endDate) {
-		return null;
+		log.info("analysisCountryByYears");
+		List<Analysis> countEachDepartment = new ArrayList<Analysis>();
+		List<Analysis> countTWEachDepartment = new ArrayList<Analysis>();
+		List<Analysis> countCNEachDepartment = new ArrayList<Analysis>();
+		List<Analysis> countUSEachDepartment = new ArrayList<Analysis>();
+		
+		countEachDepartment = analysisDao.countEachDepartmentTotal(businessId);
+		countTWEachDepartment = analysisDao.countTWEachDepartmentTotal(businessId);
+		countCNEachDepartment = analysisDao.countCNEachDepartmentTotal(businessId);
+		countUSEachDepartment = analysisDao.countUSEachDepartmentTotal(businessId);
+		
+		ListQueryForm form = new ListQueryForm(countEachDepartment, countTWEachDepartment, countCNEachDepartment, countUSEachDepartment);
+		return form;
 	}
 
 	public ListQueryForm testAnalysis(String businessId) {

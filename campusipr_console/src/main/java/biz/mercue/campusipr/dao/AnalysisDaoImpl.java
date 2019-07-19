@@ -377,18 +377,24 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
-
+	// 下方皆未測試
 	// 預設：各個國家在申請狀態的專利總數
 	@Override
 	public List<Analysis> countCountryApplStatusTotal(String businessId) {
 		log.info("各個國家在申請狀態的專利總數");
 		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no ) "
+		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listPatentStatus as lps "
+						+ "JOIN p.listPatentStatus as ls"
+						+ "JOIN ls.primaryKey.status as s "
 						+ "where lb.business_id = :businessId "
+						+ "and s.status_desc = :statusDesc "
 						+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
+		String statusDesc = "申請";
+		q.setParameter("statusDesc", statusDesc);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
@@ -401,8 +407,21 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryNoticeStatusTotal(String businessId) {
 		log.info("各個國家在公開狀態的專利總數");
 		Session session = getSession();
-		String queryStr = "";
+		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
+				+ "FROM Patent as p " 
+				+ "JOIN p.listBusiness as lb "
+				+ "JOIN p.listPatentStatus as lps "
+				+ "JOIN p.listPatentStatus as ls"
+				+ "JOIN ls.primaryKey.status as s "
+				+ "where lb.business_id = :businessId "
+				+ "and s.status_desc = :statusDesc "
+				+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
+		String statusDesc = "公開";
+		q.setParameter("statusDesc", statusDesc);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
@@ -412,20 +431,42 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryPublishStatusTotal(String businessId) {
 		log.info("各個國家在公告狀態的專利總數");
 		Session session = getSession();
-		String queryStr = "";
+		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
+				+ "FROM Patent as p " 
+				+ "JOIN p.listBusiness as lb "
+				+ "JOIN p.listPatentStatus as lps "
+				+ "JOIN p.listPatentStatus as ls"
+				+ "JOIN ls.primaryKey.status as s "
+				+ "where lb.business_id = :businessId "
+				+ "and s.status_desc = :statusDesc "
+				+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
+		String statusDesc = "公告";
+		q.setParameter("statusDesc", statusDesc);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
 
 	// 預設：單一國家的各年份總數(國家可選)
 	@Override
-	public List<Analysis> countCountryByYearTotal(String businessId) {
+	public List<Analysis> countCountryByYearTotal(String businessId, List<String> coutryIdList) {
 		log.info("單一國家的各年份總數(國家可選)");
 		Session session = getSession();
-		String queryStr = "";
+		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), date_format(patent_appl_date, '%Y') "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "where lb.business_id = :businessId "
+						+ "and p.patent_appl_country = :countryId "
+						+ "group by date_format(patent_appl_date, '%Y')";
 		Query q = session.createQuery(queryStr);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
 		log.info(q.list().isEmpty());
+		q.setParameter("countryId", coutryIdList);
 		return q.list();
 	}
 
@@ -434,8 +475,26 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountry(String businessId, Long beginDate, Long endDate) {
 		log.info("各個國家在特定日期區間的專利總數");
 		Session session = getSession();
-		String queryStr = "";
+		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no )"
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "where lb.business_id = :businessId "
+						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info(beginDateFormat);
+		log.info(endDateFormat);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
@@ -445,8 +504,29 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryApplStatus(String businessId, Long beginDate, Long endDate) {
 		log.info("各個國家在特定日期區間的申請狀態專利總數");
 		Session session = getSession();
-		String queryStr = "";
+		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
+				+ "FROM Patent as p " 
+				+ "JOIN p.listBusiness as lb "
+				+ "JOIN p.listPatentStatus as lps "
+				+ "JOIN Status as s "
+				+ "where lb.business_id = :businessId "
+				+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+				+ "and s.status_desc = '申請' "
+				+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info(beginDateFormat);
+		log.info(endDateFormat);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
@@ -456,8 +536,29 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryNoticeStatus(String businessId, Long beginDate, Long endDate) {
 		log.info("各個國家在特定日期區間的公開狀態專利總數");
 		Session session = getSession();
-		String queryStr = "";
+		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
+				+ "FROM Patent as p " 
+				+ "JOIN p.listBusiness as lb "
+				+ "JOIN p.listPatentStatus as lps "
+				+ "JOIN Status as s "
+				+ "where lb.business_id = :businessId "
+				+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+				+ "and s.status_desc = '公開' "
+				+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info(beginDateFormat);
+		log.info(endDateFormat);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
@@ -467,8 +568,29 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryPublishStatus(String businessId, Long beginDate, Long endDate) {
 		log.info("各個國家在特定日期區間的公各狀態專利總數");
 		Session session = getSession();
-		String queryStr = "";
+		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listPatentStatus as lps "
+						+ "JOIN Status as s "
+						+ "where lb.business_id = :businessId "
+						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "and s.status_desc = '公告' "
+						+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info(beginDateFormat);
+		log.info(endDateFormat);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
@@ -478,17 +600,261 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryByYear(String businessId, Long beginDate, Long endDate) {
 		log.info("單一國家的各年份總數(國家可選)");
 		Session session = getSession();
-		String queryStr = "";
+		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), date_format(patent_appl_date, '%Y') "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "where lb.business_id = :businessId "
+						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "and p.patent_appl_country = :countryId "
+						+ "group by date_format(patent_appl_date, '%Y')";
 		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info(beginDateFormat);
+		log.info(endDateFormat);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
 
+	//預設：各科系專利申請數量
+	@Override
+	public List<Analysis> countEachDepartmentTotal(String businessId) {
+		log.info("各科系專利申請數量");
+		Session session = getSession();
+		String queryStr = "SELECT ld.department_name, count(distinct ld.department_id) "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listDepartment as ld "
+						+ "where lb.business_id = :businessId "
+						+ "group by ld.department_name";
+		Query q = session.createQuery(queryStr);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		log.info(q.list().isEmpty());
+		return q.list();
+	}
+	
+	//預設：各科系在臺灣的專利申請數量
+	@Override
+	public List<Analysis> countTWEachDepartmentTotal(String businessId) {
+		log.info("各科系在臺灣的專利申請數量");
+		Session session = getSession();
+		String queryStr = "SELECT ld.department_name, count(distinct ld.department_id) "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listDepartment as ld "
+						+ "where lb.business_id = :businessId "
+						+ "and p.patent_appl_country = 'TW' "
+						+ "group by ld.department_name";
+		Query q = session.createQuery(queryStr);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		log.info(q.list().isEmpty());
+		return q.list();
+	}
+	
+	//預設：各科系在中國的專利申請數量
+	@Override
+	public List<Analysis> countCNEachDepartmentTotal(String businessId) {
+		log.info("各科系在中國的專利申請數量");
+		Session session = getSession();
+		String queryStr = "SELECT ld.department_name, count(distinct ld.department_id) "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listDepartment as ld "
+						+ "where lb.business_id = :businessId "
+						+ "and p.patent_appl_country = 'CN' "
+						+ "group by ld.department_name";
+		Query q = session.createQuery(queryStr);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		log.info(q.list().isEmpty());
+		return q.list();
+	}
+	
+	//預設：各科系在美國的專利申請數量
+	@Override
+	public List<Analysis> countUSEachDepartmentTotal(String businessId) {
+		log.info("各科系在美國的專利申請數量");
+		Session session = getSession();
+		String queryStr = "SELECT ld.department_name, count(distinct ld.department_id) "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listDepartment as ld "
+						+ "where lb.business_id = :businessId "
+						+ "and p.patent_appl_country = 'US' "
+						+ "group by ld.department_name";
+		Query q = session.createQuery(queryStr);
+		
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		log.info(q.list().isEmpty());
+		return q.list();
+	}
+
+	//各科系在特定區間的專利申請數量
+	@Override
+	public List<Analysis> countEachDepartment(String businessId, Long beginDate, Long endDate) {
+		log.info("各科系在特定區間的專利申請數量");
+		Session session = getSession();
+		String queryStr = "SELECT ld.department_name, count(distinct ld.department_id) "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listDepartment as ld "
+						+ "where lb.business_id = :businessId "
+						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "group by ld.department_name";
+		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info(beginDateFormat);
+		log.info(endDateFormat);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		log.info(q.list().isEmpty());
+		return q.list();
+	}
+	
+	//各科系特定區間在臺灣的專利申請數量
+	@Override
+	public List<Analysis> countTWEachDepartment(String businessId, Long beginDate, Long endDate) {
+		log.info("各科系在臺灣的專利申請數量");
+		Session session = getSession();
+		String queryStr = "SELECT ld.department_name, count(distinct ld.department_id) "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listDepartment as ld "
+						+ "where lb.business_id = :businessId "
+						+ "and p.patent_appl_country = 'TW' "
+						+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "group by ld.department_name";
+		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info(beginDateFormat);
+		log.info(endDateFormat);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		log.info(q.list().isEmpty());
+		return q.list();
+	}
+	//各科系特定區間在中國的專利申請數量
+	@Override
+	public List<Analysis> countCNEachDepartment(String businessId, Long beginDate, Long endDate) {
+		log.info("各科系在中國的專利申請數量");
+		Session session = getSession();
+		String queryStr = "SELECT ld.department_name, count(distinct ld.department_id) "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listDepartment as ld "
+						+ "where lb.business_id = :businessId "
+						+ "and p.patent_appl_country = 'CN' "
+						+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "group by ld.department_name";
+		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info(beginDateFormat);
+		log.info(endDateFormat);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		log.info(q.list().isEmpty());
+		return q.list();
+	}
+	
+	//各科系特定區間在美國的專利申請數量
+	@Override
+	public List<Analysis> countUSEachDepartment(String businessId, Long beginDate, Long endDate) {
+		log.info("各科系在美國的專利申請數量");
+		Session session = getSession();
+		String queryStr = "SELECT ld.department_name, count(distinct ld.department_id) "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listDepartment as ld "
+						+ "where lb.business_id = :businessId "
+						+ "and p.patent_appl_country = 'TW' "
+						+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "group by ld.department_name";
+		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info(beginDateFormat);
+		log.info(endDateFormat);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		log.info(q.list().isEmpty());
+		return q.list();
+	}
+	
+	//該科系該國家在該年度的專利-尚未啟用
+	public List<Analysis> getDepartmentPatent(String businessId, String departmentId){
+		log.info("該科系該國家在該年度的專利");
+		Session session = getSession();
+		String queryStr = "SELECT ld.department_name, distinct ld.department_id, p.patent_id, p.patent_appl_country, patent_appl_no "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listDepartment as ld "
+						+ "where lb.business_id = :businessId "
+						+ "and d.department_name = :departmentId"
+						+ "group by p.patent_id";
+		Query q = session.createQuery(queryStr);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		if (!StringUtils.isNULL(departmentId)) {
+			q.setParameter("departmentId", departmentId);
+		}
+		log.info(q.list().isEmpty());
+		return q.list();
+	}
+	
+	
 	public List<Analysis> testPatent(String businessId) {
 		Session session = getSession();
 		String queryStr = "SELECT date_format(p.patent_appl_date, '%Y'),count(distinct p.patent_id)"
 				+ "FROM Patent as p " + "JOIN p.listBusiness as lb " + "WHERE lb.business_id = :businessId "
-				+ "and p.patent_appl_no Not like '%@%' " + "GROUP BY date_format(patent_appl_date, '%Y')";
+				+ "and p.patent_appl_no Not like '%@%' " + "GROUP BY date_format(p.patent_appl_date, '%Y')";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
