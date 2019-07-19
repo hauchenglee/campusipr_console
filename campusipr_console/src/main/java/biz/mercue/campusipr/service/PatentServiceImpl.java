@@ -356,100 +356,95 @@ public class PatentServiceImpl implements PatentService {
 
 	@Override
 	public int syncPatentsByApplicant(List<Patent> list, String adminId, String businessId, String ip) {
-	          int taskResult= -1;
-	          Business ownBusiness = businessDao.getById(businessId);
-	          List<String> englishNames = new ArrayList<>();
-	          if (!StringUtils.isNULL(ownBusiness.getBusiness_name_en())) {
-	        	  englishNames.add(ownBusiness.getBusiness_name_en());
-	          }
-	          if (!StringUtils.isNULL(ownBusiness.getBusiness_alias_en())) {
-	        	  String[] itemsEn = ownBusiness.getBusiness_alias_en().split(",");
-	        	  for (String item:itemsEn) {
-		              englishNames.add(item);
-		          }
-	          }
-	                  
-	          List<String> chineseNames = new ArrayList<>();
-	          if (!StringUtils.isNULL(ownBusiness.getBusiness_name())) {
-	        	  chineseNames.add(ownBusiness.getBusiness_name());
-	          }
-	          if (!StringUtils.isNULL(ownBusiness.getBusiness_alias())) {
-		          String[] itemsCh = ownBusiness.getBusiness_alias().split(",");
-		          for (String item:itemsCh) {
-		               chineseNames.add(item);
-		          }
-	          }
-	                  
-	          List<String> dupucateStr = new ArrayList<>();
-	          if (!englishNames.isEmpty()) {
-	              List<Patent> addlist = ServiceUSPatent.getPatentRightByAssignee(englishNames, dupucateStr);
-	              list.addAll(addlist);
-	              addlist = ServiceTaiwanPatent.getPatentRightByAssignee(englishNames, dupucateStr);
-	              list.addAll(addlist);
-	          } 
-	          if (!chineseNames.isEmpty()) {
-	             List<Patent> addlist = ServiceTaiwanPatent.getPatentRightByAssignee(chineseNames, dupucateStr);
-	             list.addAll(addlist);
-	             addlist = ServiceChinaPatent.getPatentRightByAssignee(chineseNames, dupucateStr);
-	             list.addAll(addlist);
-	          }
-	          //02/23更新停止同步api狀態資料
+		int taskResult = -1;
+		Business ownBusiness = businessDao.getById(businessId);
+		List<String> englishNames = new ArrayList<>();
+		if (!StringUtils.isNULL(ownBusiness.getBusiness_name_en())) {
+			englishNames.add(ownBusiness.getBusiness_name_en());
+		}
+		if (!StringUtils.isNULL(ownBusiness.getBusiness_alias_en())) {
+			String[] itemsEn = ownBusiness.getBusiness_alias_en().split(",");
+			for (String item : itemsEn) {
+				englishNames.add(item);
+			}
+		}
+
+		List<String> chineseNames = new ArrayList<>();
+		if (!StringUtils.isNULL(ownBusiness.getBusiness_name())) {
+			chineseNames.add(ownBusiness.getBusiness_name());
+		}
+		if (!StringUtils.isNULL(ownBusiness.getBusiness_alias())) {
+			String[] itemsCh = ownBusiness.getBusiness_alias().split(",");
+			for (String item : itemsCh) {
+				chineseNames.add(item);
+			}
+		}
+
+		List<String> dupucateStr = new ArrayList<>();
+		if (!englishNames.isEmpty()) {
+			List<Patent> addlist = ServiceUSPatent.getPatentRightByAssignee(englishNames, dupucateStr);
+			list.addAll(addlist);
+			addlist = ServiceTaiwanPatent.getPatentRightByAssignee(englishNames, dupucateStr);
+			list.addAll(addlist);
+		}
+		if (!chineseNames.isEmpty()) {
+			List<Patent> addlist = ServiceTaiwanPatent.getPatentRightByAssignee(chineseNames, dupucateStr);
+			list.addAll(addlist);
+			addlist = ServiceChinaPatent.getPatentRightByAssignee(chineseNames, dupucateStr);
+			list.addAll(addlist);
+		}
+		// 02/23更新停止同步api狀態資料
 //	  		  ServiceStatusPatent.syncListPatentStatus(list);
-	          
-	          log.info("start sync");
-	        //check exit patent and sync
-	          List<Patent> listSyncPatent = patentDao.getByNotSyncPatent(businessId);
-	          log.info(listSyncPatent.get(listSyncPatent.size()-1).getPatent_appl_no());
-	          for (Patent syncPatent:listSyncPatent) {
-	        	  log.info("next_patent:"+syncPatent.getPatent_appl_no());
-	        	  if (!dupucateStr.contains(syncPatent.getPatent_appl_no())) {
-	        		  	log.info("no_duplicate_next_patent:"+syncPatent.getPatent_appl_no());
-	        		  	Patent patent = new Patent();
-	        		  	patent.setPatent_appl_no(syncPatent.getPatent_appl_no());
-	        		  	patent.setPatent_appl_country(syncPatent.getPatent_appl_country());
-	        		  	if ((patent.getPatent_appl_no().length() == 8 ||
-	        		  			patent.getPatent_appl_no().length() == 9) && 
-	        		  			Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country())) {
-			      	         ServiceTaiwanPatent.getPatentRightByApplNo(patent);
-			      	    }else if (patent.getPatent_appl_no().length() == 8 && 
-			      	             Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
-			      	         ServiceUSPatent.getPatentRightByapplNo(patent);
-			      	    }else {
-			      	         ServiceChinaPatent.getPatentRightByApplicantNo(patent);
-			      	    }
-	        		  	log.info("add patent no:"+patent.getPatent_appl_no());
-	        		  	list.add(patent);
-	        		  	dupucateStr.add(patent.getPatent_appl_no());
-	        	  }
-	          }
-	          
-	          log.info("update to db");
-	          
-	          for (Patent patent:list) {
-	        	   syncPatentStatus(patent);
-	               patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
-	               patent.setAdmin(adminDao.getById(adminId));
-	               patent.setBusiness(ownBusiness);
-	               patent.setSync_date(DateUtils.getDayStart(new Date()));
-	               if(!StringUtils.isNULL(patent.getPatent_name()) || !StringUtils.isNULL(patent.getPatent_name_en())) {
-	                   String applNo =  patent.getPatent_appl_no();
-	                   if (!StringUtils.isNULL(applNo)) {
-	                       Patent appNoPatent = patentDao.getByApplNo(applNo);
-	                       if(appNoPatent==null) {
-	                       	   this.addPatent(patent);
-	                           taskResult = Constants.INT_SUCCESS;
-	                       } else {
-	                           patent.setComparePatent(appNoPatent);
-	                           taskResult = updatePatent(patent, null);
-	                       }
-	                   }
-	               } else {
-	                   
-	                   taskResult = Constants.INT_CANNOT_FIND_DATA;
-	               }
-	           }
-	          
-	          return taskResult;
+
+		log.info("start sync");
+		// check exit patent and sync
+		List<Patent> listSyncPatent = patentDao.getByNotSyncPatent(businessId);
+		log.info(listSyncPatent.get(listSyncPatent.size() - 1).getPatent_appl_no());
+		for (Patent syncPatent : listSyncPatent) {
+			log.info("next_patent:" + syncPatent.getPatent_appl_no());
+			if (!dupucateStr.contains(syncPatent.getPatent_appl_no())) {
+				log.info("no_duplicate_next_patent:" + syncPatent.getPatent_appl_no());
+				Patent patent = new Patent();
+				patent.setPatent_appl_no(syncPatent.getPatent_appl_no());
+				patent.setPatent_appl_country(syncPatent.getPatent_appl_country());
+				if ((patent.getPatent_appl_no().length() == 8 || patent.getPatent_appl_no().length() == 9)
+						&& Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country())) {
+					ServiceTaiwanPatent.getPatentRightByApplNo(patent);
+				} else if (patent.getPatent_appl_no().length() == 8
+						&& Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
+					ServiceUSPatent.getPatentRightByapplNo(patent);
+				} else {
+					ServiceChinaPatent.getPatentRightByApplicantNo(patent);
+				}
+				log.info("add patent no:" + patent.getPatent_appl_no());
+				list.add(patent);
+				dupucateStr.add(patent.getPatent_appl_no());
+			}
+		}
+		log.info("update to db");
+		for (Patent patent : list) {
+			syncPatentStatus(patent);
+			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
+			patent.setAdmin(adminDao.getById(adminId));
+			patent.setBusiness(ownBusiness);
+			patent.setSync_date(DateUtils.getDayStart(new Date()));
+			if (!StringUtils.isNULL(patent.getPatent_name()) || !StringUtils.isNULL(patent.getPatent_name_en())) {
+				String applNo = patent.getPatent_appl_no();
+				if (!StringUtils.isNULL(applNo)) {
+					Patent appNoPatent = patentDao.getByApplNo(applNo);
+					if (appNoPatent == null) {
+						this.addPatent(patent);
+						taskResult = Constants.INT_SUCCESS;
+					} else {
+						patent.setComparePatent(appNoPatent);
+						taskResult = updatePatent(patent, null);
+					}
+				}
+			} else {
+				taskResult = Constants.INT_CANNOT_FIND_DATA;
+			}
+		}
+		return taskResult;
 	}
 
 	@Override
