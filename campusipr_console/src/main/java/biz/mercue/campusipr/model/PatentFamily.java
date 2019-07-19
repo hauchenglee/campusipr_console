@@ -30,7 +30,7 @@ public class PatentFamily extends BaseBean{
 	private String country_list;
 	
 	@JsonView({View.PatentFamily.class})
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToMany(cascade = CascadeType.DETACH, fetch = FetchType.LAZY)
 	@JoinTable(name = "patent_family",
 			joinColumns = { @JoinColumn(name = "family_id") },
 			inverseJoinColumns = { @JoinColumn(name = "patent_id") })

@@ -486,12 +486,20 @@ public class PatentServiceImpl implements PatentService {
 
 		if (Constants.APPL_COUNTRY_CN.equals(patent.getPatent_appl_country())) {
 			String appl_cn_onlyNo = "";
+			String appl_cn_withoutDot = "";
 			int indexOfDot = originApplNo.indexOf(".");
 
 			if (indexOfDot != -1) {
-				appl_cn_onlyNo = originApplNo.substring(2, indexOfDot);
+				appl_cn_withoutDot = originApplNo.substring(2, indexOfDot);
 			} else {
-				appl_cn_onlyNo = originApplNo.substring(2, originApplNo.length());
+				appl_cn_withoutDot = originApplNo.substring(2);
+			}
+
+			int indexOfU = appl_cn_withoutDot.indexOf("U");
+			if (indexOfU != -1) {
+				appl_cn_onlyNo = appl_cn_withoutDot.substring(0, indexOfU);
+			} else {
+				appl_cn_onlyNo = appl_cn_withoutDot;
 			}
 
 			String appl_indexOf0to4 = "";
@@ -505,16 +513,16 @@ public class PatentServiceImpl implements PatentService {
 			
 			
 			if (appl_cn_onlyNo.length() == 12) {
-				changeApplNo = "CN" + appl_cn_onlyNo;
+				changeApplNo = "CN" + appl_cn_onlyNo; // 不變
 			}
 			if (appl_cn_onlyNo.length() == 11) {
-				changeApplNo = "CN" + appl_indexOf0to4 + "0" + appl_indexOf5toEnd;
+				changeApplNo = "CN" + appl_indexOf0to4 + "0" + appl_indexOf5toEnd; // CN + 西元年 + 補0 + 後面數字
 			}
 			if (appl_cn_onlyNo.length() == 10) {
-				changeApplNo = "CN" + appl_indexOf0to4 + "00" + appl_indexOf5toEnd;
+				changeApplNo = "CN" + appl_indexOf0to4 + "00" + appl_indexOf5toEnd; // CN + 西元年 + 補00 + 後面數字
 			}
 			if (appl_cn_onlyNo.length() == 8) {
-				changeApplNo = "CN" + appl_cn_onlyNo;
+				changeApplNo = "CN" + appl_cn_onlyNo; // 不變
 			}
 
 			patent.setPatent_appl_no(changeApplNo);
