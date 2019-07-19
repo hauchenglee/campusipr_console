@@ -432,14 +432,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		log.info("各個國家在公告狀態的專利總數");
 		Session session = getSession();
 		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
-				+ "FROM Patent as p " 
-				+ "JOIN p.listBusiness as lb "
-				+ "JOIN p.listPatentStatus as lps "
-				+ "JOIN p.listPatentStatus as ls"
-				+ "JOIN ls.primaryKey.status as s "
-				+ "where lb.business_id = :businessId "
-				+ "and s.status_desc = :statusDesc "
-				+ "group by p.patent_appl_country";
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "JOIN p.listPatentStatus as lps "
+						+ "JOIN p.listPatentStatus as ls"
+						+ "JOIN ls.primaryKey.status as s "
+						+ "where lb.business_id = :businessId "
+						+ "and s.status_desc = :statusDesc "
+						+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
 		String statusDesc = "公告";
 		q.setParameter("statusDesc", statusDesc);
