@@ -383,7 +383,11 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryApplStatusTotal(String businessId) {
 		log.info("各個國家在申請狀態的專利總數");
 		Session session = getSession();
-		String queryStr = "";
+		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no ) "
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "where lb.business_id = :businessId "
+						+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
