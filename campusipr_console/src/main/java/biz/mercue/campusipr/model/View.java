@@ -34,7 +34,11 @@ public class View {
 	public interface PatentIdApplNo extends Public {}
 
 	public interface PatentHistoryExcel extends Public {}
-	
+
+	public interface Technology extends Public {}
+	public interface TechnologyList extends Technology {}
+	public interface TechnologyDetail extends Technology {}
+
 	public interface Analysis extends Public {}
 
 }
