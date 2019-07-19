@@ -55,19 +55,20 @@ public class MessageDaoImpl extends AbstractDao<String,  Message> implements Mes
 
 	@Override
 	public List<Message> getMessagesList(String senderId, String receiverId) {
+		Date now = new Date();
 		Criteria criteria = createEntityCriteria();
-		criteria.add(Restrictions.lt("message_date", new Date()));
+		criteria.add(Restrictions.lt("message_date", now.getTime()));
 		criteria.add(Restrictions.or(
 				Restrictions.and(Restrictions.eq("sender_id", senderId), Restrictions.eq("receiver_id", receiverId)),
 				Restrictions.and(Restrictions.eq("receiver_id", senderId), Restrictions.eq("sender_id", receiverId))));
-		criteria.addOrder(Order.asc("message_date"));
+		criteria.addOrder(Order.desc("message_date"));
 		criteria.setMaxResults(10);
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		return criteria.list();
 	}
 
 	@Override
-	public List<Message> getMessagesBeforeTime(String senderId, String receiverId, Date timeStamp) {
+	public List<Message> getMessagesBeforeTime(String senderId, String receiverId, long timeStamp) {
 		Criteria criteria =  createEntityCriteria();
 		criteria.add(Restrictions.lt("message_date", timeStamp));
 		criteria.add(Restrictions.or(
@@ -80,7 +81,7 @@ public class MessageDaoImpl extends AbstractDao<String,  Message> implements Mes
 	}
 
 	@Override
-	public List<Message> getMessagesBeforeAndEqualTime(String senderId, String receiverId, Date timeStamp) {
+	public List<Message> getMessagesBeforeAndEqualTime(String senderId, String receiverId, long timeStamp) {
 		Criteria criteria =  createEntityCriteria();
 		criteria.add(Restrictions.le("message_date", timeStamp));
 		criteria.add(Restrictions.or(
@@ -93,7 +94,7 @@ public class MessageDaoImpl extends AbstractDao<String,  Message> implements Mes
 	}
 
 	@Override
-	public List<Message> getMessagesAfterTime(String adminId,String targetId, Date time) {
+	public List<Message> getMessagesAfterTime(String adminId,String targetId, long time) {
 		Criteria criteria =  createEntityCriteria();
 		criteria.add(Restrictions.gt("message_date", time));
 		criteria.add(Restrictions.or(

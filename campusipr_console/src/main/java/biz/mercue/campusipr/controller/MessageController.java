@@ -68,15 +68,15 @@ public class MessageController {
     @RequestMapping(value = "/api/getmessagelist", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
     @ResponseBody
     public String getMessageList(HttpServletRequest request, @RequestBody String receiveJSONString) {
-        log.info("/api/getmessagelist");
+//        log.info("/api/getmessagelist");
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
         if (adminToken != null) {
             JSONObject jsonObject = new JSONObject(receiveJSONString);
             String senderId = jsonObject.optString("sender_id");
             String receiverId = jsonObject.optString("receiver_id");
-           List<Message> messageList = messageService.getMessagesList(senderId, receiverId);
-           responseBody.setCode(Constants.INT_SUCCESS);
+            List<Message> messageList = messageService.getMessagesList(senderId, receiverId);
+            responseBody.setCode(Constants.INT_SUCCESS);
             responseBody.setList(messageList);
             responseBody.setTotal_count(messageList.size());
         } else {
@@ -88,7 +88,7 @@ public class MessageController {
     @RequestMapping(value = "/api/getpreviousmessage", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
     @ResponseBody
     public String getPreviousMessageList(HttpServletRequest request, @RequestBody String receiveJSONString) {
-        log.info("/api/getpreviousmessage");
+//        log.info("/api/getpreviousmessage");
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
         if (adminToken != null) {
@@ -98,7 +98,7 @@ public class MessageController {
             long lastTimestamp = jsonObject.getLong("startTimestamp");
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(lastTimestamp);
-            List<Message> messageList = messageService.getMessagesBeforeTime(senderId, receiverId, calendar.getTime());
+            List<Message> messageList = messageService.getMessagesBeforeTime(senderId, receiverId, lastTimestamp);
             responseBody.setCode(Constants.INT_SUCCESS);
             responseBody.setList(messageList);
             responseBody.setTotal_count(messageList.size());
@@ -111,7 +111,7 @@ public class MessageController {
     @RequestMapping(value = "/api/getlastestmessage", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
     @ResponseBody
     public String getLastestMessage(HttpServletRequest request, @RequestBody String receiveJSONString) {
-        log.info("/api/getlastestmessage");
+//        log.info("/api/getlastestmessage");
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
         if (tokenBean != null) {
@@ -119,9 +119,7 @@ public class MessageController {
             String senderId = jsonObject.optString("sender_id");
             String receiverId = jsonObject.optString("receiver_id");
             long lastTimestamp = jsonObject.getLong("lastTimestamp");
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(lastTimestamp);
-            List<Message> messageList = messageService.getMessagesAfterTime(senderId, receiverId, calendar.getTime());
+            List<Message> messageList = messageService.getMessagesAfterTime(senderId, receiverId, lastTimestamp);
             responseBody.setCode(Constants.INT_SUCCESS);
             responseBody.setList(messageList);
             responseBody.setTotal_count(messageList.size());
@@ -141,10 +139,8 @@ public class MessageController {
             JSONObject jsonObject = new JSONObject(receiveJSONString);
             String senderId = jsonObject.optString("sender_id");
             String receiverId = jsonObject.optString("receiver_id");
-            long lastTimestamp = jsonObject.getLong("startTimestamp");
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(lastTimestamp);
-            List<Message> messageList = messageService.getMessagesBeforeAndEqualTime(senderId, receiverId, calendar.getTime());
+            long startTimestamp = jsonObject.getLong("startTimestamp");
+            List<Message> messageList = messageService.getMessagesBeforeAndEqualTime(senderId, receiverId, startTimestamp);
             responseBody.setCode(Constants.INT_SUCCESS);
             responseBody.setList(messageList);
             responseBody.setTotal_count(messageList.size());
@@ -177,7 +173,7 @@ public class MessageController {
     @RequestMapping(value = "/api/getchatterlist", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
     @ResponseBody
     public String getChatterList(HttpServletRequest request) {
-        log.info("/api/getchatterlist");
+//        log.info("/api/getchatterlist");
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
         if (adminToken != null) {
@@ -194,7 +190,7 @@ public class MessageController {
     @RequestMapping(value = "/api/readmessage", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
     @ResponseBody
     public String readMessage(HttpServletRequest request, @RequestBody String receiveJSONString) {
-        log.info("/api/readmessage");
+//        log.info("/api/readmessage");
         StringResponseBody responseBody  = new StringResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
         if (adminToken != null) {

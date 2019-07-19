@@ -66,8 +66,7 @@ public class Message extends BaseBean{
 	private String attachment_thumbnail_url;
 
 	@JsonView(View.Message.class)
-	@Temporal(TemporalType.TIMESTAMP)
-	private Date message_date;
+	private Long message_date;
 
 	@JsonView(View.Message.class)
 	private boolean is_read;
@@ -84,9 +83,12 @@ public class Message extends BaseBean{
 		return message_text;
 	}
 
-
-	public Date getMessage_date() {
+	public Long getMessage_date() {
 		return message_date;
+	}
+
+	public void setMessage_date(Long message_date) {
+		this.message_date = message_date;
 	}
 
 	public void setMessage_id(String message_id) {
@@ -101,14 +103,6 @@ public class Message extends BaseBean{
 		this.message_text = message_text;
 	}
 
-
-
-	public void setMessage_date(Date message_date) {
-		this.message_date = message_date;
-	}
-
-
-
 	public String getAttachment_url() {
 		return attachment_url;
 	}
@@ -116,9 +110,6 @@ public class Message extends BaseBean{
 	public void setAttachment_url(String attachment_url) {
 		this.attachment_url = attachment_url;
 	}
-
-
-
 
 	public String getAttachment_thumbnail_url() {
 		return attachment_thumbnail_url;

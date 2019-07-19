@@ -14,11 +14,11 @@ public interface MessageDao {
 
 	List<Message> getMessagesList(String senderId, String receiverId);
 
-	List<Message> getMessagesBeforeTime(String senderId, String receiverId, Date timeStamp);
+	List<Message> getMessagesBeforeTime(String senderId, String receiverId, long timeStamp);
 
-	List<Message> getMessagesBeforeAndEqualTime(String senderId, String receiverId, Date timeStamp);
+	List<Message> getMessagesBeforeAndEqualTime(String senderId, String receiverId, long timeStamp);
 
-	List<Message> getMessagesAfterTime(String senderId, String receiverId, Date timeStamp);
+	List<Message> getMessagesAfterTime(String senderId, String receiverId, long timeStamp);
 
 	List<Message> getAdminMessages(String adminId,String targetId, int page, int pageSize);
 
