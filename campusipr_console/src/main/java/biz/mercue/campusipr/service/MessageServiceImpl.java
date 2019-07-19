@@ -40,7 +40,8 @@ public class MessageServiceImpl implements MessageService{
 	public void addMessage(Message message) {
 		try {
 			message.setMessage_id(KeyGeneratorUtils.generateRandomString());
-			message.setMessage_date(new Date());
+			Date now = new Date();
+			message.setMessage_date(now.getTime());
 			mDao.addMessage(message);
 		} catch (Exception e) {
 			log.error(e.getMessage());
@@ -57,21 +58,23 @@ public class MessageServiceImpl implements MessageService{
 
 	@Override
 	public List<Message> getMessagesList(String senderId, String receiverId) {
-		return mDao.getMessagesList(senderId, receiverId);
+		List<Message> messageList = mDao.getMessagesList(senderId, receiverId);
+		Collections.reverse(messageList);
+		return messageList;
 	}
 
 	@Override
-	public List<Message> getMessagesBeforeTime(String senderId, String receiverId, Date timeStamp) {
+	public List<Message> getMessagesBeforeTime(String senderId, String receiverId, long timeStamp) {
 		return mDao.getMessagesBeforeTime(senderId, receiverId, timeStamp);
 	}
 
 	@Override
-	public List<Message> getMessagesBeforeAndEqualTime(String senderId, String receiverId, Date timeStamp) {
+	public List<Message> getMessagesBeforeAndEqualTime(String senderId, String receiverId, long timeStamp) {
 		return mDao.getMessagesBeforeAndEqualTime(senderId, receiverId, timeStamp);
 	}
 
 	@Override
-	public List<Message> getMessagesAfterTime(String senderId, String receiverId, Date timeStamp) {
+	public List<Message> getMessagesAfterTime(String senderId, String receiverId, long timeStamp) {
 		return mDao.getMessagesAfterTime(senderId, receiverId, timeStamp);
 	}
 
@@ -94,14 +97,14 @@ public class MessageServiceImpl implements MessageService{
 		try {
 			List<Admin> adminList;
 			if (adminToken.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-				log.info("user is platform: return all school member");
+//				log.info("user is platform: return all school member");
 				adminList = adminDao.getSchoolAdminList();
 				for (Admin school : adminList) {
 					Message dbMessage = mDao.getNewestMessage(school.getAdmin_id());
 					school.setMessage(dbMessage);
 				}
 			} else {
-				log.info("user is school: return all platform member");
+//				log.info("user is school: return all platform member");
 				adminList = adminDao.getPlatformAdminList();
 				for (Admin platform : adminList) {
 					Message dbMessage = mDao.getNewestMessage(platform.getAdmin_id());
