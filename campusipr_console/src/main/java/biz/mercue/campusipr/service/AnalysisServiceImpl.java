@@ -89,7 +89,6 @@ public class AnalysisServiceImpl implements AnalysisService {
 				yearsList[i][0]= 0;
 				log.info("yearsList: " + yearsList[i][1] + ", 數量: " + yearsList[i][0]);
 			}
-
 //			log.info(list[0][1]);
 //			log.info(list[analAllYearsList.size()-1][1]);
 			
