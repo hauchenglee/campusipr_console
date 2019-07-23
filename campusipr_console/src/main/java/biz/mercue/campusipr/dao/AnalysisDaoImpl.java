@@ -53,7 +53,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "WHERE p.patent_appl_no Not like '%@%' "
 						+ "and patent_appl_date IS NOT NULL " 
 						+ "and lb.business_id = :businessId "
-						+ "GROUP BY date_format(patent_appl_date, '%Y') ";
+						+ "GROUP BY date_format(patent_appl_date, '%Y') "
+						+ "Order by date_format(patent_appl_date, '%Y') asc";
 
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
@@ -377,7 +378,6 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
-	// 下方皆未測試
 	// 預設：各個國家在申請狀態的專利總數
 	@Override
 	public List<Analysis> countCountryApplStatusTotal(String businessId) {
@@ -386,8 +386,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
-						+ "JOIN p.listPatentStatus as lps "
-						+ "JOIN p.listPatentStatus as ls"
+						+ "JOIN p.listPatentStatus as ls "
 						+ "JOIN ls.primaryKey.status as s "
 						+ "where lb.business_id = :businessId "
 						+ "and s.status_desc = :statusDesc "
@@ -410,18 +409,17 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
 				+ "FROM Patent as p " 
 				+ "JOIN p.listBusiness as lb "
-				+ "JOIN p.listPatentStatus as lps "
-				+ "JOIN p.listPatentStatus as ls"
+				+ "JOIN p.listPatentStatus as ls "
 				+ "JOIN ls.primaryKey.status as s "
 				+ "where lb.business_id = :businessId "
 				+ "and s.status_desc = :statusDesc "
 				+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
 		String statusDesc = "公開";
-		q.setParameter("statusDesc", statusDesc);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
+		q.setParameter("statusDesc", statusDesc);
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
@@ -434,8 +432,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
-						+ "JOIN p.listPatentStatus as lps "
-						+ "JOIN p.listPatentStatus as ls"
+						+ "JOIN p.listPatentStatus as ls "
 						+ "JOIN ls.primaryKey.status as s "
 						+ "where lb.business_id = :businessId "
 						+ "and s.status_desc = :statusDesc "
@@ -452,7 +449,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 
 	// 預設：單一國家的各年份總數(國家可選)
 	@Override
-	public List<Analysis> countCountryByYearTotal(String businessId, List<String> coutryIdList) {
+	public List<Analysis> countCountryByYearTotal(String businessId, String countryId) {
 		log.info("單一國家的各年份總數(國家可選)");
 		Session session = getSession();
 		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), date_format(patent_appl_date, '%Y') "
@@ -465,8 +462,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
+		q.setParameter("countryId", countryId);
 		log.info(q.list().isEmpty());
-		q.setParameter("countryId", coutryIdList);
 		return q.list();
 	}
 
@@ -507,11 +504,11 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
 				+ "FROM Patent as p " 
 				+ "JOIN p.listBusiness as lb "
-				+ "JOIN p.listPatentStatus as lps "
-				+ "JOIN Status as s "
+				+ "JOIN p.listPatentStatus as ls "
+				+ "JOIN ls.primaryKey.status as s "
 				+ "where lb.business_id = :businessId "
+				+ "and s.status_desc = :statusDesc "
 				+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
-				+ "and s.status_desc = '申請' "
 				+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -521,7 +518,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String endDateFormat = sdf.format(ed);
 		log.info(beginDateFormat);
 		log.info(endDateFormat);
-
+		
+		String statusDesc = "申請";
+		q.setParameter("statusDesc", statusDesc);
 		q.setParameter("beginDate", beginDateFormat);
 		q.setParameter("endDate", endDateFormat);
 		if (!StringUtils.isNULL(businessId)) {
@@ -539,11 +538,11 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
 				+ "FROM Patent as p " 
 				+ "JOIN p.listBusiness as lb "
-				+ "JOIN p.listPatentStatus as lps "
-				+ "JOIN Status as s "
+				+ "JOIN p.listPatentStatus as ls "
+				+ "JOIN ls.primaryKey.status as s "
 				+ "where lb.business_id = :businessId "
+				+ "and s.status_desc = :statusDesc "
 				+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
-				+ "and s.status_desc = '公開' "
 				+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -553,7 +552,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String endDateFormat = sdf.format(ed);
 		log.info(beginDateFormat);
 		log.info(endDateFormat);
-
+		
+		String statusDesc = "公開";
+		q.setParameter("statusDesc", statusDesc);
 		q.setParameter("beginDate", beginDateFormat);
 		q.setParameter("endDate", endDateFormat);
 		if (!StringUtils.isNULL(businessId)) {
@@ -569,14 +570,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		log.info("各個國家在特定日期區間的公各狀態專利總數");
 		Session session = getSession();
 		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
-						+ "FROM Patent as p " 
-						+ "JOIN p.listBusiness as lb "
-						+ "JOIN p.listPatentStatus as lps "
-						+ "JOIN Status as s "
-						+ "where lb.business_id = :businessId "
-						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
-						+ "and s.status_desc = '公告' "
-						+ "group by p.patent_appl_country";
+				+ "FROM Patent as p " 
+				+ "JOIN p.listBusiness as lb "
+				+ "JOIN p.listPatentStatus as ls "
+				+ "JOIN ls.primaryKey.status as s "
+				+ "where lb.business_id = :businessId "
+				+ "and s.status_desc = :statusDesc "
+				+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+				+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		Timestamp bd = new Timestamp(beginDate);
@@ -585,7 +586,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String endDateFormat = sdf.format(ed);
 		log.info(beginDateFormat);
 		log.info(endDateFormat);
-
+		
+		String statusDesc = "公告";
+		q.setParameter("statusDesc", statusDesc);
 		q.setParameter("beginDate", beginDateFormat);
 		q.setParameter("endDate", endDateFormat);
 		if (!StringUtils.isNULL(businessId)) {
@@ -597,7 +600,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 
 	// 單一國家在特定日期區間的各年份總數(國家可選)
 	@Override
-	public List<Analysis> countCountryByYear(String businessId, Long beginDate, Long endDate) {
+	public List<Analysis> countCountryByYear(String businessId, Long beginDate, Long endDate, String countryId) {
 		log.info("單一國家的各年份總數(國家可選)");
 		Session session = getSession();
 		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), date_format(patent_appl_date, '%Y') "
@@ -618,6 +621,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 
 		q.setParameter("beginDate", beginDateFormat);
 		q.setParameter("endDate", endDateFormat);
+		q.setParameter("countryId", countryId);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}

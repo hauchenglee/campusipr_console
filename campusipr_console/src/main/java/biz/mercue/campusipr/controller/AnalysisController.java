@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.AdminToken;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
@@ -31,6 +33,7 @@ import biz.mercue.campusipr.service.AnalysisService;
 import biz.mercue.campusipr.service.PermissionService;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.ExcelUtils;
+import biz.mercue.campusipr.util.JSONResponseBody;
 import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.ListResponseBody;
@@ -57,56 +60,59 @@ public class AnalysisController {
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
 		log.info("analysisTest ");
-		ListResponseBody responseBody  = new ListResponseBody();
-		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		String businessId = jsonObject.optString("business_id");
-		Long beginTime = jsonObject.getLong("beginTime");
-		Long endTime = jsonObject.getLong("endTime");
-		ListQueryForm form = analysisService.testAnalysis(businessId);
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setListQuery(form); //沒顯示??
-		log.info("patentList:"+responseBody.getJacksonString(View.Patent.class));
-		return responseBody.getJacksonString(View.Patent.class);
+//		JSONObject jsonObject = new JSONObject(receiveJSONString);
+//		JSONResponseBody responseBody = new JSONResponseBody();
+//		String businessId = jsonObject.optString("business_id");
+//		Long beginTime = jsonObject.getLong("beginTime");
+//		Long endTime = jsonObject.getLong("endTime");
+//		JSONObject analyizeData = analysisService.testAnalysis(businessId);
+//		responseBody.setCode(Constants.INT_SUCCESS);
+//		responseBody.setData(analyizeData); //沒顯示??
+//		return responseBody.toString();
+		return null;
 	}
 
 	
-	//學校端 分析總覽預設畫面
-	@RequestMapping(value="/api/analysisschooloverview", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	// 學校端 分析總覽預設畫面
+	@RequestMapping(value = "/api/analysisschooloverview", method = {
+			RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String analysisSchoolOverview(HttpServletRequest request,
-			@RequestBody String receiveJSONString,
-			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysisAllpatent ");
-		log.info("order_field:"+fieldId);
-		log.info("asc:"+is_asc);
-		ListResponseBody responseBody  = new ListResponseBody();
-		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		String businessId = jsonObject.optString("business_id");
-		Long beginTime = jsonObject.getLong("beginTime");
-		Long endTime = jsonObject.getLong("endTime");
-		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		if(tokenBean!=null) {
-			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			if(tokenBean.checkPermission(permission.getPermission_id())) {
-				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					ListQueryForm form =  analysisService.analysisAll(businessId, beginTime, endTime);
-					log.info(form.getAnalDepartmentTotal());
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListQuery(form);
+	public String analysisSchoolOverview(HttpServletRequest request, @RequestBody String receiveJSONString,
+			@RequestParam(value = "order_field", required = false, defaultValue = "") String fieldId,
+			@RequestParam(value = "asc", required = false, defaultValue = "1") int is_asc) {
+		log.info("analysis All patent ");
+		log.info("order_field:" + fieldId);
+		log.info("asc:" + is_asc);
+		JSONResponseBody responseBody = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			String businessId = jsonObject.optString("business_id");
+			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if (tokenBean != null) {
+				Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT,
+						Constants.VIEW);
+				if (tokenBean.checkPermission(permission.getPermission_id())) {
+					if (tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+						responseBody.setCode(Constants.INT_NO_PERMISSION);
+					} else {
+						JSONObject analyizeData = analysisService.analysisAll(businessId);
+						responseBody.setCode(Constants.INT_SUCCESS);
+						responseBody.setData(analyizeData);
+					}
 				} else {
-					ListQueryForm form =  analysisService.analysisAll(businessId, beginTime, endTime);
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListQuery(form);
+					responseBody.setCode(Constants.INT_NO_PERMISSION);
 				}
-			}else {
-				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			} else {
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			}
-		}else {
-			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-		}
-		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
-		return responseBody.getJacksonString(View.Analysis.class);
+		} catch (Exception e) {
+            log.error("Exception :" + e.getMessage());
+            responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+        }
+		
+		return responseBody.toString();
+//		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
+//		return responseBody.getJacksonString(View.Analysis.class);
 	}
 	
 	//學校端 依年分析總覽
@@ -116,77 +122,78 @@ public class AnalysisController {
 			@RequestBody String receiveJSONString,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysispatentByYear ");
+		log.info("analysis patent ByYear ");
 		log.info("order_field:"+fieldId);
 		log.info("asc:"+is_asc);
-		ListResponseBody responseBody  = new ListResponseBody();
-		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		String businessId = jsonObject.optString("business_id");
-		Long beginTime = jsonObject.getLong("beginTime");
-		Long endTime = jsonObject.getLong("endTime");
-		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		if(tokenBean!=null) {
-			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			if(tokenBean.checkPermission(permission.getPermission_id())) {
-				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					ListQueryForm form =  analysisService.analysisByYear(businessId, beginTime, endTime);
-					log.info(form.getAnalDepartmentTotal());
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListQuery(form);
-				} else {
-					ListQueryForm form =  analysisService.analysisByYear(businessId, beginTime, endTime);
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListQuery(form);
+		JSONResponseBody responseBody  = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			String businessId = jsonObject.optString("business_id");
+			Long beginTime = jsonObject.getLong("beginTime");
+			Long endTime = jsonObject.getLong("endTime");
+			AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if(tokenBean!=null) {
+				Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+				if(tokenBean.checkPermission(permission.getPermission_id())) {
+					if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+						responseBody.setCode(Constants.INT_NO_PERMISSION);
+					} else {
+						JSONObject analyizeData = analysisService.analysisByYear(businessId, beginTime, endTime);
+						responseBody.setCode(Constants.INT_SUCCESS);
+						responseBody.setData(analyizeData);
+					}
+				}else {
+					responseBody.setCode(Constants.INT_NO_PERMISSION);
 				}
 			}else {
-				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			}
-		}else {
-			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-		}
-		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
-		return responseBody.getJacksonString(View.Analysis.class);
+		} catch (Exception e) {
+            log.error("Exception :" + e.getMessage());
+            responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+        }
+		return responseBody.toString();
 	}
 	
-	//學校端 國家分析預設畫面
-	@RequestMapping(value="/api/analysisschoolcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	// 學校端 國家分析預設畫面
+	@RequestMapping(value = "/api/analysisschoolcountry", method = {RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String analysisSchoolCountry(HttpServletRequest request,
-			@RequestBody String receiveJSONString,
-			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
-			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysisplatformcountry ");
-		log.info("order_field:"+fieldId);
-		log.info("asc:"+is_asc);
-		ListResponseBody responseBody  = new ListResponseBody();
-		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		String businessId = jsonObject.optString("business_id");
-		Long beginTime = jsonObject.getLong("beginTime");
-		Long endTime = jsonObject.getLong("endTime");
-		Object searchText = jsonObject.get("searchText");
-		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		if(tokenBean!=null) {
-			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			if(tokenBean.checkPermission(permission.getPermission_id())) {
-				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					ListQueryForm form =  analysisService.analysisAllCountry(businessId, beginTime, endTime, searchText);
-					log.info(form.getAnalDepartmentTotal());
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListCountryQuery(form);
+	public String analysisSchoolCountry(HttpServletRequest request, @RequestBody String receiveJSONString,
+			@RequestParam(value = "page", required = false, defaultValue = "1") int page,
+			@RequestParam(value = "order_field", required = false, defaultValue = "") String fieldId,
+			@RequestParam(value = "asc", required = false, defaultValue = "1") int is_asc) {
+		log.info("analysis platform country ");
+		log.info("order_field:" + fieldId);
+		log.info("asc:" + is_asc);
+		JSONResponseBody responseBody = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			String businessId = jsonObject.optString("business_id");
+			Long beginTime = jsonObject.getLong("beginTime");
+			Long endTime = jsonObject.getLong("endTime");
+			String countryId = jsonObject.optString("country_id");
+			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if (tokenBean != null) {
+				Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+				if (tokenBean.checkPermission(permission.getPermission_id())) {
+					if (tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+						responseBody.setCode(Constants.INT_NO_PERMISSION);
+					} else {
+						JSONObject analyizeData = analysisService.analysisAllCountry(businessId, beginTime, endTime, countryId);
+						responseBody.setCode(Constants.INT_SUCCESS);
+						responseBody.setData(analyizeData);
+					}
 				} else {
-					ListQueryForm form =  analysisService.analysisAllCountry(businessId, beginTime, endTime, searchText);
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListCountryQuery(form);
+					responseBody.setCode(Constants.INT_NO_PERMISSION);
 				}
-			}else {
-				responseBody.setCode(Constants.INT_NO_PERMISSION);
+			} else {
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			}
-		}else {
-			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		} catch (JSONException e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
 		}
-		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
-		return responseBody.getJacksonString(View.Analysis.class);
+		return responseBody.toString();
 	}
 
 	//學校端 國家分析依年度
@@ -197,37 +204,38 @@ public class AnalysisController {
 			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysisplatformcountry ");
+		log.info("analysis platform country ");
 		log.info("order_field:"+fieldId);
 		log.info("asc:"+is_asc);
-		ListResponseBody responseBody  = new ListResponseBody();
-		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		String businessId = jsonObject.optString("business_id");
-		Long beginTime = jsonObject.getLong("beginTime");
-		Long endTime = jsonObject.getLong("endTime");
-		Object searchText = jsonObject.get("searchText");
-		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		if(tokenBean!=null) {
-			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			if(tokenBean.checkPermission(permission.getPermission_id())) {
-				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					ListQueryForm form =  analysisService.analysisCountryByYear(businessId, beginTime, endTime, searchText);
-					log.info(form.getAnalDepartmentTotal());
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListCountryQuery(form);
-				} else {
-					ListQueryForm form =  analysisService.analysisCountryByYear(businessId, beginTime, endTime, searchText);
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListCountryQuery(form);
+		JSONResponseBody responseBody  = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			String businessId = jsonObject.optString("business_id");
+			Long beginTime = jsonObject.getLong("beginTime");
+			Long endTime = jsonObject.getLong("endTime");
+			String countryId = jsonObject.optString("country_id");
+			AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if(tokenBean!=null) {
+				Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+				if(tokenBean.checkPermission(permission.getPermission_id())) {
+					if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+						responseBody.setCode(Constants.INT_NO_PERMISSION);
+					} else {
+						JSONObject analyizeData =  analysisService.analysisCountryByYear(businessId, beginTime, endTime, countryId);
+						responseBody.setCode(Constants.INT_SUCCESS);
+						responseBody.setData(analyizeData);
+					}
+				}else {
+					responseBody.setCode(Constants.INT_NO_PERMISSION);
 				}
 			}else {
-				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			}
-		}else {
-			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		} catch (JSONException e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
 		}
-		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
-		return responseBody.getJacksonString(View.Analysis.class);
+		return responseBody.toString();
 	}
 	
 	//學校端 預設科系分析
@@ -238,36 +246,78 @@ public class AnalysisController {
 			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysisplatformcountry ");
+		log.info("analysis platform country ");
 		log.info("order_field:"+fieldId);
 		log.info("asc:"+is_asc);
-		ListResponseBody responseBody  = new ListResponseBody();
-		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		String businessId = jsonObject.optString("business_id");
-		Long beginTime = jsonObject.getLong("beginTime");
-		Long endTime = jsonObject.getLong("endTime");
-		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		if(tokenBean!=null) {
-			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			if(tokenBean.checkPermission(permission.getPermission_id())) {
-				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					ListQueryForm form =  analysisService.analysisAllDepartment(businessId, beginTime, endTime);
-					log.info(form.getAnalDepartmentTotal());
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListDepartmentQuery(form);
-				} else {
-					ListQueryForm form =  analysisService.analysisAllDepartment(businessId, beginTime, endTime);
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setListDepartmentQuery(form);
+		JSONResponseBody responseBody  = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			String businessId = jsonObject.optString("business_id");
+			Long beginTime = jsonObject.getLong("beginTime");
+			Long endTime = jsonObject.getLong("endTime");
+			AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if(tokenBean!=null) {
+				Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+				if(tokenBean.checkPermission(permission.getPermission_id())) {
+					if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+						responseBody.setCode(Constants.INT_NO_PERMISSION);
+					} else {
+						JSONObject analyizeData =  analysisService.analysisAllDepartment(businessId, beginTime, endTime);
+						responseBody.setCode(Constants.INT_SUCCESS);
+						responseBody.setData(analyizeData);
+					}
+				}else {
+					responseBody.setCode(Constants.INT_NO_PERMISSION);
 				}
 			}else {
-				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			}
-		}else {
-			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		} catch (JSONException e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
 		}
-		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
-		return responseBody.getJacksonString(View.Analysis.class);
+		return responseBody.toString();
+	}
+	
+	//學校端  科系依年度查詢
+	@RequestMapping(value="/api/analysisschooldepartmentbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String analysisSchoolDepartmentByYear(HttpServletRequest request,
+			@RequestBody String receiveJSONString,
+			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+		log.info("analysis platform country ");
+		log.info("order_field:"+fieldId);
+		log.info("asc:"+is_asc);
+		JSONResponseBody responseBody  = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			String businessId = jsonObject.optString("business_id");
+			Long beginTime = jsonObject.getLong("beginTime");
+			Long endTime = jsonObject.getLong("endTime");
+			AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if(tokenBean!=null) {
+				Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+				if(tokenBean.checkPermission(permission.getPermission_id())) {
+					if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+						responseBody.setCode(Constants.INT_NO_PERMISSION);
+					} else {
+						JSONObject analyizeData =  analysisService.analysisDepartmentByYears(businessId, beginTime, endTime);
+						responseBody.setCode(Constants.INT_SUCCESS);
+						responseBody.setData(analyizeData);
+					}
+				}else {
+					responseBody.setCode(Constants.INT_NO_PERMISSION);
+				}
+			}else {
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			}
+		} catch (JSONException e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		}
+		return responseBody.toString();
 	}
 	
 //	@RequestMapping(value="/api/exportschooltotal", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)

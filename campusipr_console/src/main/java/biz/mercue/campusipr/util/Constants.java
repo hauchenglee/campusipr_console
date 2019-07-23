@@ -76,6 +76,7 @@ public class Constants {
 	
 	public static final String  JSON_CODE = "code";
 	public static final String  JSON_MESSAGE = "message";
+	public static final String  JSON_MESSAGE_EN = "message_en";
 	public static final String  JSON_DATA = "data";
 	
 	public static final String  JSON_TOKEN = "token";

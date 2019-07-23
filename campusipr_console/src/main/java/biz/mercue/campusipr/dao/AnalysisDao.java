@@ -29,14 +29,14 @@ public interface AnalysisDao {
 	List<Analysis> countCountryApplStatusTotal(String businessId);
 	List<Analysis> countCountryNoticeStatusTotal(String businessId);
 	List<Analysis> countCountryPublishStatusTotal(String businessId);
-	List<Analysis> countCountryByYearTotal(String businessId, List<String> coutryIdList);
+	List<Analysis> countCountryByYearTotal(String businessId, String countryId);
 	
 
 	List<Analysis> countCountry(String businessId, Long beginDate, Long endDate);
 	List<Analysis> countCountryApplStatus(String businessId, Long beginDate, Long endDate);
 	List<Analysis> countCountryNoticeStatus(String businessId, Long beginDate, Long endDate);
 	List<Analysis> countCountryPublishStatus(String businessId, Long beginDate, Long endDate);
-	List<Analysis> countCountryByYear(String businessId, Long beginDate, Long endDate);
+	List<Analysis> countCountryByYear(String businessId, Long beginDate, Long endDate, String countryId);
 	List<Analysis> countEachDepartmentTotal(String businessId);
 	List<Analysis> countEachDepartment(String businessId, Long beginDate, Long endDate);
 	List<Analysis> countTWEachDepartmentTotal(String businessId);

@@ -419,27 +419,45 @@ public class ServiceChinaPatent {
 						}
 						
 						//第二種epodoc*2=original，epodoc全英文、original中文、英文加在一起的情況
-						for (int inventorCount = epodocNameEnCount; inventorCount < inventorList.getLength(); inventorCount++) {
-							Element inventor = (Element) inventorList.item(inventorCount);
-							Inventor inv = new Inventor();
-							if ("original".equals(inventor.getAttribute("data-format"))) {
-								NodeList nameEnList = inventor.getElementsByTagName("name");
-								if((inventorCount+epodocNameEnCount)<inventorList.getLength()) {
-									log.info("inventor: epodoc*2==original");
-									NodeList nameList = ((Element) inventorList.item(inventorCount+epodocNameEnCount)).getElementsByTagName("name");
-									if (!duplicateInventor.contains(nameList.item(0).getTextContent().replace(",", ""))) {
-										if (Integer.parseInt(inventor.getAttribute("sequence")) <= epodocNameEnCount) {
-											inv.setInventor_name_en(nameEnList.item(0).getTextContent().replace(",", ""));
-											inv.setInventor_name(nameList.item(0).getTextContent().replace(",", ""));
-											inv.setInventor_order(Integer.parseInt(inventor.getAttribute("sequence")));
-											listInventor.add(inv);
-											inv.setPatent(patent);
-											duplicateInventor.add(nameList.item(0).getTextContent().replace(",", ""));
+						if(epodocNameEnCount!=0) {
+							for (int inventorCount = epodocNameEnCount; inventorCount < inventorList.getLength(); inventorCount++) {
+								Element inventor = (Element) inventorList.item(inventorCount);
+								Inventor inv = new Inventor();
+								if ("original".equals(inventor.getAttribute("data-format"))) {
+									NodeList nameEnList = inventor.getElementsByTagName("name");
+									if((inventorCount+epodocNameEnCount)<inventorList.getLength()) {
+										log.info("inventor: epodoc*2==original");
+										NodeList nameList = ((Element) inventorList.item(inventorCount+epodocNameEnCount)).getElementsByTagName("name");
+										if (!duplicateInventor.contains(nameList.item(0).getTextContent().replace(",", ""))) {
+											if (Integer.parseInt(inventor.getAttribute("sequence")) <= epodocNameEnCount) {
+												inv.setInventor_name_en(nameEnList.item(0).getTextContent().replace(",", ""));
+												inv.setInventor_name(nameList.item(0).getTextContent().replace(",", ""));
+												inv.setInventor_order(Integer.parseInt(inventor.getAttribute("sequence")));
+												listInventor.add(inv);
+												inv.setPatent(patent);
+												duplicateInventor.add(nameList.item(0).getTextContent().replace(",", ""));
+											}
 										}
 									}
 								}
 							}
 						}
+						//第三種沒有epodoc
+						if(epodocNameEnCount==0) {
+							for (int inventorCount = 0; inventorCount < inventorList.getLength(); inventorCount++) {
+								Element inventor = (Element) inventorList.item(inventorCount);
+								String inventorName = null;	
+								Inventor inv = new Inventor();
+								if ("original".equals(inventor.getAttribute("data-format"))) {
+									NodeList nameList = inventor.getElementsByTagName("name");
+									inventorName = nameList.item(0).getTextContent().replace(",", "");
+									inv.setInventor_name(inventorName);
+									listInventor.add(inv);
+									inv.setPatent(patent);
+								}
+							}
+						}
+						
 						patent.setListInventor(listInventor);
 					}
 

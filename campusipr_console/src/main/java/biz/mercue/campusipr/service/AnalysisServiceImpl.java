@@ -43,7 +43,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 	// 未完成：預計以For迴圈在無專利的年份補零
 	@Override
-	public ListQueryForm analysisAll(String businessId, Long beginDate, Long endDate) {
+	public JSONObject analysisAll(String businessId) {
 		log.info("analysisAllPatent");
 		int unApplPatent;
 		int analYearsTotal;
@@ -64,14 +64,52 @@ public class AnalysisServiceImpl implements AnalysisService {
 		log.info(analDepartmentTotal);
 		log.info(analInventorToltal);
 
-		log.info("analAllYearsList: " + analAllYearsList.size());
-		ListQueryForm form = new ListQueryForm(unApplPatent, analYearsTotal, analFamilyTotal, analDepartmentTotal, analInventorToltal, analAllYearsList);
-		log.info(form);
-		return form;
+		Object list[][] = analAllYearsList.toArray(new Object[analAllYearsList.size()][0]);
+		log.info(list[0].length);
+		log.info(list.length);
+		String beginStr = list[0][1].toString();
+		String endStr = list[analAllYearsList.size()-1][1].toString();
+		int beginTime = Integer.parseInt(beginStr);
+		int endTime = Integer.parseInt(endStr);
+		int b;
+		int i = 0;
+		int j = 0 ;
+		try {
+			log.info(list[0][1]);
+			log.info(list[analAllYearsList.size()-1][1]);
+			for(i = 0; i<list.length; i++) {
+				for(j = 0; j<list[i].length; j++) {
+					log.info(list[i][j]);
+					
+				}
+			}
+			Integer[][] yearsList = new Integer[endTime-beginTime][2];
+			for (b = beginTime; beginTime < endTime; beginTime++) {
+				yearsList[i][1]= beginTime;
+				yearsList[i][0]= 0;
+				log.info("yearsList: " + yearsList[i][1] + ", 數量: " + yearsList[i][0]);
+			}
+
+//			log.info(list[0][1]);
+//			log.info(list[analAllYearsList.size()-1][1]);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		JSONObject result = new JSONObject();
+		result.put("unApplPatent",unApplPatent);
+		result.put("analYearsTotal",analYearsTotal);
+		result.put("analFamilyTotal",analFamilyTotal);
+		result.put("analDepartmentTotal",analDepartmentTotal);
+		result.put("analInventorToltal",analInventorToltal);
+		result.put("analAllYearsList",analAllYearsList);
+		
+		return result;
 	}
 
 	@Override
-	public ListQueryForm analysisByYear(String businessId, Long beginDate, Long endDate) {
+	public JSONObject analysisByYear(String businessId, Long beginDate, Long endDate) {
 		log.info("analysisPatentByYear");
 		int unApplPatent;
 		int analYearsTotal ;
@@ -88,14 +126,19 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Analysis> countPatentByYear = new ArrayList<Analysis>();
 		countPatentByYear = analysisDao.countPatentByYear(businessId, beginDate, endDate);
 		
-		log.info("countPatentByYear: " + countPatentByYear.size());
-		ListQueryForm form = new ListQueryForm(unApplPatent, analYearsTotal, analFamilyTotal, analDepartmentTotal, analInventorToltal, countPatentByYear);
+		JSONObject result = new JSONObject();
+		result.put("unApplPatent",unApplPatent);
+		result.put("analYearsTotal",analYearsTotal);
+		result.put("analFamilyTotal",analFamilyTotal);
+		result.put("analDepartmentTotal",analDepartmentTotal);
+		result.put("analInventorToltal",analInventorToltal);
+		result.put("analAllYearsList",countPatentByYear);
 		
-		return form;
+		return result;
 	}
 
 	@Override
-	public ListQueryForm analysisAllCountry(String businessId, Long beginDate, Long endDate, Object searchText) {
+	public JSONObject analysisAllCountry(String businessId, Long beginDate, Long endDate, String countryId) {
 		log.info("analysisAllCountry");
 		List<Analysis> countCountryTotal = new ArrayList<Analysis>();
 		List<Analysis> countCountryApplStatusTotal = new ArrayList<Analysis>();
@@ -103,27 +146,24 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Analysis> countCountryPublishStatusTotal= new ArrayList<Analysis>();
 		List<Analysis> countCountryByYearTotal= new ArrayList<Analysis>();
 		
-		String countryName = (String) searchText;
-		List<Country> countryList = countryDao.getListByFuzzy(countryName);
-		List<String> coutryIdList = new ArrayList<>();
-		for (Country country:countryList) {
-			if (!coutryIdList.contains(country.getCountry_id())) {
-				coutryIdList.add(country.getCountry_id());
-			}
-		}
-		
 		countCountryTotal = analysisDao.countCountryTotal(businessId);
 		countCountryApplStatusTotal = analysisDao.countCountryApplStatusTotal(businessId);
 		countCountryNoticeStatusTotal = analysisDao.countCountryNoticeStatusTotal(businessId);
 		countCountryPublishStatusTotal = analysisDao.countCountryPublishStatusTotal(businessId);
-		countCountryByYearTotal = analysisDao.countCountryByYearTotal(businessId, coutryIdList);
+		countCountryByYearTotal = analysisDao.countCountryByYearTotal(businessId, countryId);
 		
-		ListQueryForm form = new ListQueryForm(countCountryTotal, countCountryApplStatusTotal, countCountryNoticeStatusTotal, countCountryPublishStatusTotal, countCountryByYearTotal);
-		return form;
+		JSONObject result = new JSONObject();
+		result.put("countCountryTotal",countCountryTotal);
+		result.put("countCountryApplStatusTotal",countCountryApplStatusTotal);
+		result.put("countCountryNoticeStatusTotal",countCountryNoticeStatusTotal);
+		result.put("countCountryPublishStatusTotal",countCountryPublishStatusTotal);
+		result.put("countCountryByYearTotal",countCountryByYearTotal);
+		
+		return result;
 	}
 
 	@Override
-	public ListQueryForm analysisCountryByYear(String businessId, Long beginDate, Long endDate, Object searchText) {
+	public JSONObject analysisCountryByYear(String businessId, Long beginDate, Long endDate, String countryId) {
 		log.info("analysisCountryByYears");
 		List<Analysis> countCountry = new ArrayList<Analysis>();
 		List<Analysis> countCountryApplStatus = new ArrayList<Analysis>();
@@ -131,27 +171,25 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Analysis> countCountryPublishStatus= new ArrayList<Analysis>();
 		List<Analysis> countCountryByYear= new ArrayList<Analysis>();
 		
-		String countryName = (String) searchText;
-		List<Country> countryList = countryDao.getListByFuzzy(countryName);
-		List<String> coutryIdList = new ArrayList<>();
-		for (Country country:countryList) {
-			if (!coutryIdList.contains(country.getCountry_id())) {
-				coutryIdList.add(country.getCountry_id());
-			}
-		}
+		countCountry = analysisDao.countCountry(businessId, beginDate, endDate);
+		countCountryApplStatus = analysisDao.countCountryApplStatus(businessId, beginDate, endDate);
+		countCountryNoticeStatus= analysisDao.countCountryNoticeStatus(businessId, beginDate, endDate);
+		countCountryPublishStatus = analysisDao.countCountryPublishStatus(businessId, beginDate, endDate);
+		countCountryByYear = analysisDao.countCountryByYear(businessId, beginDate, endDate, countryId);
 		
-		countCountry = analysisDao.countCountryTotal(businessId);
-		countCountryApplStatus = analysisDao.countCountryApplStatusTotal(businessId);
-		countCountryNoticeStatus= analysisDao.countCountryNoticeStatusTotal(businessId);
-		countCountryPublishStatus = analysisDao.countCountryPublishStatusTotal(businessId);
-		countCountryByYear = analysisDao.countCountryByYearTotal(businessId, coutryIdList);
 		
-		ListQueryForm form = new ListQueryForm(countCountry, countCountryApplStatus, countCountryNoticeStatus, countCountryPublishStatus, countCountryByYear);
-		return form;
+		JSONObject result = new JSONObject();
+		result.put("countCountryTotal",countCountry);
+		result.put("countCountryApplStatusTotal",countCountryApplStatus);
+		result.put("countCountryNoticeStatusTotal",countCountryNoticeStatus);
+		result.put("countCountryPublishStatusTotal",countCountryPublishStatus);
+		result.put("countCountryByYearTotal",countCountryByYear);
+		
+		return result;
 	}
 
 	@Override
-	public ListQueryForm analysisAllDepartment(String businessId, Long beginDate, Long endDate) {
+	public JSONObject analysisAllDepartment(String businessId, Long beginDate, Long endDate) {
 		log.info("analysisCountryByYears");
 		List<Analysis> countEachDepartmentTotal = new ArrayList<Analysis>();
 		List<Analysis> countTWEachDepartmentTotal = new ArrayList<Analysis>();
@@ -163,13 +201,18 @@ public class AnalysisServiceImpl implements AnalysisService {
 		countCNEachDepartmentTotal = analysisDao.countCNEachDepartmentTotal(businessId);
 		countUSEachDepartmentTotal = analysisDao.countUSEachDepartmentTotal(businessId);
 		
-		ListQueryForm form = new ListQueryForm(countEachDepartmentTotal, countTWEachDepartmentTotal, countCNEachDepartmentTotal, countUSEachDepartmentTotal);
-		return form;
+		JSONObject result = new JSONObject();
+		result.put("countEachDepartmentTotal",countEachDepartmentTotal);
+		result.put("countTWEachDepartmentTotal",countTWEachDepartmentTotal);
+		result.put("countCNEachDepartmentTotal",countCNEachDepartmentTotal);
+		result.put("countUSEachDepartmentTotal",countUSEachDepartmentTotal);
+		
+		return result;
 	}
 
-	//多寫的 科系依年度查詢
+	//科系依年度查詢
 	@Override
-	public ListQueryForm analysisDepartmentByYears(String businessId, Long beginDate, Long endDate) {
+	public JSONObject analysisDepartmentByYears(String businessId, Long beginDate, Long endDate) {
 		log.info("analysisCountryByYears");
 		List<Analysis> countEachDepartment = new ArrayList<Analysis>();
 		List<Analysis> countTWEachDepartment = new ArrayList<Analysis>();
@@ -181,8 +224,13 @@ public class AnalysisServiceImpl implements AnalysisService {
 		countCNEachDepartment = analysisDao.countCNEachDepartmentTotal(businessId);
 		countUSEachDepartment = analysisDao.countUSEachDepartmentTotal(businessId);
 		
-		ListQueryForm form = new ListQueryForm(countEachDepartment, countTWEachDepartment, countCNEachDepartment, countUSEachDepartment);
-		return form;
+		JSONObject result = new JSONObject();
+		result.put("countEachDepartmentTotal",countEachDepartment);
+		result.put("countTWEachDepartmentTotal",countTWEachDepartment);
+		result.put("countCNEachDepartmentTotal",countCNEachDepartment);
+		result.put("countUSEachDepartmentTotal",countUSEachDepartment);
+		
+		return result;
 	}
 
 	public ListQueryForm testAnalysis(String businessId) {
@@ -198,7 +246,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 	}
 
 	@Override
-	public ListQueryForm testAnalysis(String businessId, Long beginDate, Long endDate) {
+	public JSONObject testAnalysis(String businessId, Long beginDate, Long endDate) {
 		return null;
 //		List<Analysis> countList = new ArrayList<Analysis>();
 //		countList = analysisDao.countInventorEn(businessId, beginDate, endDate);
