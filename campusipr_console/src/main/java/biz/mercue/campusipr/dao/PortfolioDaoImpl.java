@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import biz.mercue.campusipr.model.Portfolio;
@@ -64,7 +66,14 @@ public class PortfolioDaoImpl extends AbstractDao<String,  Portfolio> implements
 		long count = (long)criteria.uniqueResult();
 		return (int)count;
 	}
-	
+
+	@Override
+	public List<Portfolio> getPortfolioList() {
+		String hql = "select p from Portfolio p";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		return query.list();
+	}
 
 	
 	

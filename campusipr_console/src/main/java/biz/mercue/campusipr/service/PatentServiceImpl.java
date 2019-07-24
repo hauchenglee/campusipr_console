@@ -71,6 +71,9 @@ public class PatentServiceImpl implements PatentService {
 
 	@Autowired
 	private DepartmentDao departmentDao;
+
+	@Autowired
+	private PortfolioDao portfolioDao;
 	
 	@Override
 	public int demo(String applNo, String businessId, String patentId) {
@@ -573,7 +576,24 @@ public class PatentServiceImpl implements PatentService {
 			editPatent.setAdmin(admin);
 			editPatent.setBusiness(business);
 
-			if (dbPatentList == null || dbPatentList.isEmpty()) {
+			boolean isSync = false;
+			boolean isSamePatent = false;
+			if (dbPatentList != null || !dbPatentList.isEmpty()) {
+				for (Patent dbPatent : dbPatentList) {
+					if (dbPatent.isIs_sync()) {
+						isSync = true;
+						break;
+					}
+				}
+				for (Patent dbPatent : dbPatentList) {
+					if (dbPatent.getPatent_id().equals(editPatent.getPatent_id())) {
+						isSamePatent = true;
+						break;
+					}
+				}
+			}
+
+			if (!isSync && !isSamePatent) {
 				this.addPatent(editPatent);
 				patentHistoryFirstAdd(editPatent, editPatent.getPatent_id(), business.getBusiness_id());
 				taskResult = Constants.INT_SUCCESS;
@@ -1058,7 +1078,7 @@ public class PatentServiceImpl implements PatentService {
 				dbPatent.setListAnnuity(annuityList);
 			}
 
-			//
+			// portfolio
 			List<Portfolio> portfolioList = new ArrayList<>();
 			if (editPatent.getListPortfolio() != null) {
 				for (Portfolio editPh : editPatent.getListPortfolio()) {
@@ -1076,6 +1096,20 @@ public class PatentServiceImpl implements PatentService {
 				List<Patent> patentList = dbFamily.getListPatent();
 				patentList.remove(editPatent); // 移除舊的patent
 				patentList.add(dbPatent); // 增加新的patent
+			}
+
+			// department
+			List<Department> departmentList = new ArrayList<>();
+			if (editPatent.getListDepartment() != null) {
+				for (Department editDepartment : editPatent.getListDepartment()) {
+					editDepartment.setDepartment_id(KeyGeneratorUtils.generateRandomString());
+					editDepartment.setPatent(dbPatent);
+					departmentList.add(editDepartment);
+				}
+			}
+			departmentList.addAll(dbPatent.getListDepartment());
+			if (departmentList != null && !departmentList.isEmpty()) {
+				dbPatent.setListDepartment(departmentList);
 			}
 
 			// 1. 更新
@@ -2914,8 +2948,6 @@ public class PatentServiceImpl implements PatentService {
 			List<Business> businessList = dbPatent.getListBusiness();
 			log.info("businessId: " + businessId);
 			if (businessList.size() > 1) {
-				String protfolioId = "";
-
 				// delete business id relationship
 				List<Business> newBusinessList = new ArrayList<>();
 				for (Business dbPatentBusiness : businessList) {
@@ -3010,33 +3042,32 @@ public class PatentServiceImpl implements PatentService {
 				}
 
 				// delete portfolio relationship
-				List<Portfolio> dbPortfolioList = dbPatent.getListPortfolio();
-				List<Portfolio> newPortfolio = new ArrayList<>();
+				List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
 				for (Portfolio dbPortfolio : dbPortfolioList) {
-					if (dbPortfolio != null
-							&& dbPortfolio.getBusiness() != null
-							&& !StringUtils.isNULL(dbPortfolio.getBusiness().getBusiness_id())) {
-						if (!dbPortfolio.getBusiness().getBusiness_id().equals(businessId)) {
-							newPortfolio.add(dbPortfolio);
+					log.info(dbPortfolio.getPortfolio_id());
+					List<Patent> patentList = dbPortfolio.getListPatent();
+					if (patentList != null || !patentList.isEmpty()) {
+						log.info(patentList.size());
+						for (Patent patent : patentList) {
+							if (patent.getPatent_id().equals(deletePatentId)) {
+								patentList.remove(patent);
+							}
 						}
 					}
-				}
-				if (!newPortfolio.isEmpty()) {
-					dbPatent.setListPortfolio(newPortfolio);
 				}
 
-				// delete family relationship
-				List<PatentFamily> dbFamilyList = dbPatent.getListFamily();
-				List<PatentFamily> newFamily = new ArrayList<>();
-				for (PatentFamily dbFamily : dbFamilyList) {
-					if (dbFamily != null && !StringUtils.isNULL(dbFamily.getBusiness_id())) {
-						if (!dbFamily.getBusiness_id().equals(businessId)) {
-							newFamily.add(dbFamily);
+				// delete family
+				PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
+				if (dbFamily != null) {
+					List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
+					for (Patent patent : dbPatentFamilyList) {
+						if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
+							dbPatentFamilyList.remove(patent);
 						}
 					}
-				}
-				if (!newFamily.isEmpty()) {
-					dbPatent.setListFamily(newFamily);
+					if (dbPatentFamilyList.size() < 2) {
+						familyDao.delete(dbFamily.getPatent_family_id());
+					}
 				}
 
 				// delete department
@@ -3057,6 +3088,35 @@ public class PatentServiceImpl implements PatentService {
 
 				log.info("start to delete patent one by one");
 			} else {
+				// delete portfolio
+				List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
+				for (Portfolio dbPortfolio : dbPortfolioList) {
+					log.info(dbPortfolio.getPortfolio_id());
+					List<Patent> patentList = dbPortfolio.getListPatent();
+					if (patentList != null || !patentList.isEmpty()) {
+						log.info(patentList.size());
+						for (Patent patent : patentList) {
+							if (patent.getPatent_id().equals(deletePatentId)) {
+								patentList.remove(patent);
+							}
+						}
+					}
+				}
+
+				// delete family
+				PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
+				if (dbFamily != null) {
+					List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
+					for (Patent patent : dbPatentFamilyList) {
+						if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
+							dbPatentFamilyList.remove(patent);
+						}
+					}
+					if (dbPatentFamilyList.size() < 2) {
+						familyDao.delete(dbFamily.getPatent_family_id());
+					}
+				}
+
 				log.info("start to delete patent all");
 				patentDao.delete(deletePatentId);
 			}

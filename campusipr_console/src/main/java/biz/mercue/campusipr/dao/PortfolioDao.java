@@ -18,10 +18,6 @@ public interface PortfolioDao {
 	
 	List<Portfolio> getByBusinessId(String businessId,int page,int pageSize);
 	int getCountByBusinessId(String businessId);
-	
-	
-	
 
-	
-
+	List<Portfolio> getPortfolioList();
 }

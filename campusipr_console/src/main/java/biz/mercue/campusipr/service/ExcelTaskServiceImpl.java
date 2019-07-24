@@ -857,16 +857,16 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			log.info("rowIndex: "+rowIndex);
 
 		}
-//		log.info(rowIndex);
-//		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
+		log.info(rowIndex);
+		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
 			return listPatent;
-//		} else {
-//			log.info("Errorlist is not Empty");
-//			log.info("errorList: Column" + errorColumnList + "Row" + errorRowList);
-//			setColorOnError(book,errorColumnList , errorRowList);
-//			log.info("Color Set");
-//			return null;
-//		}
+		} else {
+			log.info("Errorlist is not Empty");
+			log.info("errorList: Column" + errorColumnList + "Row" + errorRowList);
+			setColorOnError(book,errorColumnList , errorRowList);
+			log.info("Color Set");
+			return null;
+		}
 	}
 
 	private void setColorOnError(Workbook book, List<Integer> errorColumnList, List<Integer> errorRowList) {
