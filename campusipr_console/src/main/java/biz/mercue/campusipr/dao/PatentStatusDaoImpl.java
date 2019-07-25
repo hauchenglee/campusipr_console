@@ -51,15 +51,25 @@ public class PatentStatusDaoImpl extends AbstractDao<String,  PatentStatus> impl
 	
 	@Override
 	public List<PatentStatus> getByPatent(String patentId) {
-		// TODO Auto-generated method stub
-		Criteria criteria =  createEntityCriteria();
-		criteria.add(Restrictions.eq("patent_id", patentId));
-		return criteria.list();
+		String hql = "select ps from PatentStatus ps where ps.primaryKey.patent.patent_id = :patentId";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patentId", patentId);
+		return query.list();
 	}
 	
 	@Override
 	public void create(PatentStatus ps) {
 		persist(ps);
 	}
-	
+
+	@Override
+	public void updateStatusPatent(String targetId, String updateId) {
+		String hql = "update PatentStatus ps set ps.primaryKey.patent.patent_id = :updateId where ps.primaryKey.patent.patent_id = :targetId";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("updateId", updateId);
+		query.setParameter("targetId", targetId);
+		query.executeUpdate();
+	}
 }

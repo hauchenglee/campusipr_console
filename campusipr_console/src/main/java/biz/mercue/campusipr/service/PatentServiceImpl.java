@@ -74,6 +74,9 @@ public class PatentServiceImpl implements PatentService {
 
 	@Autowired
 	private PortfolioDao portfolioDao;
+
+	@Autowired
+	private PatentStatusDao patentStatusDao;
 	
 	@Override
 	public int demo(String applNo, String businessId, String patentId) {
@@ -1010,19 +1013,8 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 
-			//
-			List<PatentStatus> psList = new ArrayList<>();
-			if (editPatent.getListPatentStatus() != null) {
-				for (PatentStatus editPs : editPatent.getListPatentStatus()) {
-					Status status = editPs.getStatus();
-					if (status.getStatus_from().equals("user")) {
-						status.setStatus_id(KeyGeneratorUtils.generateRandomString());
-						editPs.setPatent(dbPatent);
-						psList.add(editPs);
-						dbPatent.addPatentStatus(editPs);
-					}
-				}
-			}
+			// status
+			patentStatusDao.updateStatusPatent(editPatentId, dbPatentId);
 
 			//
 			List<PatentContact> patentContactList = new ArrayList<>();
@@ -1782,10 +1774,7 @@ public class PatentServiceImpl implements PatentService {
 				if (dbPatent.getListPatentStatus() != null && dbPatent.getListPatentStatus() != null) {
 					for (PatentStatus patentStatus : dbPatent.getListPatentStatus()) {
 						Status status = patentStatus.getStatus();
-						if (patentStatus.getCreate_date() != null && !status.getStatus_from().equals("user")) {
-							status.setCreate_date(patentStatus.getCreate_date());
-							statusAddData.add(JacksonJSONUtils.mapObjectWithView(status, View.Patent.class));
-						}
+						statusAddData.add(JacksonJSONUtils.mapObjectWithView(status, View.Patent.class));
 					}
 				}
 				if (!statusAddData.isEmpty()) {
