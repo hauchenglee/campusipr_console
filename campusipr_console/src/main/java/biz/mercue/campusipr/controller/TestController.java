@@ -73,7 +73,7 @@ public class TestController {
 	@ResponseBody
 	public String demo(HttpServletRequest request, @PathVariable String patentId) {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		patentService.demo("", tokenBean.getBusiness_id(), patentId);
+		int result = patentService.demo("", tokenBean.getBusiness_id(), patentId);
 		return "{\"aaa\": \"bbb\"}";
 	}
 	
