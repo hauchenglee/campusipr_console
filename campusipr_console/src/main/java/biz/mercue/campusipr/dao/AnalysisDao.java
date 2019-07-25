@@ -45,5 +45,7 @@ public interface AnalysisDao {
 	List<Analysis> countTWEachDepartment(String businessId, Long beginDate, Long endDate);
 	List<Analysis> countCNEachDepartment(String businessId, Long beginDate, Long endDate);
 	List<Analysis> countUSEachDepartment(String businessId, Long beginDate, Long endDate);
+	int countPorfolio(String businessId);
+	int countPorfolioByYear(String businessId, Long beginDate, Long endDate);
 	
 }

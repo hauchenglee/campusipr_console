@@ -67,7 +67,6 @@ public class AnalysisController {
 //		Long endTime = jsonObject.getLong("endTime");
 //		JSONObject analyizeData = analysisService.testAnalysis(businessId);
 //		responseBody.setCode(Constants.INT_SUCCESS);
-//		responseBody.setData(analyizeData); //沒顯示??
 //		return responseBody.toString();
 		return null;
 	}
@@ -167,8 +166,8 @@ public class AnalysisController {
 		try {
 			JSONObject jsonObject = new JSONObject(receiveJSONString);
 			String businessId = jsonObject.optString("business_id");
-			Long beginTime = jsonObject.getLong("beginTime");
-			Long endTime = jsonObject.getLong("endTime");
+//			Long beginTime = jsonObject.getLong("beginTime");
+//			Long endTime = jsonObject.getLong("endTime");
 			String countryId = jsonObject.optString("country_id");
 			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
 			if (tokenBean != null) {
@@ -177,7 +176,7 @@ public class AnalysisController {
 					if (tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 						responseBody.setCode(Constants.INT_NO_PERMISSION);
 					} else {
-						JSONObject analyizeData = analysisService.analysisAllCountry(businessId, beginTime, endTime, countryId);
+						JSONObject analyizeData = analysisService.analysisAllCountry(businessId, countryId);
 						responseBody.setCode(Constants.INT_SUCCESS);
 						responseBody.setData(analyizeData);
 					}
@@ -260,7 +259,7 @@ public class AnalysisController {
 					if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 						responseBody.setCode(Constants.INT_NO_PERMISSION);
 					} else {
-						JSONObject analyizeData =  analysisService.analysisAllDepartment(businessId, beginTime, endTime);
+						JSONObject analyizeData =  analysisService.analysisAllDepartment(businessId);
 						responseBody.setCode(Constants.INT_SUCCESS);
 						responseBody.setData(analyizeData);
 					}

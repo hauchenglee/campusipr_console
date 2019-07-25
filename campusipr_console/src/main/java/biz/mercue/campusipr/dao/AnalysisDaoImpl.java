@@ -817,8 +817,41 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		return q.list();
 	}
 	//專利組合
+	@Override
+	public int countPorfolio(String businessId) {
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct lpf.portfolio_id)"
+						+ "FROM Patent as p " 
+						+ "JOIN p.listPortfolio as lpf " 
+						+ "WHERE lb.business_id = :businessId ";
+		Query q = session.createQuery(queryStr);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		long count = (long) q.uniqueResult();
+//		log.info(count);
+		return (int) count;
+	}
+	//專利組合by year
+	@Override
+	public int countPorfolioByYear(String businessId, Long beginDate, Long endDate) {
+		Session session = getSession();
+		String queryStr = "SELECT date_format(p.patent_appl_date, '%Y'),count(distinct p.patent_id)"
+				+ "FROM Patent as p " + "JOIN p.listBusiness as lb " + "WHERE lb.business_id = :businessId "
+				+ "and p.patent_appl_no Not like '%@%' " + "GROUP BY date_format(p.patent_appl_date, '%Y')";
+		Query q = session.createQuery(queryStr);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		long count = (long) q.uniqueResult();
+//		log.info(count);
+		return (int) count;
+	}
 	
-	//學校數
+	
+	//學校數(business_id 去掉智財中心)
+	
+	
 	
 	public List<Analysis> testPatent(String businessId) {
 		Session session = getSession();

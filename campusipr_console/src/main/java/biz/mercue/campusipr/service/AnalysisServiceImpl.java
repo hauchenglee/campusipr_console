@@ -223,7 +223,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 	}
 
 	@Override
-	public JSONObject analysisAllCountry(String businessId, Long beginDate, Long endDate, String countryId) {
+	public JSONObject analysisAllCountry(String businessId, String countryId) {
 		log.info("analysisAllCountry");
 		List<Analysis> countCountryTotal = new ArrayList<Analysis>();
 		List<Analysis> countCountryApplStatusTotal = new ArrayList<Analysis>();
@@ -342,7 +342,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 	}
 	
 	@Override
-	public JSONObject analysisAllDepartment(String businessId, Long beginDate, Long endDate) {
+	public JSONObject analysisAllDepartment(String businessId) {
 		log.info("analysis All Department");
 		List<Analysis> countEachDepartmentTotal = new ArrayList<Analysis>();
 		List<Analysis> countTWEachDepartmentTotal = new ArrayList<Analysis>();

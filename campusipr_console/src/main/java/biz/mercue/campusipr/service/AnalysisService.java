@@ -13,9 +13,9 @@ public interface AnalysisService {
 	JSONObject testAnalysis (String businessId, Long beginDate, Long endDate);
 	JSONObject analysisAll(String businessId);
 	JSONObject analysisByYear(String businessId, Long beginDate, Long endDate);
-	JSONObject analysisAllCountry(String businessId, Long beginDate, Long endDate, String countryId);
+	JSONObject analysisAllCountry(String businessId, String countryId);
 	JSONObject analysisCountryByYear(String businessId, Long beginDate, Long endDate, String countryId);
-	JSONObject analysisAllDepartment(String businessId, Long beginDate, Long endDate);
+	JSONObject analysisAllDepartment(String businessId);
 	JSONObject analysisDepartmentByYears(String businessId, Long beginDate, Long endDate);
 
 }
