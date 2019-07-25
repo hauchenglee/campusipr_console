@@ -111,8 +111,6 @@ public class AnalysisController {
         }
 		
 		return responseBody.toString();
-//		log.info("patentList:"+responseBody.getJacksonString(View.Analysis.class));
-//		return responseBody.getJacksonString(View.Analysis.class);
 	}
 	
 	//學校端 依年分析總覽
@@ -361,7 +359,7 @@ public class AnalysisController {
 //		return null;
 //	}
 //	
-//	@RequestMapping(value="/api/analysisschoolcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@RequestMapping(value="/api/analysisplatformcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 //	@ResponseBody
 //	public String analysisPLCountry(HttpServletRequest request,
 //			@RequestBody String receiveJSONString,
@@ -380,7 +378,15 @@ public class AnalysisController {
 //			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
 //		return null;
 //	}
-
+//	@RequestMapping(value="/api/analysisplatformdepartmentbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+//	@ResponseBody
+//	public String analysisPlatformDepartment(HttpServletRequest request,
+//			@RequestBody String receiveJSONString,
+//			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+//			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+//			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+//		return null;
+//	}
 	
 //	@RequestMapping(value="/api/exportplatformtotal", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 //	@ResponseBody
