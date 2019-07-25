@@ -74,7 +74,7 @@ public class TestController {
 	public String demo(HttpServletRequest request, @PathVariable String patentId) {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		int result = patentService.demo("", tokenBean.getBusiness_id(), patentId);
-		return "{\"aaa\": \"bbb\"}";
+		return "{\"aaa\": \"" + result + "\"}";
 	}
 	
 	@RequestMapping(value="/gettestid", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
