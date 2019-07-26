@@ -76,6 +76,7 @@ public class BusinessServiceImpl implements BusinessService{
 				    anuityReminder.setAvailable(true);
 				    annuityReminderDao.create(anuityReminder);
 			    }
+				business.setCreate_date(new Date());
 				addBusiness(business);
 				//add sync work quartz
 				List<SynchronizeBusiness> syncList = syncDao.getAllSyncTask();

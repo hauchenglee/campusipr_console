@@ -8,6 +8,7 @@ import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentFamily;
 import biz.mercue.campusipr.model.Status;
+import org.json.JSONObject;
 
 public interface PatentService {
 
@@ -25,7 +26,7 @@ public interface PatentService {
 
 	int addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip);
 
-	int checkNoPublicApplNo(Patent editPatent, Business business);
+	JSONObject checkNoPublicApplNo(Patent editPatent, Business business);
 
 	int addPatentByNoPublicApplNo(Patent editPatent, Business business, Admin admin);
 

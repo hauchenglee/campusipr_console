@@ -2,14 +2,7 @@ package biz.mercue.campusipr.model;
 
 import java.util.Date;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
@@ -66,7 +59,8 @@ public class Admin extends BaseBean {
 	@Transient
 	@JsonView(View.Public.class)
 	private String token;
-	
+
+	@Column(updatable = false)
 	private Date create_date;
 	
 	private Date update_date;

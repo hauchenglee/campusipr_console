@@ -2,12 +2,7 @@ package biz.mercue.campusipr.model;
 
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -52,6 +47,7 @@ public class Business extends BaseBean{
 		
 	
 	@Temporal(TemporalType.TIMESTAMP)
+	@Column(updatable = false)
 	private Date create_date;
 	
 	

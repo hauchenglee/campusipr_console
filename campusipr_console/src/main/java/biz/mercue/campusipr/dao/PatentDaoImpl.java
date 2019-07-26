@@ -752,7 +752,58 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		long count = (long)q.uniqueResult();
 		return (int)count;
 	}
-	
+
+	@Override
+	public List<Patent> searchFieldNoStatusListPatent(String businessId, int page, int pageSize){
+		Session session = getSession();
+		String platformBusinessId = Constants.BUSINESS_PLATFORM;
+		String hql = "SELECT p FROM Patent as p JOIN p.listBusiness as lb ";
+		if (StringUtils.isNULL(businessId)) {
+			// platform
+			hql += " WHERE ((lb.business_id = :businessId) or (lb.business_id not in :businessId and p.is_sync = 1))" +
+					" and not exists (select 1 from PatentStatus as ps where ps.primaryKey.patent.patent_id = p.patent_id)";
+		} else {
+			// school
+			hql += " WHERE lb.business_id = :businessId and not exists (select 1 from PatentStatus as ps where ps.primaryKey.patent.patent_id = p.patent_id)";
+		}
+
+		Query query = session.createQuery(hql);
+		if (StringUtils.isNULL(businessId)) {
+			// platform
+			query.setParameter("businessId", platformBusinessId);
+		} else {
+			// school
+			query.setParameter("businessId", businessId);
+		}
+		query.setFirstResult((page - 1) * pageSize);
+		query.setMaxResults(pageSize);
+		return query.list();
+	}
+
+	@Override
+	public int countSearchFieldNoStatusPatent(String businessId){
+		Session session = getSession();
+		String platformBusinessId = Constants.BUSINESS_PLATFORM;
+		String hql = "SELECT count(distinct p.patent_id) FROM Patent as p JOIN p.listBusiness as lb ";
+		if (StringUtils.isNULL(businessId)) {
+			// platform
+			hql += " WHERE ((lb.business_id = :businessId) or (lb.business_id not in :businessId and p.is_sync = 1))" +
+					" and not exists (select 1 from PatentStatus as ps where ps.primaryKey.patent.patent_id = p.patent_id)";
+		} else {
+			// school
+			hql += " WHERE lb.business_id = :businessId and not exists (select 1 from PatentStatus as ps where ps.primaryKey.patent.patent_id = p.patent_id)";
+		}
+		Query query = session.createQuery(hql);
+		if (StringUtils.isNULL(businessId)) {
+			// platform
+			query.setParameter("businessId", platformBusinessId);
+		} else {
+			// school
+			query.setParameter("businessId", businessId);
+		}
+		long count = (long)query.uniqueResult();
+		return (int)count;
+	}
 	
 	@Override
 	public List<Patent> searchFieldExtensionListPatent(String searchText, String fieldCode, String businessId, int page, int pageSize, String orderList,String orderFieldCode,int is_asc){

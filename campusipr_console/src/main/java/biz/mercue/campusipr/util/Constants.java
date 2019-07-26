@@ -371,8 +371,28 @@ public class Constants {
 	public static String URL_PATENT_CONTENT  = "";
 	
 	public static final List<Integer> defaultReminderDays = Arrays.asList(90, 30, 7, -1); 
-	
+
+	// sourceFrom
 	public static final int PATENT_APPL_SYNC = 1;
 	public static final int PATENT_DETAIL_SYNC = 2;
 	public static final int PATENT_EXCEL_IMPORT = 3;
+	public static final int PATENT_UPDATE = 4;
+	public static final int PATENT_NO_PUBLIC_MERGE = 5;
+
+	public static final String STATUS_DESC_STOP_MAINTENANCE = "停止維護";
+	public static final String STATUS_DESC_ISSUED = "公告";
+	public static final String STATUS_DESC_PUBLICATION = "公開";
+	public static final String STATUS_DESC_EDITING = "撰稿中";
+	public static final String STATUS_DESC_APPROVAL = "核准";
+	public static final String STATUS_DESC_DISAPPROVING = "核駁";
+	public static final String STATUS_DESC_APPLICATION_FILING = "申請";
+	public static final String STATUS_DESC_EVALUATION = "申請評估";
+	public static final String STATUS_DESC_SEARCH_AND_EXAMINATION = "答辯中";
+	public static final String STATUS_DESC_IP_RIGHT_CESSATION = "終止";
+	public static final String STATUS_DESC_MAINTENANCE = "維護中";
+	public static final String STATUS_DESC_INVALIDATION = "舉發";
+	public static final String STATUS_DESC_APPEAL = "訴訟";
+	public static final String STATUS_DESC_IP_RIGHT_TRANSACTION = "辦理轉讓";
+	public static final String STATUS_DESC_RETURN = "退回發明人";
+	public static final String STATUS_NO_STATUS = "(無狀態)";
 }

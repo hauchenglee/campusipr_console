@@ -60,8 +60,11 @@ public interface PatentDao {
 	
 	List<Patent> searchFieldStatusListPatent(String searchText, String searchTextEn,String businessId, int page, int pageSize, String orderList,String orderFieldCode,int is_asc);
 	int  countSearchFieldStatusPatent(String searchText, String searchTextEn, String businessId);
-	
-	List<Patent> searchFieldExtensionListPatent(String searchText, String fieldCode, String businessId, int page, int pageSize, String orderList,String orderFieldCode,int is_asc);
+
+    List<Patent> searchFieldNoStatusListPatent(String businessId, int page, int pageSize);
+	int countSearchFieldNoStatusPatent(String businessId);
+
+	List<Patent> searchFieldExtensionListPatent(String searchText, String fieldCode, String businessId, int page, int pageSize, String orderList, String orderFieldCode, int is_asc);
 	int  countSearchFieldExtensionPatent(String searchText, String fieldCode, String businessId);
 	
 	Patent getByPatentNo(String patentNo);

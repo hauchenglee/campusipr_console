@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+import biz.mercue.campusipr.util.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.json.JSONObject;
@@ -62,16 +63,6 @@ import biz.mercue.campusipr.service.ExcelTaskServiceImpl;
 import biz.mercue.campusipr.service.FieldService;
 import biz.mercue.campusipr.service.PatentService;
 import biz.mercue.campusipr.service.PermissionService;
-import biz.mercue.campusipr.util.BeanResponseBody;
-import biz.mercue.campusipr.util.Constants;
-import biz.mercue.campusipr.util.DateUtils;
-import biz.mercue.campusipr.util.ExcelUtils;
-import biz.mercue.campusipr.util.FileUtils;
-import biz.mercue.campusipr.util.JWTUtils;
-import biz.mercue.campusipr.util.JacksonJSONUtils;
-import biz.mercue.campusipr.util.KeyGeneratorUtils;
-import biz.mercue.campusipr.util.ListResponseBody;
-import biz.mercue.campusipr.util.StringResponseBody;
 
 @Controller
 public class PatentController {
@@ -190,8 +181,8 @@ public class PatentController {
 	@ResponseBody
 	public String checkNoPublicApplNo(HttpServletRequest request,@RequestBody String receiveJSONString) {
 		log.info("checknopublicapplno:");
-		
-		BeanResponseBody responseBody  = new BeanResponseBody();
+
+		JSONResponseBody responseBody = new JSONResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 
 		if(tokenBean!=null) {
@@ -202,13 +193,14 @@ public class PatentController {
 			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 			patent.setBusiness(tokenBean.getBusiness());
 			patent.setAdmin_ip(ip);
-			int taskResult = patentService.checkNoPublicApplNo(patent, tokenBean.getBusiness());
-			
-			responseBody.setCode(taskResult);
+			JSONObject jsonObject = patentService.checkNoPublicApplNo(patent, tokenBean.getBusiness());
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setData(jsonObject);
+			return responseBody.toString();
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return responseBody.getJacksonString( View.PatentDetail.class);
 		}
-		return responseBody.getJacksonString( View.PatentDetail.class);
 	}
 	
 	@RequestMapping(value="/api/mergepatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)

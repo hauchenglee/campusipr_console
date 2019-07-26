@@ -4,10 +4,8 @@ import java.util.*;
 
 import biz.mercue.campusipr.dao.*;
 import biz.mercue.campusipr.model.*;
-import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -870,7 +868,8 @@ public class PatentServiceImpl implements PatentService {
 	}
 	
 	@Override
-	public int checkNoPublicApplNo(Patent editPatent, Business business) {
+	public JSONObject checkNoPublicApplNo(Patent editPatent, Business business) {
+		JSONObject jsonObject = new JSONObject();
 		try {
 			log.info("addPatentByNoPublicApplNo:");
 			String editPatentApplNo = editPatent.getPatent_appl_no();
@@ -881,7 +880,7 @@ public class PatentServiceImpl implements PatentService {
 			if (dbPatentList == null || dbPatentList.isEmpty()) {
 				// update new patent
 				log.info("// update new patent");
-				return Constants.INT_SUCCESS;
+				return jsonObject.put("sourceFrom", Constants.PATENT_UPDATE);
 			} else {
 				log.info("!dbPatentList.isEmpty()");
 				// 判斷是否同一間學校新增
@@ -901,16 +900,16 @@ public class PatentServiceImpl implements PatentService {
 				if (isDuplicate) {
 					log.info("// 同一間學校：禁止新增");
 					// 同一間學校：禁止新增
-					return Constants.INT_DATA_DUPLICATE;
+					return jsonObject.put(Constants.JSON_CODE, Constants.INT_DATA_DUPLICATE);
 				} else {
 					// 可新增：存入or合併關聯
 					log.info("// 可新增：存入or合併關聯");
-					return Constants.INT_SUCCESS;
+					return jsonObject.put("sourceFrom", Constants.PATENT_NO_PUBLIC_MERGE);
 				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			return Constants.INT_SYSTEM_PROBLEM;
+			return jsonObject.put(Constants.JSON_CODE, Constants.INT_SYSTEM_PROBLEM);
 		}
 	}
 
@@ -1078,7 +1077,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 			portfolioList.addAll(dbPatent.getListPortfolio());
-			if (portfolioList != null && portfolioList.isEmpty()) {
+			if (portfolioList != null && !portfolioList.isEmpty()) {
 				dbPatent.setListPortfolio(portfolioList);
 			}
 
@@ -1167,7 +1166,7 @@ public class PatentServiceImpl implements PatentService {
 			if (patent.isFirstAddEditHistory()) {
 				log.info("is first add");
 				patentHistoryFirstAdd(patent, patent.getPatent_id(), businessId);
-			} else {
+			} else if (patent.getSourceFrom() != Constants.PATENT_NO_PUBLIC_MERGE) {
 				log.info("is not first add");
 				comparePatent(dbBean, patent, businessId);
 			}
@@ -1284,7 +1283,7 @@ public class PatentServiceImpl implements PatentService {
 			//handleInventor(dbBean, patent);
 			handleCost(dbBean, patent, businessId);
 			handleContact(dbBean, patent);
-			handleAnnuity(dbBean, patent);
+			handleAnnuity(dbBean, patent, businessId);
 			handlePatentStatus(dbBean, patent);
 
 			if (patent.getSourceFrom() != Constants.PATENT_EXCEL_IMPORT) {
@@ -1655,8 +1654,13 @@ public class PatentServiceImpl implements PatentService {
 				String status_desc_en = new JSONObject(statusStr).optString("status_desc_en");
 				log.info("status:"+status_desc);
 				log.info("status_en:"+status_desc_en);
-				list = patentDao.searchFieldStatusListPatent(status_desc,status_desc_en, businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
-				count = patentDao.countSearchFieldStatusPatent(status_desc,status_desc_en, businessId);
+				if (!status_desc.equals(Constants.STATUS_NO_STATUS)) {
+					list = patentDao.searchFieldStatusListPatent(status_desc,status_desc_en, businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
+					count = patentDao.countSearchFieldStatusPatent(status_desc,status_desc_en, businessId);
+				} else {
+					list = patentDao.searchFieldNoStatusListPatent(businessId, page, Constants.SYSTEM_PAGE_SIZE);
+					count = patentDao.countSearchFieldNoStatusPatent(businessId);
+				}
 				break;
 
 			case Constants.SCHOOL_NO_FIELD:
@@ -2587,7 +2591,7 @@ public class PatentServiceImpl implements PatentService {
 		}
 	}
 
-	private void handleAnnuity(Patent dbPatent, Patent editPatent) {
+	private void handleAnnuity(Patent dbPatent, Patent editPatent, String businessId) {
 		if (editPatent.getListAnnuity() != null && editPatent.getListAnnuity().size() > 0) {
 			List<Annuity> listAnnuity = editPatent.getListAnnuity();
 			for (Annuity annuity : listAnnuity) {
@@ -2601,6 +2605,7 @@ public class PatentServiceImpl implements PatentService {
 					calendar.add(Calendar.DATE, -1);
 					annuity.setAnnuity_end_date(calendar.getTime());
 				}
+				annuity.setBusiness_id(businessId);
 				annuity.setPatent(dbPatent);
 			}
 			patentDao.deletePatentAnnuity(dbPatent.getPatent_id());
