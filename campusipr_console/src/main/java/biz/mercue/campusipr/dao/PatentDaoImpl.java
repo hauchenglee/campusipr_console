@@ -4,22 +4,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import biz.mercue.campusipr.model.PatentEditHistory;
 import biz.mercue.campusipr.util.Constants;
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
-import org.hibernate.FetchMode;
 import org.hibernate.Filter;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.ProjectionList;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
-import org.hibernate.sql.JoinType;
-import org.hibernate.transform.Transformers;
 import org.springframework.stereotype.Repository;
 
 
@@ -34,7 +28,31 @@ import biz.mercue.campusipr.util.StringUtils;
 public class PatentDaoImpl extends AbstractDao<String,  Patent> implements PatentDao {
 
 	private Logger log = Logger.getLogger(this.getClass().getName());
-		
+
+	@Override
+	public List<Object> demo(String patentId, String businessId) {
+		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), lsps.status_desc "
+				+ "FROM Patent as p "
+				+ "JOIN p.listBusiness as lb "
+				+ "JOIN p.listPatentStatus as ls "
+				+ "JOIN ls.primaryKey.status as lsps "
+				+ "where lb.business_id = :businessId "
+				+ "and ls.create_date = "
+				+ "( select max(ps.create_date) "
+				+ "FROM PatentStatus as ps "
+				+ "where p.patent_id = ps.primaryKey.patent.patent_id ) "
+				+ "and lsps.status_desc = :statusDesc "
+				+ "group by p.patent_appl_country";
+		Session session = getSession();
+		Query query = session.createQuery(queryStr);
+		String statusDesc = "申請";
+		query.setParameter("statusDesc", statusDesc);
+		if (!StringUtils.isNULL(businessId)) {
+			query.setParameter("businessId", businessId);
+		}
+		return query.list();
+	}
+
 	@Override
 	public Patent getById(String id){
 		return getByKey(id);

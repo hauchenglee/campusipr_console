@@ -82,6 +82,11 @@ public class PatentServiceImpl implements PatentService {
 			log.info("demo:");
 			log.info("business id: " + businessId);
 			log.info("patent id: " + patentId);
+			List<Object> objectList = new ArrayList<>();
+			List<Patent> patentList = new ArrayList<>();
+			List<Date> dateList = new ArrayList<>();
+			objectList = patentDao.demo(patentId, businessId);
+			log.info(objectList.size());
 			return Constants.INT_SUCCESS;
 		} catch (Exception e) {
 			return Constants.INT_SYSTEM_PROBLEM;
@@ -1080,6 +1085,29 @@ public class PatentServiceImpl implements PatentService {
 			if (portfolioList != null && !portfolioList.isEmpty()) {
 				dbPatent.setListPortfolio(portfolioList);
 			}
+/*			先寫來放著，不確定未來會不會用到
+			List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
+			List<String> dbPortfolioIds = new ArrayList<>();
+			for (Portfolio dbPortfolio : dbPortfolioList) {
+				log.info(dbPortfolio.getPortfolio_id());
+				List<Patent> patentList = dbPortfolio.getListPatent();
+				if (patentList != null || !patentList.isEmpty()) {
+					log.info(patentList.size());
+					for (Patent patent : patentList) {
+						if (patent.getPatent_id().equals(editPatentId)) {
+							patentList.remove(patent);
+							dbPortfolioIds.add(dbPortfolio.getPortfolio_id());
+						}
+					}
+				}
+			}
+			if (!dbPortfolioIds.isEmpty()) {
+				for (String portfolioId : dbPortfolioIds) {
+					Portfolio dbPortfolio = portfolioDao.getById(portfolioId);
+					dbPortfolio.addPatent(dbPatent);
+				}
+			}
+			dbPatent.setListPortfolio(editPatent.getListPortfolio());*/
 
 			// family
 			PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(editPatentId, business.getBusiness_id());

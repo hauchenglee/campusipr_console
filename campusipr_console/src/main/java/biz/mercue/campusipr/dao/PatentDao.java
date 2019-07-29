@@ -10,6 +10,8 @@ import biz.mercue.campusipr.model.PatentExtension;
 
 public interface PatentDao {
 
+    List<Object> demo(String patentId, String businessId);
+
 	Patent getById(String id);
 	
 	Patent getById(String businessId,String id);
