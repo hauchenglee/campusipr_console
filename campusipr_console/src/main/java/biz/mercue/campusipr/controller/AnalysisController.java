@@ -60,17 +60,34 @@ public class AnalysisController {
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
 		log.info("analysisTest ");
-//		JSONObject jsonObject = new JSONObject(receiveJSONString);
-//		JSONResponseBody responseBody = new JSONResponseBody();
-//		String businessId = jsonObject.optString("business_id");
-//		Long beginTime = jsonObject.getLong("beginTime");
-//		Long endTime = jsonObject.getLong("endTime");
-//		JSONObject analyizeData = analysisService.testAnalysis(businessId);
-//		responseBody.setCode(Constants.INT_SUCCESS);
-//		return responseBody.toString();
-		return null;
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		JSONResponseBody responseBody = new JSONResponseBody();
+		String businessId = jsonObject.optString("business_id");
+//		JSONObject analyizeData = analysisService.testAnalysis(businessId, beginTime, endTime);
+		JSONObject analyizeData = analysisService.testAnalysis();
+//		log.info(analyizeData);
+		responseBody.setCode(Constants.INT_SUCCESS);
+		responseBody.setData(analyizeData);
+		return responseBody.toString();
 	}
-
+	@RequestMapping(value="/api/analysistestbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String analysisTestByYear(HttpServletRequest request,
+			@RequestBody String receiveJSONString,
+			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+		log.info("analysisTest ");
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		JSONResponseBody responseBody = new JSONResponseBody();
+		String businessId = jsonObject.optString("business_id");
+		Long beginTime = jsonObject.getLong("beginTime");
+		Long endTime = jsonObject.getLong("endTime");
+		JSONObject analyizeData = analysisService.testAnalysis(businessId, beginTime, endTime);
+		log.info(analyizeData);
+		responseBody.setCode(Constants.INT_SUCCESS);
+		responseBody.setData(analyizeData);
+		return responseBody.toString();
+	}
 	
 	// 學校端 分析總覽預設畫面
 	@RequestMapping(value = "/api/analysisschooloverview", method = {
@@ -94,7 +111,7 @@ public class AnalysisController {
 					if (tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 						responseBody.setCode(Constants.INT_NO_PERMISSION);
 					} else {
-						JSONObject analyizeData = analysisService.analysisAll(businessId);
+						JSONObject analyizeData = analysisService.schoolOverview(businessId);
 						responseBody.setCode(Constants.INT_SUCCESS);
 						responseBody.setData(analyizeData);
 					}
@@ -135,7 +152,7 @@ public class AnalysisController {
 					if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 						responseBody.setCode(Constants.INT_NO_PERMISSION);
 					} else {
-						JSONObject analyizeData = analysisService.analysisByYear(businessId, beginTime, endTime);
+						JSONObject analyizeData = analysisService.schoolOverviewByYear(businessId, beginTime, endTime);
 						responseBody.setCode(Constants.INT_SUCCESS);
 						responseBody.setData(analyizeData);
 					}
@@ -156,12 +173,9 @@ public class AnalysisController {
 	@RequestMapping(value = "/api/analysisschoolcountry", method = {RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String analysisSchoolCountry(HttpServletRequest request, @RequestBody String receiveJSONString,
-			@RequestParam(value = "page", required = false, defaultValue = "1") int page,
-			@RequestParam(value = "order_field", required = false, defaultValue = "") String fieldId,
-			@RequestParam(value = "asc", required = false, defaultValue = "1") int is_asc) {
-		log.info("analysis platform country ");
-		log.info("order_field:" + fieldId);
-		log.info("asc:" + is_asc);
+			@RequestParam(value = "page", required = false, defaultValue = "1" )int is_asc) {
+		log.info("analysis school country ");
+
 		JSONResponseBody responseBody = new JSONResponseBody();
 		try {
 			JSONObject jsonObject = new JSONObject(receiveJSONString);
@@ -176,7 +190,7 @@ public class AnalysisController {
 					if (tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 						responseBody.setCode(Constants.INT_NO_PERMISSION);
 					} else {
-						JSONObject analyizeData = analysisService.analysisAllCountry(businessId, countryId);
+						JSONObject analyizeData = analysisService.schoolCountry(businessId, countryId);
 						responseBody.setCode(Constants.INT_SUCCESS);
 						responseBody.setData(analyizeData);
 					}
@@ -201,9 +215,7 @@ public class AnalysisController {
 			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysis platform country ");
-		log.info("order_field:"+fieldId);
-		log.info("asc:"+is_asc);
+		log.info("analysis school country by year");
 		JSONResponseBody responseBody  = new JSONResponseBody();
 		try {
 			JSONObject jsonObject = new JSONObject(receiveJSONString);
@@ -218,7 +230,7 @@ public class AnalysisController {
 					if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 						responseBody.setCode(Constants.INT_NO_PERMISSION);
 					} else {
-						JSONObject analyizeData =  analysisService.analysisCountryByYear(businessId, beginTime, endTime, countryId);
+						JSONObject analyizeData =  analysisService.schoolCountryByYear(businessId, beginTime, endTime, countryId);
 						responseBody.setCode(Constants.INT_SUCCESS);
 						responseBody.setData(analyizeData);
 					}
@@ -243,15 +255,13 @@ public class AnalysisController {
 			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysis platform country ");
+		log.info("analysis school department ");
 		log.info("order_field:"+fieldId);
 		log.info("asc:"+is_asc);
 		JSONResponseBody responseBody  = new JSONResponseBody();
 		try {
 			JSONObject jsonObject = new JSONObject(receiveJSONString);
 			String businessId = jsonObject.optString("business_id");
-			Long beginTime = jsonObject.getLong("beginTime");
-			Long endTime = jsonObject.getLong("endTime");
 			AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 			if(tokenBean!=null) {
 				Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
@@ -259,7 +269,7 @@ public class AnalysisController {
 					if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 						responseBody.setCode(Constants.INT_NO_PERMISSION);
 					} else {
-						JSONObject analyizeData =  analysisService.analysisAllDepartment(businessId);
+						JSONObject analyizeData =  analysisService.schoolDepartment(businessId);
 						responseBody.setCode(Constants.INT_SUCCESS);
 						responseBody.setData(analyizeData);
 					}
@@ -284,7 +294,7 @@ public class AnalysisController {
 			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysis platform country ");
+		log.info("analysis school department by year");
 		log.info("order_field:"+fieldId);
 		log.info("asc:"+is_asc);
 		JSONResponseBody responseBody  = new JSONResponseBody();
@@ -300,7 +310,7 @@ public class AnalysisController {
 					if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 						responseBody.setCode(Constants.INT_NO_PERMISSION);
 					} else {
-						JSONObject analyizeData =  analysisService.analysisDepartmentByYears(businessId, beginTime, endTime);
+						JSONObject analyizeData =  analysisService.schoolDepartmentByYear(businessId, beginTime, endTime);
 						responseBody.setCode(Constants.INT_SUCCESS);
 						responseBody.setData(analyizeData);
 					}
@@ -317,75 +327,168 @@ public class AnalysisController {
 		return responseBody.toString();
 	}
 	
-//	@RequestMapping(value="/api/exportschooltotal", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public ResponseEntity<InputStreamResource> exportSchoolTotal(HttpServletRequest request,@RequestBody String receiveJSONString){
-//		log.info("exportpatent ");
-//		return null;
-//	}
 	
-//	@RequestMapping(value="/api/exportschoolcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public ResponseEntity<InputStreamResource> exportSchoolCountry(HttpServletRequest request,@RequestBody String receiveJSONString){
-//		log.info("exportpatent ");
-//		return null;
-//	}
-//	
-//	@RequestMapping(value="/api/exportplatformdepartment", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public ResponseEntity<InputStreamResource> exportSchoolDepartment(HttpServletRequest request,@RequestBody String receiveJSONString){
-//		log.info("exportpatent ");
-//		return null;
-//	}
-//	
-//	@RequestMapping(value="/api/analysisplatformoverview", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public String analysisPlatformOverview(HttpServletRequest request,
-//			@RequestBody String receiveJSONString,
-//			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
-//			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-//			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-//		return null;
-//	}
-//	
-//	@RequestMapping(value="/api/analysisplatformbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public String analysisPlatformByYear(HttpServletRequest request,
-//			@RequestBody String receiveJSONString,
-//			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
-//			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-//			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-//		return null;
-//	}
-//	
-//	@RequestMapping(value="/api/analysisplatformcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public String analysisPLCountry(HttpServletRequest request,
-//			@RequestBody String receiveJSONString,
-//			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
-//			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-//			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-//		return null;
-//	}
-//	
-//	@RequestMapping(value="/api/analysisplatformdepartment", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public String analysisPlatformDepartment(HttpServletRequest request,
-//			@RequestBody String receiveJSONString,
-//			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
-//			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-//			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-//		return null;
-//	}
-//	@RequestMapping(value="/api/analysisplatformdepartmentbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public String analysisPlatformDepartment(HttpServletRequest request,
-//			@RequestBody String receiveJSONString,
-//			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
-//			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-//			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-//		return null;
-//	}
+	//平台端
+	@RequestMapping(value="/api/analysisplatformoverview", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String analysisPlatformOverview(HttpServletRequest request,
+			@RequestBody String receiveJSONString,
+			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+		JSONResponseBody responseBody  = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if(tokenBean!=null) {
+				Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+				if(tokenBean.checkPermission(permission.getPermission_id())) {
+					if(!tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+						responseBody.setCode(Constants.INT_NO_PERMISSION);
+					} else {
+						JSONObject analyizeData =  analysisService.platformOverview();
+						responseBody.setCode(Constants.INT_SUCCESS);
+						responseBody.setData(analyizeData);
+					}
+				}else {
+					responseBody.setCode(Constants.INT_NO_PERMISSION);
+				}
+			}else {
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			}
+		} catch (JSONException e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		}
+		return responseBody.toString();
+	}
+	
+	@RequestMapping(value="/api/analysisplatformbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String analysisPlatformByYear(HttpServletRequest request,
+			@RequestBody String receiveJSONString,
+			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+		JSONResponseBody responseBody  = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			Long beginTime = jsonObject.getLong("beginTime");
+			Long endTime = jsonObject.getLong("endTime");
+			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if (tokenBean != null) {
+					JSONObject analyizeData = analysisService.platformOverviewByYear(beginTime, endTime);
+					responseBody.setCode(Constants.INT_SUCCESS);
+					responseBody.setData(analyizeData);
+			} else {
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			}
+		} catch (JSONException e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		}
+		return responseBody.toString();
+	}
+	
+	// 每個國家看到所有學校的資料
+	@RequestMapping(value = "/api/analysisplatformcountry", method = {
+			RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String analysisPlatformCountry(HttpServletRequest request, @RequestBody String receiveJSONString,
+			@RequestParam(value = "page", required = false, defaultValue = "1") int page,
+			@RequestParam(value = "order_field", required = false, defaultValue = "") String fieldId,
+			@RequestParam(value = "asc", required = false, defaultValue = "1") int is_asc) {
+		log.info("analysis school country ");
+		log.info("order_field:" + fieldId);
+		log.info("asc:" + is_asc);
+		JSONResponseBody responseBody = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			String countryId = jsonObject.optString("country_id");
+			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if (tokenBean != null) {
+				JSONObject analyizeData = analysisService.platformCountry(countryId);
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setData(analyizeData);
+			}
+		} catch (JSONException e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		}
+		return responseBody.toString();
+	}
+	@RequestMapping(value="/api/analysisplatformcountrybyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String analysisPlatformCountryByYear(HttpServletRequest request,
+			@RequestBody String receiveJSONString,
+			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+		JSONResponseBody responseBody = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			String countryId = jsonObject.optString("country_id");
+			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			Long beginTime = jsonObject.getLong("beginTime");
+			Long endTime = jsonObject.getLong("endTime");
+			if (tokenBean != null) {
+				JSONObject analyizeData = analysisService.platformCountryByYear(countryId, beginTime, endTime);
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setData(analyizeData);
+			}
+		} catch (JSONException e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		}
+		return responseBody.toString();
+	}
+	
+	@RequestMapping(value="/api/analysisplatformschool", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String analysisPlatformSchool(HttpServletRequest request,
+			@RequestBody String receiveJSONString,
+			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+		JSONResponseBody responseBody = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			if (tokenBean != null) {
+				JSONObject analyizeData = analysisService.platformSchool();
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setData(analyizeData);
+			}
+		} catch (JSONException e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		}
+		return responseBody.toString();
+	}
+	@RequestMapping(value="/api/analysisplatformschoolbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String analysisPlatformSchoolByYear(HttpServletRequest request,
+			@RequestBody String receiveJSONString,
+			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
+			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
+			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+		JSONResponseBody responseBody = new JSONResponseBody();
+		try {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+			Long beginTime = jsonObject.getLong("beginTime");
+			Long endTime = jsonObject.getLong("endTime");
+			if (tokenBean != null) {
+				JSONObject analyizeData = analysisService.platformSchoolByYear(beginTime, endTime);
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setData(analyizeData);
+			}
+		} catch (JSONException e) {
+			log.error("Exception :" + e.getMessage());
+			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		}
+		return responseBody.toString();
+	}
 	
 //	@RequestMapping(value="/api/exportplatformtotal", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 //	@ResponseBody
@@ -431,18 +534,5 @@ public class AnalysisController {
 //		}
 //		return null;
 //	}
-	
-//	@RequestMapping(value="/api/exportplatformschool", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public ResponseEntity<InputStreamResource> exportPlatformSchool(HttpServletRequest request,@RequestBody String receiveJSONString){
-//		log.info("exportpatent ");
-//		return null;
-//	}
-//	
-//	@RequestMapping(value="/api/exportplatformcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public ResponseEntity<InputStreamResource> exportPlatformCountry(HttpServletRequest request,@RequestBody String receiveJSONString){
-//		log.info("exportpatent ");
-//		return null;
-//	}
+
 }
