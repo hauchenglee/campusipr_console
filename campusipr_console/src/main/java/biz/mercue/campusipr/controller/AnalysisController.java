@@ -450,6 +450,7 @@ public class AnalysisController {
 			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+		log.info("analysis Platform School");
 		JSONResponseBody responseBody = new JSONResponseBody();
 		try {
 			JSONObject jsonObject = new JSONObject(receiveJSONString);
@@ -472,6 +473,7 @@ public class AnalysisController {
 			@RequestParam(value ="page",required=false,defaultValue = "1") int page,
 			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
 			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
+		log.info("analysis Platform School By Year");
 		JSONResponseBody responseBody = new JSONResponseBody();
 		try {
 			JSONObject jsonObject = new JSONObject(receiveJSONString);

@@ -73,4 +73,8 @@ public interface AnalysisDao {
 	int countAllPatentByYear(Long beginDate, Long endDate);
 	List<Analysis> countYearPatent();
 	List<Analysis> countYearPatentByYear(Long beginDate, Long endDate);
+	List<Analysis> getEachDepartmentDefaultYear(String businessId);
+	List<Analysis> countSchoolSum();
+	List<Analysis> countSchoolSumByYear(Long beginDate, Long endDate);
+	List<Analysis> getDefaultYear();
 }

@@ -260,9 +260,13 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Analysis> countTWEachDepartmentTotal = new ArrayList<Analysis>();
 		List<Analysis> countCNEachDepartmentTotal = new ArrayList<Analysis>();
 		List<Analysis> countUSEachDepartmentTotal = new ArrayList<Analysis>();
+		List<Analysis> getEachDepartmentDefaultYear = new ArrayList<Analysis>();
+		
 		List<Object> twdepCombine = new ArrayList<Object>();
 		List<Object> cndepCombine = new ArrayList<Object>();
 		List<Object> usdepCombine = new ArrayList<Object>();
+		
+		getEachDepartmentDefaultYear = analysisDao.getEachDepartmentDefaultYear(businessId);
 		
 		countEachDepartmentTotal = analysisDao.countEachDepartment(businessId);
 		countTWEachDepartmentTotal = analysisDao.countTWEachDepartment(businessId);
@@ -289,6 +293,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 		result.put("countTWEachDepartmentTotal",twdepCombine);
 		result.put("countCNEachDepartmentTotal",cndepCombine);
 		result.put("countUSEachDepartmentTotal",usdepCombine);
+		result.put("getEachDepartmentDefaultYear",getEachDepartmentDefaultYear);
 		
 		return result;
 	}
@@ -365,7 +370,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 		result.put("schoolSum",schoolSum);
 		result.put("applSum",applSum);
 		result.put("porfolioSum",porfolioSum);
-		result.put("countYearPatent",combineOverview);
+		result.put("analAllYearsList",combineOverview);
 		return result;
 	}
 
@@ -390,7 +395,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 		result.put("schoolSum",schoolSum);
 		result.put("applSum",applSum);
 		result.put("porfolioSum",porfolioSum);
-		result.put("countYearPatent",combineOverview);
+		result.put("analAllYearsList",combineOverview);
 		
 		return result;
 	}
@@ -404,6 +409,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Analysis> countSchoolCountryPublishStatus= new ArrayList<Analysis>();
 		List<Analysis> countSchoolSingleCountry= new ArrayList<Analysis>();
 		List<Analysis> countYearPatent = new ArrayList<Analysis>();
+		
 		List<Object> combineYear = new ArrayList<Object>();
 		List<Object> combineCountry = new ArrayList<Object>();
 		List<Object> combineApplStatus = new ArrayList<Object>();
@@ -452,11 +458,12 @@ public class AnalysisServiceImpl implements AnalysisService {
 		}
 		
 		JSONObject result = new JSONObject();
-		result.put("countSchoolCountry",combineCountry);
-		result.put("countSchoolCountryApplStatus",combineApplStatus);
-		result.put("countSchoolCountryNoticeStatus",combineNoticeStatus);
-		result.put("countSchoolCountryPublishStatus",combinePublishStatus);
-		result.put("countSchoolSingleCountry",combineYear);
+		result.put("countCountryTotal",combineCountry);
+		result.put("countCountryApplStatusTotal",combineApplStatus);
+		result.put("countCountryNoticeStatusTotal",combineNoticeStatus);
+		result.put("countCountryPublishStatusTotal",combinePublishStatus);
+		result.put("countCountryByYearTotal",combineYear);
+		result.put("analAllYearsList",countYearPatent);
 		
 		return result;
 	}
@@ -517,11 +524,11 @@ public class AnalysisServiceImpl implements AnalysisService {
 		}
 		
 		JSONObject result = new JSONObject();
-		result.put("countSchoolCountry",combineCountry);
-		result.put("countSchoolCountryApplStatus",combineApplStatus);
-		result.put("countSchoolCountryNoticeStatus",combineNoticeStatus);
-		result.put("countSchoolCountryPublishStatus",combinePublishStatus);
-		result.put("countSchoolSingleCountry",combineYear);
+		result.put("countCountryTotal",combineCountry);
+		result.put("countCountryApplStatusTotal",combineApplStatus);
+		result.put("countCountryNoticeStatusTotal",combineNoticeStatus);
+		result.put("countCountryPublishStatusTotal",combinePublishStatus);
+		result.put("countCountryByYearTotal",combineYear);
 		
 		return result;
 	}
@@ -532,16 +539,24 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Analysis> countSchoolPatentApplStatus= new ArrayList<Analysis>();
 		List<Analysis> countSchoolPatentNoticeStatus= new ArrayList<Analysis>();
 		List<Analysis> countSchoolPatentPublishStatus= new ArrayList<Analysis>();
+		List<Analysis> countSchoolSum= new ArrayList<Analysis>();
+		List<Analysis> getDefaultYear = new ArrayList<Analysis>();
+		List<Object> combineSchoolSum = new ArrayList<Object>();
 		
 		countSchoolPatentTotal = analysisDao.countSchoolPatentTotal();
 		countSchoolPatentApplStatus = analysisDao.countSchoolPatentApplStatus();
 		countSchoolPatentNoticeStatus = analysisDao.countSchoolPatentNoticeStatus();
 		countSchoolPatentPublishStatus = analysisDao.countSchoolPatentPublishStatus();
-		
+		getDefaultYear=analysisDao.getDefaultYear();
+		countSchoolSum = analysisDao.countSchoolSum();
+				
 		Object countryToArray [][]=countSchoolPatentTotal.toArray(new Object[countSchoolPatentTotal.size()][0]);
 		Object applStatusToArray [][]=countSchoolPatentApplStatus.toArray(new Object[countSchoolPatentApplStatus.size()][0]);
 		Object noticeStatusToArray [][]=countSchoolPatentNoticeStatus.toArray(new Object[countSchoolPatentNoticeStatus.size()][0]);
 		Object publishStatusToArray [][]=countSchoolPatentPublishStatus.toArray(new Object[countSchoolPatentPublishStatus.size()][0]);
+		Object countSchoolSumToArray[][] = countSchoolSum.toArray(new Object[countSchoolSum.size()][0]);
+		
+		combineSchoolSum.addAll(combineSchoolSum(countSchoolSumToArray));
 		
 		List <Object> patentCNTotal = new ArrayList<Object>(); 
 		List <Object> patentTWTotal = new ArrayList<Object>(); 
@@ -590,6 +605,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 		result.put("patentTWPublish", patentTWPublish);
 		result.put("patentUSPublish", patentUSPublish);
 		
+		result.put("getDefaultYear", getDefaultYear);
+		result.put("combineSchoolSum", combineSchoolSum);
 		return result;
 	}
 	
@@ -599,51 +616,55 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Analysis> countSchoolPatentApplStatus= new ArrayList<Analysis>();
 		List<Analysis> countSchoolPatentNoticeStatus= new ArrayList<Analysis>();
 		List<Analysis> countSchoolPatentPublishStatus= new ArrayList<Analysis>();
-		
-		countSchoolPatentTotal = analysisDao.countSchoolPatentTotalByYear(beginDate, endDate);
-		countSchoolPatentApplStatus = analysisDao.countSchoolPatentApplStatusByYear(beginDate, endDate);
-		countSchoolPatentNoticeStatus = analysisDao.countSchoolPatentNoticeStatusByYear(beginDate, endDate);
-		countSchoolPatentPublishStatus = analysisDao.countSchoolPatentPublishStatusByYear(beginDate, endDate);
-		
-		Object countryToArray [][]=countSchoolPatentTotal.toArray(new Object[countSchoolPatentTotal.size()][0]);
-		Object applStatusToArray [][]=countSchoolPatentApplStatus.toArray(new Object[countSchoolPatentApplStatus.size()][0]);
-		Object noticeStatusToArray [][]=countSchoolPatentNoticeStatus.toArray(new Object[countSchoolPatentNoticeStatus.size()][0]);
-		Object publishStatusToArray [][]=countSchoolPatentPublishStatus.toArray(new Object[countSchoolPatentPublishStatus.size()][0]);
-		
+		List<Analysis> countSchoolSum= new ArrayList<Analysis>();
+		List<Object> combineSchoolSum = new ArrayList<Object>();
 		List <Object> patentCNTotal = new ArrayList<Object>(); 
 		List <Object> patentTWTotal = new ArrayList<Object>(); 
 		List <Object> patentUSTotal = new ArrayList<Object>();
-		patentCNTotal.addAll(combineSchoolData(countryToArray).getPlantformSchoolCNPatentData());
-		patentTWTotal.addAll(combineSchoolData(countryToArray).getPlantformSchoolTWPatentData());
-		patentUSTotal.addAll(combineSchoolData(countryToArray).getPlantformSchoolUSPatentData());
-		
 		List <Object> patentCNAppl = new ArrayList<Object>(); 
 		List <Object> patentTWAppl = new ArrayList<Object>(); 
 		List <Object> patentUSAppl = new ArrayList<Object>(); 
-		patentCNAppl.addAll(combineSchoolData(applStatusToArray).getPlantformSchoolCNPatentData());
-		patentTWAppl.addAll(combineSchoolData(applStatusToArray).getPlantformSchoolTWPatentData());
-		patentUSAppl.addAll(combineSchoolData(applStatusToArray).getPlantformSchoolUSPatentData());
-		
 		List <Object> patentCNNotice = new ArrayList<Object>(); 
 		List <Object> patentTWNotice = new ArrayList<Object>(); 
 		List <Object> patentUSNotice = new ArrayList<Object>();
-		patentCNNotice.addAll(combineSchoolData(noticeStatusToArray).getPlantformSchoolCNPatentData());
-		patentTWNotice.addAll(combineSchoolData(noticeStatusToArray).getPlantformSchoolTWPatentData());
-		patentUSNotice.addAll(combineSchoolData(noticeStatusToArray).getPlantformSchoolUSPatentData());
-		
-		
 		List <Object> patentCNPublish = new ArrayList<Object>(); 
 		List <Object> patentTWPublish = new ArrayList<Object>(); 
 		List <Object> patentUSPublish = new ArrayList<Object>();
-		patentCNPublish.addAll(combineSchoolData(publishStatusToArray).getPlantformSchoolCNPatentData());
-		patentTWPublish.addAll(combineSchoolData(publishStatusToArray).getPlantformSchoolTWPatentData());
-		patentUSPublish.addAll(combineSchoolData(publishStatusToArray).getPlantformSchoolUSPatentData());
+		
+		try {
+			countSchoolPatentTotal = analysisDao.countSchoolPatentTotalByYear(beginDate, endDate);
+			countSchoolPatentApplStatus = analysisDao.countSchoolPatentApplStatusByYear(beginDate, endDate);
+			countSchoolPatentNoticeStatus = analysisDao.countSchoolPatentNoticeStatusByYear(beginDate, endDate);
+			countSchoolPatentPublishStatus = analysisDao.countSchoolPatentPublishStatusByYear(beginDate, endDate);
+			countSchoolSum = analysisDao.countSchoolSumByYear(beginDate, endDate);
+			
+			Object countryToArray [][]=countSchoolPatentTotal.toArray(new Object[countSchoolPatentTotal.size()][0]);
+			Object applStatusToArray [][]=countSchoolPatentApplStatus.toArray(new Object[countSchoolPatentApplStatus.size()][0]);
+			Object noticeStatusToArray [][]=countSchoolPatentNoticeStatus.toArray(new Object[countSchoolPatentNoticeStatus.size()][0]);
+			Object publishStatusToArray [][]=countSchoolPatentPublishStatus.toArray(new Object[countSchoolPatentPublishStatus.size()][0]);
+			Object countSchoolSumToArray[][] = countSchoolSum.toArray(new Object[countSchoolSum.size()][0]);
+			
+			combineSchoolSum.addAll(combineSchoolSum(countSchoolSumToArray));
+			patentCNTotal.addAll(combineSchoolData(countryToArray).getPlantformSchoolCNPatentData());
+			patentTWTotal.addAll(combineSchoolData(countryToArray).getPlantformSchoolTWPatentData());
+			patentUSTotal.addAll(combineSchoolData(countryToArray).getPlantformSchoolUSPatentData());
+			patentCNAppl.addAll(combineSchoolData(applStatusToArray).getPlantformSchoolCNPatentData());
+			patentTWAppl.addAll(combineSchoolData(applStatusToArray).getPlantformSchoolTWPatentData());
+			patentUSAppl.addAll(combineSchoolData(applStatusToArray).getPlantformSchoolUSPatentData());
+			patentCNNotice.addAll(combineSchoolData(noticeStatusToArray).getPlantformSchoolCNPatentData());
+			patentTWNotice.addAll(combineSchoolData(noticeStatusToArray).getPlantformSchoolTWPatentData());
+			patentUSNotice.addAll(combineSchoolData(noticeStatusToArray).getPlantformSchoolUSPatentData());
+			patentCNPublish.addAll(combineSchoolData(publishStatusToArray).getPlantformSchoolCNPatentData());
+			patentTWPublish.addAll(combineSchoolData(publishStatusToArray).getPlantformSchoolTWPatentData());
+			patentUSPublish.addAll(combineSchoolData(publishStatusToArray).getPlantformSchoolUSPatentData());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+		}
 		
 		JSONObject result = new JSONObject();
-//		result.put("countSchoolPatentTotal",countSchoolPatentTotal);
-//		result.put("countSchoolPatentApplStatus",countSchoolPatentApplStatus);
-//		result.put("countSchoolPatentNoticeStatus",countSchoolPatentNoticeStatus);
-//		result.put("countSchoolPatentPublishStatus",countSchoolPatentPublishStatus);
+
 		result.put("patentCNTotal", patentCNTotal);
 		result.put("patentTWTotal", patentTWTotal);
 		result.put("patentUSTotal", patentUSTotal);
@@ -659,8 +680,51 @@ public class AnalysisServiceImpl implements AnalysisService {
 		result.put("patentCNPublish", patentCNPublish);
 		result.put("patentTWPublish", patentTWPublish);
 		result.put("patentUSPublish", patentUSPublish);
+		result.put("combineSchoolSum", combineSchoolSum);
 		
 		return result;
+	}
+	
+	private List<Object> combineSchoolSum(Object[][] dataToArray){
+		List<Object> combineSchoolSum = new ArrayList<Object>();
+		List<String> schoolList = analysisDao.getSchoolList();
+		Object[][]schoolListToArray = schoolList.toArray(new Object[schoolList.size()][0]);
+		
+		try {
+			Object[] combineArr;
+			int schoolInx = 0;
+			int dataInx = 0;
+			if(schoolListToArray.length!=0 && dataToArray.length!=0) {
+				for(schoolInx = 0;schoolInx<schoolListToArray.length;schoolInx++) {
+					combineArr = new Object[2];
+					if(dataInx < schoolListToArray.length) {
+						if(schoolListToArray[schoolInx][0].equals(dataToArray[dataInx][0])) {
+							combineArr[0] = dataToArray[dataInx][0];
+							combineArr[1] = dataToArray[dataInx][1];
+							combineSchoolSum.add(combineArr);
+//							log.info("Id: "+dataToArray[dataInx][0]);
+							dataInx++;
+						}else {
+							combineArr[0] = schoolListToArray[schoolInx][0];
+							combineArr[1] = 0;
+							combineSchoolSum.add(combineArr);
+//							log.info("Id: "+schoolListToArray[schoolInx][0]);
+						}
+					}else {
+						combineArr[0] = schoolListToArray[schoolInx][0];
+						combineArr[1] = 0;
+						combineSchoolSum.add(combineArr);
+//						log.info("Id: "+schoolListToArray[schoolInx][0]);
+					}
+				}
+			}else {
+				log.info(dataToArray.length);
+				log.info(schoolListToArray.length);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return combineSchoolSum;
 	}
 	
 	private Analysis combineSchoolData(Object[][] dataToArray){
@@ -673,6 +737,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 			List <Object> usDateList = new ArrayList<Object>();
 			
 			List<String> schoolList = analysisDao.getSchoolList();
+			Object[][]schoolListToArray = schoolList.toArray(new Object[schoolList.size()][0]);
+			
 			Analysis analysis = new Analysis();
 			try {
 				int dataInx = 0;
@@ -684,7 +750,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 				Object countryId ;
 	//			Object status;
 				Object[] combineArr;
-				if (dataToArray.length != 0) {
+				if (dataToArray.length != 0 && !schoolList.isEmpty()) {
 					for (dataInx = 0; dataInx < dataToArray.length; dataInx++) {
 						if (dataToArray[dataInx][3].equals("cn")) {
 							busineseId = dataToArray[dataInx][0];
@@ -723,25 +789,10 @@ public class AnalysisServiceImpl implements AnalysisService {
 							usDateList.add(combineArr);
 						}
 					}
-				}else {
-					for(schoolInx = 0;schoolInx<schoolList.size();schoolInx++) {
-						combineArr = new Object[4];
-						combineArr[0] = schoolList.get(schoolInx);
-						combineArr[1] = "enName";
-						combineArr[2] = 0;
-						combineArr[3] = "countryId";
-						combineCNPatentTotal.add(combineArr);
-						combineTWPatentTotal.add(combineArr);
-						combineUSPatentTotal.add(combineArr);
-					}
-				}
-				Object CNDateListToArray [][]=cnDateList.toArray(new Object[cnDateList.size()][0]);
-				Object TWDateListToArray [][]=twDateList.toArray(new Object[twDateList.size()][0]);
-				Object USDateListToArray [][]=usDateList.toArray(new Object[usDateList.size()][0]);
-				
-				
-				
-				if(!schoolList.isEmpty()&&dataToArray.length != 0) {
+					
+					Object CNDateListToArray [][]=cnDateList.toArray(new Object[cnDateList.size()][0]);
+					Object TWDateListToArray [][]=twDateList.toArray(new Object[twDateList.size()][0]);
+					Object USDateListToArray [][]=usDateList.toArray(new Object[usDateList.size()][0]);
 					//各學校CN Total
 					if(!cnDateList.isEmpty()) {
 						dataIter = 0;
@@ -749,23 +800,23 @@ public class AnalysisServiceImpl implements AnalysisService {
 						for(schoolInx = 0;schoolInx<schoolList.size();schoolInx++) {
 							combineArr = new Object[4];
 							if(dataIter<CNDateListToArray.length) {
-								if(schoolList.get(schoolInx).equals(CNDateListToArray[dataIter][0])) {
-									combineArr[0] = schoolList.get(schoolInx);
+								if(schoolListToArray[schoolInx][0].equals(CNDateListToArray[dataIter][0])) {
+									combineArr[0] = schoolListToArray[schoolInx][0];
 									combineArr[1] = CNDateListToArray[dataIter][1];
 									combineArr[2] = CNDateListToArray[dataIter][2];
 									combineArr[3] = CNDateListToArray[dataIter][3];
 									combineCNPatentTotal.add(combineArr);
 									dataIter++;
 								}else {
-									combineArr[0] = schoolList.get(schoolInx);
-									combineArr[1] = "enName";
+									combineArr[0] = schoolListToArray[schoolInx][0];
+									combineArr[1] = schoolListToArray[schoolInx][1];
 									combineArr[2] = 0;
 									combineArr[3] = countryId;
 									combineCNPatentTotal.add(combineArr);
 								}
 							}else {
-								combineArr[0] = schoolList.get(schoolInx);
-								combineArr[1] = "enName";
+								combineArr[0] = schoolListToArray[schoolInx][0];
+								combineArr[1] = schoolListToArray[schoolInx][1];
 								combineArr[2] = 0;
 								combineArr[3] = countryId;
 								combineCNPatentTotal.add(combineArr);
@@ -774,8 +825,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 					}else {
 						for(schoolInx = 0;schoolInx<schoolList.size();schoolInx++) {
 							combineArr = new Object[4];
-							combineArr[0] = schoolList.get(schoolInx);
-							combineArr[1] = "enName";
+							combineArr[0] = schoolListToArray[schoolInx][0];
+							combineArr[1] = schoolListToArray[schoolInx][1];
 							combineArr[2] = 0;
 							combineArr[3] = "countryId";
 							combineCNPatentTotal.add(combineArr);
@@ -789,23 +840,23 @@ public class AnalysisServiceImpl implements AnalysisService {
 						for(schoolInx = 0;schoolInx<schoolList.size();schoolInx++) {
 							combineArr = new Object[4];
 							if(dataIter<TWDateListToArray.length) {
-								if(schoolList.get(schoolInx).equals(TWDateListToArray[dataIter][0])) {
-									combineArr[0] = schoolList.get(schoolInx);
+								if(schoolListToArray[schoolInx][0].equals(TWDateListToArray[dataIter][0])) {
+									combineArr[0] = schoolListToArray[schoolInx][0];
 									combineArr[1] = TWDateListToArray[dataIter][1];
 									combineArr[2] = TWDateListToArray[dataIter][2];
 									combineArr[3] = TWDateListToArray[dataIter][3];
 									combineTWPatentTotal.add(combineArr);
 									dataIter++;
 								}else {
-									combineArr[0] = schoolList.get(schoolInx);
-									combineArr[1] = "enName";
+									combineArr[0] = schoolListToArray[schoolInx][0];
+									combineArr[1] = schoolListToArray[schoolInx][1];
 									combineArr[2] = 0;
 									combineArr[3] = countryId;
 									combineTWPatentTotal.add(combineArr);
 								}
 							}else {
-								combineArr[0] = schoolList.get(schoolInx);
-								combineArr[1] = "enName";
+								combineArr[0] = schoolListToArray[schoolInx][0];
+								combineArr[1] = schoolListToArray[schoolInx][1];
 								combineArr[2] = 0;
 								combineArr[3] = countryId;
 								combineTWPatentTotal.add(combineArr);
@@ -814,11 +865,11 @@ public class AnalysisServiceImpl implements AnalysisService {
 					}else {
 						for(schoolInx = 0;schoolInx<schoolList.size();schoolInx++) {
 							combineArr = new Object[4];
-							combineArr[0] = schoolList.get(schoolInx);
-							combineArr[1] = "enName";
+							combineArr[0] = schoolListToArray[schoolInx][0];
+							combineArr[1] = schoolListToArray[schoolInx][1];
 							combineArr[2] = 0;
 							combineArr[3] = "countryId";
-							combineCNPatentTotal.add(combineArr);
+							combineTWPatentTotal.add(combineArr);
 						}
 						log.info("twDateList is Empty");
 					}
@@ -829,23 +880,23 @@ public class AnalysisServiceImpl implements AnalysisService {
 						for(schoolInx = 0;schoolInx<schoolList.size();schoolInx++) {
 							combineArr = new Object[4];
 							if(dataIter<USDateListToArray.length) {
-								if(schoolList.get(schoolInx).equals(USDateListToArray[dataIter][0])) {
-									combineArr[0] = schoolList.get(schoolInx);
+								if(schoolListToArray[schoolInx][0].equals(USDateListToArray[dataIter][0])) {
+									combineArr[0] = schoolListToArray[schoolInx][0];
 									combineArr[1] = USDateListToArray[dataIter][1];
 									combineArr[2] = USDateListToArray[dataIter][2];
 									combineArr[3] = USDateListToArray[dataIter][3];
 									combineUSPatentTotal.add(combineArr);
 									dataIter++;
 								}else {
-									combineArr[0] = schoolList.get(schoolInx);
-									combineArr[1] = "enName";
+									combineArr[0] = schoolListToArray[schoolInx][0];
+									combineArr[1] = schoolListToArray[schoolInx][1];
 									combineArr[2] = 0;
 									combineArr[3] = countryId;
 									combineUSPatentTotal.add(combineArr);
 								}
 							}else {
-								combineArr[0] = schoolList.get(schoolInx);
-								combineArr[1] = "enName";
+								combineArr[0] = schoolListToArray[schoolInx][0];
+								combineArr[1] = schoolListToArray[schoolInx][1];
 								combineArr[2] = 0;
 								combineArr[3] = countryId;
 								combineUSPatentTotal.add(combineArr);
@@ -854,22 +905,35 @@ public class AnalysisServiceImpl implements AnalysisService {
 					}else {
 						for(schoolInx = 0;schoolInx<schoolList.size();schoolInx++) {
 							combineArr = new Object[4];
-							combineArr[0] = schoolList.get(schoolInx);
-							combineArr[1] = "enName";
+							combineArr[0] = schoolListToArray[schoolInx][0];
+							combineArr[1] = schoolListToArray[schoolInx][1];
 							combineArr[2] = 0;
 							combineArr[3] = "countryId";
-							combineCNPatentTotal.add(combineArr);
+							combineUSPatentTotal.add(combineArr);
 						}
 						log.info("usDateList is Empty");
 					}
-					analysis.setPlantformSchoolCNPatentTotal(combineCNPatentTotal);
-					analysis.setPlantformSchoolTWPatentTotal(combineTWPatentTotal);
-					analysis.setPlantformSchoolUSPatentTotal(combineUSPatentTotal);
+				}else if(dataToArray.length==0) {
+					log.info("dataToArray is null");
+					for(schoolInx = 0;schoolInx<schoolList.size();schoolInx++) {
+						combineArr = new Object[4];
+						combineArr[0] = schoolListToArray[schoolInx][0];
+						combineArr[1] = schoolListToArray[schoolInx][1];
+						combineArr[2] = 0;
+						combineArr[3] = "countryId";
+						combineCNPatentTotal.add(combineArr);
+						combineTWPatentTotal.add(combineArr);
+						combineUSPatentTotal.add(combineArr);
+					}
+				}else {
+					log.info("shoolList is null");
 				}
+				analysis.setPlantformSchoolCNPatentTotal(combineCNPatentTotal);
+				analysis.setPlantformSchoolTWPatentTotal(combineTWPatentTotal);
+				analysis.setPlantformSchoolUSPatentTotal(combineUSPatentTotal);			
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
 			return analysis;
 		}
 
@@ -1099,7 +1163,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			Object[] combineArr;
 			try {
 				if (statusToArray.length == 0) {
-					log.info("空的");
+					log.info("無狀態");
 					for (countryInx = 0; countryInx < allCountryList.size(); countryInx++) {
 						countryData.add(0);
 					}
