@@ -129,11 +129,12 @@ public class MessageDaoImpl extends AbstractDao<String,  Message> implements Mes
 	}
 
 	@Override
-	public Message getNewestMessage(String senderId) {
-		String hql = "select m from Message m where m.sender_id = :senderId order by m.message_date desc";
+	public Message getNewestMessage(String senderId, String receiverId) {
+		String hql = "select m from Message m where m.sender_id = :senderId and m.receiver_id = :receiverId order by m.message_date desc";
 		Session session = getSession();
 		Query query = session.createQuery(hql);
 		query.setParameter("senderId", senderId);
+		query.setParameter("receiverId", receiverId);
 		query.setMaxResults(1);
 		return (Message) query.uniqueResult();
 	}

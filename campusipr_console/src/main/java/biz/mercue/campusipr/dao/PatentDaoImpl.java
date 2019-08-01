@@ -99,6 +99,20 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.add(Restrictions.like("patent_appl_no", applNo, MatchMode.START));
 		return criteria.list();
 	}
+
+	@Override
+	public List<Patent> getByAdvancedSearch(String hql, List<String> dataList, int page, int pageSize) {
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		for (int i = 0; i < dataList.size(); i++) {
+			String parameterName = "s" + i;
+			query.setParameter(parameterName, dataList.get(i));
+		}
+		query.setFirstResult((page - 1) * pageSize);
+		query.setMaxResults(pageSize);
+//		query.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // 可以用distinct(bean)代替
+		return query.list();
+	}
 	
 	@Override
 	public int updatePatentApplNo(String patentId, String patentApplNo) {
@@ -109,26 +123,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	    query.setParameter("patent_id", patentId);
 	    return query.executeUpdate();
 	}
-
-	@Override
-	public int updatePatentHistory(String dbPatentId, String editPatentId) {
-		String hql = "Update PatentEditHistory peh set peh.patent_id = :dbPatent_id where peh.patent_id = :editPatent_id";
-		Session session = getSession();
-		Query query = session.createQuery(hql);
-		query.setParameter("dbPatent_id", dbPatentId);
-		query.setParameter("editPatent_id", editPatentId);
-		return query.executeUpdate();
-	}
-	
-	@Override
-	public List<Patent> getByFamily(String familyId){
-		String hql = "from Patent p inner join p.listFamily as plf where plf = :familyId";
-		Session session = getSession();
-		Query query = session.createQuery(hql);
-		query.setParameter("familyId", familyId);
-		return query.list();
-	}
-
 
 	@Override
 	public void create(Patent patent) {
@@ -247,15 +241,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		}
 		criteria.add(Restrictions.in("patent_id", ids));
 		return criteria.list();
-	}
-	
-	public PatentExtension getPatentExtensionByPatentIdAndBusinessId (String patentId, String businessId) {
-	    String hql = "FROM PatentExtension where patent_id = :patent_id and business_id = :business_id";
-	    Session session = getSession();
-	    Query query = session.createQuery(hql);
-	    query.setParameter("patent_id", patentId);
-	    query.setParameter("business_id", businessId);
-	    return  (PatentExtension) query.getSingleResult();
 	}
 	
 	@Override

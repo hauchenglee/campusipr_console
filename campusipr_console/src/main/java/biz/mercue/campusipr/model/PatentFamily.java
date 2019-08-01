@@ -43,7 +43,7 @@ public class PatentFamily extends BaseBean{
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date update_date;
 	
-	@JsonView({View.PatentDetail.class})
+	@JsonView({View.Patent.class, View.PatentDetail.class})
 	private String business_id;
 
 	@Transient

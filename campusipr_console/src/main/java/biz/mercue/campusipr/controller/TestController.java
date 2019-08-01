@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -71,9 +72,11 @@ public class TestController {
 
 	@RequestMapping(value="/api/demo/{patentId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String demo(HttpServletRequest request, @PathVariable String patentId) {
+	public String demo(HttpServletRequest request, @PathVariable String patentId, @RequestBody String receiveJSONString) {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		int result = patentService.demo("", tokenBean.getBusiness_id(), patentId);
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		String str = jsonObject.optString("str");
+		int result = patentService.demo("", tokenBean.getBusiness_id(), patentId, str);
 		return "{\"aaa\": \"" + result + "\"}";
 	}
 	

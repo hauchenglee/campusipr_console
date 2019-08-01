@@ -35,7 +35,7 @@ public class Admin extends BaseBean {
 	private String admin_unit_name;
 	
 	@JsonView({View.Admin.class,View.Role.class})
-	private boolean available;
+	private Boolean available;
 	
 	
 	@JsonView({View.Admin.class,View.Role.class})
@@ -105,11 +105,11 @@ public class Admin extends BaseBean {
 		this.admin_password = admin_password;
 	}
 
-	public boolean isAvailable() {
+	public Boolean isAvailable() {
 		return available;
 	}
 
-	public void setAvailable(boolean available) {
+	public void setAvailable(Boolean available) {
 		this.available = available;
 	}
 

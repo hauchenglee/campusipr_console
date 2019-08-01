@@ -2,16 +2,7 @@ package biz.mercue.campusipr.model;
 
 import java.util.Date;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -68,7 +59,7 @@ public class Message extends BaseBean{
 	@JsonView(View.Message.class)
 	private Long message_date;
 
-	@JsonView(View.Message.class)
+    @JsonView({View.Message.class, View.Admin.class})
 	private boolean is_read;
 
 	public String getMessage_id() {

@@ -26,7 +26,7 @@ public interface MessageDao {
 
 	List<Message> searchText(String senderId, String receiverId, String text);
 
-    Message getNewestMessage(String senderId);
+    Message getNewestMessage(String senderId, String receiverId);
 
 	void readMessage(String senderId, String receiverId);
 }

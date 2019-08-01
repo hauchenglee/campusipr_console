@@ -42,6 +42,7 @@ public class MessageServiceImpl implements MessageService{
 			message.setMessage_id(KeyGeneratorUtils.generateRandomString());
 			Date now = new Date();
 			message.setMessage_date(now.getTime());
+			message.setIs_read(false);
 			mDao.addMessage(message);
 		} catch (Exception e) {
 			log.error(e.getMessage());
@@ -100,15 +101,23 @@ public class MessageServiceImpl implements MessageService{
 //				log.info("user is platform: return all school member");
 				adminList = adminDao.getSchoolAdminList();
 				for (Admin school : adminList) {
-					Message dbMessage = mDao.getNewestMessage(school.getAdmin_id());
-					school.setMessage(dbMessage);
+					Message dbMessage = mDao.getNewestMessage(school.getAdmin_id(), Constants.BUSINESS_PLATFORM);
+					if (dbMessage != null) {
+						school.setMessage(dbMessage);
+					} else {
+						school.setMessage(null);
+					}
 				}
 			} else {
 //				log.info("user is school: return all platform member");
 				adminList = adminDao.getPlatformAdminList();
 				for (Admin platform : adminList) {
-					Message dbMessage = mDao.getNewestMessage(platform.getAdmin_id());
-					platform.setMessage(dbMessage);
+					Message dbMessage = mDao.getNewestMessage(Constants.BUSINESS_PLATFORM, adminToken.getAdmin().getAdmin_id());
+					if (dbMessage != null) {
+						platform.setMessage(dbMessage);
+					} else {
+						platform.setMessage(null);
+					}
 				}
 			}
 			return adminList;

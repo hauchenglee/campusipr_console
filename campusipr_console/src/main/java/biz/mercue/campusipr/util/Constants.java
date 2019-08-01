@@ -395,4 +395,68 @@ public class Constants {
 	public static final String STATUS_DESC_IP_RIGHT_TRANSACTION = "辦理轉讓";
 	public static final String STATUS_DESC_RETURN = "退回發明人";
 	public static final String STATUS_NO_STATUS = "(無狀態)";
+
+	public static final String SEARCH_FIELD_CODE_PT = "PT"; // patent title
+	public static final String SEARCH_FIELD_CODE_PTE = "PTE"; // patent title en
+	public static final String SEARCH_FIELD_CODE_AC = "AC"; // applicant country
+	public static final String SEARCH_FIELD_CODE_APN = "APN"; // application number
+	public static final String SEARCH_FIELD_CODE_APD = "APD"; // application date
+	public static final String SEARCH_FIELD_CODE_PN = "PN"; // publish number
+	public static final String SEARCH_FIELD_CODE_PD = "PD"; // publication date
+	public static final String SEARCH_FIELD_CODE_IN = "ISN"; // issue number
+	public static final String SEARCH_FIELD_CODE_ID = "ID"; // issue date
+	public static final String SEARCH_FIELD_CODE_PAN = "PAN"; // patent number
+	public static final String SEARCH_FIELD_CODE_AAN = "AAN"; // applicant name
+	public static final String SEARCH_FIELD_CODE_AN = "AN"; // assignee name
+	public static final String SEARCH_FIELD_CODE_IVN = "IN"; // inventor name
+	public static final String SEARCH_FIELD_CODE_PS = "PS"; // patent status
+
+	public static final String[] SEARCH_FIELD_CODE = {
+			Constants.SEARCH_FIELD_CODE_PT,
+			Constants.SEARCH_FIELD_CODE_PTE,
+			Constants.SEARCH_FIELD_CODE_AC,
+			Constants.SEARCH_FIELD_CODE_APN,
+			Constants.SEARCH_FIELD_CODE_APD,
+			Constants.SEARCH_FIELD_CODE_PN,
+			Constants.SEARCH_FIELD_CODE_PD,
+			Constants.SEARCH_FIELD_CODE_IN,
+			Constants.SEARCH_FIELD_CODE_ID,
+			Constants.SEARCH_FIELD_CODE_PAN,
+			Constants.SEARCH_FIELD_CODE_AAN,
+			Constants.SEARCH_FIELD_CODE_AN,
+			Constants.SEARCH_FIELD_CODE_IVN,
+			Constants.SEARCH_FIELD_CODE_PS
+	};
+
+	public static final String PATENT_NAME = "patent_name";
+	public static final String PATENT_NAME_EN = "patent_name_en";
+	public static final String PATENT_APPL_COUNTRY = "patent_appl_country";
+	public static final String PATENT_APPL_NO = "patent_appl_no";
+	public static final String PATENT_APPL_DATE = "patent_appl_date";
+	public static final String PATENT_PUBLISH_NO = "patent_publish_no";
+	public static final String PATENT_PUBLISH_DATE = "patent_publish_date";
+	public static final String PATENT_NOTICE_NO = "patent_notice_no";
+	public static final String PATENT_NOTICE_DATE = "patent_notice_date";
+	public static final String PATENT_NO = "patent_no";
+	public static final String APPLICANT_NAME = "applicant_name";
+	public static final String ASSIGNEE_NAME = "assignee_name";
+	public static final String INVENTOR_NAME = "inventor_name";
+	public static final String STATUS_DESC = "status_desc";
+
+	public static final String[] SEARCH_FIELD_NAME = {
+			Constants.PATENT_NAME,
+			Constants.PATENT_NAME_EN,
+			Constants.PATENT_APPL_COUNTRY,
+			Constants.PATENT_APPL_NO,
+			Constants.PATENT_APPL_DATE,
+			Constants.PATENT_PUBLISH_NO,
+			Constants.PATENT_PUBLISH_DATE,
+			Constants.PATENT_NOTICE_NO,
+			Constants.PATENT_NOTICE_DATE,
+			Constants.PATENT_NO,
+			Constants.APPLICANT_NAME,
+			Constants.ASSIGNEE_NAME,
+			Constants.INVENTOR_NAME,
+			Constants.STATUS_DESC
+	};
 }

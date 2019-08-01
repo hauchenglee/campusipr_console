@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 public interface PatentService {
 
-	int demo(String applNo, String businessId, String patentId);
+	int demo(String applNo, String businessId, String patentId, String str);
 
 	int addPatent(Patent patent);
 
@@ -33,6 +33,8 @@ public interface PatentService {
 	int mergeDiffPatent(String dbPatentId, Patent editPatent, Admin admin, Business business);
 
 	int updatePatent(Patent patent, String businessId);
+
+	ListQueryForm advancedSearch(String searchStr, String business, int page, int pageSize);
 
 	void patentHistoryFirstAdd(Patent patent, String patentId, String businessId);
 

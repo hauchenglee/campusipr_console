@@ -77,15 +77,23 @@ public class PatentServiceImpl implements PatentService {
 	private PatentStatusDao patentStatusDao;
 	
 	@Override
-	public int demo(String applNo, String businessId, String patentId) {
+	public int demo(String applNo, String businessId, String patentId, String str) {
 		try {
+			int page = 1;
+			int pageSize = 20;
 			log.info("demo:");
 			log.info("business id: " + businessId);
 			log.info("patent id: " + patentId);
+			log.info("str: " + str);
 			List<Object> objectList = new ArrayList<>();
 			List<Patent> patentList = new ArrayList<>();
 			List<Date> dateList = new ArrayList<>();
-			objectList = patentDao.demo(patentId, businessId);
+			ListQueryForm form = new ListQueryForm();
+//			objectList = patentDao.demo(patentId, businessId);
+
+			form = advancedSearch(str, businessId, page, pageSize);
+
+
 			log.info(objectList.size());
 			return Constants.INT_SUCCESS;
 		} catch (Exception e) {
@@ -1085,29 +1093,6 @@ public class PatentServiceImpl implements PatentService {
 			if (portfolioList != null && !portfolioList.isEmpty()) {
 				dbPatent.setListPortfolio(portfolioList);
 			}
-/*			先寫來放著，不確定未來會不會用到
-			List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
-			List<String> dbPortfolioIds = new ArrayList<>();
-			for (Portfolio dbPortfolio : dbPortfolioList) {
-				log.info(dbPortfolio.getPortfolio_id());
-				List<Patent> patentList = dbPortfolio.getListPatent();
-				if (patentList != null || !patentList.isEmpty()) {
-					log.info(patentList.size());
-					for (Patent patent : patentList) {
-						if (patent.getPatent_id().equals(editPatentId)) {
-							patentList.remove(patent);
-							dbPortfolioIds.add(dbPortfolio.getPortfolio_id());
-						}
-					}
-				}
-			}
-			if (!dbPortfolioIds.isEmpty()) {
-				for (String portfolioId : dbPortfolioIds) {
-					Portfolio dbPortfolio = portfolioDao.getById(portfolioId);
-					dbPortfolio.addPatent(dbPatent);
-				}
-			}
-			dbPatent.setListPortfolio(editPatent.getListPortfolio());*/
 
 			// family
 			PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(editPatentId, business.getBusiness_id());
@@ -1722,11 +1707,195 @@ public class PatentServiceImpl implements PatentService {
 		
 		return form;
 	}
-	
 
 	@Override
 	public List<Status> getEditStatus(){
 		return statusDao.getEditable();
+	}
+
+	@Override
+	public ListQueryForm advancedSearch(String searchStr, String business, int page, int pageSize) {
+		try {
+			String patternAll = "^[\u4e00-\u9fa5_a-zA-Z0-9]+$"; // 匹配中文，英文字母和數字及下劃線
+			String patternSpace = "\\u0020"; // 匹配空白
+
+			String finalSearchSQL = "";
+			String finalSearchHQL = "";
+			List<Integer> slashIndexList = new ArrayList<>(); // 斜線的index，目的：依據index找出field name
+			List<Integer> fieldCodeStartIndexList = new ArrayList<>();
+			List<String> fieldCodeList = new ArrayList<>(); // 查詢欄位code名稱list（欄位查詢簡稱）
+			List<String> fieldNameList = new ArrayList<>(); // 查詢欄位name名稱list（實際欄位名稱）
+			List<String> fieldNameContainSQLList = new ArrayList<>(); // 查詢欄位name名稱list（實際欄位名稱 && SQL前綴）
+			List<String> elementAreaList = new ArrayList<>(); // 去除欄位名稱跟斜線後的list，也就是每一個field code的範圍
+			List<String> dataList = new LinkedList<>(); // 只有單純查詢資料的data list，為了setParam用的
+
+			searchStr = searchStr.trim();
+			if (searchStr.contains("/")) {
+				finalSearchSQL = "select pat from Patent pat" +
+						" join pat.listApplicant app" +
+						" join pat.listAssignee ass" +
+						" join pat.listInventor inv" +
+						" join pat.listPatentStatus pls" +
+						" join pls.primaryKey.status sta" +
+						" where ";
+				finalSearchHQL = "select distinct(pat) from Patent pat" +
+						" left join pat.listApplicant app" +
+						" left join pat.listAssignee ass" +
+						" left join pat.listInventor inv" +
+						" join pat.listPatentStatus pls" +
+						" join pls.primaryKey.status sta" +
+						" where ";
+
+				// list：儲存斜線的index，用途算出field code name以及field code彼此之間的Area
+				for (int i = 0; i < searchStr.length(); i++) {
+					if (String.valueOf(searchStr.charAt(i)).equals("/")) {
+						slashIndexList.add(i);
+					}
+				}
+
+				fieldCodeList.add(searchStr.split("/")[0]);
+				fieldCodeStartIndexList.add(0);
+
+				for (Integer index : slashIndexList) {
+					for (int i = index; i > 0; i--) {
+						if (String.valueOf(searchStr.charAt(i)).matches(patternSpace)) {
+							fieldCodeList.add(searchStr.substring(i + 1, index));
+							fieldCodeStartIndexList.add(i);
+							break;
+						}
+					}
+				}
+
+				System.out.println("slashIndexList: " + slashIndexList);
+				System.out.println("fieldCodeStartIndexList: " + fieldCodeStartIndexList);
+
+				int elementAreaCount = 1;
+				for (Integer slashIndex : slashIndexList) {
+					if (elementAreaCount < fieldCodeStartIndexList.size()) {
+						elementAreaList.add(searchStr.substring(slashIndex + 1, fieldCodeStartIndexList.get(elementAreaCount)));
+					} else {
+						elementAreaList.add(searchStr.substring(slashIndex + 1));
+					}
+					elementAreaCount++;
+				}
+
+				System.out.println("elementAreaList: " + elementAreaList);
+				StringBuilder elementAreaReplaceStr = new StringBuilder();
+				for (String element : elementAreaList) {
+					elementAreaReplaceStr.append(element.replaceAll("and", "")
+							.replaceAll("AND", "")
+							.replaceAll("or", "")
+							.replaceAll("OR", "")
+							.replaceAll("\\(", "")
+							.replaceAll("\\)", ""));
+				}
+
+				String[] dataArr = elementAreaReplaceStr.toString().split(" ");
+				dataList = new LinkedList<>(Arrays.asList(elementAreaReplaceStr.toString().split(" ")));
+				dataList.removeIf(data -> data == null || data.trim().length() == 0);
+
+				System.out.println("dataList: " + dataList);
+
+				// 將field code轉換成field name
+				System.out.println("fieldCodeList: " + fieldCodeList);
+				int fieldCodeCount;
+				for (int i = 0; i < Constants.SEARCH_FIELD_CODE.length; i++) {
+					for (fieldCodeCount = 0; fieldCodeCount < fieldCodeList.size(); fieldCodeCount++) {
+						if (fieldCodeList.get(fieldCodeCount).equalsIgnoreCase(Constants.SEARCH_FIELD_CODE[i])) {
+							fieldNameList.add(Constants.SEARCH_FIELD_NAME[i]);
+							fieldNameContainSQLList.add(Constants.SEARCH_FIELD_NAME[i].substring(0, 3) + "." + Constants.SEARCH_FIELD_NAME[i]);
+						}
+					}
+				}
+
+				System.out.println("fieldNameList: " + fieldNameList);
+				System.out.println("fieldNameContainSQLList: " + fieldNameContainSQLList);
+
+				// 接下來拆分field name跟data的關係
+				// 想法：依據elementAreaList，每個ele相對應field name index
+				// 搜尋除() and or以外的data start index
+				// 然後依據field name塞入相對應的index
+				int elementFieldCount = 0;
+				int dataCount = 0;
+				boolean isFirstAddBracket;
+				for (String elementArea : elementAreaList) {
+					isFirstAddBracket = true;
+					int arrCount = 0;
+					// 在這area裡相對應field name
+					String currentFieldName = fieldNameContainSQLList.get(elementFieldCount);
+					String[] currentElementDataArr = elementArea.split(" ");
+					for (String arr : currentElementDataArr) {
+						if (!arr.equalsIgnoreCase("and") && !arr.equalsIgnoreCase("or")) {
+							for (int i = 0; i < elementArea.length(); i++) {
+								System.out.println("elementArea: " + elementArea);
+								if (isFirstAddBracket) {
+									if (String.valueOf(arr.charAt(i)).matches(patternAll)) {
+										finalSearchSQL += "(" + arr.substring(0, i) + currentFieldName + " = " + arr.substring(i);
+										finalSearchHQL += "(" + arr.substring(0, i) + currentFieldName + " = " + ":s" + dataCount;
+										dataCount++;
+										break;
+									}
+								} else {
+									if (String.valueOf(arr.charAt(i)).matches(patternAll)) {
+										finalSearchSQL += arr.substring(0, i) + currentFieldName + " = " + arr.substring(i);
+										finalSearchHQL += arr.substring(0, i) + currentFieldName + " = " + ":s" + dataCount;
+										dataCount++;
+										break;
+									}
+								}
+							}
+							isFirstAddBracket = false;
+						} else {
+							if (arrCount == currentElementDataArr.length - 1) {
+								if (arr.equalsIgnoreCase("and")) {
+									finalSearchSQL += " ) and ";
+									finalSearchHQL += ") and ";
+								}
+								if (arr.equalsIgnoreCase("or")) {
+									finalSearchSQL += " ) or ";
+									finalSearchHQL += ") or ";
+								}
+							} else {
+								if (arr.equalsIgnoreCase("and")) {
+									finalSearchSQL += " and ";
+									finalSearchHQL += " and ";
+								}
+								if (arr.equalsIgnoreCase("or")) {
+									finalSearchSQL += " or ";
+									finalSearchHQL += " or ";
+								}
+							}
+						}
+						arrCount++;
+					}
+					elementFieldCount++;
+				}
+
+				finalSearchSQL += ")"; // end of bracket
+				finalSearchHQL += ")"; // end of bracket
+
+			} else {
+				// 錯誤訊息
+			}
+			log.info("sql: " + finalSearchSQL);
+			log.info("hql: " + finalSearchHQL);
+
+			List<Patent> patentList = patentDao.getByAdvancedSearch(finalSearchHQL, dataList, page, pageSize);
+			if (patentList != null) {
+				log.info("patentList.size(): " + patentList.size());
+				for (Patent patent : patentList) {
+					log.info("patent id: " + patent.getPatent_id());
+					log.info("patent name: " + patent.getPatent_name());
+				}
+			} else {
+				log.info("search result is null");
+			}
+
+			return new ListQueryForm();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ListQueryForm();
+		}
 	}
 
 	public void patentHistoryMerge(Patent dbPatent, String businessId) {

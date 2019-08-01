@@ -21,7 +21,9 @@ public interface PatentDao {
 	Patent getByApplNoAndBusinessId(String applNo, String businessId);
 	
 	List<Patent> getPatentListByApplNo(String applNo);
-	
+
+	List<Patent> getByAdvancedSearch(String hql, List<String> dataList, int page, int pageSize);
+
 	int updatePatentApplNo(String patentId, String patentApplNo);
 
 	void create(Patent patent);
@@ -37,13 +39,6 @@ public interface PatentDao {
 
 	
 	List<Patent> getByPatentIds(List<String> ids,String businessId);
-
-	int updatePatentHistory(String dbPatentId, String editPatentId);
-
-	List<Patent> getByFamily(String familyId);
-	
-	PatentExtension getPatentExtensionByPatentIdAndBusinessId(String patentId, String businessId);
-	
 	
 	List<Patent> searchAllFieldPatent(String  searchText, String businessId, int page, int pageSize, String orderList, String orderFieldCode, int is_asc);
 	int  countSearchAllFieldPatent(String searchText,String businessId);

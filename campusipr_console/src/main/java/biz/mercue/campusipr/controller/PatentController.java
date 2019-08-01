@@ -768,4 +768,24 @@ public class PatentController {
 			return null;
 		}
 	}
+
+	@RequestMapping(value = "/api/advancesearch", method = RequestMethod.POST, produces = Constants.CONTENT_TYPE_JSON)
+	public String advanceSearch(HttpServletRequest request,
+								@RequestBody String receiveJSONString,
+								@RequestParam(value ="page",required=false,defaultValue = "1") int page) {
+		log.info("advance search controller");
+		ListResponseBody responseBody = new ListResponseBody();
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		String query = jsonObject.optString("query");
+
+		AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if (adminToken != null) {
+			ListQueryForm form = patentService.advancedSearch(query, adminToken.getBusiness_id(), page, Constants.SYSTEM_PAGE_SIZE);
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setListQuery(form);
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString(View.Patent.class);
+	}
 }
