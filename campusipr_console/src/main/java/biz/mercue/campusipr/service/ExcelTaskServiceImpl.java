@@ -411,14 +411,70 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		log.info(sheet.getLastRowNum());
 		Row testRow = sheet.getRow(y);
 		
+//		for (y = 0; y < sheet.getLastRowNum(); y++) {
+////			log.info(testRow.getLastCellNum());
+//			if(sheet.getRow(y)==null) {
+//				log.info("Row is null");
+//				book.getSheetAt(0).createRow(y);
+//			}
+//			for (x = 0; x < testRow.getLastCellNum(); x++) {
+//				Cell cell =	testRow.getCell(x);
+//				if (cell != null || cell.getCellType() != Cell.CELL_TYPE_BLANK) {
+//				}
+//			}
+//		}
 		for (y = 0; y < sheet.getLastRowNum(); y++) {
 			log.info(testRow.getLastCellNum());
-			if(sheet.getRow(y)==null) {
+			if (sheet.getRow(y) == null) {
 				log.info("Row is null");
-				book.getSheetAt(0).createRow(y);
+//				book.getSheetAt(0).createRow(y);
+//				emptyRowList.add(y);
 			}
-			for (x = 0; x < testRow.getLastCellNum(); x++) {
+			if (sheet.getRow(y).isFormatted()) {
+				formatRowList.add(y);
+				log.info(y + "行有格式");
+//				for (x = 0; x < sheet.getRow(y).getLastCellNum(); x++) {
+					try {
+						sheet.getRow(y).getCell(x).setCellType(CellType.STRING);
+						sheet.getRow(y).getCell(x).getStringCellValue();
+						log.info(y + "行有String值");
+					} catch (Exception e) {
+						log.info("找不到Value");
+						
+					}
+//				}
 			}
+//				sheet.getRow(y).getCell(x).setCellValue("");
+			for (x = 0; x < sheet.getRow(y).getLastCellNum(); x++) {
+				log.info("x");
+//					sheet.getRow(y).getCell(x).setCellValue("");
+				if (sheet.getRow(y).getCell(x) == null || sheet.getRow(y).getCell(x).getCellType() == 3
+						|| sheet.getRow(y).getCell(x).getCellType() == Cell.CELL_TYPE_BLANK
+						|| sheet.getRow(y).getLastCellNum() == -1) {
+					log.info("EmptyCell: " + x + ", " + y);
+					emptyCell++;
+				}
+				
+				if (testRow.getCell(x).getCellTypeEnum() == CellType.STRING) {
+					if (sheet.getRow(y).getCell(x) != null) {
+						sheet.getRow(y).getCell(x).setCellType(CellType.STRING);
+						log.info(sheet.getRow(y).getCell(x).getStringCellValue());
+//						sheet.getRow(y).getCell(x).getStringCellValue().trim();
+					}
+				}
+				if (emptyCell == sheet.getRow(y).getLastCellNum()) {
+					log.info("EmptyRow");
+//					log.info(y);
+					emptyRowList.add(y);
+				}
+			}
+			emptyCell=0;
+		}
+		for(int r = 0;r<emptyRowList.size();r++) {
+			int emptyRowIndex = emptyRowList.get(r);
+			log.info(emptyRowIndex);
+			book.getSheetAt(0).removeRow(sheet.getRow(emptyRowIndex));
+			log.info("移除成功第"+emptyRowIndex+"行");
 		}
 		
 		for (Row row : sheet) {
@@ -857,7 +913,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			log.info("rowIndex: "+rowIndex);
 
 		}
-		log.info(rowIndex);
+//		log.info("rowIndex: "+rowIndex);
 		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
 			return listPatent;
 		} else {
@@ -872,7 +928,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 	private void setColorOnError(Workbook book, List<Integer> errorColumnList, List<Integer> errorRowList) {
 		int x = 0;
 		int y = 0;
-		log.info(errorRowList.size());
+		log.info("errorRowList size: "+errorRowList.size());
 
 		try {
 			log.info("XSSF");
@@ -913,8 +969,8 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				int errorRowIndex = errorRowList.get(x);
 				int errorColIndex = errorColumnList.get(y);
 				row = (HSSFRow) book.getSheetAt(0).getRow(errorRowIndex);
-				log.info("Row: "+errorRowIndex);
-				log.info("eCol, eRow: "+errorColIndex+", " +errorRowIndex);
+//				log.info("Row: "+errorRowIndex);
+//				log.info("eCol, eRow: "+errorColIndex+", " +errorRowIndex);
 				if(row==null) {
 					log.info("row=null");
 				}else {
