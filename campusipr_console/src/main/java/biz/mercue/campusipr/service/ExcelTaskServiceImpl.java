@@ -390,8 +390,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		}
 		
 	}
-	
-	
+		
 	private List<Patent> readBook2Patent(Workbook book, List<FieldMap> listField, List<Integer> other_info_index, String excelTaskId) {
 		log.info("readBook2Patent");
 		String pattern = "[0-9]";
@@ -408,75 +407,59 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		List<Integer> emptyRowList = new ArrayList<Integer>();
 		List<Integer> formatRowList = new ArrayList<Integer>();
 		List<Country> listCountry = countryDao.getAll();
-		log.info(sheet.getLastRowNum());
+		log.info("Row: "+sheet.getLastRowNum());
 		Row testRow = sheet.getRow(y);
 		
-//		for (y = 0; y < sheet.getLastRowNum(); y++) {
-////			log.info(testRow.getLastCellNum());
-//			if(sheet.getRow(y)==null) {
-//				log.info("Row is null");
-//				book.getSheetAt(0).createRow(y);
-//			}
-//			for (x = 0; x < testRow.getLastCellNum(); x++) {
-//				Cell cell =	testRow.getCell(x);
-//				if (cell != null || cell.getCellType() != Cell.CELL_TYPE_BLANK) {
-//				}
-//			}
-//		}
 		for (y = 0; y < sheet.getLastRowNum(); y++) {
-			log.info(testRow.getLastCellNum());
+			log.info(y +"行，有 "+testRow.getLastCellNum());
+			
 			if (sheet.getRow(y) == null) {
-				log.info("Row is null");
-//				book.getSheetAt(0).createRow(y);
-//				emptyRowList.add(y);
-			}
-			if (sheet.getRow(y).isFormatted()) {
-				formatRowList.add(y);
-				log.info(y + "行有格式");
-//				for (x = 0; x < sheet.getRow(y).getLastCellNum(); x++) {
-					try {
-						sheet.getRow(y).getCell(x).setCellType(CellType.STRING);
-						sheet.getRow(y).getCell(x).getStringCellValue();
-						log.info(y + "行有String值");
-					} catch (Exception e) {
-						log.info("找不到Value");
-						
-					}
-//				}
-			}
-//				sheet.getRow(y).getCell(x).setCellValue("");
-			for (x = 0; x < sheet.getRow(y).getLastCellNum(); x++) {
-				log.info("x");
-//					sheet.getRow(y).getCell(x).setCellValue("");
-				if (sheet.getRow(y).getCell(x) == null || sheet.getRow(y).getCell(x).getCellType() == 3
-						|| sheet.getRow(y).getCell(x).getCellType() == Cell.CELL_TYPE_BLANK
-						|| sheet.getRow(y).getLastCellNum() == -1) {
-					log.info("EmptyCell: " + x + ", " + y);
-					emptyCell++;
-				}
-				
-				if (testRow.getCell(x).getCellTypeEnum() == CellType.STRING) {
-					if (sheet.getRow(y).getCell(x) != null) {
-						sheet.getRow(y).getCell(x).setCellType(CellType.STRING);
-						log.info(sheet.getRow(y).getCell(x).getStringCellValue());
-//						sheet.getRow(y).getCell(x).getStringCellValue().trim();
-					}
-				}
-				if (emptyCell == sheet.getRow(y).getLastCellNum()) {
-					log.info("EmptyRow");
-//					log.info(y);
+				log.info(y +": Row is null");
+				book.getSheetAt(0).createRow(y);
+				log.info(sheet.getRow(y).getLastCellNum());
+				if(sheet.getRow(y).getLastCellNum()==-1){
 					emptyRowList.add(y);
 				}
 			}
-			emptyCell=0;
+			if (sheet.getRow(y) != null&&sheet.getRow(y).isFormatted()) {
+				formatRowList.add(y);
+//				log.info(y + "行有格式");
+				if(sheet.getRow(y).getLastCellNum()==-1){
+					emptyRowList.add(y);
+				}
+//					try {
+//						log.info("第 "+y + " 行, CellCount: "+sheet.getRow(y).getLastCellNum());
+//					} catch (Exception e) {
+//						log.info("第 "+y + " 行找不到Value");
+//					}
+			}
+			if(sheet.getRow(y) != null) {
+				for (x = 0; x < sheet.getRow(y).getLastCellNum(); x++) {
+					if (sheet.getRow(y).getCell(x) == null || sheet.getRow(y).getCell(x).getCellType() == 3
+							|| sheet.getRow(y).getCell(x).getCellType() == Cell.CELL_TYPE_BLANK
+							|| sheet.getRow(y).getLastCellNum() == -1) {
+						emptyCell++;
+					}
+					
+					if (testRow.getCell(x).getCellTypeEnum() == CellType.STRING) {
+						if (sheet.getRow(y).getCell(x) != null) {
+							sheet.getRow(y).getCell(x).setCellType(CellType.STRING);
+						}
+					}
+					if (emptyCell == sheet.getRow(y).getLastCellNum()) {
+						emptyRowList.add(y);
+					}
+				}
+				emptyCell=0;
+			}
 		}
 		for(int r = 0;r<emptyRowList.size();r++) {
 			int emptyRowIndex = emptyRowList.get(r);
-			log.info(emptyRowIndex);
+			log.info("emptyRowList.size(): "+emptyRowList.size()+", emptyRowIndex: "+emptyRowIndex);
 			book.getSheetAt(0).removeRow(sheet.getRow(emptyRowIndex));
+//			book.getSheetAt(0).shiftRows(emptyRowIndex, emptyRowIndex+1, -10);
 			log.info("移除成功第"+emptyRowIndex+"行");
 		}
-		
 		for (Row row : sheet) {
 			log.info("Row");
 			if (rowIndex == 0) {
@@ -891,7 +874,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 						}
 					}
-				} // close if (other_info_index.size() > 0 && !isApplNoNull)
+				} 
 				//log.info(appendOtherInfo);
 
 				if (!StringUtils.isNULL(appendOtherInfo)) {
@@ -914,7 +897,9 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 
 		}
 //		log.info("rowIndex: "+rowIndex);
-		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
+		int errorRowIndex = errorRowList.get(0);
+		log.info(book.getSheetAt(0).getRow(errorRowIndex) == null);
+		if (errorColumnList.isEmpty() || errorRowList.isEmpty() || book.getSheetAt(0).getRow(errorRowIndex)==null) {
 			return listPatent;
 		} else {
 			log.info("Errorlist is not Empty");
@@ -943,12 +928,16 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				int errorRowIndex = errorRowList.get(x);
 				int errorColIndex = errorColumnList.get(y);
 				row = (XSSFRow) book.getSheetAt(0).getRow(errorRowIndex);
-				cell = row.getCell(errorColIndex);
-				if(cell==null) {
-					row.createCell(errorColIndex).setCellValue("");
-					row.createCell(errorColIndex).setCellStyle(style);
+				if(row==null) {
+					log.info("row=null");
 				}else {
-					cell.setCellStyle(style);
+					cell = row.getCell(errorColIndex);
+					if(cell==null) {
+						row.createCell(errorColIndex).setCellValue("");
+						row.createCell(errorColIndex).setCellStyle(style);
+					}else {
+						cell.setCellStyle(style);
+					}
 				}
 				y++;
 			}
