@@ -17,10 +17,10 @@ public class Admin extends BaseBean {
 	
 	
 	@Id
-	@JsonView({View.Admin.class,View.Role.class})
+	@JsonView({View.Admin.class, View.Role.class, View.Message.class})
 	private String admin_id;
 	
-	@JsonView({View.Admin.class,View.Role.class})
+	@JsonView({View.Admin.class, View.Role.class, View.Message.class})
 	private String admin_name;
 	
 	@JsonView({View.Admin.class,View.Role.class})

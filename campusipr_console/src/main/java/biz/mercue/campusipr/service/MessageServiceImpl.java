@@ -7,8 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 
-import biz.mercue.campusipr.model.Admin;
-import biz.mercue.campusipr.model.AdminToken;
+import biz.mercue.campusipr.dao.BusinessDao;
+import biz.mercue.campusipr.model.*;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import org.apache.log4j.Logger;
@@ -36,13 +36,18 @@ public class MessageServiceImpl implements MessageService{
 	@Autowired
 	private AdminDao adminDao;
 
+	@Autowired
+	private BusinessDao businessDao;
+
 	@Override
-	public void addMessage(Message message) {
+	public void addMessage(Message message, Admin admin) {
 		try {
 			message.setMessage_id(KeyGeneratorUtils.generateRandomString());
 			Date now = new Date();
 			message.setMessage_date(now.getTime());
 			message.setIs_read(false);
+			message.setAdmin(admin);
+			message.setBusiness(admin.getBusiness());
 			mDao.addMessage(message);
 		} catch (Exception e) {
 			log.error(e.getMessage());
@@ -96,7 +101,7 @@ public class MessageServiceImpl implements MessageService{
 	@Override
 	public List<Admin> getAllAdminAndNewestMessage(AdminToken adminToken) {
 		try {
-			List<Admin> adminList;
+			List<Admin> adminList = new ArrayList<>();
 			if (adminToken.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
 //				log.info("user is platform: return all school member");
 				adminList = adminDao.getSchoolAdminList();
@@ -109,8 +114,13 @@ public class MessageServiceImpl implements MessageService{
 					}
 				}
 			} else {
-//				log.info("user is school: return all platform member");
-				adminList = adminDao.getPlatformAdminList();
+//				log.info("user is school: return public platform");
+				Business platformBusiness = businessDao.getById(Constants.BUSINESS_PLATFORM);
+				Admin platformAdmin = new Admin();
+				platformAdmin.setAdmin_id("public_platform");
+				platformAdmin.setAdmin_name("中心平台");
+				platformAdmin.setBusiness(platformBusiness);
+				adminList.add(platformAdmin);
 				for (Admin platform : adminList) {
 					Message dbMessage = mDao.getNewestMessage(Constants.BUSINESS_PLATFORM, adminToken.getAdmin().getAdmin_id());
 					if (dbMessage != null) {

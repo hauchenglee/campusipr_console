@@ -770,9 +770,10 @@ public class PatentController {
 	}
 
 	@RequestMapping(value = "/api/advancesearch", method = RequestMethod.POST, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
 	public String advanceSearch(HttpServletRequest request,
 								@RequestBody String receiveJSONString,
-								@RequestParam(value ="page",required=false,defaultValue = "1") int page) {
+								@RequestParam(value = "page", required = false, defaultValue = "1") int page) {
 		log.info("advance search controller");
 		ListResponseBody responseBody = new ListResponseBody();
 		JSONObject jsonObject = new JSONObject(receiveJSONString);

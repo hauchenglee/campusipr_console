@@ -15,7 +15,7 @@ import biz.mercue.campusipr.model.Message;
 public interface MessageService {
 	
 
-	void addMessage(Message message);
+	void addMessage(Message message, Admin admin);
 
 	ListQueryForm getMessagesList(String senderId, String receiverId, int page, int pageSize);
 

@@ -1719,8 +1719,10 @@ public class PatentServiceImpl implements PatentService {
 			String patternAll = "^[\u4e00-\u9fa5_a-zA-Z0-9]+$"; // 匹配中文，英文字母和數字及下劃線
 			String patternSpace = "\\u0020"; // 匹配空白
 
+			String searchHQL = "";
 			String finalSearchSQL = "";
 			String finalSearchHQL = "";
+			String finalSearchHQLCount = "";
 			List<Integer> slashIndexList = new ArrayList<>(); // 斜線的index，目的：依據index找出field name
 			List<Integer> fieldCodeStartIndexList = new ArrayList<>();
 			List<String> fieldCodeList = new ArrayList<>(); // 查詢欄位code名稱list（欄位查詢簡稱）
@@ -1739,6 +1741,13 @@ public class PatentServiceImpl implements PatentService {
 						" join pls.primaryKey.status sta" +
 						" where ";
 				finalSearchHQL = "select distinct(pat) from Patent pat" +
+						" left join pat.listApplicant app" +
+						" left join pat.listAssignee ass" +
+						" left join pat.listInventor inv" +
+						" join pat.listPatentStatus pls" +
+						" join pls.primaryKey.status sta" +
+						" where ";
+				finalSearchHQLCount = "select count(distinct(pat)) from Patent pat" +
 						" left join pat.listApplicant app" +
 						" left join pat.listAssignee ass" +
 						" left join pat.listInventor inv" +
@@ -1766,8 +1775,8 @@ public class PatentServiceImpl implements PatentService {
 					}
 				}
 
-				System.out.println("slashIndexList: " + slashIndexList);
-				System.out.println("fieldCodeStartIndexList: " + fieldCodeStartIndexList);
+				log.info("slashIndexList: " + slashIndexList);
+				log.info("fieldCodeStartIndexList: " + fieldCodeStartIndexList);
 
 				int elementAreaCount = 1;
 				for (Integer slashIndex : slashIndexList) {
@@ -1779,7 +1788,7 @@ public class PatentServiceImpl implements PatentService {
 					elementAreaCount++;
 				}
 
-				System.out.println("elementAreaList: " + elementAreaList);
+				log.info("elementAreaList: " + elementAreaList);
 				StringBuilder elementAreaReplaceStr = new StringBuilder();
 				for (String element : elementAreaList) {
 					elementAreaReplaceStr.append(element.replaceAll("and", "")
@@ -1794,10 +1803,10 @@ public class PatentServiceImpl implements PatentService {
 				dataList = new LinkedList<>(Arrays.asList(elementAreaReplaceStr.toString().split(" ")));
 				dataList.removeIf(data -> data == null || data.trim().length() == 0);
 
-				System.out.println("dataList: " + dataList);
+				log.info("dataList: " + dataList);
 
 				// 將field code轉換成field name
-				System.out.println("fieldCodeList: " + fieldCodeList);
+				log.info("fieldCodeList: " + fieldCodeList);
 				int fieldCodeCount;
 				for (int i = 0; i < Constants.SEARCH_FIELD_CODE.length; i++) {
 					for (fieldCodeCount = 0; fieldCodeCount < fieldCodeList.size(); fieldCodeCount++) {
@@ -1808,8 +1817,8 @@ public class PatentServiceImpl implements PatentService {
 					}
 				}
 
-				System.out.println("fieldNameList: " + fieldNameList);
-				System.out.println("fieldNameContainSQLList: " + fieldNameContainSQLList);
+				log.info("fieldNameList: " + fieldNameList);
+				log.info("fieldNameContainSQLList: " + fieldNameContainSQLList);
 
 				// 接下來拆分field name跟data的關係
 				// 想法：依據elementAreaList，每個ele相對應field name index
@@ -1827,18 +1836,17 @@ public class PatentServiceImpl implements PatentService {
 					for (String arr : currentElementDataArr) {
 						if (!arr.equalsIgnoreCase("and") && !arr.equalsIgnoreCase("or")) {
 							for (int i = 0; i < elementArea.length(); i++) {
-								System.out.println("elementArea: " + elementArea);
 								if (isFirstAddBracket) {
 									if (String.valueOf(arr.charAt(i)).matches(patternAll)) {
 										finalSearchSQL += "(" + arr.substring(0, i) + currentFieldName + " = " + arr.substring(i);
-										finalSearchHQL += "(" + arr.substring(0, i) + currentFieldName + " = " + ":s" + dataCount;
+										searchHQL += "(" + arr.substring(0, i) + currentFieldName + " = " + ":s" + dataCount;
 										dataCount++;
 										break;
 									}
 								} else {
 									if (String.valueOf(arr.charAt(i)).matches(patternAll)) {
 										finalSearchSQL += arr.substring(0, i) + currentFieldName + " = " + arr.substring(i);
-										finalSearchHQL += arr.substring(0, i) + currentFieldName + " = " + ":s" + dataCount;
+										searchHQL += arr.substring(0, i) + currentFieldName + " = " + ":s" + dataCount;
 										dataCount++;
 										break;
 									}
@@ -1849,20 +1857,20 @@ public class PatentServiceImpl implements PatentService {
 							if (arrCount == currentElementDataArr.length - 1) {
 								if (arr.equalsIgnoreCase("and")) {
 									finalSearchSQL += " ) and ";
-									finalSearchHQL += ") and ";
+									searchHQL += ") and ";
 								}
 								if (arr.equalsIgnoreCase("or")) {
 									finalSearchSQL += " ) or ";
-									finalSearchHQL += ") or ";
+									searchHQL += ") or ";
 								}
 							} else {
 								if (arr.equalsIgnoreCase("and")) {
 									finalSearchSQL += " and ";
-									finalSearchHQL += " and ";
+									searchHQL += " and ";
 								}
 								if (arr.equalsIgnoreCase("or")) {
 									finalSearchSQL += " or ";
-									finalSearchHQL += " or ";
+									searchHQL += " or ";
 								}
 							}
 						}
@@ -1871,27 +1879,42 @@ public class PatentServiceImpl implements PatentService {
 					elementFieldCount++;
 				}
 
-				finalSearchSQL += ")"; // end of bracket
-				finalSearchHQL += ")"; // end of bracket
+				finalSearchSQL += searchHQL + ")"; // end of bracket
+				finalSearchHQL += searchHQL + ")"; // end of bracket
+				finalSearchHQLCount += searchHQL + ")"; // end of bracket
 
 			} else {
 				// 錯誤訊息
+
 			}
 			log.info("sql: " + finalSearchSQL);
 			log.info("hql: " + finalSearchHQL);
+			log.info("hql count: " + finalSearchHQLCount);
 
-			List<Patent> patentList = patentDao.getByAdvancedSearch(finalSearchHQL, dataList, page, pageSize);
-			if (patentList != null) {
-				log.info("patentList.size(): " + patentList.size());
-				for (Patent patent : patentList) {
+			List<Patent> list = patentDao.getByAdvancedSearch(finalSearchHQL, dataList, page, pageSize);
+//			int patentListCount = patentDao.getCountByAdvancedSearch(finalSearchHQLCount, dataList, page, pageSize);
+			int listCount = 1;
+			if (list != null && !list.isEmpty()) {
+				log.info("patentList.size(): " + list.size());
+				log.info("patentListCount(): " + listCount);
+				for (Patent patent : list) {
 					log.info("patent id: " + patent.getPatent_id());
 					log.info("patent name: " + patent.getPatent_name());
+				}
+
+				// get data to avoid lazy loading exception
+				for(Patent patent : list) {
+					patent.getListBusiness().size();
+					patent.getListInventor().size();
+					patent.getListPatentStatus().size();
+					patent.getListExtension().size();
+					patent.getListFamily().size();
 				}
 			} else {
 				log.info("search result is null");
 			}
 
-			return new ListQueryForm();
+			return new ListQueryForm(listCount, Constants.SYSTEM_PAGE_SIZE, list);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ListQueryForm();
@@ -2541,7 +2564,8 @@ public class PatentServiceImpl implements PatentService {
 				List<String> costAddData = new ArrayList<>();
 				if (patent.getListCost() != null) {
 					for (PatentCost cost : patent.getListCost()) {
-						if (cost.getBusiness_id().equals(businessId)) {
+						String costBusinessId = cost.getBusiness_id();
+						if (!StringUtils.isNULL(costBusinessId) && costBusinessId.equals(businessId)) {
 							costAddData.add(JacksonJSONUtils.mapObjectWithView(cost, View.PatentDetail.class));
 						}
 					}

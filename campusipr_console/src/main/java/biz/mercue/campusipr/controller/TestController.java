@@ -1,18 +1,15 @@
 package biz.mercue.campusipr.controller;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import biz.mercue.campusipr.model.AdminToken;
+import biz.mercue.campusipr.model.*;
 import biz.mercue.campusipr.util.*;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
@@ -22,6 +19,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,9 +29,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import biz.mercue.campusipr.model.Permission;
-import biz.mercue.campusipr.model.Status;
-import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.PatentService;
 import biz.mercue.campusipr.service.PermissionService;
@@ -74,8 +69,27 @@ public class TestController {
 	@ResponseBody
 	public String demo(HttpServletRequest request, @PathVariable String patentId, @RequestBody String receiveJSONString) {
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+//		Patent gPatent = new Gson().fromJson(receiveJSONString, Patent.class);
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
 		String str = jsonObject.optString("str");
+//		String str2 = jsonObject.getString("str");
+
+//		Type listType = new TypeToken<List<String>>() {}.getType();
+//		List<String> list = new Gson().fromJson("patent_ids", listType);
+
+		JSONArray s = jsonObject.optJSONArray("listBusiness");
+
+
+//		List<String> patent_ids = jsonObject.optJSONArray("patent_ids");
+		List<String> field_ids = (List<String>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("field_ids").toString(), new TypeReference<List<String>>(){});
+		List<Business> businessList = (List<Business>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("listBusiness").toString(), new TypeReference<List<Business>>(){});
+		List<Business> businessList2 = (List<Business>) JacksonJSONUtils.readValue("listBusiness", Business.class);
+
+
+//		int i = jsonObject.optInt("listBusiness");
+//		int i2 = jsonObject.getInt("listBusiness");
+
+
 		int result = patentService.demo("", tokenBean.getBusiness_id(), patentId, str);
 		return "{\"aaa\": \"" + result + "\"}";
 	}

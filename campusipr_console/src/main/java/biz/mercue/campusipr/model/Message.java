@@ -18,11 +18,6 @@ public class Message extends BaseBean{
 	@JsonView(View.Message.class)
 	private String message_type;
 
-
-	@JsonView(View.Message.class)
-	private String business_id;
-
-
 	@JsonView(View.Message.class)
 	private String channel_id;
 
@@ -61,6 +56,16 @@ public class Message extends BaseBean{
 
     @JsonView({View.Message.class, View.Admin.class})
 	private boolean is_read;
+
+    @JsonView(View.Message.class)
+    @OneToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name="admin_id")
+	private Admin admin;
+
+	@JsonView(View.Message.class)
+    @OneToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name="business_id")
+	private Business business;
 
 	public String getMessage_id() {
 		return message_id;
@@ -110,14 +115,6 @@ public class Message extends BaseBean{
 		this.attachment_thumbnail_url = attachment_thumbnail_url;
 	}
 
-	public String getBusiness_id() {
-		return business_id;
-	}
-
-	public void setBusiness_id(String business_id) {
-		this.business_id = business_id;
-	}
-
 	public String getChannel_id() {
 		return channel_id;
 	}
@@ -164,5 +161,21 @@ public class Message extends BaseBean{
 
 	public void setIs_read(boolean is_read) {
 		this.is_read = is_read;
+	}
+
+	public Admin getAdmin() {
+		return admin;
+	}
+
+	public void setAdmin(Admin admin) {
+		this.admin = admin;
+	}
+
+	public Business getBusiness() {
+		return business;
+	}
+
+	public void setBusiness(Business business) {
+		this.business = business;
 	}
 }

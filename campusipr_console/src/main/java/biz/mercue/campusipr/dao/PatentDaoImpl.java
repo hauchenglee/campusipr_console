@@ -113,7 +113,18 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 //		query.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // 可以用distinct(bean)代替
 		return query.list();
 	}
-	
+
+	@Override
+	public int getCountByAdvancedSearch(String hql, List<String> dataList, int page, int pageSize) {
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		for (int i = 0; i < dataList.size(); i++) {
+			String parameterName = "s" + i;
+			query.setParameter(parameterName, dataList.get(i));
+		}
+		return (int) query.uniqueResult();
+	}
+
 	@Override
 	public int updatePatentApplNo(String patentId, String patentApplNo) {
 		String hql = "Update Patent p set p.patent_appl_no = :patentApplNo where patent_id = :patent_id";

@@ -36,7 +36,7 @@ public class MessageController {
         BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
         if (adminToken != null) {
-            messageService.addMessage(message);
+            messageService.addMessage(message, adminToken.getAdmin());
             responseBody.setCode(Constants.INT_SUCCESS);
             responseBody.setBean(message);
         } else {
