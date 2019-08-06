@@ -1,10 +1,13 @@
 package biz.mercue.campusipr.controller;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,9 +65,13 @@ public class AnalysisController {
 		log.info("analysisTest ");
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
 		JSONResponseBody responseBody = new JSONResponseBody();
-		String businessId = jsonObject.optString("business_id");
+		JSONArray businessName = jsonObject.optJSONArray("business_name");
+		JSONArray statusDesc=jsonObject.optJSONArray("statusDesc");
+		JSONArray countryId = jsonObject.optJSONArray("country_id");
+		log.info(jsonObject.optJSONArray("statusDesc").length());
+		log.info(statusDesc);
+		JSONObject analyizeData = analysisService.schoolData(statusDesc, businessName, countryId);
 //		JSONObject analyizeData = analysisService.testAnalysis(businessId, beginTime, endTime);
-		JSONObject analyizeData = analysisService.testAnalysis();
 //		log.info(analyizeData);
 		responseBody.setCode(Constants.INT_SUCCESS);
 		responseBody.setData(analyizeData);
@@ -492,49 +499,381 @@ public class AnalysisController {
 		return responseBody.toString();
 	}
 	
-//	@RequestMapping(value="/api/exportplatformtotal", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-//	@ResponseBody
-//	public ResponseEntity<InputStreamResource> exportPlatformTotal(HttpServletRequest request,@RequestBody String receiveJSONString){
-//		log.info("exportpatent ");
-//		StringResponseBody responseBody  = new StringResponseBody();
-//		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-//		if(tokenBean!=null) {
-//			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-//			
-//			if(tokenBean.checkPermission(permission.getPermission_id())) {
-//
-//                JSONObject jsonObject = new JSONObject(receiveJSONString);
-//				List<String> patent_ids = (List<String>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("patent_ids").toString(), new TypeReference<List<String>>(){});
-//				List<String> field_ids = (List<String>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("field_ids").toString(), new TypeReference<List<String>>(){});
-//
-//				String bussinessId = tokenBean.getBusiness().getBusiness_id();
-//				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-//					bussinessId = null;
-//				}
-//				
-//				List<Patent> listPatent = AnalysisService.getExcelByPatentIds(patent_ids, bussinessId);
-//				
-//				String fileName = tokenBean.getBusiness().getBusiness_name();
-//				ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(field_ids, listPatent, bussinessId);
-//				
-//				HttpHeaders headers = new HttpHeaders();
-//				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
-//				
-//
-//				return ResponseEntity
-//		                .ok()
-//		                .headers(headers)
-//		                .contentType(MediaType.parseMediaType("application/ms-excel"))
-//		                .body(new InputStreamResource(fileOut));
-//			} else {
-//				responseBody.setCode(Constants.INT_NO_PERMISSION);
-//				return null;
-//			}
-//		} else {
-//			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-//			return null;
-//		}
-//		return null;
-//	}
-
+	@RequestMapping(value="/api/exportschooloverview", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportSchoolOverview(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export School Overview");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {	
+				JSONObject jsonObject = new JSONObject(receiveJSONString);
+				String businessId = jsonObject.optString("business_id");
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "school_Overview";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				ByteArrayInputStream fileOut = analysisService.exportSchoolOverview(businessId);
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
+	@RequestMapping(value="/api/exportschooloverviewbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportSchoolByYear(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export Patent By Year ");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			String businessId = jsonObject.optString("business_id");
+			Long beginTime = jsonObject.optLong("beginTime");
+			Long endTime = jsonObject.optLong("endTime");
+			if(tokenBean.checkPermission(permission.getPermission_id())) {			
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "school_Overview";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				ByteArrayInputStream fileOut = analysisService.exportSchoolOverviewByYear(businessId, beginTime, endTime);
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
+	
+	@RequestMapping(value="/api/exportschoolcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportSchoolCountry(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export Country ");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			if(tokenBean.checkPermission(permission.getPermission_id())) {	
+				JSONObject jsonObject = new JSONObject(receiveJSONString);
+				String businessId = jsonObject.optString("business_id");
+//				String countryId = jsonObject.optString("country_id");
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "school_Country";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				ByteArrayInputStream fileOut = analysisService.exportCountry(businessId);
+				
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
+	@RequestMapping(value="/api/exportschoolcountrybyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportSchoolCountryByYear(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export Country by year ");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			String businessId = jsonObject.optString("business_id");
+			Long beginTime = jsonObject.optLong("beginTime");
+			Long endTime = jsonObject.optLong("endTime");
+			String countryId = jsonObject.optString("country_id");
+			if(tokenBean.checkPermission(permission.getPermission_id())) {			
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "school_Country";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				
+				ByteArrayInputStream fileOut = analysisService.exportCountryByYear(businessId, beginTime, endTime);
+				
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
+	@RequestMapping(value="/api/exportschoolDepartment", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportSchoolDepartment(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export Department ");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {	
+				JSONObject jsonObject = new JSONObject(receiveJSONString);
+				String businessId = jsonObject.optString("business_id");
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "school_Department";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				ByteArrayInputStream fileOut = analysisService.exportSchoolDepartment(businessId);
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
+	
+	@RequestMapping(value="/api/exportschoolDepartmentbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportSchoolDepartmentByYear(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export Department by year");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {	
+				JSONObject jsonObject = new JSONObject(receiveJSONString);
+				String businessId = jsonObject.optString("business_id");
+				Long beginTime = jsonObject.optLong("beginTime");
+				Long endTime = jsonObject.optLong("endTime");
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "school_Department";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				ByteArrayInputStream fileOut = analysisService.exportSchoolDepartmentByYear(businessId, beginTime, endTime);
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
+	
+	
+	@RequestMapping(value="/api/exportplatformoverview", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportPlatformOverview(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export Platform Overview");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {	
+				
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "platform_Overview";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				ByteArrayInputStream fileOut = analysisService.exportPlatformOverview();
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
+	@RequestMapping(value="/api/exportplatformoverviewbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportPlatformByYear(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export Platform By Year");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			JSONObject jsonObject = new JSONObject(receiveJSONString);
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			Long beginTime = jsonObject.optLong("beginTime");
+			Long endTime = jsonObject.optLong("endTime");
+			if(tokenBean.checkPermission(permission.getPermission_id())) {			
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "platform_Overview";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				ByteArrayInputStream fileOut = analysisService.exportPlatformOverviewByYear(beginTime,endTime);
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
+	@RequestMapping(value="/api/exportplatformcountry", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportPlatformCountry(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export Platform Country ");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {	
+				String businessId = null;
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "platform_Country";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				ByteArrayInputStream fileOut = analysisService.exportCountry(businessId);
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
+	@RequestMapping(value="/api/exportplatformcountrybyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportPlatformCountryByYear(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export Platform Country by year");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			if(tokenBean.checkPermission(permission.getPermission_id())) {	
+				String businessId = null;
+				Long beginTime = jsonObject.optLong("beginTime");
+				Long endTime = jsonObject.optLong("endTime");
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "platform_Country";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				ByteArrayInputStream fileOut = analysisService.exportCountryByYear(businessId, beginTime, endTime);
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
+	@RequestMapping(value="/api/exportplatformschool", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportPlatformSchool(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export Platform Country ");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {	
+				JSONArray businessName = jsonObject.optJSONArray("business_name");
+				JSONArray statusDesc=jsonObject.optJSONArray("statusDesc");
+				JSONArray countryId = jsonObject.optJSONArray("country_id");
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "platform_School";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				ByteArrayInputStream fileOut = analysisService.exportPlatformSchool(statusDesc, businessName, countryId);
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
+	@RequestMapping(value="/api/exportplatformschoolbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public ResponseEntity<InputStreamResource> exportPlatformSchoolByYear(HttpServletRequest request,@RequestBody String receiveJSONString){
+		log.info("export Platform Country ");
+		StringResponseBody responseBody  = new StringResponseBody();
+		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		if(tokenBean!=null) {
+			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+			
+			if(tokenBean.checkPermission(permission.getPermission_id())) {	
+				JSONArray businessName = jsonObject.optJSONArray("business_name");
+				JSONArray statusDesc=jsonObject.optJSONArray("statusDesc");
+				JSONArray countryId = jsonObject.optJSONArray("country_id");
+				Long beginTime = jsonObject.optLong("beginTime");
+				Long endTime = jsonObject.optLong("endTime");
+				HttpHeaders headers = new HttpHeaders();
+				String fileName = "platform_School";
+				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+				ByteArrayInputStream fileOut = analysisService.exportPlatformSchoolByYear(statusDesc, businessName, countryId, beginTime, endTime);
+				return ResponseEntity
+		                .ok()
+		                .headers(headers)
+		                .contentType(MediaType.parseMediaType("application/ms-excel"))
+		                .body(new InputStreamResource(fileOut));
+			} else {
+				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				return null;
+			}
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return null;
+		}
+	}
 }

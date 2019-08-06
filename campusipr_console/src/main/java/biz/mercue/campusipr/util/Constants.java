@@ -459,4 +459,11 @@ public class Constants {
 			Constants.INVENTOR_NAME,
 			Constants.STATUS_DESC
 	};
+	public static final String ANALYSIS_FAMILYAMOUNT ="專利家族總數";
+	public static final String ANALYSIS_DEPARTMENTAMOUNT ="科系總數";
+	public static final String ANALYSIS_INVENTORAMOUNT ="發明人總數";
+	public static final String ANALYSIS_SCHOOLAMOUNT = "學校總數";
+	public static final String ANALYSIS_PATENTAMOUNT = "專利申請總數";
+	public static final String ANALYSIS_PORTFOLIOAMOUNT = "專利組合總數";
+	public static final String ANALYSIS_PATENTAMOUNTBYYEAR = "歷年專利申請總數";
 }

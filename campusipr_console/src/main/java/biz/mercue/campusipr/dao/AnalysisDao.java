@@ -3,6 +3,8 @@ package biz.mercue.campusipr.dao;
 import java.util.Date;
 import java.util.List;
 
+import org.json.JSONArray;
+
 import biz.mercue.campusipr.model.Analysis;
 import biz.mercue.campusipr.model.Patent;
 
@@ -77,4 +79,10 @@ public interface AnalysisDao {
 	List<Analysis> countSchoolSum();
 	List<Analysis> countSchoolSumByYear(Long beginDate, Long endDate);
 	List<Analysis> getDefaultYear();
+	List<Analysis> testPatent();
+	List<Analysis> countSchoolPatentStatus(JSONArray statusDesc,JSONArray businessId);
+	List<Analysis> countSchoolPatentTotal(JSONArray schoolArray);
+	List<Analysis> countSchoolPatentTotalByYear(JSONArray schoolArray, Long beginDate, Long endDate);
+	List<Analysis> countSchoolPatentStatusByYear(JSONArray statusDesc, JSONArray schoolArray, Long beginDate,
+			Long endDate);
 }

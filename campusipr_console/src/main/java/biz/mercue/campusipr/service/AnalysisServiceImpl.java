@@ -1,5 +1,8 @@
 package biz.mercue.campusipr.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,6 +12,18 @@ import java.util.Map;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.log4j.Logger;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -188,70 +203,71 @@ public class AnalysisServiceImpl implements AnalysisService {
 		
 		return result;
 	}
-
 	@Override
-		public JSONObject schoolCountryByYear(String businessId, Long beginDate, Long endDate, String countryId) {
-			log.info("analysis Country By Years");
-			List<Analysis> countCountry = new ArrayList<Analysis>();
-			List<Analysis> countCountryApplStatus = new ArrayList<Analysis>();
-			List<Analysis> countCountryNoticeStatus = new ArrayList<Analysis>();
-			List<Analysis> countCountryPublishStatus= new ArrayList<Analysis>();
-			List<Analysis> countCountryByYear= new ArrayList<Analysis>();
-			
-			List<Object> combineCountry = new ArrayList<Object>();
-			List<Object> combineApplStatus = new ArrayList<Object>();
-			List<Object> combineNoticeStatus = new ArrayList<Object>();
-			List<Object> combinePublishStatus = new ArrayList<Object>();
-			
-			List<Object> combineYear = new ArrayList<Object>();
-			
-			countCountry = analysisDao.countCountryByYear(businessId, beginDate, endDate);
-			countCountryApplStatus = analysisDao.countCountryApplStatusByYear(businessId, beginDate, endDate);
-			countCountryNoticeStatus= analysisDao.countCountryNoticeStatusByYear(businessId, beginDate, endDate);
-			countCountryPublishStatus = analysisDao.countCountryPublishStatusByYear(businessId, beginDate, endDate);
-			countCountryByYear = analysisDao.countSingleCountryByYear(businessId, beginDate, endDate, countryId);
-			
-			Object yearToArray[][] = countCountryByYear.toArray(new Object[countCountryByYear.size()][0]);
-			Object countryToArray [][]=countCountry.toArray(new Object[countCountry.size()][0]);
-			Object applStatusToArray [][]=countCountryApplStatus.toArray(new Object[countCountryApplStatus.size()][0]);
-			Object noticeStatusToArray [][]=countCountryNoticeStatus.toArray(new Object[countCountryNoticeStatus.size()][0]);
-			Object publishStatusToArray [][]=countCountryPublishStatus.toArray(new Object[countCountryPublishStatus.size()][0]);
+	public JSONObject schoolCountryByYear(String businessId, Long beginDate, Long endDate, String countryId) {
+		log.info("analysis Country By Years");
+		List<Analysis> countCountry = new ArrayList<Analysis>();
+		List<Analysis> countCountryApplStatus = new ArrayList<Analysis>();
+		List<Analysis> countCountryNoticeStatus = new ArrayList<Analysis>();
+		List<Analysis> countCountryPublishStatus = new ArrayList<Analysis>();
+		List<Analysis> countCountryByYear = new ArrayList<Analysis>();
 
-			combineYear.addAll(combineCountryByYear(yearToArray, beginDate, endDate, countryId));
-			
-			if(countCountry.size()==3) {
-				combineCountry.addAll(countCountry);
-			}else {
-				combineCountry.addAll(combineStatus(countryToArray));
-			}
-			
-			if(countCountryApplStatus.size()==3) {
-				combineApplStatus.addAll(countCountryApplStatus);
-			}else {
-				combineApplStatus.addAll(combineStatus(applStatusToArray));
-			}
-			
-			if(countCountryNoticeStatus.size()==3) {
-				combineNoticeStatus.addAll(countCountryNoticeStatus);
-			}else {
-				combineNoticeStatus.addAll(combineStatus(noticeStatusToArray));
-			}
-			
-			if(countCountryPublishStatus.size()==3) {
-				combinePublishStatus.addAll(countCountryPublishStatus);
-			}else {
-				combinePublishStatus.addAll(combineStatus(publishStatusToArray));
-			}
-			
-			JSONObject result = new JSONObject();
-			result.put("countCountryTotal",combineCountry);
-			result.put("countCountryApplStatusTotal",combineApplStatus);
-			result.put("countCountryNoticeStatusTotal",combineNoticeStatus);
-			result.put("countCountryPublishStatusTotal",combinePublishStatus);
-			result.put("countCountryByYearTotal",combineYear);
-			
-			return result;
+		List<Object> combineCountry = new ArrayList<Object>();
+		List<Object> combineApplStatus = new ArrayList<Object>();
+		List<Object> combineNoticeStatus = new ArrayList<Object>();
+		List<Object> combinePublishStatus = new ArrayList<Object>();
+
+		List<Object> combineYear = new ArrayList<Object>();
+
+		countCountry = analysisDao.countCountryByYear(businessId, beginDate, endDate);
+		countCountryApplStatus = analysisDao.countCountryApplStatusByYear(businessId, beginDate, endDate);
+		countCountryNoticeStatus = analysisDao.countCountryNoticeStatusByYear(businessId, beginDate, endDate);
+		countCountryPublishStatus = analysisDao.countCountryPublishStatusByYear(businessId, beginDate, endDate);
+		countCountryByYear = analysisDao.countSingleCountryByYear(businessId, beginDate, endDate, countryId);
+
+		Object yearToArray[][] = countCountryByYear.toArray(new Object[countCountryByYear.size()][0]);
+		Object countryToArray[][] = countCountry.toArray(new Object[countCountry.size()][0]);
+		Object applStatusToArray[][] = countCountryApplStatus.toArray(new Object[countCountryApplStatus.size()][0]);
+		Object noticeStatusToArray[][] = countCountryNoticeStatus
+				.toArray(new Object[countCountryNoticeStatus.size()][0]);
+		Object publishStatusToArray[][] = countCountryPublishStatus
+				.toArray(new Object[countCountryPublishStatus.size()][0]);
+
+		combineYear.addAll(combineCountryByYear(yearToArray, beginDate, endDate, countryId));
+
+		if (countCountry.size() == 3) {
+			combineCountry.addAll(countCountry);
+		} else {
+			combineCountry.addAll(combineStatus(countryToArray));
 		}
+
+		if (countCountryApplStatus.size() == 3) {
+			combineApplStatus.addAll(countCountryApplStatus);
+		} else {
+			combineApplStatus.addAll(combineStatus(applStatusToArray));
+		}
+
+		if (countCountryNoticeStatus.size() == 3) {
+			combineNoticeStatus.addAll(countCountryNoticeStatus);
+		} else {
+			combineNoticeStatus.addAll(combineStatus(noticeStatusToArray));
+		}
+
+		if (countCountryPublishStatus.size() == 3) {
+			combinePublishStatus.addAll(countCountryPublishStatus);
+		} else {
+			combinePublishStatus.addAll(combineStatus(publishStatusToArray));
+		}
+
+		JSONObject result = new JSONObject();
+		result.put("countCountryTotal", combineCountry);
+		result.put("countCountryApplStatusTotal", combineApplStatus);
+		result.put("countCountryNoticeStatusTotal", combineNoticeStatus);
+		result.put("countCountryPublishStatusTotal", combinePublishStatus);
+		result.put("countCountryByYearTotal", combineYear);
+
+		return result;
+	}
 
 	@Override
 	public JSONObject schoolDepartment(String businessId) {
@@ -1287,9 +1303,6 @@ public class AnalysisServiceImpl implements AnalysisService {
 					log.error(e);
 				}
 				return analList;
-				
-				
-			
 			}
 
 	private List<Object> combineDepartment(Object depToArray[][], Object countryToArray[][]) {
@@ -1360,13 +1373,857 @@ public class AnalysisServiceImpl implements AnalysisService {
 			return depCombine;
 		}
 
-	public JSONObject testAnalysis() {
+
+	@Override
+	public ByteArrayInputStream exportPlatformOverview (){
+		ByteArrayOutputStream fileOut = null;
+		JSONObject platformOverview = platformOverview();
+		String schoolSum = platformOverview.optString("schoolSum");
+		String applSum = platformOverview.optString("applSum");
+		String porfolioSum= platformOverview.optString("porfolioSum");
+		JSONArray analAllYearsList= platformOverview.optJSONArray("analAllYearsList");
+		
+		log.info(platformOverview);
+		try {
+			XSSFWorkbook workbook = new XSSFWorkbook(); 
+			XSSFSheet sheet = workbook.createSheet(); 
+			XSSFRow row = sheet.createRow((short)0);
+			XSSFCell cell = row.createCell((short) 0); 
+			cell.setCellValue(Constants.ANALYSIS_SCHOOLAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(schoolSum); 
+			
+			row = sheet.createRow((short) 1);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(applSum); 
+			
+			row = sheet.createRow((short) 2);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_PORTFOLIOAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(porfolioSum);
+			
+			row = sheet.createRow((short) 4);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNTBYYEAR);
+			for(int dataInx = 0;dataInx<analAllYearsList.length() ;dataInx++) {
+				Object yearData =platformOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(1);
+				Object countData =platformOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(0);
+				row = sheet.createRow((short) 5+dataInx);
+				cell = row.createCell((short) 0);
+				cell.setCellValue(yearData.toString());
+				cell = row.createCell((short) 1);
+				cell.setCellValue(countData.toString());
+			}
+			fileOut = new ByteArrayOutputStream();
+			workbook.write(fileOut);
+			fileOut.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ByteArrayInputStream(fileOut.toByteArray());
+	}
+	
+	@Override
+	public ByteArrayInputStream exportPlatformOverviewByYear(Long beginDate, Long endDate){
+		ByteArrayOutputStream fileOut = null;
+		JSONObject platformOverview = platformOverviewByYear(beginDate, endDate);
+		String schoolSum = platformOverview.optString("schoolSum");
+		String applSum = platformOverview.optString("applSum");
+		String porfolioSum= platformOverview.optString("porfolioSum");
+		JSONArray analAllYearsList= platformOverview.optJSONArray("analAllYearsList");
+		
+		log.info(platformOverview);
+		try {
+			XSSFWorkbook workbook = new XSSFWorkbook(); 
+			XSSFSheet sheet = workbook.createSheet(); 
+			XSSFRow row = sheet.createRow((short)0);
+			XSSFCell cell = row.createCell((short) 0); 
+			cell.setCellValue(Constants.ANALYSIS_SCHOOLAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(schoolSum); 
+			
+			row = sheet.createRow((short) 1);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(applSum); 
+			
+			row = sheet.createRow((short) 2);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_PORTFOLIOAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(porfolioSum);
+			
+			row = sheet.createRow((short) 4);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNTBYYEAR);
+			for(int dataInx = 0;dataInx<analAllYearsList.length() ;dataInx++) {
+				Object yearData =platformOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(1);
+				Object countData =platformOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(0);
+				row = sheet.createRow((short) 5+dataInx);
+				cell = row.createCell((short) 0);
+				cell.setCellValue(yearData.toString());
+				cell = row.createCell((short) 1);
+				cell.setCellValue(countData.toString());
+			}
+			fileOut = new ByteArrayOutputStream();
+			workbook.write(fileOut);
+			fileOut.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ByteArrayInputStream(fileOut.toByteArray());
+	}
+
+	
+	
+	
+	@Override
+	public ByteArrayInputStream exportSchoolOverview(String businessId){
+		ByteArrayOutputStream fileOut = null;
+		JSONObject schoolOverview = schoolOverview(businessId);
+		String analYearsTotal = schoolOverview.optString("analYearsTotal");
+		String analFamilyTotal = schoolOverview.optString("analFamilyTotal");
+		String analDepartmentTotal= schoolOverview.optString("analDepartmentTotal");
+		String analInventorToltal= schoolOverview.optString("analInventorToltal");
+		JSONArray analAllYearsList= schoolOverview.optJSONArray("analAllYearsList");
+		
+		log.info(schoolOverview);
+		try {
+			XSSFWorkbook workbook = new XSSFWorkbook(); 
+			XSSFSheet sheet = workbook.createSheet(); 
+			XSSFRow row = sheet.createRow((short)0);
+			XSSFCell cell = row.createCell((short) 0); 
+			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(analYearsTotal); 
+			
+			row = sheet.createRow((short) 1);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_FAMILYAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(analFamilyTotal); 
+			
+			row = sheet.createRow((short) 2);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_DEPARTMENTAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(analDepartmentTotal);
+			
+			row = sheet.createRow((short) 3);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_INVENTORAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(analInventorToltal);
+			
+			row = sheet.createRow((short) 5);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNTBYYEAR);
+			for(int dataInx = 0;dataInx<analAllYearsList.length() ;dataInx++) {
+				Object yearData =schoolOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(1);
+				Object countData =schoolOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(0);
+				row = sheet.createRow((short) 6+dataInx);
+				cell = row.createCell((short) 0);
+				cell.setCellValue(yearData.toString());
+				cell = row.createCell((short) 1);
+				cell.setCellValue(countData.toString());
+			}
+			fileOut = new ByteArrayOutputStream();
+			workbook.write(fileOut);
+			fileOut.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ByteArrayInputStream(fileOut.toByteArray());
+	}
+
+	@Override
+	public ByteArrayInputStream exportSchoolOverviewByYear(String businessId, Long beginDate, Long endDate){
+		ByteArrayOutputStream fileOut = null;
+		JSONObject schoolOverview = schoolOverviewByYear(businessId, beginDate, endDate);
+		String analYearsTotal = schoolOverview.optString("analYearsTotal");
+		String analFamilyTotal = schoolOverview.optString("analFamilyTotal");
+		String analDepartmentTotal= schoolOverview.optString("analDepartmentTotal");
+		String analInventorToltal= schoolOverview.optString("analInventorToltal");
+		JSONArray analAllYearsList= schoolOverview.optJSONArray("analAllYearsList");
+		
+		log.info(schoolOverview);
+		try {
+			XSSFWorkbook workbook = new XSSFWorkbook(); 
+			XSSFSheet sheet = workbook.createSheet(); 
+			XSSFRow row = sheet.createRow((short)0);
+			XSSFCell cell = row.createCell((short) 0); 
+			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(analYearsTotal); 
+			
+			row = sheet.createRow((short) 1);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_FAMILYAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(analFamilyTotal); 
+			
+			row = sheet.createRow((short) 2);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_DEPARTMENTAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(analDepartmentTotal);
+			
+			row = sheet.createRow((short) 3);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_INVENTORAMOUNT); 
+			cell = row.createCell((short) 1);
+			cell.setCellValue(analInventorToltal);
+			
+			row = sheet.createRow((short) 5);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNTBYYEAR);
+			for(int dataInx = 0;dataInx<analAllYearsList.length() ;dataInx++) {
+				Object yearData =schoolOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(1);
+				Object countData =schoolOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(0);
+				row = sheet.createRow((short) 6+dataInx);
+				cell = row.createCell((short) 0);
+				cell.setCellValue(yearData.toString());
+				cell = row.createCell((short) 1);
+				cell.setCellValue(countData.toString());
+			}
+			fileOut = new ByteArrayOutputStream();
+			workbook.write(fileOut);
+			fileOut.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ByteArrayInputStream(fileOut.toByteArray());
+	}
+
+	@Override
+	public ByteArrayInputStream exportCountry(String businessId) {
+		ByteArrayOutputStream fileOut = null;
+		// default Country = "tw"
+		JSONObject countryData = null;
+		JSONArray countCountryTotal = null;
+		JSONArray countCountryApplStatusTotal = null;
+		JSONArray countCountryNoticeStatusTotal = null;
+		JSONArray countCountryPublishStatusTotal = null;
+		JSONArray countCountryByYearTotal = null;
+		JSONObject countryUSData = null;
+		JSONObject countryCNData = null;
+		if(businessId==null) {
+			countryData = platformCountry("tw");
+			countCountryTotal= countryData.optJSONArray("countCountryTotal");
+			countCountryApplStatusTotal= countryData.optJSONArray("countCountryApplStatusTotal");
+			countCountryNoticeStatusTotal= countryData.optJSONArray("countCountryNoticeStatusTotal");
+			countCountryPublishStatusTotal= countryData.optJSONArray("countCountryPublishStatusTotal");
+			countCountryByYearTotal= countryData.optJSONArray("countCountryByYearTotal");
+			countryUSData = platformCountry("us");
+			countryCNData = platformCountry("cn");
+		}else {
+			countryData = schoolCountry(businessId, "tw");
+			countCountryTotal= countryData.optJSONArray("countCountryTotal");
+			countCountryApplStatusTotal= countryData.optJSONArray("countCountryApplStatusTotal");
+			countCountryNoticeStatusTotal= countryData.optJSONArray("countCountryNoticeStatusTotal");
+			countCountryPublishStatusTotal= countryData.optJSONArray("countCountryPublishStatusTotal");
+			countCountryByYearTotal= countryData.optJSONArray("countCountryByYearTotal");
+			countryUSData = schoolCountry(businessId, "us");
+			countryCNData = schoolCountry(businessId, "cn");
+		}
+		
+		log.info(countryData);
+		try {
+			XSSFWorkbook workbook = new XSSFWorkbook(); 
+			XSSFSheet sheet = workbook.createSheet(); 
+			XSSFRow row ;
+			XSSFCell cell; 
+			int dataInx = 0;
+			row = sheet.createRow((short)0);
+			String title [] = {"國家","申請","公開","公告","總數"};
+			for(dataInx = 0;dataInx<title.length;dataInx++) {
+				cell = row.createCell((short) dataInx);
+				Object titleData =title [dataInx];
+				cell.setCellValue(titleData.toString());
+			}
+			for(dataInx = 0;dataInx<countCountryTotal.length();dataInx++) {
+				row = sheet.createRow((short) 1+dataInx);
+				cell = row.createCell((short) 0);
+				Object countryName = countCountryTotal.optJSONArray(dataInx).get(0);
+				cell.setCellValue(countryName.toString().toUpperCase()); 
+				cell = row.createCell((short) 1);
+				Object applCount = countCountryApplStatusTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(applCount.toString()); 
+				cell = row.createCell((short) 2);
+				Object noticeCount = countCountryNoticeStatusTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(noticeCount.toString()); 
+				cell = row.createCell((short) 3);
+				Object publishCount = countCountryPublishStatusTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(publishCount.toString()); 
+				cell = row.createCell((short) 4);
+				Object sum = countCountryTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(sum.toString()); 
+			}		
+			
+			row = sheet.createRow((short) 6);
+			cell = row.createCell((short) 0);
+			cell.setCellValue("臺灣歷年專利");
+			cell = row.createCell((short) 3);
+			cell.setCellValue("美國歷年專利");
+			cell = row.createCell((short) 6);
+			cell.setCellValue("中國歷年專利");
+
+			for(dataInx = 0;dataInx<countCountryByYearTotal.length() ;dataInx++) {
+				Object yearData =countryData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(2);
+				Object countData =countryData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(1);
+				row = sheet.createRow((short) 7+dataInx);
+				cell = row.createCell((short) 0);
+				cell.setCellValue(yearData.toString());
+				cell = row.createCell((short) 1);
+				cell.setCellValue(countData.toString());
+				
+				yearData =countryUSData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(2);
+				countData =countryUSData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(1);
+				cell = row.createCell((short) 3);
+				cell.setCellValue(yearData.toString());
+				cell = row.createCell((short) 4);
+				cell.setCellValue(countData.toString());
+				
+				yearData =countryCNData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(2);
+				countData =countryCNData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(1);
+				cell = row.createCell((short) 6);
+				cell.setCellValue(yearData.toString());
+				cell = row.createCell((short) 7);
+				cell.setCellValue(countData.toString());
+			}
+			
+			fileOut = new ByteArrayOutputStream();
+			workbook.write(fileOut);
+			fileOut.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ByteArrayInputStream(fileOut.toByteArray());
+		
+	}
+	@Override
+	public ByteArrayInputStream exportCountryByYear(String businessId, Long beginDate, Long endDate) {
+		ByteArrayOutputStream fileOut = null;
+		// default Country = "tw"
+		JSONObject countryData = null;
+		JSONArray countCountryTotal = null;
+		JSONArray countCountryApplStatusTotal = null;
+		JSONArray countCountryNoticeStatusTotal = null;
+		JSONArray countCountryPublishStatusTotal = null;
+		JSONArray countCountryByYearTotal = null;
+		JSONObject countryUSData = null;
+		JSONObject countryCNData = null;
+		if(businessId==null) {
+			countryData = platformCountryByYear("tw", beginDate, endDate);
+			countCountryTotal= countryData.optJSONArray("countCountryTotal");
+			countCountryApplStatusTotal= countryData.optJSONArray("countCountryApplStatusTotal");
+			countCountryNoticeStatusTotal= countryData.optJSONArray("countCountryNoticeStatusTotal");
+			countCountryPublishStatusTotal= countryData.optJSONArray("countCountryPublishStatusTotal");
+			countCountryByYearTotal= countryData.optJSONArray("countCountryByYearTotal");
+			countryUSData = platformCountryByYear("us", beginDate, endDate);
+			countryCNData = platformCountryByYear("cn", beginDate, endDate);
+		}else {
+			countryData = schoolCountryByYear(businessId, beginDate, endDate, "tw");
+			countCountryTotal= countryData.optJSONArray("countCountryTotal");
+			countCountryApplStatusTotal= countryData.optJSONArray("countCountryApplStatusTotal");
+			countCountryNoticeStatusTotal= countryData.optJSONArray("countCountryNoticeStatusTotal");
+			countCountryPublishStatusTotal= countryData.optJSONArray("countCountryPublishStatusTotal");
+			countCountryByYearTotal= countryData.optJSONArray("countCountryByYearTotal");
+			countryUSData = schoolCountryByYear(businessId, beginDate, endDate, "us");
+			countryCNData = schoolCountryByYear(businessId, beginDate, endDate, "cn");
+		}
+		log.info(countryData);
+		try {
+			XSSFWorkbook workbook = new XSSFWorkbook(); 
+			XSSFSheet sheet = workbook.createSheet(); 
+			XSSFRow row ;
+			XSSFCell cell; 
+			int dataInx = 0;
+			row = sheet.createRow((short)0);
+			String title [] = {"國家","申請","公開","公告","總數"};
+			for(dataInx = 0;dataInx<title.length;dataInx++) {
+				cell = row.createCell((short) dataInx);
+				Object titleData =title [dataInx];
+				cell.setCellValue(titleData.toString());
+			}
+			for(dataInx = 0;dataInx<countCountryTotal.length();dataInx++) {
+				row = sheet.createRow((short) 1+dataInx);
+				cell = row.createCell((short) 0);
+				Object countryName = countCountryTotal.optJSONArray(dataInx).get(0);
+				cell.setCellValue(countryName.toString().toUpperCase()); 
+				cell = row.createCell((short) 1);
+				Object applCount = countCountryApplStatusTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(applCount.toString()); 
+				cell = row.createCell((short) 2);
+				Object noticeCount = countCountryNoticeStatusTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(noticeCount.toString()); 
+				cell = row.createCell((short) 3);
+				Object publishCount = countCountryPublishStatusTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(publishCount.toString()); 
+				cell = row.createCell((short) 4);
+				Object sum = countCountryTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(sum.toString()); 
+			}		
+			
+			row = sheet.createRow((short) 6);
+			cell = row.createCell((short) 0);
+			cell.setCellValue("臺灣歷年專利");
+			cell = row.createCell((short) 3);
+			cell.setCellValue("美國歷年專利");
+			cell = row.createCell((short) 6);
+			cell.setCellValue("中國歷年專利");
+	
+			for(dataInx = 0;dataInx<countCountryByYearTotal.length() ;dataInx++) {
+				Object yearData =countryData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(2);
+				Object countData =countryData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(1);
+				row = sheet.createRow((short) 7+dataInx);
+				cell = row.createCell((short) 0);
+				cell.setCellValue(yearData.toString());
+				cell = row.createCell((short) 1);
+				cell.setCellValue(countData.toString());
+				
+				yearData =countryUSData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(2);
+				countData =countryUSData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(1);
+				cell = row.createCell((short) 3);
+				cell.setCellValue(yearData.toString());
+				cell = row.createCell((short) 4);
+				cell.setCellValue(countData.toString());
+				
+				yearData =countryCNData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(2);
+				countData =countryCNData.optJSONArray("countCountryByYearTotal").getJSONArray(dataInx).get(1);
+				cell = row.createCell((short) 6);
+				cell.setCellValue(yearData.toString());
+				cell = row.createCell((short) 7);
+				cell.setCellValue(countData.toString());
+			}
+			
+			fileOut = new ByteArrayOutputStream();
+			workbook.write(fileOut);
+			fileOut.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ByteArrayInputStream(fileOut.toByteArray());
+		
+	}
+
+	@Override
+	public ByteArrayInputStream exportSchoolDepartment(String businessId){
+		ByteArrayOutputStream fileOut = null;
+		JSONObject schoolDepartment = schoolDepartment(businessId);
+		JSONArray countEachDepartmentTotal= schoolDepartment.optJSONArray("countEachDepartmentTotal");
+		JSONArray countTWEachDepartmentTotal= schoolDepartment.optJSONArray("countTWEachDepartmentTotal");
+		JSONArray countCNEachDepartmentTotal= schoolDepartment.optJSONArray("countCNEachDepartmentTotal");
+		JSONArray countUSEachDepartmentTotal= schoolDepartment.optJSONArray("countUSEachDepartmentTotal");
+		log.info(schoolDepartment);
+		try {
+			XSSFWorkbook workbook = new XSSFWorkbook(); 
+			XSSFSheet sheet = workbook.createSheet(); 
+			XSSFRow row = sheet.createRow((short)0);
+			XSSFCell cell = row.createCell((short) 0); 
+			cell.setCellValue("科系"); 
+			int dataInx = 0;
+			String countryId [] = {"美國","臺灣","中國大陸","總數"};
+			for(dataInx = 0;dataInx<countryId.length;dataInx++) {
+				cell = row.createCell((short) 1+dataInx);
+				Object countryData =countryId [dataInx];
+				cell.setCellValue(countryData.toString());
+			}
+			for(dataInx = 0;dataInx<countEachDepartmentTotal.length();dataInx++) {
+				row = sheet.createRow((short) 1+dataInx);
+				cell = row.createCell((short) 0);
+				Object departmentName = countEachDepartmentTotal.optJSONArray(dataInx).get(0);
+				cell.setCellValue(departmentName.toString()); 
+				cell = row.createCell((short) 1);
+				Object departmentUSData = countUSEachDepartmentTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(departmentUSData.toString()); 
+				cell = row.createCell((short) 2);
+				Object departmentTWData = countTWEachDepartmentTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(departmentTWData.toString()); 
+				cell = row.createCell((short) 3);
+				Object departmentCNData = countCNEachDepartmentTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(departmentCNData.toString()); 
+				cell = row.createCell((short) 4);
+				Object departmentSumData = countEachDepartmentTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(departmentSumData.toString()); 
+			}		
+			fileOut = new ByteArrayOutputStream();
+			workbook.write(fileOut);
+			fileOut.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ByteArrayInputStream(fileOut.toByteArray());
+	}
+
+	@Override
+	public ByteArrayInputStream exportSchoolDepartmentByYear(String businessId, Long beginDate, Long endDate){
+		ByteArrayOutputStream fileOut = null;
+		JSONObject schoolDepartment = schoolDepartmentByYear(businessId, beginDate, endDate);
+		JSONArray countEachDepartmentTotal= schoolDepartment.optJSONArray("countEachDepartmentTotal");
+		JSONArray countTWEachDepartmentTotal= schoolDepartment.optJSONArray("countTWEachDepartmentTotal");
+		JSONArray countCNEachDepartmentTotal= schoolDepartment.optJSONArray("countCNEachDepartmentTotal");
+		JSONArray countUSEachDepartmentTotal= schoolDepartment.optJSONArray("countUSEachDepartmentTotal");
+		log.info(schoolDepartment);
+		try {
+			XSSFWorkbook workbook = new XSSFWorkbook(); 
+			XSSFSheet sheet = workbook.createSheet(); 
+			XSSFRow row = sheet.createRow((short)0);
+			XSSFCell cell = row.createCell((short) 0); 
+			cell.setCellValue("科系"); 
+			int dataInx = 0;
+			String countryId [] = {"美國","臺灣","中國大陸","總數"};
+			for(dataInx = 0;dataInx<countryId.length;dataInx++) {
+				cell = row.createCell((short) 1+dataInx);
+				Object countryData =countryId [dataInx];
+				cell.setCellValue(countryData.toString());
+			}
+			for(dataInx = 0;dataInx<countEachDepartmentTotal.length();dataInx++) {
+				row = sheet.createRow((short) 1+dataInx);
+				cell = row.createCell((short) 0);
+				Object departmentName = countEachDepartmentTotal.optJSONArray(dataInx).get(0);
+				cell.setCellValue(departmentName.toString()); 
+				cell = row.createCell((short) 1);
+				Object departmentUSData = countUSEachDepartmentTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(departmentUSData.toString()); 
+				cell = row.createCell((short) 2);
+				Object departmentTWData = countTWEachDepartmentTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(departmentTWData.toString()); 
+				cell = row.createCell((short) 3);
+				Object departmentCNData = countCNEachDepartmentTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(departmentCNData.toString()); 
+				cell = row.createCell((short) 4);
+				Object departmentSumData = countEachDepartmentTotal.optJSONArray(dataInx).get(1);
+				cell.setCellValue(departmentSumData.toString()); 
+			}		
+			fileOut = new ByteArrayOutputStream();
+			workbook.write(fileOut);
+			fileOut.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ByteArrayInputStream(fileOut.toByteArray());
+	}
+	
+	@Override
+	public ByteArrayInputStream exportPlatformSchool(JSONArray statusDesc, JSONArray businessName, JSONArray countryId){
+		ByteArrayOutputStream fileOut = null;
+		List<Analysis> countList = new ArrayList<Analysis>();
+		List<Analysis> sumList = new ArrayList<Analysis>();
+		countList = analysisDao.countSchoolPatentStatus(statusDesc, businessName);
+		sumList= analysisDao.countSchoolPatentTotal(businessName);
+		
+		try {
+			int schoolInx = 0;
+			int dataInx = 0;
+			int titleInx = 0;
+			int countryInx = 0;
+			String data;
+			String sum;
+			String schoolName ;
+			String title = null;
+			Object [][]countListToArray = countList.toArray(new Object[countList.size()][0]);
+			Object [][]sumListToArray = sumList.toArray(new Object[sumList.size()][0]);
+			XSSFWorkbook workbook = new XSSFWorkbook(); 
+			XSSFSheet sheet = workbook.createSheet(); 
+			XSSFRow row = null ;
+			XSSFCell cell;
+			CellStyle redStyle = workbook.createCellStyle();
+			XSSFFont redFont = workbook.createFont();
+			redFont.setColor(IndexedColors.LIGHT_BLUE.index);
+			redStyle.setFont(redFont);
+//			校名跟欄位名
+			for(schoolInx = 0;schoolInx<businessName.length();schoolInx++) {
+				schoolName = businessName.get(schoolInx).toString();
+				row = sheet.createRow((short) 0 + (schoolInx*6));
+				cell = row.createCell((short) 0);
+				cell.setCellStyle(redStyle);
+				cell.setCellValue(schoolName);
+				
+				row = sheet.createRow((short)1 + (schoolInx*6));
+				for(titleInx = 0;titleInx<statusDesc.length()+1;titleInx++) {
+					cell = row.createCell((short) 1+titleInx);
+					if(statusDesc.isNull(titleInx)) {
+						cell.setCellValue("總數");
+					}else {
+						title = statusDesc.get(titleInx).toString();
+						cell.setCellValue(title);
+					}
+				}
+			}
+			//寫入值
+			for (countryInx=0;countryInx < countryId.length();countryInx++) {
+				log.info(countryId.get(countryInx).toString());
+				for(schoolInx = 0;schoolInx<businessName.length();schoolInx++) {
+					schoolName = businessName.get(schoolInx).toString();
+					switch (countryId.get(countryInx).toString()) {
+					case "tw":
+						row = sheet.createRow((short) 2 + (schoolInx * 6));
+						cell = row.createCell((short) 0);
+						cell.setCellValue("臺灣");
+						for (titleInx = 0; titleInx < statusDesc.length(); titleInx++) {
+							title = statusDesc.opt(titleInx).toString();
+//							log.info(title);
+							for (dataInx = 0; dataInx < countList.size(); dataInx++) {
+								if (countListToArray[dataInx][1].equals(schoolName)&& countListToArray[dataInx][3].equals("tw")) {
+									if (countListToArray[dataInx][4].equals(title)) {
+										cell = row.createCell((short) 1 + titleInx);
+										data = countListToArray[dataInx][2].toString();
+										cell.setCellValue(data);
+//										log.info(countListToArray[dataInx][2].toString());
+									}
+								}
+							}
+//							log.info(schoolName + ": " + schoolInx);
+						}
+						cell = row.createCell((short) 1 + titleInx);
+						for (dataInx = 0; dataInx < sumList.size(); dataInx++) {
+							if (sumListToArray[dataInx][1].equals(schoolName)&& sumListToArray[dataInx][3].equals("tw")) {
+								sum = sumListToArray[dataInx][2].toString();
+								cell.setCellValue(sum);
+							}
+						}
+						break;
+					case "us":
+						row = sheet.createRow((short) (2 + countryInx) + (schoolInx * 6));
+						cell = row.createCell((short) 0);
+						cell.setCellValue("美國");
+						for (titleInx = 0; titleInx < statusDesc.length(); titleInx++) {
+							title = statusDesc.get(titleInx).toString();
+							for (dataInx = 0; dataInx < countList.size(); dataInx++) {
+								if (countListToArray[dataInx][1].equals(schoolName)&& countListToArray[dataInx][3].equals("us")) {
+									if (countListToArray[dataInx][4].equals(title)) {
+										cell = row.createCell((short) 1 + titleInx);
+										data = countListToArray[dataInx][2].toString();
+										cell.setCellValue(data);
+//										log.info(countListToArray[dataInx][2].toString());
+									}
+								}
+							}
+						}
+						cell = row.createCell((short) 1 + titleInx);
+						for (dataInx = 0; dataInx < sumList.size(); dataInx++) {
+							if (sumListToArray[dataInx][1].equals(schoolName)&& sumListToArray[dataInx][3].equals("us")) {
+								sum = sumListToArray[dataInx][2].toString();
+								cell.setCellValue(sum);
+							}
+						}
+						break;
+					case "cn":
+						row = sheet.createRow((short) (2 + countryInx) + (schoolInx * 6));
+						cell = row.createCell((short) 0);
+						cell.setCellValue("中國大陸");
+						for (titleInx = 0; titleInx < statusDesc.length(); titleInx++) {
+							title = statusDesc.get(titleInx).toString();
+							for (dataInx = 0; dataInx < countList.size(); dataInx++) {
+								if (countListToArray[dataInx][1].equals(schoolName)&& countListToArray[dataInx][3].equals("cn")) {
+									if (countListToArray[dataInx][4].equals(title)) {
+										cell = row.createCell((short) 1 + titleInx);
+										data = countListToArray[dataInx][2].toString();
+										cell.setCellValue(data);
+//										log.info("value: " + countListToArray[dataInx][2].toString());
+									}
+								}
+							}
+						}
+						cell = row.createCell((short) 1 + titleInx);
+						for (dataInx = 0; dataInx < sumList.size(); dataInx++) {
+							if (sumListToArray[dataInx][1].equals(schoolName)&& sumListToArray[dataInx][3].equals("cn")) {
+								sum = sumListToArray[dataInx][2].toString();
+								cell.setCellValue(sum);
+							}
+						}
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			log.info("schoolInx: " + schoolInx);
+		
+			
+			fileOut = new ByteArrayOutputStream();
+			workbook.write(fileOut);
+			fileOut.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ByteArrayInputStream(fileOut.toByteArray());
+	}
+	@Override
+	public ByteArrayInputStream exportPlatformSchoolByYear(JSONArray statusDesc, JSONArray businessName, JSONArray countryId,Long beginDate, Long endDate){
+		ByteArrayOutputStream fileOut = null;
+		List<Analysis> countList = new ArrayList<Analysis>();
+		List<Analysis> sumList = new ArrayList<Analysis>();
+		countList = analysisDao.countSchoolPatentStatusByYear(statusDesc, businessName, beginDate, endDate);
+		sumList= analysisDao.countSchoolPatentTotalByYear(businessName, beginDate, endDate);
+		
+		try {
+			int schoolInx = 0;
+			int dataInx = 0;
+			int titleInx = 0;
+			int countryInx = 0;
+			String data;
+			String sum;
+			String schoolName ;
+			String title = null;
+			Object [][]countListToArray = countList.toArray(new Object[countList.size()][0]);
+			Object [][]sumListToArray = sumList.toArray(new Object[sumList.size()][0]);
+			XSSFWorkbook workbook = new XSSFWorkbook(); 
+			XSSFSheet sheet = workbook.createSheet(); 
+			XSSFRow row = null ;
+			XSSFCell cell;
+			CellStyle redStyle = workbook.createCellStyle();
+			XSSFFont redFont = workbook.createFont();
+			redFont.setColor(IndexedColors.LIGHT_BLUE.index);
+			redStyle.setFont(redFont);
+//			校名跟欄位名
+			for(schoolInx = 0;schoolInx<businessName.length();schoolInx++) {
+				schoolName = businessName.get(schoolInx).toString();
+				row = sheet.createRow((short) 0 + (schoolInx*6));
+				cell = row.createCell((short) 0);
+				cell.setCellStyle(redStyle);
+				cell.setCellValue(schoolName);
+				
+				row = sheet.createRow((short)1 + (schoolInx*6));
+				for(titleInx = 0;titleInx<statusDesc.length()+1;titleInx++) {
+					cell = row.createCell((short) 1+titleInx);
+					if(statusDesc.isNull(titleInx)) {
+						cell.setCellValue("總數");
+					}else {
+						title = statusDesc.get(titleInx).toString();
+						cell.setCellValue(title);
+					}
+				}
+			}
+			//寫入值
+			for (countryInx=0;countryInx < countryId.length();countryInx++) {
+				log.info(countryId.get(countryInx).toString());
+				for(schoolInx = 0;schoolInx<businessName.length();schoolInx++) {
+					schoolName = businessName.get(schoolInx).toString();
+					switch (countryId.get(countryInx).toString()) {
+					case "tw":
+						row = sheet.createRow((short) 2 + (schoolInx * 6));
+						cell = row.createCell((short) 0);
+						cell.setCellValue("臺灣");
+						for (titleInx = 0; titleInx < statusDesc.length(); titleInx++) {
+							title = statusDesc.opt(titleInx).toString();
+							log.info(title);
+							for (dataInx = 0; dataInx < countList.size(); dataInx++) {
+								if (countListToArray[dataInx][1].equals(schoolName)&& countListToArray[dataInx][3].equals("tw")) {
+									if (countListToArray[dataInx][4].equals(title)) {
+										cell = row.createCell((short) 1 + titleInx);
+										data = countListToArray[dataInx][2].toString();
+										cell.setCellValue(data);
+										log.info(countListToArray[dataInx][2].toString());
+									}
+								}
+							}
+							log.info(schoolName + ": " + schoolInx);
+						}
+						cell = row.createCell((short) 1 + titleInx);
+						for (dataInx = 0; dataInx < sumList.size(); dataInx++) {
+							if (sumListToArray[dataInx][1].equals(schoolName)&& sumListToArray[dataInx][3].equals("tw")) {
+								sum = sumListToArray[dataInx][2].toString();
+								cell.setCellValue(sum);
+							}
+						}
+						break;
+					case "us":
+						row = sheet.createRow((short) (2 + countryInx) + (schoolInx * 6));
+						cell = row.createCell((short) 0);
+						cell.setCellValue("美國");
+						for (titleInx = 0; titleInx < statusDesc.length(); titleInx++) {
+							title = statusDesc.get(titleInx).toString();
+							for (dataInx = 0; dataInx < countList.size(); dataInx++) {
+								if (countListToArray[dataInx][1].equals(schoolName)&& countListToArray[dataInx][3].equals("us")) {
+									if (countListToArray[dataInx][4].equals(title)) {
+										cell = row.createCell((short) 1 + titleInx);
+										data = countListToArray[dataInx][2].toString();
+										cell.setCellValue(data);
+										log.info(countListToArray[dataInx][2].toString());
+									}
+								}
+							}
+						}
+						cell = row.createCell((short) 1 + titleInx);
+						for (dataInx = 0; dataInx < sumList.size(); dataInx++) {
+							if (sumListToArray[dataInx][1].equals(schoolName)&& sumListToArray[dataInx][3].equals("us")) {
+								sum = sumListToArray[dataInx][2].toString();
+								cell.setCellValue(sum);
+							}
+						}
+						break;
+					case "cn":
+						row = sheet.createRow((short) (2 + countryInx) + (schoolInx * 6));
+						cell = row.createCell((short) 0);
+						cell.setCellValue("中國大陸");
+						for (titleInx = 0; titleInx < statusDesc.length(); titleInx++) {
+							title = statusDesc.get(titleInx).toString();
+							for (dataInx = 0; dataInx < countList.size(); dataInx++) {
+								if (countListToArray[dataInx][1].equals(schoolName)&& countListToArray[dataInx][3].equals("cn")) {
+									if (countListToArray[dataInx][4].equals(title)) {
+										cell = row.createCell((short) 1 + titleInx);
+										data = countListToArray[dataInx][2].toString();
+										cell.setCellValue(data);
+										log.info("value: " + countListToArray[dataInx][2].toString());
+									}
+								}
+							}
+						}
+						cell = row.createCell((short) 1 + titleInx);
+						for (dataInx = 0; dataInx < sumList.size(); dataInx++) {
+							if (sumListToArray[dataInx][1].equals(schoolName)&& sumListToArray[dataInx][3].equals("cn")) {
+								sum = sumListToArray[dataInx][2].toString();
+								cell.setCellValue(sum);
+							}
+						}
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			log.info("schoolInx: " + schoolInx);
+		
+			
+			fileOut = new ByteArrayOutputStream();
+			workbook.write(fileOut);
+			fileOut.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ByteArrayInputStream(fileOut.toByteArray());
+	}
+	
+	
+	@Override
+	public JSONObject schoolData (JSONArray statusDesc, JSONArray businessName, JSONArray countryId) {
+		List<Analysis> countList = new ArrayList<Analysis>();
+		List<Analysis> countTWList = new ArrayList<Analysis>();
+		List<Analysis> countUSList = new ArrayList<Analysis>();
+		List<Analysis> countCNList = new ArrayList<Analysis>();
+		countList = analysisDao.countSchoolPatentStatus(statusDesc, businessName);
+		log.info(countList.size());
+		int dataInx = 0;
+		String schoolName = businessName.get(dataInx).toString();
+		log.info(schoolName);
+		JSONObject result = new JSONObject();
+		result.put("countList",countList);
+		return result;
+	}
+	
+	public JSONObject testAnalysis(JSONArray statusDesc, JSONArray businessId) {
 //		int counttt = 0;
 //		counttt = analysisDao.countPorfolio(businessId);
 //		log.info(unApplPatent);
 //		return unApplPatent;
 		List<Analysis> countList = new ArrayList<Analysis>();
-		countList = analysisDao.countSchoolPatentApplStatus();
+		countList = analysisDao.countSchoolPatentStatus(statusDesc, businessId);
 		log.info(countList.size());
 //		log.info(countList);
 		JSONObject result = new JSONObject();
@@ -1387,10 +2244,5 @@ public class AnalysisServiceImpl implements AnalysisService {
 		return result;
 	}
 
-	@Override
-	public JSONObject testAnalysis(String businessId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }
