@@ -22,8 +22,8 @@ public interface PatentDao {
 	
 	List<Patent> getPatentListByApplNo(String applNo);
 
-	List<Patent> getByAdvancedSearch(String hql, List<String> dataList, int page, int pageSize);
-	int getCountByAdvancedSearch(String hql, List<String> dataList, int page, int pageSize);
+	List<Patent> getByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize);
+	int getCountByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize);
 
 	int updatePatentApplNo(String patentId, String patentApplNo);
 

@@ -40,8 +40,6 @@ public interface PatentService {
 
 	int authorizedUpdatePatent(String businessId, Patent patent);
 
-	int deletePatent(Patent patent);
-
 	List<Patent> getExcelByPatentIds(List<String> idList, String businessId);
 
 	ListQueryForm getByBusinessId(String businessId, int page, String orderFieldId, int is_asc);

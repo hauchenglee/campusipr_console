@@ -317,10 +317,10 @@ public class Constants {
 	public static final String EXCEL_COLUMN_INVENTOR = "發明人";
 	public static final String EXCEL_COLUMN_APPLICATION_DATE = "申請日";
 	public static final String EXCEL_COLUMN_APPLICATION_NO = "申請號";
-	public static final String EXCEL_COLUMN_PUBLIC_DATE = "公開日";
-	public static final String EXCEL_COLUMN_PUBLIC_NO = "公開號";
-	public static final String EXCEL_COLUMN_NOTICE_DATE = "公告日";
-	public static final String EXCEL_COLUMN_NOTICE_NO = "公告號";
+	public static final String EXCEL_COLUMN_NOTICE_NO = "公開號";
+	public static final String EXCEL_COLUMN_NOTICE_DATE = "公開日";
+	public static final String EXCEL_COLUMN_PUBLIC_NO = "公告號";
+	public static final String EXCEL_COLUMN_PUBLIC_DATE = "公告日";
 	public static final String EXCEL_COLUMN_PATENT_NO = "證書號";
 	
 	public static final String EXCEL_COLUMN_PAY_VAILD_DATE = "年費有效日期";
