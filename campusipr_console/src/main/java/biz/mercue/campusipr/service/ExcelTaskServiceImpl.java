@@ -542,113 +542,40 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							}
 							log.info("patent no:"+patent.getPatent_no());
 							break;
-						case Constants.PATENT_APPL_NO_FIELD:
-							if(row.getCell(fieldMap.getExcel_field_index())==null) {
-								Cell forNullCell = row.createCell(fieldMap.getExcel_field_index());
-								row.createCell(fieldMap.getExcel_field_index()).setCellValue("");
-								errorRowList.add(rowIndex);
-								errorColumnList.add(fieldMap.getExcel_field_index());
-								log.info("patentApplNo補空");
-								log.info("Cell==null(跟Type3不同)- row:"+ rowIndex + "、col:" + fieldMap.getExcel_field_index());
-								break;
-							}
-//							String patentApplNoCell= row.getCell(fieldMap.getExcel_field_index()).getStringCellValue();
-//							log.info(patentApplNoCell);
-							if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-								int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-								int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
-								String patentApplNo = null;
-								// type is null --> jump out for loop
-								if (cellType == 3) {
+							case Constants.PATENT_APPL_NO_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) == null) {
+									row.createCell(fieldMap.getExcel_field_index()).setCellValue("");
 									errorRowList.add(rowIndex);
 									errorColumnList.add(fieldMap.getExcel_field_index());
-									log.info("ErrorIndex:申請號為null，cellType == 3- row:"+ rowIndex + "、col:" + fieldMap.getExcel_field_index());
-									if(StringUtils.isNULL(countryName)) {										
-										isApplNoNull = true;
-										errorRowList.add(rowIndex);
-										errorColumnList.add(fieldMap.getExcel_field_index());
-										log.info("countryName and applynois null- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
-										break ;
-									}
-								}
-								
-								// check country field value to detect add tw, us or cn etc
-								String countryAddName = null;
-								if(!StringUtils.isNULL(countryName)) {
-									for (Country country : listCountry) {
-										if (country.getCountry_name().contains(countryName) || country.getCountry_alias_name().contains(countryName)) {
-											countryAddName = country.getCountry_id().toUpperCase();
-											break;
-										}
-									}
-								}
-								
-								if (StringUtils.isNULL(countryAddName)) {
-//									listPatent = null;
-									errorRowList.add(rowIndex);
-									errorColumnList.add(fieldMap.getExcel_field_index());
-									log.info("ErrorIndex:countryAddName is null- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+									log.info("patentApplNo補空");
+									log.info("Cell==null(跟Type3不同)- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
 									break;
 								}
-								
-								// type is numeric --> need to add country name
-								if (cellType == 0) {
-									log.info("type is numeric");
-									row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
-									patentApplNo = countryAddName + row.getCell(excelFieldIndex).getStringCellValue();
-								}
-								// type is string
-								if (cellType == 1) {
-									patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
-									// resolve cell value is number but cell type is string
-									if (patentApplNo.matches(pattern)) {
-										patentApplNo = countryAddName + row.getCell(excelFieldIndex).getStringCellValue();
-									}
-									if(StringUtils.isNULL(patentApplNo)) {
+								String patentApplNo = "";
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+									int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
+									// type is null --> jump out for loop
+									if (cellType == 3) {
 										errorRowList.add(rowIndex);
 										errorColumnList.add(fieldMap.getExcel_field_index());
-										log.info("patentApplNo為null- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+										log.info("ErrorIndex:申請號為null，cellType == 3- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
 									}
-									if(patentApplNo.isEmpty()) {
-										errorRowList.add(rowIndex);
-										errorColumnList.add(fieldMap.getExcel_field_index());
-										log.info("patentApplNo is Empty- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+
+									// type is numeric --> need to add country name
+									if (cellType == 0) {
+										log.info("type is numeric");
+										row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
+										patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
 									}
-									if(!StringUtils.isNULL(patentApplNo)) {
-										// check country name equals patent appl no country name
-//										log.info("patentApplNo:"+patentApplNo+ "。");
-										patentApplNo =patentApplNo.replaceAll(" ", "");
-//										log.info("patentApplNo:"+patentApplNo+ "。");
-										
-										if(StringUtils.isNULL(patentApplNo)) {
-											row.createCell(fieldMap.getExcel_field_index()).setCellValue("");
-											errorRowList.add(rowIndex);
-											errorColumnList.add(fieldMap.getExcel_field_index());
-											log.info("遇到patentApplNo只有空白格的情形- row:"+ rowIndex + "、col:" + fieldMap.getExcel_field_index());
-											break;
-										}
-										String countryStartName = patentApplNo.substring(0, 2); // patent appl no start country name, e.g. tw, us or cn
-//										// check country field name is equals patent appl no or not
-//										if(countryAddName ==(countryStartName.toUpperCase())) {
-//											errorRowList.add(rowIndex);
-//											errorColumnList.add(fieldMap.getExcel_field_index());
-//											log.info("國家與申請號不相等- row:" + rowIndex + "、col" + fieldMap.getExcel_field_index());
-//										}
-										if (!countryAddName.equalsIgnoreCase(countryStartName.toUpperCase())) {
-											// data is incorrect, thus set data is null
-											errorRowList.add(rowIndex);
-											errorColumnList.add(fieldMap.getExcel_field_index());
-											log.info("國家與申請號不相等- row:" + rowIndex + "、col" + fieldMap.getExcel_field_index());
-											break;
-										}
-										
+									// type is string
+									if (cellType == 1) {
+										patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
 									}
+									patent.setPatent_appl_no(patentApplNo);
+									isApplNoNull = false;
 								}
-								patent.setPatent_appl_no(patentApplNo);
-								isApplNoNull = false;
-							}
-//							log.info(row.getCell(fieldMap.getExcel_field_index()));
-							break;
+								break;
 						case Constants.PATENT_APPL_DATE_FIELD:
 							if (row.getCell(fieldMap.getExcel_field_index())!= null) {
 								Cell cellApplDate = row.getCell(fieldMap.getExcel_field_index());
