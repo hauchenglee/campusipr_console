@@ -33,11 +33,13 @@ import biz.mercue.campusipr.dao.AnalysisDao;
 import biz.mercue.campusipr.dao.CountryDao;
 import biz.mercue.campusipr.dao.FieldDao;
 import biz.mercue.campusipr.dao.PatentDao;
+import biz.mercue.campusipr.dao.StatusDao;
 import biz.mercue.campusipr.model.Analysis;
 import biz.mercue.campusipr.model.Country;
 import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.model.PatentField;
+import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.util.Constants;
 import javassist.expr.NewArray;
 
@@ -53,6 +55,9 @@ public class AnalysisServiceImpl implements AnalysisService {
 	@Autowired
 	private AnalysisDao analysisDao;
 
+	@Autowired
+	private StatusDao statusDao;
+	
 	@Override
 	public JSONObject schoolOverview(String businessId) {
 		log.info("analysis All Patent");
@@ -558,6 +563,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Analysis> countSchoolSum= new ArrayList<Analysis>();
 		List<Analysis> getDefaultYear = new ArrayList<Analysis>();
 		List<Object> combineSchoolSum = new ArrayList<Object>();
+		List<Status> statusList = new ArrayList<Status>();
+		statusList=statusDao.getEditable();
 		
 		countSchoolPatentTotal = analysisDao.countSchoolPatentTotal();
 		countSchoolPatentApplStatus = analysisDao.countSchoolPatentApplStatus();
@@ -623,6 +630,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 		
 		result.put("getDefaultYear", getDefaultYear);
 		result.put("combineSchoolSum", combineSchoolSum);
+		result.put("statusList", statusList);
+		log.info(statusList);
 		return result;
 	}
 	
@@ -646,7 +655,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List <Object> patentCNPublish = new ArrayList<Object>(); 
 		List <Object> patentTWPublish = new ArrayList<Object>(); 
 		List <Object> patentUSPublish = new ArrayList<Object>();
-		
+		List<Status> statusList = new ArrayList<Status>();
+		statusList=statusDao.getEditable();
 		try {
 			countSchoolPatentTotal = analysisDao.countSchoolPatentTotalByYear(beginDate, endDate);
 			countSchoolPatentApplStatus = analysisDao.countSchoolPatentApplStatusByYear(beginDate, endDate);
@@ -697,7 +707,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 		result.put("patentTWPublish", patentTWPublish);
 		result.put("patentUSPublish", patentUSPublish);
 		result.put("combineSchoolSum", combineSchoolSum);
-		
+		result.put("statusList", statusList);
+		log.info(statusList);
 		return result;
 	}
 	
