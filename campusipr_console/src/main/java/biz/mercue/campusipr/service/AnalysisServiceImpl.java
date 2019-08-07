@@ -564,8 +564,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Analysis> getDefaultYear = new ArrayList<Analysis>();
 		List<Object> combineSchoolSum = new ArrayList<Object>();
 		List<Status> statusList = new ArrayList<Status>();
-		statusList=statusDao.getEditable();
 		
+		statusList=statusDao.getEditable();
 		countSchoolPatentTotal = analysisDao.countSchoolPatentTotal();
 		countSchoolPatentApplStatus = analysisDao.countSchoolPatentApplStatus();
 		countSchoolPatentNoticeStatus = analysisDao.countSchoolPatentNoticeStatus();
