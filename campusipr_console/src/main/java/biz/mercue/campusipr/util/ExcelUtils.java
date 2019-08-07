@@ -146,6 +146,7 @@ public class ExcelUtils {
 		excelColumnMap.put("382c9ca7af04c5362e1f24f1bf38249b", Constants.EXCEL_COLUMN_PATENT_CLAIM);
 		excelColumnMap.put("006b70bc72595d46bed73899fb557bb1", Constants.EXCEL_COLUMN_PATENT_DESC);
 		excelColumnMap.put("785c0e398eca15f96476fceafeb11598", Constants.EXCEL_COLUMN_PATENT_IPC);
+		excelColumnMap.put("ab022983f82441ca165f667059761258", Constants.EXCEL_COLUMN_SCHOOL_DEPARTMENT);
 		excelColumnMap.put("71edfc0d2783857fefb360e574a90355", Constants.EXCEL_COLUMN_SCHOOL_NUM_FIELD);
 		excelColumnMap.put("78f94e6e1b246d9419faa044a1119cc7", Constants.EXCEL_COLUMN_SCHOOL_APPL_YEAR);
 		excelColumnMap.put("fcb331d04d95960a7a8fe469015343f8", Constants.EXCEL_COLUMN_SCHOOL_SUBSIDY_UNIT);
@@ -524,6 +525,40 @@ public class ExcelUtils {
 								}
 							}
 							row.createCell(columnCount).setCellValue(ipcStr);
+						}
+						columnCount++;
+						break;
+					case Constants.SCHOOL_DEPARTMENT_FIELD: // 學校科系
+						log.info("SCHOOL_DEPARTMENT_FIELD: " + Constants.SCHOOL_DEPARTMENT_FIELD);
+						log.info(columnCount);
+						if (patent.getListDepartment() != null) {
+							String departmentStr = "";
+							int lastIndexDe = patent.getListDepartment().size() - 1;
+							for (Department dep : patent.getListDepartment()) {
+								if (dep.getDepartment_id().equals(patent.getListDepartment().get(lastIndexDe).getDepartment_id())) {
+									if (!StringUtils.isNULL(dep.getDepartment_name())) {
+										departmentStr += dep.getDepartment_name();
+									}
+									if (!StringUtils.isNULL(dep.getDepartment_name_en())) {
+										if (!StringUtils.isNULL(departmentStr) && !StringUtils.isNULL(dep.getDepartment_name())) {
+											departmentStr += "_";
+										}
+										departmentStr += dep.getDepartment_name_en();
+									}
+								} else {
+									if (!StringUtils.isNULL(dep.getDepartment_name())) {
+										departmentStr += dep.getDepartment_name();
+									}
+									if (!StringUtils.isNULL(dep.getDepartment_name_en())) {
+										if (!StringUtils.isNULL(departmentStr) && !StringUtils.isNULL(dep.getDepartment_name())) {
+											departmentStr += "_";
+										}
+										departmentStr += dep.getDepartment_name_en();
+									}
+									departmentStr += "、";
+								}
+							}
+							row.createCell(columnCount).setCellValue(departmentStr);
 						}
 						columnCount++;
 						break;

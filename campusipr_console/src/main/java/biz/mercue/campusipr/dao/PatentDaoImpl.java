@@ -57,7 +57,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	public Patent getById(String id){
 		return getByKey(id);
 	}
-	
+
 	@Override
 	public Patent getById(String businessId,String id) {
 		Criteria criteria =null;
@@ -74,8 +74,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.add(Restrictions.eq("patent_id", id));
 		return (Patent) criteria.uniqueResult();
 	}
-	
-	
+
 	@Override
 	public Patent getByApplNo(String applNo) {
 		Criteria criteria =  createEntityCriteria();
@@ -99,60 +98,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		criteria.add(Restrictions.like("patent_appl_no", applNo, MatchMode.START));
 		return criteria.list();
 	}
-
-	@Override
-	public List<Patent> getByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize) {
-		Session session = getSession();
-		Query query = session.createQuery(hql);
-		for (int i = 0; i < dataList.size(); i++) {
-			String parameterName = "s" + i;
-			query.setParameter(parameterName, dataList.get(i));
-		}
-		query.setParameter("bid", businessId);
-		query.setFirstResult((page - 1) * pageSize);
-		query.setMaxResults(pageSize);
-//		query.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // 可以用distinct(bean)代替
-		return query.list();
-	}
-
-	@Override
-	public int getCountByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize) {
-		Session session = getSession();
-		Query query = session.createQuery(hql);
-		for (int i = 0; i < dataList.size(); i++) {
-			String parameterName = "s" + i;
-			query.setParameter(parameterName, dataList.get(i));
-		}
-		query.setParameter("bid", businessId);
-		long count = (long) query.uniqueResult();
-		return (int) count;
-	}
-
-//	@Override
-//	public List<Patent> getByAdvancedSearchDate(String hql, List<String> dataList, int page, int pageSize) {
-//		Session session = getSession();
-//		Query query = session.createQuery(hql);
-//		for (int i = 0; i < dataList.size(); i++) {
-//			String parameterName = "s" + i;
-//			query.setParameter(parameterName, dataList.get(i));
-//		}
-//		query.setFirstResult((page - 1) * pageSize);
-//		query.setMaxResults(pageSize);
-////		query.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // 可以用distinct(bean)代替
-//		return query.list();
-//	}
-//
-//	@Override
-//	public int getCountByAdvancedSearchDate(String hql, List<String> dataList, int page, int pageSize) {
-//		Session session = getSession();
-//		Query query = session.createQuery(hql);
-//		for (int i = 0; i < dataList.size(); i++) {
-//			String parameterName = "s" + i;
-//			query.setParameter(parameterName, dataList.get(i));
-//		}
-//		long count = (long) query.uniqueResult();
-//		return (int) count;
-//	}
 
 	@Override
 	public int updatePatentApplNo(String patentId, String patentApplNo) {
@@ -914,12 +859,65 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 
 	@Override
+	public List<Patent> getByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize) {
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		for (int i = 0; i < dataList.size(); i++) {
+			String parameterName = "s" + i;
+			query.setParameter(parameterName, dataList.get(i));
+		}
+		query.setParameter("bid", businessId);
+		query.setFirstResult((page - 1) * pageSize);
+		query.setMaxResults(pageSize);
+//		query.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // 可以用distinct(bean)代替
+		return query.list();
+	}
+
+	@Override
+	public int getCountByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize) {
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		for (int i = 0; i < dataList.size(); i++) {
+			String parameterName = "s" + i;
+			query.setParameter(parameterName, dataList.get(i));
+		}
+		query.setParameter("bid", businessId);
+		long count = (long) query.uniqueResult();
+		return (int) count;
+	}
+
+	@Override
+	public List<Patent> getByAdvancedSearchDate(String hql, List<String> dataList, int page, int pageSize) {
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		for (int i = 0; i < dataList.size(); i++) {
+			String parameterName = "s" + i;
+			query.setParameter(parameterName, dataList.get(i));
+		}
+		query.setFirstResult((page - 1) * pageSize);
+		query.setMaxResults(pageSize);
+//		query.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // 可以用distinct(bean)代替
+		return query.list();
+	}
+
+	@Override
+	public int getCountByAdvancedSearchDate(String hql, List<String> dataList, int page, int pageSize) {
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		for (int i = 0; i < dataList.size(); i++) {
+			String parameterName = "s" + i;
+			query.setParameter(parameterName, dataList.get(i));
+		}
+		long count = (long) query.uniqueResult();
+		return (int) count;
+	}
+
+	@Override
 	public Patent getByPatentNo(String patentNo) {
 		Criteria criteria = createEntityCriteria();
 		criteria.add(Restrictions.eq("patent_no", patentNo));
 		return (Patent) criteria.uniqueResult();
 	}
-
 
 	@Override
 	public void deletePatentAnnuity(String patentId) {
@@ -957,7 +955,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		query.executeUpdate();
 	}
 
-
 	@Override
 	public void deleteInventor(String patentId) {
 		String hql = "Delete From Inventor where patent_id = :patent_id";
@@ -967,7 +964,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		query.executeUpdate();
 	}
 
-
 	@Override
 	public void deleteAssignee(String patentId) {
 		String hql = "Delete From Assignee where patent_id = :patent_id";
@@ -976,7 +972,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		query.setParameter("patent_id", patentId);
 		query.executeUpdate();
 	}
-
 
 	@Override
 	public void deleteApplicant(String patentId) {
