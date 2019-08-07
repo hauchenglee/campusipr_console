@@ -338,25 +338,27 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	}
 
 	// 預設：各個國家專利總數
-	// 國家部分因目前資料庫國家混亂，故有設定"and p.patent_appl_country in ('tw','us','cn')"，之後有乾淨的資料庫後可拿掉
-	@Override
-	public List<Analysis> countCountry(String businessId) {
-//		log.info("各個國家的專利總數");
-		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id ) " 
-					+ "FROM Patent as p "
-					+ "JOIN p.listBusiness as lb " 
-					+ "where lb.business_id = :businessId "
-					+ "and p.patent_appl_country in ('tw','us','cn') "
-					+ "group by p.patent_appl_country";
-			
-		Query q = session.createQuery(queryStr);
-		if (!StringUtils.isNULL(businessId)&& !businessId.equals(Constants.BUSINESS_PLATFORM)) {
-			q.setParameter("businessId", businessId);
+		// 國家部分因目前資料庫國家混亂，故有設定"and p.patent_appl_country in ('tw','us','cn')"，之後有乾淨的資料庫後可拿掉
+		@Override
+		public List<Analysis> countCountry(String businessId) {
+	//		log.info("各個國家的專利總數");
+			Session session = getSession();
+			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id ) " 
+						+ "FROM Patent as p "
+						+ "JOIN p.listBusiness as lb " 
+						+ "where lb.business_id = :businessId "
+						+ "and p.patent_appl_country in ('tw','us','cn') "
+						+ "and p.patent_appl_date IS NOT NULL "
+						+ "group by p.patent_appl_country";
+				
+			Query q = session.createQuery(queryStr);
+			if (!StringUtils.isNULL(businessId)&& !businessId.equals(Constants.BUSINESS_PLATFORM)) {
+				q.setParameter("businessId", businessId);
+			}
+	
+			return q.list();
 		}
 
-		return q.list();
-	}
 	// 預設：各個國家在申請狀態的專利總數
 	@Override
 	public List<Analysis> countCountryApplStatus(String businessId) {
@@ -955,18 +957,13 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public int countSchool() {
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct b.business_id) "
-						+ "FROM Business as b ";
-//						+ "WHERE b.create_date IS NOT NULL " ;
+						+ "FROM Business as b "
+						+ "WHERE b.create_date IS NOT NULL "
+						+ "AND b.business_id != :role " ;
 		Query q = session.createQuery(queryStr);
+		q.setParameter("role",Constants.BUSINESS_PLATFORM);
 		long count = (long) q.uniqueResult();
-		if(count==0) {
-			log.info(count);
-			return (int) count;
-		}else {
-			count = (long) q.uniqueResult() -1 ;
-//			log.info(count);
-			return (int) count;
-		}
+		return (int) count;
 	}
 	//學校數By Year(business_id 去掉智財中心)
 	@Override
@@ -974,26 +971,20 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct b.business_id) "
 						+ "FROM Business as b "
-						+ "WHERE (date_format(b.create_date, '%Y') between :beginDate and :endDate)";
+						+ "WHERE (date_format(b.create_date, '%Y') between :beginDate and :endDate) "
+						+ "AND b.business_id != :role " ;
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		Timestamp bd = new Timestamp(beginDate);
 		Timestamp ed = new Timestamp(endDate);
 		String beginDateFormat = sdf.format(bd);
 		String endDateFormat = sdf.format(ed);
-
 		q.setParameter("beginDate", beginDateFormat);
 		q.setParameter("endDate", endDateFormat);
+		q.setParameter("role",Constants.BUSINESS_PLATFORM);
 
 		long count = (long) q.uniqueResult();
-		if(count==0) {
-			log.info("如果是0，表示未有資料，或create_date皆是NULL: "+count);
-			return (int) count;
-		}else {
-			count = (long) q.uniqueResult() -1 ;
-			log.info(count);
-			return (int) count;
-		}
+		return (int) count;
 	}
 	
 	@Override
@@ -1123,6 +1114,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "FROM Patent as p "
 							+ "JOIN p.listBusiness as lb " 
 							+ "where lb.business_id = :businessId "
+							+ "and p.patent_appl_date IS NOT NULL "
 							+ "GROUP BY p.patent_appl_country ";
 			Query q = session.createQuery(queryStr);
 			if (!StringUtils.isNULL(businessId)) {
@@ -1153,6 +1145,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
 							+ "and lsps.status_desc = :statusDesc "
+							+ "and p.patent_appl_date IS NOT NULL "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "
@@ -1189,6 +1182,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
 							+ "and lsps.status_desc = :statusDesc "
+							+ "and p.patent_appl_date IS NOT NULL "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "
@@ -1225,6 +1219,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
 							+ "and lsps.status_desc = :statusDesc "
+							+ "and p.patent_appl_date IS NOT NULL "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "

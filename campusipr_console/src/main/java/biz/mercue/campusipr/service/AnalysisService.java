@@ -29,9 +29,7 @@ public interface AnalysisService {
 	JSONObject platformCountryByYear(String countryId, Long beginDate, Long endDate);
 	JSONObject platformSchool();
 	JSONObject platformSchoolByYear(Long beginDate, Long endDate);
-	ByteArrayInputStream exportPlatformOverview();
 	ByteArrayInputStream exportPlatformOverviewByYear(Long beginDate, Long endDate);
-	ByteArrayInputStream exportSchoolOverview(String businessId);
 	ByteArrayInputStream exportSchoolOverviewByYear(String businessId, Long beginDate, Long endDate);
 	ByteArrayInputStream exportSchoolDepartment(String businessId);
 	ByteArrayInputStream exportSchoolDepartmentByYear(String businessId, Long beginDate, Long endDate);

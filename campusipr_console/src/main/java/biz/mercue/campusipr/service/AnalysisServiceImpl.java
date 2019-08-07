@@ -1374,58 +1374,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 		}
 
 
-	@Override
-	public ByteArrayInputStream exportPlatformOverview (){
-		ByteArrayOutputStream fileOut = null;
-		JSONObject platformOverview = platformOverview();
-		String schoolSum = platformOverview.optString("schoolSum");
-		String applSum = platformOverview.optString("applSum");
-		String porfolioSum= platformOverview.optString("porfolioSum");
-		JSONArray analAllYearsList= platformOverview.optJSONArray("analAllYearsList");
-		
-		log.info(platformOverview);
-		try {
-			XSSFWorkbook workbook = new XSSFWorkbook(); 
-			XSSFSheet sheet = workbook.createSheet(); 
-			XSSFRow row = sheet.createRow((short)0);
-			XSSFCell cell = row.createCell((short) 0); 
-			cell.setCellValue(Constants.ANALYSIS_SCHOOLAMOUNT); 
-			cell = row.createCell((short) 1);
-			cell.setCellValue(schoolSum); 
-			
-			row = sheet.createRow((short) 1);
-			cell = row.createCell((short) 0);
-			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNT); 
-			cell = row.createCell((short) 1);
-			cell.setCellValue(applSum); 
-			
-			row = sheet.createRow((short) 2);
-			cell = row.createCell((short) 0);
-			cell.setCellValue(Constants.ANALYSIS_PORTFOLIOAMOUNT); 
-			cell = row.createCell((short) 1);
-			cell.setCellValue(porfolioSum);
-			
-			row = sheet.createRow((short) 4);
-			cell = row.createCell((short) 0);
-			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNTBYYEAR);
-			for(int dataInx = 0;dataInx<analAllYearsList.length() ;dataInx++) {
-				Object yearData =platformOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(1);
-				Object countData =platformOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(0);
-				row = sheet.createRow((short) 5+dataInx);
-				cell = row.createCell((short) 0);
-				cell.setCellValue(yearData.toString());
-				cell = row.createCell((short) 1);
-				cell.setCellValue(countData.toString());
-			}
-			fileOut = new ByteArrayOutputStream();
-			workbook.write(fileOut);
-			fileOut.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return new ByteArrayInputStream(fileOut.toByteArray());
-	}
-	
+
 	@Override
 	public ByteArrayInputStream exportPlatformOverviewByYear(Long beginDate, Long endDate){
 		ByteArrayOutputStream fileOut = null;
@@ -1477,69 +1426,6 @@ public class AnalysisServiceImpl implements AnalysisService {
 		}
 		return new ByteArrayInputStream(fileOut.toByteArray());
 	}
-
-	
-	
-	
-	@Override
-	public ByteArrayInputStream exportSchoolOverview(String businessId){
-		ByteArrayOutputStream fileOut = null;
-		JSONObject schoolOverview = schoolOverview(businessId);
-		String analYearsTotal = schoolOverview.optString("analYearsTotal");
-		String analFamilyTotal = schoolOverview.optString("analFamilyTotal");
-		String analDepartmentTotal= schoolOverview.optString("analDepartmentTotal");
-		String analInventorToltal= schoolOverview.optString("analInventorToltal");
-		JSONArray analAllYearsList= schoolOverview.optJSONArray("analAllYearsList");
-		
-		log.info(schoolOverview);
-		try {
-			XSSFWorkbook workbook = new XSSFWorkbook(); 
-			XSSFSheet sheet = workbook.createSheet(); 
-			XSSFRow row = sheet.createRow((short)0);
-			XSSFCell cell = row.createCell((short) 0); 
-			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNT); 
-			cell = row.createCell((short) 1);
-			cell.setCellValue(analYearsTotal); 
-			
-			row = sheet.createRow((short) 1);
-			cell = row.createCell((short) 0);
-			cell.setCellValue(Constants.ANALYSIS_FAMILYAMOUNT); 
-			cell = row.createCell((short) 1);
-			cell.setCellValue(analFamilyTotal); 
-			
-			row = sheet.createRow((short) 2);
-			cell = row.createCell((short) 0);
-			cell.setCellValue(Constants.ANALYSIS_DEPARTMENTAMOUNT); 
-			cell = row.createCell((short) 1);
-			cell.setCellValue(analDepartmentTotal);
-			
-			row = sheet.createRow((short) 3);
-			cell = row.createCell((short) 0);
-			cell.setCellValue(Constants.ANALYSIS_INVENTORAMOUNT); 
-			cell = row.createCell((short) 1);
-			cell.setCellValue(analInventorToltal);
-			
-			row = sheet.createRow((short) 5);
-			cell = row.createCell((short) 0);
-			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNTBYYEAR);
-			for(int dataInx = 0;dataInx<analAllYearsList.length() ;dataInx++) {
-				Object yearData =schoolOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(1);
-				Object countData =schoolOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(0);
-				row = sheet.createRow((short) 6+dataInx);
-				cell = row.createCell((short) 0);
-				cell.setCellValue(yearData.toString());
-				cell = row.createCell((short) 1);
-				cell.setCellValue(countData.toString());
-			}
-			fileOut = new ByteArrayOutputStream();
-			workbook.write(fileOut);
-			fileOut.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return new ByteArrayInputStream(fileOut.toByteArray());
-	}
-
 	@Override
 	public ByteArrayInputStream exportSchoolOverviewByYear(String businessId, Long beginDate, Long endDate){
 		ByteArrayOutputStream fileOut = null;
