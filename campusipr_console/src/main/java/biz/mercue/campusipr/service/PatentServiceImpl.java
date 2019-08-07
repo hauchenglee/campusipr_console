@@ -1508,7 +1508,9 @@ public class PatentServiceImpl implements PatentService {
 			patent.getListExtension().size();
 			patent.getListBusiness().size();
 			patent.getListAnnuity().size();
-
+			patent.getListDepartment().size();
+			patent.getListCost().size();
+			patent.getListContact().size();
 		}
 		return patentList;
 	}

@@ -22,23 +22,18 @@ public interface PatentDao {
 	
 	List<Patent> getPatentListByApplNo(String applNo);
 
-	List<Patent> getByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize);
-	int getCountByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize);
-
 	int updatePatentApplNo(String patentId, String patentApplNo);
 
 	void create(Patent patent);
 	
 	void delete(String id);
-	
-	
+
 	List<Patent> getByBusinessId(String businessId,int page,int pageSize, String orderList, String orderFieldCode,int is_asc);
 	int  getCountByBusinessId(String businessId);	
 	
 	List<Patent> getByBusinessId(String businessId);
 	List<Patent> getByNotSyncPatent(String businessId);
 
-	
 	List<Patent> getByPatentIds(List<String> ids,String businessId);
 	
 	List<Patent> searchAllFieldPatent(String  searchText, String businessId, int page, int pageSize, String orderList, String orderFieldCode, int is_asc);
@@ -64,7 +59,13 @@ public interface PatentDao {
 
 	List<Patent> searchFieldExtensionListPatent(String searchText, String fieldCode, String businessId, int page, int pageSize, String orderList, String orderFieldCode, int is_asc);
 	int  countSearchFieldExtensionPatent(String searchText, String fieldCode, String businessId);
-	
+
+	List<Patent> getByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize);
+	int getCountByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize);
+
+	List<Patent> getByAdvancedSearchDate(String hql, List<String> dataList, int page, int pageSize);
+	int getCountByAdvancedSearchDate(String hql, List<String> dataList, int page, int pageSize);
+
 	Patent getByPatentNo(String patentNo);
 	
 	void deletePatentAnnuity(String patentId);

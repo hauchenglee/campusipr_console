@@ -333,6 +333,7 @@ public class Constants {
 	public static final String EXCEL_COLUMN_PATENT_DESC = "專利描述";
 	public static final String EXCEL_COLUMN_PATENT_IPC = "國際專利分類";
 
+	public static final String EXCEL_COLUMN_SCHOOL_DEPARTMENT = "學校科系";
 	public static final String EXCEL_COLUMN_SCHOOL_NUM_FIELD = "學校編號";
 	public static final String EXCEL_COLUMN_SCHOOL_APPL_YEAR = "申請年度";
 	public static final String EXCEL_COLUMN_SCHOOL_SUBSIDY_UNIT = "補助單位";
