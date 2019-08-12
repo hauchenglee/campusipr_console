@@ -821,10 +821,12 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 					if (!StringUtils.isNULL(appendOtherInfo)) {
 						patentExtension.setExtension_other_information(appendOtherInfo);
 						patent.setExtension(patentExtension);
-					} else {
+					}
+					// 註解掉影響：如果欄位未選擇或是無值，不會抹除db other info數據
+					/* else {
 						patentExtension.setExtension_other_information("");
 						patent.setExtension(patentExtension);
-					}
+					}*/
 					
 					log.info("patent add");
 					if (!StringUtils.isNULL(patent.getPatent_appl_no()) && !StringUtils.isNULL(patent.getPatent_appl_country())) {

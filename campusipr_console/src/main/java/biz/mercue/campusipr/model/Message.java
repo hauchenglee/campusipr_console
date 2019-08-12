@@ -58,12 +58,12 @@ public class Message extends BaseBean{
 	private boolean is_read;
 
     @JsonView(View.Message.class)
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
 	@JoinColumn(name="admin_id")
 	private Admin admin;
 
 	@JsonView(View.Message.class)
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
 	@JoinColumn(name="business_id")
 	private Business business;
 

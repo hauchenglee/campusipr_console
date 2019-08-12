@@ -92,6 +92,7 @@ public class PatentServiceImpl implements PatentService {
 //			objectList = patentDao.demo(patentId, businessId);
 
 			form = advancedSearch(str, businessId, page, pageSize);
+			form = advancedSearchDate(str, businessId, page, pageSize);
 
 
 			log.info(objectList.size());
@@ -699,49 +700,54 @@ public class PatentServiceImpl implements PatentService {
 				List<Patent> dbPatentList = patentDao.getPatentListByApplNo(StringUtils.getApplNoWithoutAt(editPatent.getPatent_appl_no()));
 				Patent dbTargetPatent = new Patent();
 
-				if (dbPatentList == null || dbPatentList.isEmpty()) {
-					editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
+				boolean isSync = false;
+				boolean isSamePatent = false;
+				if (dbPatentList != null || !dbPatentList.isEmpty()) {
+					for (Patent dbPatent : dbPatentList) {
+						if (dbPatent.isIs_sync()) {
+							isSync = true;
+							break;
+						}
+					}
+					for (Patent dbPatent : dbPatentList) {
+						if (dbPatent.getPatent_id().equals(editPatent.getPatent_id())) {
+							isSamePatent = true;
+							break;
+						}
+					}
+				}
+
+				if (!isSync && !isSamePatent) {
+					// 資料庫都沒有已同步資料（有可能是未公開patent），並且id都不一樣
+					// -> 新增
 					this.addPatent(editPatent);
 					patentHistoryFirstAdd(editPatent, editPatent.getPatent_id(), business.getBusiness_id());
-
 					taskResult = Constants.INT_SUCCESS;
 				} else {
+					// 資料庫已經有一筆patent是同步的
+					// 接下來找出那筆已同步的patent是哪間學校的
+					// 如果是同一間學校 -> update自己本身patent
+					// 如果是不同的學校 -> 將目前資料關聯相對應的patent
 					for (Patent dbPatent : dbPatentList) {
 						for (Business dbBusinessInList : dbPatent.getListBusiness()) {
 							if (business.getBusiness_id().equals(dbBusinessInList.getBusiness_id())) {
+								// 本學校的patent
+								editPatent.setFirstAddEditHistory(false);
 								dbTargetPatent = dbPatent;
 								break;
-							}
-						}
-					}
-
-					// db list 不是空的，但可能是其他學校新增的未公開專利，並不包含該學校專利
-					// 所以如果該學校從未新增，要 add patent
-					// 如果已經新增，要update
-
-					if (StringUtils.isNULL(dbTargetPatent.getPatent_id())) {
-						// 表示這學校從來沒新增過，在資料庫沒有這筆
-						editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
-						this.addPatent(editPatent);
-						patentHistoryFirstAdd(editPatent, editPatent.getPatent_id(), business.getBusiness_id());
-
-						taskResult = Constants.INT_SUCCESS;
-					} else {
-						for (Business dbBusinessInList : dbTargetPatent.getListBusiness()) {
-							if (business.getBusiness_id().equals(dbBusinessInList.getBusiness_id())) {
-								editPatent.setFirstAddEditHistory(false);
-								break;
 							} else {
+								if (dbPatent.isIs_sync()) {
+									dbTargetPatent = dbPatent;
+								}
 								editPatent.setFirstAddEditHistory(true);
 							}
 						}
-
-						editPatent.setComparePatent(dbTargetPatent);
-						handleExtensionExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
-						handleDepartmentExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
-						editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
-						taskResult = updatePatent(editPatent, null);
 					}
+					editPatent.setComparePatent(dbTargetPatent);
+					handleExtensionExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
+					handleDepartmentExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
+					editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
+					taskResult = updatePatent(editPatent, business.getBusiness_id());
 				}
 			}
 			return taskResult;
@@ -1925,7 +1931,7 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	private ListQueryForm advancedSearchDate(String searchStr, String business, int page, int pageSize) {
-		ListQueryForm form;
+		ListQueryForm form = new ListQueryForm();
 		int slashIndex = searchStr.indexOf("/");
 		String fieldCode = searchStr.substring(0, slashIndex);
 		String fieldName = "";
@@ -1949,11 +1955,24 @@ public class PatentServiceImpl implements PatentService {
 				break;
 		}
 
-		if (!StringUtils.isNULL(fieldName)) {
+		String data = searchStr.substring(slashIndex);
+		String[] searchDateObj = data.split("-");
+		Date sd = new Date(Long.valueOf(searchDateObj[0]));
+		Date ed = new Date(Long.valueOf(searchDateObj[1]));
+		List<Date> dataList = new ArrayList<>();
+		dataList.add(sd);
+		dataList.add(ed);
+		List<Patent> patentList = patentDao.getByAdvancedSearchDate(finalSearchHQL, dataList, business, page, pageSize);
 
-		}
+		/*
+						String[] searchDateObj = ((String) searchObj).split("-");
+				Date sd = new Date(Long.valueOf(searchDateObj[0]));
+				Date ed = new Date(Long.valueOf(searchDateObj[1]));
+				list = patentDao.searchFieldPatent(sd, ed, field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
+				count = patentDao.countSearchFieldPatent(sd, ed, field.getField_code(), businessId);
+		 */
 
-		form = advancedSearchDate(searchStr, business, page, pageSize);
+
 		return form;
 	}
 

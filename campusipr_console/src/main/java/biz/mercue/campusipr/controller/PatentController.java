@@ -396,7 +396,11 @@ public class PatentController {
 			if(family != null) {
 				String businessId = null;
 				if(!tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)){
-					businessId  = tokenBean.getBusiness().getBusiness_id();
+					// school
+					businessId = tokenBean.getBusiness().getBusiness_id();
+				} else {
+					// platform
+					businessId = Constants.BUSINESS_PLATFORM;
 				}
 				int taskResult = patentService.combinePatentFamily(family, businessId, patentId, tokenBean.getAdmin(), request.getRemoteAddr());
 				responseBody.setCode(taskResult);
