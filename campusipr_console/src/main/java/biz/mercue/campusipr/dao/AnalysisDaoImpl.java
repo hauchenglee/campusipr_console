@@ -1750,10 +1750,10 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 				if (!StringUtils.isNULL(businessName)) {
 					q.setParameter("businessName", businessName);
 				}
-				log.info(q.list().isEmpty());
+//				log.info(q.list().isEmpty());
 				schoolData.addAll(q.list());
 			}
-			log.info(schoolData);
+//			log.info(schoolData);
 			return schoolData;
 		}
 
@@ -1795,16 +1795,15 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						Timestamp ed = new Timestamp(endDate);
 						String beginDateFormat = sdf.format(bd);
 						String endDateFormat = sdf.format(ed);
-						log.info("開始年: "+beginDateFormat+"，結束年: "+endDateFormat);
+//						log.info("開始年: "+beginDateFormat+"，結束年: "+endDateFormat);
 						q.setParameter("beginDate", beginDateFormat);
 						q.setParameter("endDate", endDateFormat);
-						log.info(q.list().isEmpty());
-						log.info(schoolArray);
-						log.info(statusDesc);
+//						log.info(q.list().isEmpty());
+//						log.info(schoolArray);
+//						log.info(statusDesc);
 						schoolData.addAll(q.list());
 					}
 				}
-				log.info(schoolData);
 				return schoolData;
 			}
 

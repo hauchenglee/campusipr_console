@@ -1958,7 +1958,13 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Analysis> sumList = new ArrayList<Analysis>();
 		countList = analysisDao.countSchoolPatentStatusByYear(statusDesc, businessName, beginDate, endDate);
 		sumList= analysisDao.countSchoolPatentTotalByYear(businessName, beginDate, endDate);
-		
+		//只是用log檢查時間
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info("開始年: "+beginDateFormat+"，結束年: "+endDateFormat);
 		try {
 			int schoolInx = 0;
 			int dataInx = 0;
@@ -1970,6 +1976,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			String title = null;
 			Object [][]countListToArray = countList.toArray(new Object[countList.size()][0]);
 			Object [][]sumListToArray = sumList.toArray(new Object[sumList.size()][0]);
+			
 			XSSFWorkbook workbook = new XSSFWorkbook(); 
 			XSSFSheet sheet = workbook.createSheet(); 
 			XSSFRow row = null ;
@@ -2003,13 +2010,12 @@ public class AnalysisServiceImpl implements AnalysisService {
 				for(schoolInx = 0;schoolInx<businessName.length();schoolInx++) {
 					schoolName = businessName.get(schoolInx).toString();
 					switch (countryId.get(countryInx).toString()) {
-					case "tw":
+					case "中華民國":
 						row = sheet.createRow((short) 2 + (schoolInx * 6));
 						cell = row.createCell((short) 0);
 						cell.setCellValue("臺灣");
 						for (titleInx = 0; titleInx < statusDesc.length(); titleInx++) {
 							title = statusDesc.opt(titleInx).toString();
-							log.info(title);
 							for (dataInx = 0; dataInx < countList.size(); dataInx++) {
 								if (countListToArray[dataInx][1].equals(schoolName)&& countListToArray[dataInx][3].equals("tw")) {
 									if (countListToArray[dataInx][4].equals(title)) {
@@ -2020,7 +2026,13 @@ public class AnalysisServiceImpl implements AnalysisService {
 									}
 								}
 							}
-							log.info(schoolName + ": " + schoolInx);
+							if(row.getCell(1 + titleInx) == null) {
+								cell = row.createCell((short) 1 + titleInx);
+								data = "0";
+								cell.setCellValue(data);
+							}
+//							log.info(schoolName + ": " + schoolInx);
+//							log.info(title + ": " + titleInx);
 						}
 						cell = row.createCell((short) 1 + titleInx);
 						for (dataInx = 0; dataInx < sumList.size(); dataInx++) {
@@ -2029,8 +2041,12 @@ public class AnalysisServiceImpl implements AnalysisService {
 								cell.setCellValue(sum);
 							}
 						}
+						if(cell.getStringCellValue()=="") {
+							sum = "0";
+							cell.setCellValue(sum);
+						}
 						break;
-					case "us":
+					case "美國":
 						row = sheet.createRow((short) (2 + countryInx) + (schoolInx * 6));
 						cell = row.createCell((short) 0);
 						cell.setCellValue("美國");
@@ -2046,6 +2062,11 @@ public class AnalysisServiceImpl implements AnalysisService {
 									}
 								}
 							}
+							if(row.getCell(1 + titleInx) == null) {
+								cell = row.createCell((short) 1 + titleInx);
+								data = "0";
+								cell.setCellValue(data);
+							}
 						}
 						cell = row.createCell((short) 1 + titleInx);
 						for (dataInx = 0; dataInx < sumList.size(); dataInx++) {
@@ -2054,8 +2075,12 @@ public class AnalysisServiceImpl implements AnalysisService {
 								cell.setCellValue(sum);
 							}
 						}
+						if(cell.getStringCellValue()=="") {
+							sum = "0";
+							cell.setCellValue(sum);
+						}
 						break;
-					case "cn":
+					case "中國大陸":
 						row = sheet.createRow((short) (2 + countryInx) + (schoolInx * 6));
 						cell = row.createCell((short) 0);
 						cell.setCellValue("中國大陸");
@@ -2071,6 +2096,11 @@ public class AnalysisServiceImpl implements AnalysisService {
 									}
 								}
 							}
+							if(row.getCell(1 + titleInx) == null) {
+								cell = row.createCell((short) 1 + titleInx);
+								data = "0";
+								cell.setCellValue(data);
+							}
 						}
 						cell = row.createCell((short) 1 + titleInx);
 						for (dataInx = 0; dataInx < sumList.size(); dataInx++) {
@@ -2078,6 +2108,10 @@ public class AnalysisServiceImpl implements AnalysisService {
 								sum = sumListToArray[dataInx][2].toString();
 								cell.setCellValue(sum);
 							}
+						}
+						if(cell.getStringCellValue()=="") {
+							sum = "0";
+							cell.setCellValue(sum);
 						}
 						break;
 					default:
@@ -2101,16 +2135,37 @@ public class AnalysisServiceImpl implements AnalysisService {
 	@Override
 	public JSONObject schoolData (JSONArray statusDesc, JSONArray businessName, JSONArray countryId) {
 		List<Analysis> countList = new ArrayList<Analysis>();
+		List<Analysis> sumList = new ArrayList<Analysis>();
 		List<Analysis> countTWList = new ArrayList<Analysis>();
 		List<Analysis> countUSList = new ArrayList<Analysis>();
 		List<Analysis> countCNList = new ArrayList<Analysis>();
-		countList = analysisDao.countSchoolPatentStatus(statusDesc, businessName);
-		log.info(countList.size());
-		int dataInx = 0;
-		String schoolName = businessName.get(dataInx).toString();
-		log.info(schoolName);
+		List<Object> combineSumList = new ArrayList<Object>();
+		List<Object> combineList = new ArrayList<Object>();
+		
+		Long beginDate = 98243200000L;
+		Long endDate = 1662307661000L;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info("開始年: "+beginDateFormat+"，結束年: "+endDateFormat);
+		countList = analysisDao.countSchoolPatentStatusByYear(statusDesc, businessName, beginDate, endDate);
+		sumList = analysisDao.countSchoolPatentTotalByYear(businessName, beginDate, endDate);
+		Object [][] countListToArray = countList.toArray(new Object[countList.size()][0]);
+		Object [][] sumListToArray = sumList.toArray(new Object[sumList.size()][0]);
+		
+		
+		
+		
+//		log.info(countList.size());
+//		int dataInx = 0;
+//		String schoolName = businessName.get(dataInx).toString();
+//		log.info(schoolName);
 		JSONObject result = new JSONObject();
 		result.put("countList",countList);
+		result.put("sumList",sumList);
+		result.put("combineList", combineList);
 		return result;
 	}
 	
