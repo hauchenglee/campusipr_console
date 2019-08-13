@@ -697,42 +697,10 @@ public class AnalysisController {
 		}
 	}
 
-	@RequestMapping(value="/api/exportplatformschool", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public ResponseEntity<InputStreamResource> exportPlatformSchool(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("export Platform Country ");
-		StringResponseBody responseBody  = new StringResponseBody();
-		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		if(tokenBean!=null) {
-			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			
-			if(tokenBean.checkPermission(permission.getPermission_id())) {	
-				JSONArray businessName = jsonObject.optJSONArray("business_name");
-				JSONArray statusDesc=jsonObject.optJSONArray("statusDesc");
-				JSONArray countryId = jsonObject.optJSONArray("country_id");
-				HttpHeaders headers = new HttpHeaders();
-				String fileName = "platform_School";
-				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
-				ByteArrayInputStream fileOut = analysisService.exportPlatformSchool(statusDesc, businessName, countryId);
-				return ResponseEntity
-		                .ok()
-		                .headers(headers)
-		                .contentType(MediaType.parseMediaType("application/ms-excel"))
-		                .body(new InputStreamResource(fileOut));
-			} else {
-				responseBody.setCode(Constants.INT_NO_PERMISSION);
-				return null;
-			}
-		} else {
-			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-			return null;
-		}
-	}
 	@RequestMapping(value="/api/exportplatformschoolbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public ResponseEntity<InputStreamResource> exportPlatformSchoolByYear(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("export Platform Country ");
+		log.info("export Platform School ");
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		JSONObject jsonObject = new JSONObject(receiveJSONString);

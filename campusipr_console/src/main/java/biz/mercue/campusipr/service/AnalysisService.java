@@ -36,7 +36,6 @@ public interface AnalysisService {
 	ByteArrayInputStream exportCountry(String businessId);
 	ByteArrayInputStream exportCountryByYear(String businessId, Long beginDate, Long endDate);
 	JSONObject schoolData(JSONArray statusDesc, JSONArray businessId, JSONArray countryId);
-	ByteArrayInputStream exportPlatformSchool(JSONArray statusDesc, JSONArray businessName, JSONArray countryId);
 	ByteArrayInputStream exportPlatformSchoolByYear(JSONArray statusDesc, JSONArray businessName, JSONArray countryId,
 			Long beginDate, Long endDate);
 

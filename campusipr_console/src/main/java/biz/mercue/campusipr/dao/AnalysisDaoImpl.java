@@ -35,7 +35,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT count(distinct p.patent_id)" 
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
-						+ "WHERE (p.patent_appl_no like '%@%' or p.patent_appl_no IS NULL)"
+						+ "WHERE p.is_sync = 0 "
 						+ "and lb.business_id = :businessId ";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
@@ -54,8 +54,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 			String queryStr = "SELECT count(distinct p.patent_appl_no)" 
 							+ "FROM Patent as p " 
 							+ "JOIN p.listBusiness as lb "
-							+ "WHERE p.patent_appl_no Not like '%@%' " 
-							+ "and patent_appl_date IS NOT NULL "
+							+ "WHERE p.is_sync = 1 "
 							+ "and lb.business_id = :businessId ";
 			Query q = session.createQuery(queryStr);
 			if (!StringUtils.isNULL(businessId)) {
@@ -71,10 +70,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countYearPatent(String businessId) {
 //		log.info("歷年專利申請數量");
 		Session session = getSession();
-		String queryStr = "SELECT count(distinct p.patent_id), date_format(p.patent_appl_date, '%Y')"
+		String queryStr = "SELECT count(distinct patent_appl_no), date_format(p.patent_appl_date, '%Y')"
 						+ "FROM Patent as p " + "JOIN p.listBusiness as lb " 
-						+ "WHERE p.patent_appl_no Not like '%@%' "
-						+ "and patent_appl_date IS NOT NULL " 
+						+ "WHERE p.is_sync = 1 " 
 						+ "and lb.business_id = :businessId "
 						+ "GROUP BY date_format(patent_appl_date, '%Y') "
 						+ "Order by date_format(patent_appl_date, '%Y') asc";
@@ -87,7 +85,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		return q.list();
 	}
 
-	// 預設：專利家族總數
+	// 預設：專利家族總數-有跟同步專利成為家族的才會列入計算
 	@Override
 	public int countPatentFamily(String businessId) {
 //		log.info("年度合計專利家族總數");
@@ -95,7 +93,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT count(distinct lf.patent_family_id)" 
 						+ "FROM Patent as p "
 						+ "JOIN p.listFamily as lf " 
-						+ "WHERE lf.business_id = :businessId ";
+						+ "WHERE lf.business_id = :businessId "
+						+ "AND p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
@@ -114,7 +113,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT count(distinct ld.department_name)" 
 						+ "FROM Patent as p "
 						+ "JOIN p.listDepartment as ld " 
-						+ "WHERE ld.business_id = :businessId ";
+						+ "WHERE ld.business_id = :businessId "
+						+ "AND  p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
@@ -133,7 +133,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "FROM Patent as p " 
 						+ "JOIN p.listInventor as li "
 						+ "JOIN p.listBusiness as lb " 
-						+ "WHERE lb.business_id = :businessId ";
+						+ "WHERE lb.business_id = :businessId "
+						+ "AND  p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
@@ -154,7 +155,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listBusiness as lb " 
 						+ "WHERE li.inventor_name_en is not NULL "
 						+ "and li.inventor_name is Null " 
-						+ "and lb.business_id = :businessId ";
+						+ "and lb.business_id = :businessId "
+						+ "AND  p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
@@ -172,8 +174,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT count(distinct p.patent_appl_no)" 
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
-						+ "WHERE p.patent_appl_no Not like '%@%' " 
-						+ "and patent_appl_date IS NOT NULL "
+						+ "WHERE p.is_sync = 1 "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "and lb.business_id = :businessId ";
 
@@ -203,7 +204,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "FROM Patent as p "
 						+ "JOIN p.listFamily as lf " 
 						+ "WHERE (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
-						+ "and lf.business_id = :businessId ";
+						+ "and lf.business_id = :businessId "
+						+ "and p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		Timestamp bd = new Timestamp(beginDate);
@@ -231,7 +233,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "FROM Patent as p "
 						+ "JOIN p.listDepartment as ld " 
 						+ "WHERE (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
-						+ "and ld.business_id = :businessId ";
+						+ "and ld.business_id = :businessId "
+						+ "and p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		Timestamp bd = new Timestamp(beginDate);
@@ -259,7 +262,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listInventor as li "
 						+ "JOIN p.listBusiness as lb " 
 						+ "WHERE (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
-						+ "and lb.business_id = :businessId ";
+						+ "and lb.business_id = :businessId "
+						+ "and p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		Timestamp bd = new Timestamp(beginDate);
@@ -289,7 +293,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "WHERE li.inventor_name_en is not NULL "
 						+ "and li.inventor_name is Null "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
-						+ "and lb.business_id = :businessId ";
+						+ "and lb.business_id = :businessId "
+						+ "and p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
@@ -312,11 +317,10 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countYearPatentByYear(String businessId, Long beginDate, Long endDate) {
 //		log.info("特定年度區間歷年專利申請數量");
 		Session session = getSession();
-		String queryStr = "SELECT count(distinct p.patent_id), date_format(p.patent_appl_date, '%Y')"
+		String queryStr = "SELECT count(distinct patent_appl_no), date_format(p.patent_appl_date, '%Y')"
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb " 
-						+ "WHERE p.patent_appl_no Not like '%@%' "
-						+ "and patent_appl_date IS NOT NULL " 
+						+ "WHERE p.is_sync = 1 " 
 						+ "and lb.business_id = :businessId "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "GROUP BY date_format(patent_appl_date, '%Y') ";
@@ -337,18 +341,18 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		return q.list();
 	}
 
-	// 預設：各個國家專利總數
+	// 預設：各個國家專利總數，各專利狀態只會讀取已同步的專利
 		// 國家部分因目前資料庫國家混亂，故有設定"and p.patent_appl_country in ('tw','us','cn')"，之後有乾淨的資料庫後可拿掉
 		@Override
 		public List<Analysis> countCountry(String businessId) {
 	//		log.info("各個國家的專利總數");
 			Session session = getSession();
-			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id ) " 
+			String queryStr = "SELECT p.patent_appl_country, count(distinct patent_appl_no) " 
 						+ "FROM Patent as p "
 						+ "JOIN p.listBusiness as lb " 
 						+ "where lb.business_id = :businessId "
 						+ "and p.patent_appl_country in ('tw','us','cn') "
-						+ "and p.patent_appl_date IS NOT NULL "
+						+ "and p.is_sync = 1 "
 						+ "group by p.patent_appl_country";
 				
 			Query q = session.createQuery(queryStr);
@@ -364,14 +368,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryApplStatus(String businessId) {
 //		log.info("各個國家在申請狀態的專利總數");
 		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), lsps.status_desc "
+		String queryStr = "SELECT p.patent_appl_country, count(distinct patent_appl_no), lsps.status_desc "
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
 						+ "JOIN p.listPatentStatus as ls "
 						+ "JOIN ls.primaryKey.status as lsps "
 						+ "where lb.business_id = :businessId "
 						+ "and lsps.status_desc = :statusDesc "
-						+ "and p.patent_appl_date IS NOT NULL "
+						+ "and p.is_sync = 1 "
 						+ "and p.patent_appl_country in ('tw','us','cn') "
 						+ "and ls.create_date = "
 							+ "( select MAX(ls.create_date) "
@@ -396,14 +400,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryNoticeStatus(String businessId) {
 //		log.info("各個國家在公開狀態的專利總數");
 		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), lsps.status_desc "
+		String queryStr = "SELECT p.patent_appl_country, count(distinct patent_appl_no), lsps.status_desc "
 				+ "FROM Patent as p " 
 				+ "JOIN p.listBusiness as lb "
 				+ "JOIN p.listPatentStatus as ls "
 				+ "JOIN ls.primaryKey.status as lsps "
 				+ "where lb.business_id = :businessId "
 				+ "and lsps.status_desc = :statusDesc "
-				+ "and p.patent_appl_date IS NOT NULL "
+				+ "and p.is_sync = 1 "
 				+ "and p.patent_appl_country in ('tw','us','cn') "
 				+ "and ls.create_date = "
 					+ "( select MAX(ls.create_date) "
@@ -426,14 +430,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryPublishStatus(String businessId) {
 //		log.info("各個國家在公告狀態的專利總數");
 		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), lsps.status_desc "
+		String queryStr = "SELECT p.patent_appl_country, count(distinct patent_appl_no), lsps.status_desc "
 				+ "FROM Patent as p " 
 				+ "JOIN p.listBusiness as lb "
 				+ "JOIN p.listPatentStatus as ls "
 				+ "JOIN ls.primaryKey.status as lsps "
 				+ "where lb.business_id = :businessId "
 				+ "and lsps.status_desc = :statusDesc "
-				+ "and p.patent_appl_date IS NOT NULL "
+				+ "and p.is_sync = 1 "
 				+ "and p.patent_appl_country in ('tw','us','cn') "
 				+ "and ls.create_date = "
 					+ "( select MAX(ls.create_date) "
@@ -456,12 +460,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countSingleCountry(String businessId, String countryId) {
 //		log.info("單一國家的各年份總數(國家可選)");
 		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), date_format(patent_appl_date, '%Y') "
+		String queryStr = "SELECT p.patent_appl_country, count(distinct patent_appl_no), date_format(patent_appl_date, '%Y') "
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
 						+ "where lb.business_id = :businessId "
 						+ "and p.patent_appl_no IS NOT NULL "
-						+ "and p.patent_appl_date IS NOT NULL "
+						+ "and p.is_sync = 1 "
 						+ "and p.patent_appl_country in ('tw','us','cn') "
 						+ "and p.patent_appl_country = :countryId "
 						+ "group by date_format(patent_appl_date, '%Y')";
@@ -479,11 +483,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryByYear(String businessId, Long beginDate, Long endDate) {
 //		log.info("各個國家在特定日期區間的專利總數");
 		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id )"
+		String queryStr = "SELECT p.patent_appl_country, count(distinct patent_appl_no)"
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
 						+ "where lb.business_id = :businessId "
 						+ "and p.patent_appl_country in ('tw','us','cn') "
+						+ "and p.is_sync = 1 "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
@@ -507,13 +512,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryApplStatusByYear(String businessId, Long beginDate, Long endDate) {
 //		log.info("各個國家在特定日期區間的申請狀態專利總數");
 		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), s.status_desc "
+		String queryStr = "SELECT p.patent_appl_country, count(distinct patent_appl_no), s.status_desc "
 				+ "FROM Patent as p " 
 				+ "JOIN p.listBusiness as lb "
 				+ "JOIN p.listPatentStatus as ls "
 				+ "JOIN ls.primaryKey.status as s "
 				+ "where lb.business_id = :businessId "
 				+ "and s.status_desc = :statusDesc "
+				+ "and p.is_sync = 1 "
 				+ "and p.patent_appl_country in ('tw','us','cn') "
 				+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 				+ "and ls.create_date = ( select MAX(ls.create_date) " 
@@ -543,13 +549,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryNoticeStatusByYear(String businessId, Long beginDate, Long endDate) {
 //		log.info("各個國家在特定日期區間的公開狀態專利總數");
 		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), s.status_desc "
+		String queryStr = "SELECT p.patent_appl_country, count(distinct patent_appl_no), s.status_desc "
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
 						+ "JOIN p.listPatentStatus as ls "
 						+ "JOIN ls.primaryKey.status as s "
 						+ "where lb.business_id = :businessId "
 						+ "and s.status_desc = :statusDesc "
+						+ "and p.is_sync = 1 "
 						+ "and p.patent_appl_country in ('tw','us','cn') "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "and ls.create_date = (select MAX(ls.create_date) " 
@@ -579,13 +586,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countCountryPublishStatusByYear(String businessId, Long beginDate, Long endDate) {
 //		log.info("各個國家在特定日期區間的公各狀態專利總數");
 		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), s.status_desc "
+		String queryStr = "SELECT p.patent_appl_country, count(distinct patent_appl_no), s.status_desc "
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
 						+ "JOIN p.listPatentStatus as ls "
 						+ "JOIN ls.primaryKey.status as s "
 						+ "where lb.business_id = :businessId "
 						+ "and s.status_desc = :statusDesc "
+						+ "and p.is_sync = 1 "
 						+ "and p.patent_appl_country in ('tw','us','cn') "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "and ls.create_date = ( select MAX(ls.create_date) " 
@@ -615,11 +623,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countSingleCountryByYear(String businessId, Long beginDate, Long endDate, String countryId) {
 //		log.info("單一國家的各年份總數(國家可選)");
 		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), date_format(patent_appl_date, '%Y') "
+		String queryStr = "SELECT p.patent_appl_country, count(distinct patent_appl_no), date_format(patent_appl_date, '%Y') "
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
 						+ "where lb.business_id = :businessId "
 						+ "and p.patent_appl_country in ('tw','us','cn') "
+						+ "and p.is_sync = 1 "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "and p.patent_appl_country = :countryId "
 						+ "group by date_format(patent_appl_date, '%Y')";
@@ -645,12 +654,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> getEachDepartmentDefaultYear(String businessId) {
 //		log.info("GetDefaultYear");
 		Session session = getSession();
-		String queryStr = "SELECT count(distinct p.patent_id), date_format(p.patent_appl_date, '%Y') "
+		String queryStr = "SELECT count(distinct patent_appl_no), date_format(p.patent_appl_date, '%Y') "
 						+ "FROM Patent as p "
 						+ "JOIN p.listBusiness as lb "
 						+ "JOIN p.listDepartment as ld " 
 						+ "where lb.business_id = :businessId "
-						+ "AND p.patent_appl_date IS NOT NULL "
+						+ "and p.is_sync = 1 "
 						+ "group by date_format(p.patent_appl_date, '%Y')";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
@@ -670,7 +679,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listBusiness as lb "
 						+ "JOIN p.listDepartment as ld " 
 						+ "where lb.business_id = :businessId "
-						+ "AND p.patent_appl_date IS NOT NULL "
+						+ "and p.is_sync = 1 "
 						+ "group by ld.department_name";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
@@ -691,6 +700,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listDepartment as ld "
 						+ "where lb.business_id = :businessId "
 						+ "and p.patent_appl_country = 'TW' "
+						+ "and p.is_sync = 1 "
 						+ "group by ld.department_name";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
@@ -711,6 +721,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listDepartment as ld "
 						+ "where lb.business_id = :businessId "
 						+ "and p.patent_appl_country = 'CN' "
+						+ "and p.is_sync = 1 "
 						+ "group by ld.department_name";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
@@ -731,6 +742,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listDepartment as ld "
 						+ "where lb.business_id = :businessId "
 						+ "and p.patent_appl_country = 'US' "
+						+ "and p.is_sync = 1 "
 						+ "group by ld.department_name";
 		Query q = session.createQuery(queryStr);
 		
@@ -752,6 +764,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listDepartment as ld "
 						+ "where lb.business_id = :businessId "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "and p.is_sync = 1 "
 						+ "group by ld.department_name";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -780,6 +793,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listBusiness as lb "
 						+ "JOIN p.listDepartment as ld "
 						+ "where lb.business_id = :businessId "
+						+ "and p.is_sync = 1 "
 						+ "and p.patent_appl_country = 'TW' "
 						+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "group by ld.department_name";
@@ -809,6 +823,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listDepartment as ld "
 						+ "where lb.business_id = :businessId "
 						+ "and p.patent_appl_country = 'CN' "
+						+ "and p.is_sync = 1 "
 						+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "group by ld.department_name";
 		Query q = session.createQuery(queryStr);
@@ -839,6 +854,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listDepartment as ld "
 						+ "where lb.business_id = :businessId "
 						+ "and p.patent_appl_country = 'US' "
+						+ "and p.is_sync = 1 "
 						+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "group by ld.department_name";
 		Query q = session.createQuery(queryStr);
@@ -878,6 +894,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
+	//平台端
 	//預設：專利組合
 	@Override
 	public int countPorfolio() {
@@ -885,7 +902,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT count(distinct lpf.portfolio_id)"
 						+ "FROM Patent as p " 
 						+ "JOIN p.listPortfolio as lpf "
-						+ "WHERE lpf.create_date IS NOT NULL "; 
+						+ "WHERE lpf.create_date IS NOT NULL "
+						+ "and p.is_sync = 1 "; 
 		Query q = session.createQuery(queryStr);
 
 		long count = (long) q.uniqueResult();
@@ -899,7 +917,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT count(distinct lpf.portfolio_id)"
 						+ "FROM Patent as p " 
 						+ "JOIN p.listPortfolio as lpf " 
-						+ "WHERE (date_format(lpf.create_date, '%Y') between :beginDate and :endDate) ";
+						+ "WHERE (date_format(lpf.create_date, '%Y') between :beginDate and :endDate) "
+						+ "and p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		Timestamp bd = new Timestamp(beginDate);
@@ -921,8 +940,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct p.patent_appl_no)" 
 						+ "FROM Patent as p " 
-						+ "WHERE p.patent_appl_no Not like '%@%' " 
-						+ "and patent_appl_date IS NOT NULL ";
+						+ "WHERE p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		long count = (long) q.uniqueResult();
 //		log.info(count);
@@ -935,8 +953,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct p.patent_appl_no)" 
 						+ "FROM Patent as p " 
-						+ "WHERE p.patent_appl_no Not like '%@%' " 
-						+ "and patent_appl_date IS NOT NULL "
+						+ "WHERE p.is_sync = 1 "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) ";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -991,10 +1008,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countYearPatent() {
 //		log.info("歷年專利申請數量");
 		Session session = getSession();
-		String queryStr = "SELECT count(distinct p.patent_id), date_format(p.patent_appl_date, '%Y')"
+		String queryStr = "SELECT count(distinct p.patent_appl_no), date_format(p.patent_appl_date, '%Y')"
 						+ "FROM Patent as p " 
-						+ "WHERE p.patent_appl_no Not like '%@%' "
-						+ "and patent_appl_date IS NOT NULL " 
+						+ "WHERE p.is_sync = 1 " 
 						+ "GROUP BY date_format(patent_appl_date, '%Y') "
 						+ "Order by date_format(patent_appl_date, '%Y') asc";
 
@@ -1007,10 +1023,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	public List<Analysis> countYearPatentByYear(Long beginDate, Long endDate) {
 //		log.info("歷年專利申請數量");
 		Session session = getSession();
-		String queryStr = "SELECT count(distinct p.patent_id), date_format(p.patent_appl_date, '%Y')"
+		String queryStr = "SELECT count(distinct p.patent_appl_no), date_format(p.patent_appl_date, '%Y')"
 						+ "FROM Patent as p " 
-						+ "WHERE p.patent_appl_no Not like '%@%' "
-						+ "and patent_appl_date IS NOT NULL " 
+						+ "WHERE p.is_sync = 1 " 
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "GROUP BY date_format(patent_appl_date, '%Y') "
 						+ "Order by date_format(patent_appl_date, '%Y') asc";
@@ -1052,7 +1067,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT MIN(date_format(patent_appl_date, '%Y')), MAX(date_format(patent_appl_date, '%Y')) "
 						+ "FROM Patent as p "
 						+ "JOIN p.listBusiness as lb "
-						+ "where lb.business_id != :role ";
+						+ "where lb.business_id != :role "
+						+ "AND p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		q.setParameter("role",Constants.BUSINESS_PLATFORM);
 //		log.info(q.list().size());
@@ -1062,10 +1078,11 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	@Override
 	public List<Analysis> countSchoolSum(){
 		Session session = getSession();
-		String queryStr = "SELECT distinct lb.business_id, count(p.patent_id) "
+		String queryStr = "SELECT distinct lb.business_id, count(p.patent_appl_no) "
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
 						+ "where lb.business_id != :role "
+						+ "and  p.is_sync = 1 "
 						+ "GROUP BY lb.business_id";
 		Query q = session.createQuery(queryStr);
 		q.setParameter("role",Constants.BUSINESS_PLATFORM);
@@ -1076,10 +1093,11 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	@Override
 	public List<Analysis> countSchoolSumByYear(Long beginDate, Long endDate){
 		Session session = getSession();
-		String queryStr = "SELECT distinct lb.business_id, count(p.patent_id) "
+		String queryStr = "SELECT distinct lb.business_id, count(p.patent_appl_no) "
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
 						+ "where lb.business_id != :role "
+						+ "AND p.is_sync = 1 "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "GROUP BY lb.business_id";
 		Query q = session.createQuery(queryStr);
@@ -1110,11 +1128,11 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		for (listInx = 0; listInx < schoolListToArray.length; listInx++) {
 			businessId = schoolListToArray[listInx][0].toString();
-			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country " 
+			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country " 
 							+ "FROM Patent as p "
 							+ "JOIN p.listBusiness as lb " 
 							+ "where lb.business_id = :businessId "
-							+ "and p.patent_appl_date IS NOT NULL "
+							+ "AND  p.is_sync = 1 "
 							+ "GROUP BY p.patent_appl_country ";
 			Query q = session.createQuery(queryStr);
 			if (!StringUtils.isNULL(businessId)) {
@@ -1138,14 +1156,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		for (listInx = 0; listInx < schoolListToArray.length; listInx++) {
 			businessId = schoolListToArray[listInx][0].toString();
-			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country, lsps.status_desc " 
+			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country, lsps.status_desc " 
 							+ "FROM Patent as p "
 							+ "JOIN p.listBusiness as lb " 
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
 							+ "and lsps.status_desc = :statusDesc "
-							+ "and p.patent_appl_date IS NOT NULL "
+							+ "and p.is_sync = 1 "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "
@@ -1175,14 +1193,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		for (listInx = 0; listInx < schoolListToArray.length; listInx++) {
 			businessId = schoolListToArray[listInx][0].toString();
-			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country, lsps.status_desc " 
+			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country, lsps.status_desc " 
 							+ "FROM Patent as p "
 							+ "JOIN p.listBusiness as lb " 
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
 							+ "and lsps.status_desc = :statusDesc "
-							+ "and p.patent_appl_date IS NOT NULL "
+							+ "and p.is_sync = 1 "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "
@@ -1212,14 +1230,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		for (listInx = 0; listInx < schoolListToArray.length; listInx++) {
 			businessId = schoolListToArray[listInx][0].toString();
-			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country, lsps.status_desc " 
+			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country, lsps.status_desc " 
 							+ "FROM Patent as p "
 							+ "JOIN p.listBusiness as lb " 
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
 							+ "and lsps.status_desc = :statusDesc "
-							+ "and p.patent_appl_date IS NOT NULL "
+							+ "and p.is_sync = 1 "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "
@@ -1249,11 +1267,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		for (listInx = 0; listInx < schoolListToArray.length; listInx++) {
 			businessId = schoolListToArray[listInx][0].toString();
-			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country " 
+			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country " 
 							+ "FROM Patent as p "
 							+ "JOIN p.listBusiness as lb " 
 							+ "where lb.business_id = :businessId "
 							+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+							+ "AND p.is_sync = 1 "
 							+ "GROUP BY p.patent_appl_country ";
 			Query q = session.createQuery(queryStr);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -1285,13 +1304,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		for (listInx = 0; listInx < schoolListToArray.length; listInx++) {
 			businessId = schoolListToArray[listInx][0].toString();
-			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country, lsps.status_desc " 
+			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country, lsps.status_desc " 
 							+ "FROM Patent as p "
 							+ "JOIN p.listBusiness as lb " 
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
 							+ "and lsps.status_desc = :statusDesc "
+							+ "AND p.is_sync = 1  "
 							+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
@@ -1330,13 +1350,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		for (listInx = 0; listInx < schoolListToArray.length; listInx++) {
 			businessId = schoolListToArray[listInx][0].toString();
-			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country, lsps.status_desc " 
+			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country, lsps.status_desc " 
 							+ "FROM Patent as p "
 							+ "JOIN p.listBusiness as lb " 
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
 							+ "and lsps.status_desc = :statusDesc "
+							+ "AND p.is_sync = 1 "
 							+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
@@ -1375,13 +1396,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		for (listInx = 0; listInx < schoolListToArray.length; listInx++) {
 			businessId = schoolListToArray[listInx][0].toString();
-			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country, lsps.status_desc " 
+			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country, lsps.status_desc " 
 							+ "FROM Patent as p "
 							+ "JOIN p.listBusiness as lb " 
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
 							+ "and lsps.status_desc = :statusDesc "
+							+ "AND p.is_sync = 1 "
 							+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
@@ -1415,6 +1437,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no ) " 
 						+ "FROM Patent as p "
 						+ "WHERE p.patent_appl_country in ('tw','us','cn') "
+						+ "and p.is_sync = 1 "
 						+ "group by p.patent_appl_country";
 
 		Query q = session.createQuery(queryStr);
@@ -1426,12 +1449,13 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		public List<Analysis> countSchoolCountryApplStatus() {
 	//		log.info("各個國家在申請狀態的專利總數");
 			Session session = getSession();
-			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), lsps.status_desc "
+			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), lsps.status_desc "
 							+ "FROM Patent as p " 
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lsps.status_desc = :statusDesc "
 							+ "and p.patent_appl_country in ('tw','us','cn') "
+							+ "and p.is_sync = 1 "
 							+ "and ls.create_date = "
 								+ "( select MAX(ls.create_date) "
 								+ "FROM p.listPatentStatus as ls "
@@ -1451,12 +1475,13 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		public List<Analysis> countSchoolCountryNoticeStatus() {
 	//		log.info("各個國家在公開狀態的專利總數");
 			Session session = getSession();
-			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), lsps.status_desc "
+			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), lsps.status_desc "
 					+ "FROM Patent as p " 
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as lsps "
 					+ "where lsps.status_desc = :statusDesc "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "and  p.is_sync = 1 "
 					+ "and ls.create_date = "
 						+ "( select MAX(ls.create_date) "
 						+ "FROM p.listPatentStatus as ls "
@@ -1476,12 +1501,13 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		public List<Analysis> countSchoolCountryPublishStatus() {
 	//		log.info("各個國家在公告狀態的專利總數");
 			Session session = getSession();
-			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), lsps.status_desc "
+			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), lsps.status_desc "
 					+ "FROM Patent as p " 
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as lsps "
 					+ "where lsps.status_desc = :statusDesc "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "and p.is_sync = 1 "
 					+ "and ls.create_date = "
 						+ "( select MAX(ls.create_date) "
 						+ "FROM p.listPatentStatus as ls "
@@ -1501,10 +1527,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		public List<Analysis> countSchoolSingleCountry(String countryId) {
 	//		log.info("單一國家的各年份總數(國家可選)");
 			Session session = getSession();
-			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), date_format(patent_appl_date, '%Y') "
+			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), date_format(patent_appl_date, '%Y') "
 							+ "FROM Patent as p " 
-							+ "where p.patent_appl_date IS NOT NULL "
-							+ "and p.patent_appl_date NOT IN('', 0) "
+							+ "where  p.is_sync = 1 "
 							+ "and p.patent_appl_country in ('tw','us','cn') "
 							+ "and p.patent_appl_country = :countryId "
 							+ "group by date_format(patent_appl_date, '%Y')";
@@ -1519,10 +1544,11 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		public List<Analysis> countSchoolCountryByYear(Long beginDate, Long endDate) {
 	//		log.info("各個國家在特定日期區間的專利總數");
 			Session session = getSession();
-			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id )"
+			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no )"
 							+ "FROM Patent as p " 
 							+ "where (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 							+ "and p.patent_appl_country in ('tw','us','cn') "
+							+ "AND  p.is_sync = 1 "
 							+ "group by p.patent_appl_country";
 			Query q = session.createQuery(queryStr);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -1543,12 +1569,13 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		public List<Analysis> countSchoolCountryApplStatusByYear(Long beginDate, Long endDate) {
 	//		log.info("各個國家在特定日期區間的申請狀態專利總數");
 			Session session = getSession();
-			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), s.status_desc "
+			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
 					+ "FROM Patent as p " 
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as s "
 					+ "where s.status_desc = :statusDesc "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "AND p.is_sync = 1 "
 					+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 					+ "and ls.create_date = ( select MAX(ls.create_date) " 
 										  + "FROM p.listPatentStatus as ls " 
@@ -1575,12 +1602,13 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		public List<Analysis> countSchoolCountryNoticeStatusByYear(Long beginDate, Long endDate) {
 	//		log.info("各個國家在特定日期區間的公開狀態專利總數");
 			Session session = getSession();
-			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), s.status_desc "
+			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
 					+ "FROM Patent as p " 
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as s "
 					+ "where s.status_desc = :statusDesc "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "AND p.is_sync = 1 "
 					+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 					+ "and ls.create_date = " 
 					  + "( select MAX(ls.create_date) " 
@@ -1608,12 +1636,13 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		public List<Analysis> countSchoolCountryPublishStatusByYear(Long beginDate, Long endDate) {
 	//		log.info("各個國家在特定日期區間的公各狀態專利總數");
 			Session session = getSession();
-			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), s.status_desc "
+			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), s.status_desc "
 					+ "FROM Patent as p " 
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as s "
 					+ "WHERE s.status_desc = :statusDesc "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "AND p.is_sync = 1 "
 					+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 					+ "and ls.create_date = ( select MAX(ls.create_date) " 
 										  + "FROM p.listPatentStatus as ls " 
@@ -1639,11 +1668,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		public List<Analysis> countSchoolSingleCountryByYear(Long beginDate, Long endDate, String countryId) {
 	//		log.info("單一國家的各年份總數(國家可選)");
 			Session session = getSession();
-			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), date_format(patent_appl_date, '%Y') "
+			String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_appl_no), date_format(patent_appl_date, '%Y') "
 							+ "FROM Patent as p " 
 							+ "WHERE (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 							+ "and p.patent_appl_country in ('tw','us','cn') "
 							+ "and p.patent_appl_country = :countryId "
+							+ "AND p.is_sync = 1 "
 							+ "group by date_format(patent_appl_date, '%Y')";
 			Query q = session.createQuery(queryStr);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -1669,10 +1699,11 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		for (listInx = 0; listInx < schoolArray.length(); listInx++) {
 			businessName = schoolArray.optString(listInx);
-			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country " 
+			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country " 
 							+ "FROM Patent as p "
 							+ "JOIN p.listBusiness as lb " 
 							+ "where lb.business_name = :businessName "
+							+ "AND p.is_sync = 1 "
 							+ "GROUP BY p.patent_appl_country ";
 			Query q = session.createQuery(queryStr);
 			if (!StringUtils.isNULL(businessName)) {
@@ -1698,12 +1729,13 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 				status = statusDesc.optString(statusInx);
 				for (schoolInx = 0; schoolInx < schoolArray.length(); schoolInx++) {
 					businessName = schoolArray.optString(schoolInx);
-					String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country, lsps.status_desc " 
+					String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country, lsps.status_desc " 
 							+ "FROM Patent as p "
 							+ "JOIN p.listBusiness as lb " 
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_name = :businessName "
+							+ "AND p.is_sync = 1 "
 							+ "and lsps.status_desc = :status "
 							+ "and ls.create_date = "
 							+ "( select MAX(ls.create_date) "
@@ -1732,10 +1764,11 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 			Session session = getSession();
 			for (listInx = 0; listInx < schoolArray.length(); listInx++) {
 				businessName = schoolArray.optString(listInx);
-				String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country " 
+				String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country " 
 								+ "FROM Patent as p "
 								+ "JOIN p.listBusiness as lb " 
 								+ "where lb.business_name = :businessName "
+								+ "AND p.is_sync = 1 "
 								+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 								+ "GROUP BY p.patent_appl_country ";
 				Query q = session.createQuery(queryStr);
@@ -1767,18 +1800,19 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 				List<Analysis> schoolData = new ArrayList<Analysis>();
 		
 				Session session = getSession();
-				log.info(statusDesc.length());
+//				log.info(statusDesc.length());
 				for(statusInx=0;statusInx<statusDesc.length();statusInx++) {
 					status = statusDesc.optString(statusInx);
 					for (schoolInx = 0; schoolInx < schoolArray.length(); schoolInx++) {
 						businessName = schoolArray.optString(schoolInx);
-						String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_id), p.patent_appl_country, lsps.status_desc " 
+						String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country, lsps.status_desc " 
 								+ "FROM Patent as p "
 								+ "JOIN p.listBusiness as lb " 
 								+ "JOIN p.listPatentStatus as ls "
 								+ "JOIN ls.primaryKey.status as lsps "
 								+ "where lb.business_name = :businessName "
 								+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+								+ "AND p.is_sync = 1  "
 								+ "and lsps.status_desc = :status "
 								+ "and ls.create_date = "
 								+ "( select MAX(ls.create_date) "
