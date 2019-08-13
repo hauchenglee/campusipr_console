@@ -1689,70 +1689,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	//		log.info(q.list().isEmpty());
 			return q.list();
 		}
-	//For Excel Export 各國家總合By Select School
-	@Override
-	public List<Analysis> countSchoolPatentTotal(JSONArray schoolArray){
-		int listInx = 0;
-		String businessName = null;
-		List<Analysis> schoolData = new ArrayList<Analysis>();
-		
-		Session session = getSession();
-		for (listInx = 0; listInx < schoolArray.length(); listInx++) {
-			businessName = schoolArray.optString(listInx);
-			String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country " 
-							+ "FROM Patent as p "
-							+ "JOIN p.listBusiness as lb " 
-							+ "where lb.business_name = :businessName "
-							+ "AND p.is_sync = 1 "
-							+ "GROUP BY p.patent_appl_country ";
-			Query q = session.createQuery(queryStr);
-			if (!StringUtils.isNULL(businessName)) {
-				q.setParameter("businessName", businessName);
-			}
-			schoolData.addAll(q.list());
-		}
-		return schoolData;
-	}
 
-	//For Excel Export 各狀態各國家By Select Status and school
-		@Override
-		public List<Analysis> countSchoolPatentStatus(JSONArray statusDesc,JSONArray schoolArray){
-			int schoolInx = 0;
-			int statusInx = 0;
-			String businessName = null;
-			String status =null;
-			List<Analysis> schoolData = new ArrayList<Analysis>();
-	
-			Session session = getSession();
-			log.info(statusDesc.length());
-			for(statusInx=0;statusInx<statusDesc.length();statusInx++) {
-				status = statusDesc.optString(statusInx);
-				for (schoolInx = 0; schoolInx < schoolArray.length(); schoolInx++) {
-					businessName = schoolArray.optString(schoolInx);
-					String queryStr = "SELECT lb.business_id, lb.business_name, count(p.patent_appl_no), p.patent_appl_country, lsps.status_desc " 
-							+ "FROM Patent as p "
-							+ "JOIN p.listBusiness as lb " 
-							+ "JOIN p.listPatentStatus as ls "
-							+ "JOIN ls.primaryKey.status as lsps "
-							+ "where lb.business_name = :businessName "
-							+ "AND p.is_sync = 1 "
-							+ "and lsps.status_desc = :status "
-							+ "and ls.create_date = "
-							+ "( select MAX(ls.create_date) "
-							+ "FROM p.listPatentStatus as ls "
-							+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
-							+ "GROUP BY p.patent_appl_country ";
-					Query q = session.createQuery(queryStr);
-					q.setParameter("status", status);
-					if (!StringUtils.isNULL(businessName)) {
-						q.setParameter("businessName", businessName);
-					}
-					schoolData.addAll(q.list());
-				}
-			}
-	//		log.info(schoolData);
-			return schoolData;
-		}
+
+
 
 	//For Excel Export 各國家總合By Select School
 		@Override

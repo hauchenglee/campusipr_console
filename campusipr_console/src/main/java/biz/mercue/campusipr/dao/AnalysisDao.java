@@ -80,8 +80,6 @@ public interface AnalysisDao {
 	List<Analysis> countSchoolSumByYear(Long beginDate, Long endDate);
 	List<Analysis> getDefaultYear();
 	List<Analysis> testPatent();
-	List<Analysis> countSchoolPatentStatus(JSONArray statusDesc,JSONArray businessId);
-	List<Analysis> countSchoolPatentTotal(JSONArray schoolArray);
 	List<Analysis> countSchoolPatentTotalByYear(JSONArray schoolArray, Long beginDate, Long endDate);
 	List<Analysis> countSchoolPatentStatusByYear(JSONArray statusDesc, JSONArray schoolArray, Long beginDate,
 			Long endDate);
