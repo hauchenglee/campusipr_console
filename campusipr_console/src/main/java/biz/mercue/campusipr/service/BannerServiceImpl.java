@@ -38,8 +38,10 @@ public class BannerServiceImpl implements BannerService{
 		if(StringUtils.isNULL(banner.getBanner_id())) {
 			 banner.setBanner_id(KeyGeneratorUtils.generateRandomString());
 		}
-		
 		bannerDao.create(banner);
+		
+		Banner dbBean = bannerDao.getById(banner.getBanner_id());
+		dbBean.setCreate_date(new Date());
 	}
 
 	@Override
