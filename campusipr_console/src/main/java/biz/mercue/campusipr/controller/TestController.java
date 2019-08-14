@@ -68,28 +68,10 @@ public class TestController {
 	@RequestMapping(value="/api/demo/{patentId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String demo(HttpServletRequest request, @PathVariable String patentId, @RequestBody String receiveJSONString) {
+		log.info("demo");
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-//		Patent gPatent = new Gson().fromJson(receiveJSONString, Patent.class);
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
 		String str = jsonObject.optString("str");
-//		String str2 = jsonObject.getString("str");
-
-//		Type listType = new TypeToken<List<String>>() {}.getType();
-//		List<String> list = new Gson().fromJson("patent_ids", listType);
-
-		JSONArray s = jsonObject.optJSONArray("listBusiness");
-
-
-//		List<String> patent_ids = jsonObject.optJSONArray("patent_ids");
-		List<String> field_ids = (List<String>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("field_ids").toString(), new TypeReference<List<String>>(){});
-		List<Business> businessList = (List<Business>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("listBusiness").toString(), new TypeReference<List<Business>>(){});
-		List<Business> businessList2 = (List<Business>) JacksonJSONUtils.readValue("listBusiness", Business.class);
-
-
-//		int i = jsonObject.optInt("listBusiness");
-//		int i2 = jsonObject.getInt("listBusiness");
-
-
 		int result = patentService.demo("", tokenBean.getBusiness_id(), patentId, str);
 		return "{\"aaa\": \"" + result + "\"}";
 	}

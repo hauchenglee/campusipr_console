@@ -16,10 +16,12 @@ public interface PatentStatusDao {
 	PatentStatus getByStatusAndPatent(String patentId, String StatusId, Date createTime);
 	
 	List<PatentStatus> getByPatent(String patentId);
+
+	List<String> getStatusIds(String patentId);
 	
 	void create(PatentStatus ps);
 
-    void updateStatusPatent(String targetId, String updateId);
+    void updateStatusPatent(List<String> targetId, String updateId);
 
 
     //void  deletePatentStatus(String patentId);

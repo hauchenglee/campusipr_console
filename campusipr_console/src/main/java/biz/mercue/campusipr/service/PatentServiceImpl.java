@@ -91,8 +91,10 @@ public class PatentServiceImpl implements PatentService {
 			ListQueryForm form = new ListQueryForm();
 //			objectList = patentDao.demo(patentId, businessId);
 
-			form = advancedSearch(str, businessId, page, pageSize);
-			form = advancedSearchDate(str, businessId, page, pageSize);
+			List<String> statusIds = patentStatusDao.getStatusIds(patentId);
+			if (!statusIds.isEmpty()) {
+				patentStatusDao.updateStatusPatent(statusIds, patentId);
+			}
 
 
 			log.info(objectList.size());
@@ -592,7 +594,7 @@ public class PatentServiceImpl implements PatentService {
 
 			boolean isSync = false;
 			boolean isSamePatent = false;
-			if (dbPatentList != null || !dbPatentList.isEmpty()) {
+			if (!dbPatentList.isEmpty()) {
 				for (Patent dbPatent : dbPatentList) {
 					if (dbPatent.isIs_sync()) {
 						isSync = true;
@@ -670,14 +672,15 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	@Override
-	public int addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip) {
+	public Map<String, Patent> addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip) {
+		Map<String, Patent> mergeMap = new HashMap<>();
 		try {
-			log.info("addPatentByExcel: ");
 			int taskResult = Constants.INT_SYSTEM_PROBLEM;
 			if (patentList == null) {
-				return Constants.INT_DATA_ERROR;
+				return null;
 			}
 
+			String businessId = business.getBusiness_id();
 			for (Patent editPatent : patentList) {
 				int syncResult = syncPatentData(editPatent);
 				if (!editPatent.isIs_sync()) {
@@ -698,36 +701,89 @@ public class PatentServiceImpl implements PatentService {
 				handleDepartmentAddAsList(editPatent, business.getBusiness_id());
 
 				List<Patent> dbPatentList = patentDao.getPatentListByApplNo(StringUtils.getApplNoWithoutAt(editPatent.getPatent_appl_no()));
-				Patent dbTargetPatent = new Patent();
+				Patent dbTargetPatent = new Patent(); // 將要作用（update or merge）的db patent bean
+				boolean isNotSync = true;
+				boolean isNotSameBusiness = true;
+				boolean isAdd = false;
+				boolean isMerge = false;
 
-				boolean isSync = false;
-				boolean isSamePatent = false;
-				if (dbPatentList != null || !dbPatentList.isEmpty()) {
+				/*
+				excel匯入最終有三種結果及相對應的條件判斷：
+				1. add new patent（新增專利）
+				  -> db無任何同樣申請號的專利，屬於全新新增專利
+				  -> 所有db同申請號專利未同步（未公開），且其中沒有自己學校專利
+				2. update then merge patent（先更新再合併）
+				  -> db有兩個以上同申請號專利，其一為他校已同步專利，其二為本學校未同步專利
+				     先更新此刻專利數據，再將本學校未同步專利合併關聯到db中已同步的專利
+				3. just update patent（僅更新）
+				  -> 所有db專利未同步，但其中有自己學校
+				  -> 有專利同步，是其他學校
+				  -> 有專利同步，是自己學校
+				 */
+
+				// add patent
+				if (!dbPatentList.isEmpty()) {
 					for (Patent dbPatent : dbPatentList) {
 						if (dbPatent.isIs_sync()) {
-							isSync = true;
+							isNotSync = false;
 							break;
 						}
 					}
 					for (Patent dbPatent : dbPatentList) {
-						if (dbPatent.getPatent_id().equals(editPatent.getPatent_id())) {
-							isSamePatent = true;
+						for (Business dbBusiness : dbPatent.getListBusiness()) {
+							String dbBid = dbBusiness.getBusiness_id();
+							if (dbBid.equals(businessId)) {
+								isNotSameBusiness = false;
+								break;
+							}
+						}
+					}
+				}
+				if (isNotSync && isNotSameBusiness || dbPatentList.isEmpty()) {
+					log.info("add patent patent by excel: " + editPatent.getPatent_appl_no());
+					this.addPatent(editPatent);
+					patentHistoryFirstAdd(editPatent, editPatent.getPatent_id(), business.getBusiness_id());
+					isAdd = true;
+				}
+
+				// update then merge
+				if (!isAdd) {
+					// 找出該學校原本在db的專利
+					for (Patent dbPatent : dbPatentList) {
+						for (Business dbBusiness : dbPatent.getListBusiness()) {
+							String dbBid = dbBusiness.getBusiness_id();
+							if (dbBid.equals(businessId)) {
+								dbTargetPatent = dbPatent;
+							}
+						}
+					}
+
+					// 找出在db中唯一同步的專利
+					Patent syncPatent = new Patent();
+					for (Patent dbPatent : dbPatentList) {
+						if (dbPatent.isIs_sync()) {
+							syncPatent = dbPatent;
 							break;
+						}
+					}
+
+					if (!StringUtils.isNULL(dbTargetPatent.getPatent_id())) {
+						if (!isNotSync && !dbTargetPatent.isIs_sync()) {
+							log.info("update then merge patent by excel: " + editPatent.getPatent_appl_no());
+							editPatent.setComparePatent(dbTargetPatent);
+							editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
+							handleExtensionExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
+							handleDepartmentExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
+							updatePatent(editPatent, business.getBusiness_id());
+							mergeMap.put(syncPatent.getPatent_id(), editPatent);
+							isMerge = true;
 						}
 					}
 				}
 
-				if (!isSync && !isSamePatent) {
-					// 資料庫都沒有已同步資料（有可能是未公開patent），並且id都不一樣
-					// -> 新增
-					this.addPatent(editPatent);
-					patentHistoryFirstAdd(editPatent, editPatent.getPatent_id(), business.getBusiness_id());
-					taskResult = Constants.INT_SUCCESS;
-				} else {
-					// 資料庫已經有一筆patent是同步的
-					// 接下來找出那筆已同步的patent是哪間學校的
-					// 如果是同一間學校 -> update自己本身patent
-					// 如果是不同的學校 -> 將目前資料關聯相對應的patent
+				// just update
+				if (!isMerge) {
+					log.info("just update patent by excel: " + editPatent.getPatent_appl_no());
 					for (Patent dbPatent : dbPatentList) {
 						for (Business dbBusinessInList : dbPatent.getListBusiness()) {
 							if (business.getBusiness_id().equals(dbBusinessInList.getBusiness_id())) {
@@ -747,14 +803,16 @@ public class PatentServiceImpl implements PatentService {
 					handleExtensionExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
 					handleDepartmentExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
 					editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
-					taskResult = updatePatent(editPatent, business.getBusiness_id());
+					updatePatent(editPatent, business.getBusiness_id());
+					contactData(editPatent);
 				}
 			}
-			return taskResult;
+
+			return mergeMap;
 		} catch (Exception e) {
 			log.info(e.getMessage());
 			e.printStackTrace();
-			return Constants.INT_SYSTEM_PROBLEM;
+			return null;
 		}
 	}
 
@@ -971,9 +1029,9 @@ public class PatentServiceImpl implements PatentService {
 				}
 
 				// 不同學校新增情況下，db資料是否已經同步
+				log.info("不同學校新增情況下，db資料是否已經同步");
 				for (Patent dbPatent : dbPatentList) {
-					log.info(dbPatent.getPatent_id());
-					log.info(dbPatent.isIs_sync());
+					log.info("dbPatent.getPatent_id(): " + dbPatent.getPatent_id());
 					if (!dbPatent.isIs_sync()) {
 						// 都沒同步 -> 存入資料庫，申請號random
 						isSync = false;
@@ -1003,6 +1061,19 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	@Override
+	public int mergeDiffPatentByExcel(Map<String, Patent> mergeMap, Admin admin, Business business) {
+		try {
+			for (Map.Entry<String, Patent> patentEntry : mergeMap.entrySet()) {
+				mergeDiffPatent(patentEntry.getKey(), patentEntry.getValue(), admin, business);
+			}
+			return Constants.INT_SUCCESS;
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			return Constants.INT_SYSTEM_PROBLEM;
+		}
+	}
+
+	@Override
 	public int mergeDiffPatent(String dbPatentId, Patent editPatent, Admin admin, Business business) {
 		try {
 			log.info(dbPatentId);
@@ -1025,7 +1096,10 @@ public class PatentServiceImpl implements PatentService {
 			}
 
 			// status
-			patentStatusDao.updateStatusPatent(editPatentId, dbPatentId);
+			List<String> statusIds = patentStatusDao.getStatusIds(editPatentId);
+			if (!statusIds.isEmpty()) {
+				patentStatusDao.updateStatusPatent(statusIds, dbPatentId);
+			}
 
 			//
 			List<PatentContact> patentContactList = new ArrayList<>();
@@ -1037,7 +1111,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 			patentContactList.addAll(dbPatent.getListContact());
-			if (patentContactList != null && !patentContactList.isEmpty()) {
+			if (!patentContactList.isEmpty()) {
 				dbPatent.setListContact(patentContactList);
 			}
 
@@ -1050,7 +1124,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 			patentCostList.addAll(dbPatent.getListCost());
-			if (patentCostList != null && !patentCostList.isEmpty()) {
+			if (!patentCostList.isEmpty()) {
 				dbPatent.setListCost(patentCostList);
 			}
 
@@ -1064,7 +1138,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 			extensionList.addAll(dbPatent.getListExtension());
-			if (extensionList != null && !extensionList.isEmpty()) {
+			if (!extensionList.isEmpty()) {
 				dbPatent.setListExtension(extensionList);
 			}
 
@@ -1077,19 +1151,17 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 			annuityList.addAll(dbPatent.getListAnnuity());
-			if (annuityList != null && !annuityList.isEmpty()) {
+			if (!annuityList.isEmpty()) {
 				dbPatent.setListAnnuity(annuityList);
 			}
 
 			// portfolio
 			List<Portfolio> portfolioList = new ArrayList<>();
 			if (editPatent.getListPortfolio() != null) {
-				for (Portfolio editPh : editPatent.getListPortfolio()) {
-					portfolioList.add(editPh);
-				}
+				portfolioList.addAll(editPatent.getListPortfolio());
 			}
 			portfolioList.addAll(dbPatent.getListPortfolio());
-			if (portfolioList != null && !portfolioList.isEmpty()) {
+			if (!portfolioList.isEmpty()) {
 				dbPatent.setListPortfolio(portfolioList);
 			}
 
@@ -1111,7 +1183,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 			departmentList.addAll(dbPatent.getListDepartment());
-			if (departmentList != null && !departmentList.isEmpty()) {
+			if (!departmentList.isEmpty()) {
 				dbPatent.setListDepartment(departmentList);
 			}
 
@@ -1166,7 +1238,6 @@ public class PatentServiceImpl implements PatentService {
 		log.info("updatePatent:" + patent.getPatent_id());
 		List<PatentEditHistory> editList = new ArrayList<PatentEditHistory>();
 		Patent dbBean = patent.getComparePatent();
-		log.info(dbBean == null);
 		if (dbBean == null) {
 			log.info("Compare Patent is null");
 			dbBean = patentDao.getById(patent.getPatent_id());
@@ -1908,7 +1979,7 @@ public class PatentServiceImpl implements PatentService {
 		log.info("hql count: " + finalSearchHQLCount);
 
 		List<Patent> list = patentDao.getByAdvancedSearchString(finalSearchHQL, dataList, businessId, page, pageSize);
-		int patentListCount = patentDao.getCountByAdvancedSearchString(finalSearchHQLCount, dataList, businessId, page, pageSize);
+		int patentListCount = patentDao.getCountByAdvancedSearchString(finalSearchHQLCount, dataList, businessId);
 		if (list != null && !list.isEmpty()) {
 			log.info("patentListCount(): " + patentListCount);
 			for (Patent patent : list) {
@@ -1930,7 +2001,7 @@ public class PatentServiceImpl implements PatentService {
 		return new ListQueryForm(patentListCount, Constants.SYSTEM_PAGE_SIZE, list);
 	}
 
-	private ListQueryForm advancedSearchDate(String searchStr, String business, int page, int pageSize) {
+	private ListQueryForm advancedSearchDate(String searchStr, String businessId, int page, int pageSize) {
 		ListQueryForm form = new ListQueryForm();
 		int slashIndex = searchStr.indexOf("/");
 		String fieldCode = searchStr.substring(0, slashIndex);
@@ -1962,7 +2033,9 @@ public class PatentServiceImpl implements PatentService {
 		List<Date> dataList = new ArrayList<>();
 		dataList.add(sd);
 		dataList.add(ed);
-		List<Patent> patentList = patentDao.getByAdvancedSearchDate(finalSearchHQL, dataList, business, page, pageSize);
+		List<Patent> list = patentDao.getByAdvancedSearchDate(finalSearchHQL, dataList, businessId, page, pageSize);
+		int patentListCount = patentDao.getCountByAdvancedSearchDate(finalSearchHQLCount, dataList, businessId);
+
 
 		/*
 						String[] searchDateObj = ((String) searchObj).split("-");
@@ -2021,7 +2094,6 @@ public class PatentServiceImpl implements PatentService {
 				if (dbPatent.getListApplicant() != null) {
 					List<String> applAddData = new ArrayList<>();
 					for (Applicant appl : dbPatent.getListApplicant()) {
-						log.info(appl.getApplicant_name());
 						applAddData.add(JacksonJSONUtils.mapObjectWithView(appl, View.PatentDetail.class));
 					}
 					if (!applAddData.isEmpty()) {
@@ -2037,7 +2109,6 @@ public class PatentServiceImpl implements PatentService {
 				if (dbPatent.getListInventor() != null) {
 					List<String> invAddData = new ArrayList<>();
 					for (Inventor inv : dbPatent.getListInventor()) {
-						log.info(inv.getInventor_name());
 						invAddData.add(JacksonJSONUtils.mapObjectWithView(inv, View.PatentDetail.class));
 					}
 					if (!invAddData.isEmpty()) {
@@ -2837,6 +2908,10 @@ public class PatentServiceImpl implements PatentService {
 			}
 			patentDao.deletePatentCost(dbPatent.getPatent_id());
 			dbPatent.setListCost(editPatent.getListCost());
+		} else {
+			if (dbPatent.getListCost() != null) {
+				patentDao.deletePatentCost(dbPatent.getPatent_id());
+			}
 		}
 	}
 

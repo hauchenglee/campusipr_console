@@ -61,10 +61,10 @@ public interface PatentDao {
 	int  countSearchFieldExtensionPatent(String searchText, String fieldCode, String businessId);
 
 	List<Patent> getByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize);
-	int getCountByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize);
+	int getCountByAdvancedSearchString(String hql, List<String> dataList, String businessId);
 
 	List<Patent> getByAdvancedSearchDate(String hql, List<Date> dataList, String businessId, int page, int pageSize);
-	int getCountByAdvancedSearchDate(String hql, List<Date> dataList, String businessId, int page, int pageSize);
+	int getCountByAdvancedSearchDate(String hql, List<Date> dataList, String businessId);
 
 	Patent getByPatentNo(String patentNo);
 	

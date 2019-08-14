@@ -1,6 +1,7 @@
 package biz.mercue.campusipr.service;
 
 import java.util.List;
+import java.util.Map;
 
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.model.Business;
@@ -24,7 +25,7 @@ public interface PatentService {
 
 	int addPatentByApplNo(Patent patent, Admin admin, Business business, int sourceFrom);
 
-	int addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip);
+	Map<String, Patent> addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip);
 
 	JSONObject checkNoPublicApplNo(Patent editPatent, Business business);
 
@@ -37,6 +38,8 @@ public interface PatentService {
 	ListQueryForm advancedSearch(String searchStr, String business, int page, int pageSize);
 
 	void patentHistoryFirstAdd(Patent patent, String patentId, String businessId);
+
+	int mergeDiffPatentByExcel(Map<String, Patent> mergeMap, Admin admin, Business business);
 
 	int authorizedUpdatePatent(String businessId, Patent patent);
 

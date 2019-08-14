@@ -57,19 +57,32 @@ public class PatentStatusDaoImpl extends AbstractDao<String,  PatentStatus> impl
 		query.setParameter("patentId", patentId);
 		return query.list();
 	}
-	
+
+	@Override
+	public List<String> getStatusIds(String patentId) {
+		String hql = "select ps.primaryKey.status.status_id from PatentStatus ps" +
+				" join ps.primaryKey.status as jst" +
+				" where ps.primaryKey.patent.patent_id = :patentId and jst.status_from = :s_from";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("patentId", patentId);
+		query.setParameter("s_from", "user");
+		return query.list();
+	}
+
 	@Override
 	public void create(PatentStatus ps) {
 		persist(ps);
 	}
 
 	@Override
-	public void updateStatusPatent(String targetId, String updateId) {
-		String hql = "update PatentStatus ps set ps.primaryKey.patent.patent_id = :updateId where ps.primaryKey.patent.patent_id = :targetId";
+	public void updateStatusPatent(List<String> statusId, String updateId) {
+		String hql = "update PatentStatus ps set ps.primaryKey.patent.patent_id = :updateId" +
+				" where ps.primaryKey.status.status_id in (:statusId)";
 		Session session = getSession();
 		Query query = session.createQuery(hql);
 		query.setParameter("updateId", updateId);
-		query.setParameter("targetId", targetId);
+		query.setParameter("statusId", statusId);
 		query.executeUpdate();
 	}
 }

@@ -874,7 +874,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 
 	@Override
-	public int getCountByAdvancedSearchString(String hql, List<String> dataList, String businessId, int page, int pageSize) {
+	public int getCountByAdvancedSearchString(String hql, List<String> dataList, String businessId) {
 		Session session = getSession();
 		Query query = session.createQuery(hql);
 		for (int i = 0; i < dataList.size(); i++) {
@@ -901,7 +901,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	}
 
 	@Override
-	public int getCountByAdvancedSearchDate(String hql, List<Date> dataList, String businessId, int page, int pageSize) {
+	public int getCountByAdvancedSearchDate(String hql, List<Date> dataList, String businessId) {
 		Session session = getSession();
 		Query query = session.createQuery(hql);
 		for (int i = 0; i < dataList.size(); i++) {
