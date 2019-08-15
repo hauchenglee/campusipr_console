@@ -264,22 +264,26 @@ public class ServiceChinaPatent {
 						if (cNode.getNodeType() == Node.ELEMENT_NODE) { 
 							Element cElement = (Element) cNode;
 							if ("docdb".equals(cElement.getAttribute("document-id-type"))) {
+								Node pubCountryNode = cElement.getElementsByTagName("country").item(0);
 								Node pubNode = cElement.getElementsByTagName("doc-number").item(0);
 								Node pubKindNode = cElement.getElementsByTagName("kind").item(0);
 								Node pubDateNode = cElement.getElementsByTagName("date").item(0);
+								String countryId = pubCountryNode.getTextContent().toString().toUpperCase();
 								String pubKindNo = pubKindNode.getTextContent().toString().toUpperCase();
 								String publicateNo = pubNode.getTextContent().substring(0, pubNode.getTextContent().length());
+								
 								log.info(pubKindNo);
+								
 								if ("A".equals(pubKindNo)) {
 									log.info("發明類型Kind A 公開號: "+publicateNo);
-									patent.setPatent_notice_no(publicateNo);
+									patent.setPatent_notice_no(countryId+publicateNo);
 								}
 								if ("B".equals(pubKindNo)) {
 									log.info("發明類型Kind B 公告號: "+publicateNo);
 									if (publicateNo.length() > 9) {
 										publicateNo = publicateNo.substring(0, publicateNo.length()-1);
 									}
-									patent.setPatent_publish_no(publicateNo);
+									patent.setPatent_publish_no(countryId+publicateNo);
 								}
 								//實用新型只需放公告號/日
 								if ("U".equals(pubKindNo)) {
@@ -287,7 +291,7 @@ public class ServiceChinaPatent {
 									if (publicateNo.length() > 9) {
 										publicateNo = publicateNo.substring(0, publicateNo.length()-1);
 									}
-									patent.setPatent_publish_no(publicateNo);
+									patent.setPatent_publish_no(countryId+publicateNo);
 								}
 								
 								try {
@@ -332,7 +336,7 @@ public class ServiceChinaPatent {
 								Node applDateNode = cElement.getElementsByTagName("date").item(0);
 								String applNo = applNode.getTextContent().substring(0, applNode.getTextContent().length());
 								patent.setPatent_appl_no(applNo);
-								patent.setPatent_no(applNo);
+								patent.setPatent_no("CN"+applNo);
 								try {
 									String publishDateStr =applDateNode.getTextContent();
 									if (!StringUtils.isNULL(publishDateStr)) {
@@ -535,8 +539,8 @@ public class ServiceChinaPatent {
 								appl.setApplicant_name_en(nameEnList.item(0).getTextContent().replace(",", ""));
 								appl.setApplicant_order(Integer.parseInt(applicant.getAttribute("sequence")));
 								appl.setPatent(patent);
-								log.info("applicantName"+nameList.item(0).getTextContent().replace(",", ""));
-								log.info("applicantNameEn"+nameEnList.item(0).getTextContent().replace(",", ""));
+//								log.info("applicantName"+nameList.item(0).getTextContent().replace(",", ""));
+//								log.info("applicantNameEn"+nameEnList.item(0).getTextContent().replace(",", ""));
 								
 								
 								listAssignee.add(assign);

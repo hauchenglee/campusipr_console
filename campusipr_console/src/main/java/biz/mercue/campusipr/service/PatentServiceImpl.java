@@ -294,8 +294,18 @@ public class PatentServiceImpl implements PatentService {
 			patent.setIs_sync(true);
 		}
 		
-//		//同步時同步US、CN專利權使日及估算專利權止日
+//		//US、CN專利權始日及估算專利權止日
 		if(Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
+//			if(Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country())) {
+//				log.info("patent.getPatent_appl_date() : "+patent.getPatent_appl_date());
+//				Calendar calendar = Calendar.getInstance();
+//				patent.setPatent_bdate(patent.getPatent_publish_date());
+//				calendar.setTime(patent.getPatent_appl_date());
+//				calendar.add(Calendar.DATE, -1);
+//				calendar.add(Calendar.YEAR, 20);
+//				Date edate=calendar.getTime();
+//				patent.setPatent_edate(edate);
+//			}
 			if(Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
 				log.info("patent.getPatent_appl_date() : "+patent.getPatent_appl_date());
 				Calendar calendar = Calendar.getInstance();
@@ -1296,7 +1306,6 @@ public class PatentServiceImpl implements PatentService {
 					dbBean.setListIPC(patent.getListIPC());
 	                for (IPCClass ipc:patent.getListIPC()) {
 	             	    IPCClass ipcDb = ipcDao.getByIdAndVersion(ipc.getIpc_class_id());
-	             	    log.info(ipcDb);
 	             	    if (ipcDb == null) {
 	             		   ipcDao.create(ipc);
 	             	    }
@@ -1397,7 +1406,6 @@ public class PatentServiceImpl implements PatentService {
 
 			log.info(checkBusinessIds);
 			if (patent.getBusiness() != null) {
-				log.info(patent.getBusiness().getBusiness_id());
 				if (!checkBusinessIds.contains(patent.getBusiness().getBusiness_id())) {
 					log.info("add business");
 					dbBean.addBusiness(patent.getBusiness());
@@ -2668,7 +2676,6 @@ public class PatentServiceImpl implements PatentService {
 			}
 			if (Constants.INVENTOR_NAME_FIELD.equals(field.getField_id()) && patent.getListInventor() != null) {
 				
-				log.info("需修改紀錄");
 				JSONObject emptyInventor = new JSONObject();
 				emptyInventor.put("inventor_name", emptyItem);
 				
@@ -2695,9 +2702,9 @@ public class PatentServiceImpl implements PatentService {
 					Iterator<Inventor> iterator = dbBean.getListInventor().iterator();
 					while (iterator.hasNext()) {
 						Inventor inv = iterator.next();
-						log.info("inventor id :"+inv.getInventor_id());
+//						log.info("inventor id :"+inv.getInventor_id());
 						if (mapping.containsKey(inv.getInventor_id())) {
-							log.info("contain");
+//							log.info("contain");
 							//update
 							String invName = "";
 							if (inv.getInventor_name() != null) {
@@ -2741,7 +2748,7 @@ public class PatentServiceImpl implements PatentService {
 				if (invAddData.isEmpty()&&!invRemoveData.isEmpty()) {
 					invAddData.add(emptyInventor.toString());
 				}
-				log.info("invAddData: "+invAddData);
+//				log.info("invAddData: "+invAddData);
 				if (!invAddData.isEmpty()) {
 					PatentEditHistory peh = insertFieldHistory(patent, invAddData, "create", field.getField_id(), editor, businessId);
 					if (peh != null) {dbBean.addHistory(peh);}
@@ -3170,7 +3177,7 @@ public class PatentServiceImpl implements PatentService {
 					duplicateBussinessId.add(extension.getBusiness_id());
 				}
 			}
-			log.info(businessId);
+//			log.info(businessId);
 			patentDao.deletePatentExtension(dbPatent.getPatent_id(), businessId);
 			dbPatent.setListExtension(editPatent.getListExtension());
 		} else {
@@ -3475,10 +3482,10 @@ public class PatentServiceImpl implements PatentService {
 				// delete portfolio relationship
 				List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
 				for (Portfolio dbPortfolio : dbPortfolioList) {
-					log.info(dbPortfolio.getPortfolio_id());
+//					log.info(dbPortfolio.getPortfolio_id());
 					List<Patent> patentList = dbPortfolio.getListPatent();
 					if (patentList != null || !patentList.isEmpty()) {
-						log.info(patentList.size());
+//						log.info(patentList.size());
 						for (Patent patent : patentList) {
 							if (patent.getPatent_id().equals(deletePatentId)) {
 								patentList.remove(patent);
@@ -3522,10 +3529,10 @@ public class PatentServiceImpl implements PatentService {
 				// delete portfolio
 				List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
 				for (Portfolio dbPortfolio : dbPortfolioList) {
-					log.info(dbPortfolio.getPortfolio_id());
+//					log.info(dbPortfolio.getPortfolio_id());
 					List<Patent> patentList = dbPortfolio.getListPatent();
 					if (patentList != null || !patentList.isEmpty()) {
-						log.info(patentList.size());
+//						log.info(patentList.size());
 						for (Patent patent : patentList) {
 							if (patent.getPatent_id().equals(deletePatentId)) {
 								patentList.remove(patent);

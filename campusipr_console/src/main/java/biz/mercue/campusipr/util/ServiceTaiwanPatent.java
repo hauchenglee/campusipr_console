@@ -265,7 +265,7 @@ public class ServiceTaiwanPatent {
 			patent.setPatent_appl_no(patentObj.optJSONObject("application-reference").optString("appl-no"));
 					
 			if (!"0".equals(patentObj.optJSONObject("publication-reference").optString("notice-no"))) {
-				patent.setPatent_notice_no(patentObj.optJSONObject("publication-reference").optString("notice-no"));
+				patent.setPatent_notice_no("TW"+patentObj.optJSONObject("publication-reference").optString("notice-no"));
 			} else {
 				patent.setPatent_notice_no(null);
 			}
@@ -281,7 +281,7 @@ public class ServiceTaiwanPatent {
 			}
 			
 			if (!"0".equals(patentObj.optJSONObject("publication-reference").optString("publish-no"))) {
-				patent.setPatent_publish_no(patentObj.optJSONObject("publication-reference").optString("publish-no"));
+				patent.setPatent_publish_no("TW"+patentObj.optJSONObject("publication-reference").optString("publish-no"));
 			} else {
 				patent.setPatent_publish_no(null);
 			}
@@ -297,7 +297,7 @@ public class ServiceTaiwanPatent {
 			}
 			
 			if (patentObj.optJSONObject("patent-right") != null) {
-				patent.setPatent_no(patentObj.optJSONObject("patent-right").optString("patent-no"));
+				patent.setPatent_no("TW"+patentObj.optJSONObject("patent-right").optString("patent-no"));
 				
 				try {
 					String patentBeginDateStr = patentObj.optJSONObject("patent-right").optString("patent-bdate");
@@ -343,8 +343,8 @@ public class ServiceTaiwanPatent {
 			if (!StringUtils.isNULL(contextUrlPub)) {
 				taskResultPub = getContext(patent, contextUrlPub);
 			}
-			log.info(taskResultPub);
-			log.info(contextUrlPub);
+//			log.info(taskResultPub);
+//			log.info(contextUrlPub);
 
 			int taskResultIsu = Constants.INT_SYSTEM_PROBLEM;
 			if (taskResultPub == Constants.INT_SYSTEM_PROBLEM) {
@@ -403,7 +403,7 @@ public class ServiceTaiwanPatent {
 				applicant.setApplicant_order(applObj.optInt("-sequence"));
 				applicant.setPatent(patent);
 				listAppl.add(applicant);
-				log.info(applicant.getApplicant_name());
+//				log.info(applicant.getApplicant_name());
 				patent.setListApplicant(listAppl);
 			}
 					

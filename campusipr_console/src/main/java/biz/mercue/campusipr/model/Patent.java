@@ -384,16 +384,19 @@ public class Patent extends BaseBean{
 	}
 
 	public void setPatent_notice_no(String patent_notice_no) {
-		if (!StringUtils.isNULL(patent_notice_no)) {
-			if (patent_notice_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_TW)) {
-				patent_notice_no = patent_notice_no.replace("TW", "").replace("tw", "");
+		if (!StringUtils.isNULL(patent_notice_no) && !StringUtils.isNULL(patent_appl_country)) {
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_TW)) {
+				patent_notice_no =Constants.APPL_COUNTRY_TW.toUpperCase()+ (patent_notice_no.replace("TW", "").replace("tw", "").replace("US", "").replace("CN", ""));
 			}
-			if (patent_notice_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_US)) {
-				patent_notice_no = patent_notice_no.replace("US", "").replace("us", "");
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_US)) {
+				patent_notice_no =Constants.APPL_COUNTRY_US.toUpperCase()+(patent_notice_no.replace("US", "").replace("us", "").replace("US", "").replace("CN", ""));
 			}
-			if (patent_notice_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_CN)) {
-				patent_notice_no = patent_notice_no.replace("CN", "").replace("cn", "");
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_CN)) {
+				patent_notice_no = Constants.APPL_COUNTRY_CN.toUpperCase()+(patent_notice_no.replace("CN", "").replace("cn", "").replace("US", "").replace("CN", ""));
 			}
+		}
+		if(patent_notice_no.equals("TW")||patent_notice_no.equals("US")||patent_notice_no.equals("CN")) {
+			patent_notice_no="";
 		}
 		this.patent_notice_no = patent_notice_no;
 	}
@@ -411,16 +414,19 @@ public class Patent extends BaseBean{
 	}
 
 	public void setPatent_publish_no(String patent_publish_no) {
-		if (!StringUtils.isNULL(patent_publish_no)) {
-			if (patent_publish_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_TW)) {
-				patent_publish_no = patent_publish_no.replace("TW", "").replace("tw", "");
+		if (!StringUtils.isNULL(patent_publish_no) && !StringUtils.isNULL(patent_appl_country)) {
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_TW)) {
+				patent_publish_no = Constants.APPL_COUNTRY_TW.toUpperCase()+(patent_publish_no.replace("TW", "").replace("tw", "").replace("US", "").replace("CN", ""));
 			}
-			if (patent_publish_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_US)) {
-				patent_publish_no = patent_publish_no.replace("US", "").replace("us", "");
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_US)) {
+				patent_publish_no = Constants.APPL_COUNTRY_US.toUpperCase()+(patent_publish_no.replace("US", "").replace("us", "").replace("US", "").replace("CN", ""));
 			}
-			if (patent_publish_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_CN)) {
-				patent_publish_no = patent_publish_no.replace("CN", "").replace("cn", "");
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_CN)) {
+				patent_publish_no = Constants.APPL_COUNTRY_CN.toUpperCase()+(patent_publish_no.replace("CN", "").replace("cn", "").replace("US", "").replace("CN", ""));
 			}
+		}
+		if(patent_publish_no.equals("TW")||patent_publish_no.equals("US")||patent_publish_no.equals("CN")) {
+			patent_publish_no="";
 		}
 		this.patent_publish_no = patent_publish_no;
 	}
@@ -438,16 +444,19 @@ public class Patent extends BaseBean{
 	}
 
 	public void setPatent_no(String patent_no) {
-		if (!StringUtils.isNULL(patent_no)) {
-			if (patent_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_TW)) {
-				patent_no = patent_no.replace("TW", "").replace("tw", "");
+		if (!StringUtils.isNULL(patent_no) && !StringUtils.isNULL(patent_appl_country)) {
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_TW)) {
+				patent_no = Constants.APPL_COUNTRY_TW.toUpperCase()+(patent_no.replace("TW", "").replace("tw", "").replace("US", "").replace("CN", ""));
 			}
-			if (patent_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_US)) {
-				patent_no = patent_no.replace("US", "").replace("us", "");
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_US)) {
+				patent_no = Constants.APPL_COUNTRY_US.toUpperCase()+(patent_no.replace("US", "").replace("us", "").replace("US", "").replace("CN", ""));
 			}
-			if (patent_no.toLowerCase().startsWith(Constants.APPL_COUNTRY_CN)) {
-				patent_no = patent_no.replace("CN", "").replace("cn", "");
+			if (patent_appl_country.toLowerCase().equals(Constants.APPL_COUNTRY_CN)) {
+				patent_no = Constants.APPL_COUNTRY_CN.toUpperCase()+(patent_no.replace("CN", "").replace("cn", "").replace("US", "").replace("CN", ""));
 			}
+		}
+		if(patent_no.equals("TW")||patent_no.equals("US")||patent_no.equals("CN")) {
+			patent_no="";
 		}
 		this.patent_no = patent_no;
 	}

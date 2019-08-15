@@ -348,11 +348,11 @@ public class ServiceUSPatent {
 				for (int index = 0; index < patentDocsObj.length(); index++) {
 					JSONObject patentObj = patentDocsObj.optJSONObject(index);
 					if (patentObj.has("patentNumber")) {
-						patent.setPatent_no(patentObj.optString("patentNumber"));
+						patent.setPatent_no("US"+patentObj.optString("patentNumber"));
 					}
 					
 					if (patentObj.optString("documentId").endsWith("A1")) {
-						patent.setPatent_notice_no(patentObj.optString("documentId")
+						patent.setPatent_notice_no("US"+patentObj.optString("documentId")
 								.substring(0, patentObj.optString("documentId").indexOf("A1")));
 						try {
 							String noticeDateStr = patentObj.optString("publicationDate");
@@ -366,7 +366,7 @@ public class ServiceUSPatent {
 						}
 					}
 					if (patentObj.optString("documentId").endsWith("A2")) {
-						patent.setPatent_notice_no(patentObj.optString("documentId")
+						patent.setPatent_notice_no("US"+patentObj.optString("documentId")
 								.substring(0, patentObj.optString("documentId").indexOf("A2")));
 						try {
 							String noticeDateStr = patentObj.optString("publicationDate");
@@ -380,7 +380,7 @@ public class ServiceUSPatent {
 						}
 					}
 					if (patentObj.optString("documentId").endsWith("A9")) {
-						patent.setPatent_notice_no(patentObj.optString("documentId")
+						patent.setPatent_notice_no("US"+patentObj.optString("documentId")
 								.substring(0, patentObj.optString("documentId").indexOf("A9")));
 						try {
 							String noticeDateStr = patentObj.optString("publicationDate");
@@ -395,7 +395,7 @@ public class ServiceUSPatent {
 					}
 					
 					if (patentObj.optString("documentId").endsWith("B1")) {
-						patent.setPatent_publish_no(patentObj.optString("documentId")
+						patent.setPatent_publish_no("US"+patentObj.optString("documentId")
 								.substring(0, patentObj.optString("documentId").indexOf("B1")));
 						try {
 							String publishDateStr = patentObj.optString("publicationDate");
@@ -410,7 +410,7 @@ public class ServiceUSPatent {
 					}
 					
 					if (patentObj.optString("documentId").endsWith("B2")) {
-						patent.setPatent_publish_no(patentObj.optString("documentId")
+						patent.setPatent_publish_no("US"+patentObj.optString("documentId")
 								.substring(0, patentObj.optString("documentId").indexOf("B2")));
 						try {
 							String publishDateStr = patentObj.optString("publicationDate");
