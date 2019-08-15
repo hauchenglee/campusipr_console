@@ -608,8 +608,11 @@ public class PatentController {
 					switch (mapPatentKey) {
 					case Constants.INT_SUCCESS:
 						Map<String, Patent> mergeMap = patentService.addPatentByExcel(mapPatent.get(mapPatentKey), tokenBean.getAdmin(), tokenBean.getBusiness(), ip);
-						responseBodyCode = patentService.mergeDiffPatentByExcel(mergeMap, tokenBean.getAdmin(), tokenBean.getBusiness());
-						log.info("responseBodyCode: " + responseBodyCode);
+						if (mergeMap != null && !mergeMap.isEmpty()) {
+							responseBodyCode = patentService.mergeDiffPatentByExcel(mergeMap, tokenBean.getAdmin(), tokenBean.getBusiness());
+						} else {
+							responseBodyCode = Constants.INT_SUCCESS;
+						}
 						break;
 					case Constants.INT_DATA_ERROR:
 						responseBodyCode = Constants.INT_DATA_ERROR;

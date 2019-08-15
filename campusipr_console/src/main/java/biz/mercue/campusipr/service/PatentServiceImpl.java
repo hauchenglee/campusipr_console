@@ -792,7 +792,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 
 				// just update
-				if (!isMerge) {
+				if (!dbPatentList.isEmpty() && !isMerge) {
 					log.info("just update patent by excel: " + editPatent.getPatent_appl_no());
 					for (Patent dbPatent : dbPatentList) {
 						for (Business dbBusinessInList : dbPatent.getListBusiness()) {
