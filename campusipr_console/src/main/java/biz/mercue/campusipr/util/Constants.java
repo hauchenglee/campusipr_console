@@ -370,6 +370,8 @@ public class Constants {
 	public static String URL_ENABLE_PASSWORD  = "";
 	public static String URL_LOGIN  = "";
 	public static String URL_PATENT_CONTENT  = "";
+	public static String LOCAL_IP = "";
+	public static String IPs = "";
 	
 	public static final List<Integer> defaultReminderDays = Arrays.asList(90, 30, 7, -1); 
 
