@@ -73,8 +73,8 @@ public class TestController {
 		
 		
 		response.setCode(Constants.INT_SUCCESS);
-		response.setMessage("V_2019_08_19_01");
-		response.setMessage_en("V_2019_08_19_01");
+		response.setMessage("V_2019_08_19_02");
+		response.setMessage_en("V_2019_08_19_02");
 		String result = JacksonJSONUtils.mapObjectWithView(response, View.Public.class);
 		log.info("result :"+result);
 		return result;

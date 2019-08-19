@@ -21,9 +21,9 @@ path:
     graphicsmagick: 
    
 url:
-    image: "http://192.168.0.37/imageservice/campusipr/"
-    video: "http://192.168.0.37/imageservice/campusipr/"
-    file:  "http://192.168.0.37/imageservice/campusipr/"
+    image: "http://192.168.0.37:8080/imageservice/campusipr/"
+    video: "http://192.168.0.37:8080/imageservice/campusipr/"
+    file:  "http://192.168.0.37:8080/imageservice/campusipr/"
 
 
 jieba: 
