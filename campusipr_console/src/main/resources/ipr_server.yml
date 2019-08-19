@@ -63,9 +63,9 @@ html:
     one_patent_change :  /opt/impact/html/onepatent.html
     multiple_patent_change :  /opt/impact/html/multiplepatent.html
     annuity_reminder :  /opt/impact/html/annuity_reminder.html
-    url_reset_password_transfer :  http://192.168.0.37/campusipr_console/resetpassword
-    url_enable_password_transfer :  http://192.168.0.37/campusipr_console/enablepassword
-    url_login : http://192.168.0.37/impact
-    url_reset_password :  http://192.168.0.37/impact/app/html/resetpwd.html
-    url_enable_password :  http://192.168.0.37/impact/app/html/enablepwd.html
-    url_patent_content :  http://192.168.0.37/impact/html/patent-content/search?patent_id=
+    url_reset_password_transfer :  http://192.168.0.37:8080/campusipr_console/resetpassword
+    url_enable_password_transfer :  http://192.168.0.37:8080/campusipr_console/enablepassword
+    url_login : http://192.168.0.37:8080/impact
+    url_reset_password :  http://192.168.0.37:8080/impact/app/html/resetpwd.html
+    url_enable_password :  http://192.168.0.37:8080/impact/app/html/enablepwd.html
+    url_patent_content :  http://192.168.0.37:8080/impact/html/patent-content/search?patent_id=
