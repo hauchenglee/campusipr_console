@@ -790,8 +790,12 @@ public class PatentController {
 		AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if (adminToken != null) {
 			ListQueryForm form = patentService.advancedSearch(query, adminToken.getBusiness_id(), page, Constants.SYSTEM_PAGE_SIZE);
-			responseBody.setCode(Constants.INT_SUCCESS);
-			responseBody.setListQuery(form);
+			if (form == null) {
+				responseBody.setCode(Constants.INT_INCORRECT_SYNTAX);
+			} else {
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setListQuery(form);
+			}
 		} else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}

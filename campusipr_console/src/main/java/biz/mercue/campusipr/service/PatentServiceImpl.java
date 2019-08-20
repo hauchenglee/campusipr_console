@@ -1806,13 +1806,13 @@ public class PatentServiceImpl implements PatentService {
 						form = advancedSearchDate(searchStr, business, page, pageSize);
 						break;
 					default:
-						form = new ListQueryForm();
+						form = null;
 						break;
 				}
 
 			} else {
 				// error query
-				form = new ListQueryForm();
+				form = null;
 			}
 			return form;
 		} catch (Exception e) {
@@ -1938,8 +1938,19 @@ public class PatentServiceImpl implements PatentService {
 					for (int i = 0; i < elementArea.length(); i++) {
 						if (isFirstAddBracket) {
 							if (String.valueOf(arr.charAt(i)).matches(patternAll)) {
-								finalSearchSQL += "(" + arr.substring(0, i) + currentFieldName + " = " + arr.substring(i);
-								searchHQL += "(" + arr.substring(0, i) + currentFieldName + " = " + ":s" + dataCount;
+								if (arr.startsWith(")")) {
+									int leftBracketCount = 0;
+									for (int j = 0; j < arr.length(); j++) {
+										if (String.valueOf(arr.charAt(j)).equals("(")) {
+											leftBracketCount++;
+										}
+									}
+									for (int j = 0; j < leftBracketCount; j++) {
+										searchHQL += "(";
+									}
+								}
+								finalSearchSQL += arr.substring(0, i) + currentFieldName + " = " + arr.substring(i);
+								searchHQL += arr.substring(0, i) + currentFieldName + " = " + ":s" + dataCount;
 								dataCount++;
 								break;
 							}
@@ -1947,6 +1958,17 @@ public class PatentServiceImpl implements PatentService {
 							if (String.valueOf(arr.charAt(i)).matches(patternAll)) {
 								finalSearchSQL += arr.substring(0, i) + currentFieldName + " = " + arr.substring(i);
 								searchHQL += arr.substring(0, i) + currentFieldName + " = " + ":s" + dataCount;
+								if (arr.endsWith(")")) {
+									int rightBracketCount = 0;
+									for (int j = 0; j < arr.length(); j++) {
+										if (String.valueOf(arr.charAt(j)).equals(")")) {
+											rightBracketCount++;
+										}
+									}
+									for (int j = 0; j < rightBracketCount; j++) {
+										searchHQL += ")";
+									}
+								}
 								dataCount++;
 								break;
 							}
@@ -1956,12 +1978,12 @@ public class PatentServiceImpl implements PatentService {
 				} else {
 					if (arrCount == currentElementDataArr.length - 1) {
 						if (arr.equalsIgnoreCase("and")) {
-							finalSearchSQL += " ) and ";
-							searchHQL += ") and ";
+							finalSearchSQL += "  and "; // original: finalSearchSQL += " ) and ";
+							searchHQL += " and ";
 						}
 						if (arr.equalsIgnoreCase("or")) {
-							finalSearchSQL += " ) or ";
-							searchHQL += ") or ";
+							finalSearchSQL += "  or "; // original: finalSearchSQL += " ) or ";
+							searchHQL += " or ";
 						}
 					} else {
 						if (arr.equalsIgnoreCase("and")) {
@@ -1979,9 +2001,9 @@ public class PatentServiceImpl implements PatentService {
 			elementFieldCount++;
 		}
 
-		finalSearchSQL += searchHQL + ")"; // end of bracket
-		finalSearchHQL += searchHQL + ")"; // end of bracket
-		finalSearchHQLCount += searchHQL + ")"; // end of bracket
+		finalSearchSQL += searchHQL; // end of bracket. fix: 現在不補括號
+		finalSearchHQL += searchHQL; // end of bracket. fix: 現在不補括號
+		finalSearchHQLCount += searchHQL; // end of bracket. fix: 現在不補括號
 		log.info("sql: " + finalSearchSQL);
 		log.info("hql: " + finalSearchHQL);
 		log.info("hql count: " + finalSearchHQLCount);
@@ -2010,7 +2032,6 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	private ListQueryForm advancedSearchDate(String searchStr, String businessId, int page, int pageSize) {
-		ListQueryForm form = new ListQueryForm();
 		int slashIndex = searchStr.indexOf("/");
 		String fieldCode = searchStr.substring(0, slashIndex);
 		String fieldName = "";
@@ -2024,17 +2045,21 @@ public class PatentServiceImpl implements PatentService {
 		switch (fieldCode) {
 			case Constants.SEARCH_FIELD_CODE_APD:
 				fieldName = Constants.PATENT_APPL_DATE;
+				break;
 			case Constants.SEARCH_FIELD_CODE_PD:
 				fieldName = Constants.PATENT_PUBLISH_DATE;
+				break;
 			case Constants.SEARCH_FIELD_CODE_ID:
 				fieldName = Constants.PATENT_NOTICE_DATE;
 				break;
 			default:
-				form = new ListQueryForm();
 				break;
 		}
 
-		String data = searchStr.substring(slashIndex);
+		finalSearchHQL += "pat." + fieldName + " >= :d0 and pat." + fieldName + " <= :d1";
+		finalSearchHQLCount += "pat." + fieldName + " >= :d0 and pat." + fieldName + " <= :d1";
+
+		String data = searchStr.substring(slashIndex + 1);
 		String[] searchDateObj = data.split("-");
 		Date sd = new Date(Long.valueOf(searchDateObj[0]));
 		Date ed = new Date(Long.valueOf(searchDateObj[1]));
@@ -2044,17 +2069,25 @@ public class PatentServiceImpl implements PatentService {
 		List<Patent> list = patentDao.getByAdvancedSearchDate(finalSearchHQL, dataList, businessId, page, pageSize);
 		int patentListCount = patentDao.getCountByAdvancedSearchDate(finalSearchHQLCount, dataList, businessId);
 
+		if (list != null && !list.isEmpty()) {
+			log.info("patentListCount(): " + patentListCount);
+			for (Patent patent : list) {
+				log.info("patent id: " + patent.getPatent_id());
+				log.info("patent name: " + patent.getPatent_name());
+			}
 
-		/*
-						String[] searchDateObj = ((String) searchObj).split("-");
-				Date sd = new Date(Long.valueOf(searchDateObj[0]));
-				Date ed = new Date(Long.valueOf(searchDateObj[1]));
-				list = patentDao.searchFieldPatent(sd, ed, field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
-				count = patentDao.countSearchFieldPatent(sd, ed, field.getField_code(), businessId);
-		 */
-
-
-		return form;
+			// get data to avoid lazy loading exception
+			for (Patent patent : list) {
+				patent.getListBusiness().size();
+				patent.getListInventor().size();
+				patent.getListPatentStatus().size();
+				patent.getListExtension().size();
+				patent.getListFamily().size();
+			}
+		} else {
+			log.info("search result is empty");
+		}
+		return new ListQueryForm(patentListCount, Constants.SYSTEM_PAGE_SIZE, list);
 	}
 
 	public void patentHistoryMerge(Patent dbPatent, String businessId) {
