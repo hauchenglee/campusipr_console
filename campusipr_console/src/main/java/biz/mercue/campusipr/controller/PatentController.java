@@ -777,7 +777,7 @@ public class PatentController {
 		}
 	}
 
-	@RequestMapping(value = "/api/advancesearch", method = RequestMethod.POST, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/api/advancedsearch", method = RequestMethod.POST, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String advanceSearch(HttpServletRequest request,
 								@RequestBody String receiveJSONString,
@@ -785,7 +785,7 @@ public class PatentController {
 		log.info("advance search controller");
 		ListResponseBody responseBody = new ListResponseBody();
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		String query = jsonObject.optString("query");
+		String query = jsonObject.optString("searchText");
 
 		AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
 		if (adminToken != null) {
