@@ -411,7 +411,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		Row testRow = sheet.getRow(y);
 		
 		for (y = 0; y < sheet.getLastRowNum(); y++) {
-			log.info(y +"行，有 "+testRow.getLastCellNum()+"格");
+//			log.info(y +"行，有 "+testRow.getLastCellNum()+"格");
 			
 			if (sheet.getRow(y) == null) {
 				log.info(y +": Row is null");
@@ -472,7 +472,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			}
 		}
 		for (Row row : sheet) {
-			log.info("Row");
+//			log.info("Row");
 			if (rowIndex == 0) {
 				log.info("Title Row");
 			} else {
@@ -584,7 +584,14 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 									}
 									// type is string
 									if (cellType == 1) {
+										if(row.getCell(excelFieldIndex).getStringCellValue()=="") {
+											errorRowList.add(rowIndex);
+											errorColumnList.add(fieldMap.getExcel_field_index());
+											log.info("ErrorIndex:申請號為''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+											break;
+										}
 										patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
+										log.info(patentApplNo);
 									}
 									patent.setPatent_appl_no(patentApplNo);
 									isApplNoNull = false;
