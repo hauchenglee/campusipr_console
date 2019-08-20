@@ -2498,7 +2498,7 @@ public class PatentServiceImpl implements PatentService {
 						}
 					}
 				}
-				if (patent.getListPatentStatus().isEmpty() && !dbBean.getListPatentStatus().isEmpty()) {
+				if (patent.getListPatentStatus()==null && dbBean.getListPatentStatus()!=null) {
 					if (statusAddData.isEmpty()) {
 						log.info("statusAddData: is Empty");
 						statusAddData.add(emptyStatus.toString());
@@ -2777,7 +2777,7 @@ public class PatentServiceImpl implements PatentService {
 						}
 					}
 				}
-				if(patent.getListCost().isEmpty()&&!dbBean.getListCost().isEmpty()) {
+				if(patent.getListCost()==null&&dbBean.getListCost()!=null) {
 					if(costAddData.isEmpty()) {
 						log.info("costAddData: is Empty");
 						costAddData.add(emptyCost.toString());
