@@ -64,6 +64,22 @@ public class TestController {
 	
 	@Autowired
 	ServletContext servletContext;
+	
+	@RequestMapping(value="/test", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
+	@ResponseBody
+	public String test(HttpServletRequest request) {
+		log.info("test ");
+		BeanResponseBody response = new BeanResponseBody();
+		
+		
+		response.setCode(Constants.INT_SUCCESS);
+		response.setMessage("V_2019_08_19_03");
+		response.setMessage_en("V_2019_08_19_03");
+		String result = JacksonJSONUtils.mapObjectWithView(response, View.Public.class);
+		log.info("result :"+result);
+		return result;
+	}
+	
 
 	@RequestMapping(value="/api/demo/{patentId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody

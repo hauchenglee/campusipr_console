@@ -237,13 +237,15 @@ public class ExcelUtils {
 							int index = 0;
 							for (PatentStatus patentStatus : patent.getListPatentStatus()) {
 								Status status = patentStatus.getStatus();
-								if (!StringUtils.isNULL(status.getStatus_desc())) {
+								if (!StringUtils.isNULL(status.getStatus_desc())
+										&& (businessId.equals(patentStatus.getBusiness_id())) || patentStatus.getBusiness_id() == null) {
 									statusStr += status.getStatus_desc();
 								}
-								if (patentStatus.getCreate_date() != null) {
+								if (patentStatus.getCreate_date() != null
+										&& (businessId.equals(patentStatus.getBusiness_id())) || patentStatus.getBusiness_id() == null) {
 									statusStr += "_" + DateUtils.getDashFormatDate(patentStatus.getCreate_date());
 								}
-								if (index < patent.getListPatentStatus().size() - 1) {
+								if (index < patent.getListPatentStatus().size() - 1 && !StringUtils.isNULL(statusStr)) {
 									statusStr += "、";
 								}
 								index++;
@@ -535,27 +537,31 @@ public class ExcelUtils {
 							String departmentStr = "";
 							int lastIndexDe = patent.getListDepartment().size() - 1;
 							for (Department dep : patent.getListDepartment()) {
-								if (dep.getDepartment_id().equals(patent.getListDepartment().get(lastIndexDe).getDepartment_id())) {
+								if (dep.getDepartment_id().equals(patent.getListDepartment().get(lastIndexDe).getDepartment_id())
+										&& businessId.equals(dep.getBusiness_id())) {
 									if (!StringUtils.isNULL(dep.getDepartment_name())) {
 										departmentStr += dep.getDepartment_name();
 									}
-									if (!StringUtils.isNULL(dep.getDepartment_name_en())) {
+									if (!StringUtils.isNULL(dep.getDepartment_name_en())
+											&& businessId.equals(dep.getBusiness_id())) {
 										if (!StringUtils.isNULL(departmentStr) && !StringUtils.isNULL(dep.getDepartment_name())) {
 											departmentStr += "_";
 										}
 										departmentStr += dep.getDepartment_name_en();
 									}
 								} else {
-									if (!StringUtils.isNULL(dep.getDepartment_name())) {
+									if (!StringUtils.isNULL(dep.getDepartment_name()) && businessId.equals(dep.getBusiness_id())) {
 										departmentStr += dep.getDepartment_name();
 									}
-									if (!StringUtils.isNULL(dep.getDepartment_name_en())) {
+									if (!StringUtils.isNULL(dep.getDepartment_name_en()) && businessId.equals(dep.getBusiness_id())) {
 										if (!StringUtils.isNULL(departmentStr) && !StringUtils.isNULL(dep.getDepartment_name())) {
 											departmentStr += "_";
 										}
 										departmentStr += dep.getDepartment_name_en();
 									}
-									departmentStr += "、";
+									if (!StringUtils.isNULL(departmentStr)) {
+										departmentStr += "、";
+									}
 								}
 							}
 							row.createCell(columnCount).setCellValue(departmentStr);

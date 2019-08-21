@@ -891,12 +891,12 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		Session session = getSession();
 		Query query = session.createQuery(hql);
 		for (int i = 0; i < dataList.size(); i++) {
-			String parameterName = "s" + i;
+			String parameterName = "d" + i;
 			query.setParameter(parameterName, dataList.get(i));
 		}
+		query.setParameter("bid", businessId);
 		query.setFirstResult((page - 1) * pageSize);
 		query.setMaxResults(pageSize);
-//		query.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); // 可以用distinct(bean)代替
 		return query.list();
 	}
 
@@ -905,9 +905,10 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		Session session = getSession();
 		Query query = session.createQuery(hql);
 		for (int i = 0; i < dataList.size(); i++) {
-			String parameterName = "s" + i;
+			String parameterName = "d" + i;
 			query.setParameter(parameterName, dataList.get(i));
 		}
+		query.setParameter("bid", businessId);
 		long count = (long) query.uniqueResult();
 		return (int) count;
 	}

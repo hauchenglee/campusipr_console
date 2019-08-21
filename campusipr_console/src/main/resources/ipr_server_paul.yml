@@ -1,0 +1,71 @@
+ip: localhost:8080
+jdbc:
+    driverClassName : "com.mysql.cj.jdbc.MysqlConnectionPoolDataSource"
+    url: "jdbc:mysql://localhost:3306/campusipr_console?useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Taipei&characterEncoding=utf8&maxAllowedPacket=33554432"
+    username: root
+    password: MyNewPass4!
+  
+hibernate:
+    dialect: org.hibernate.dialect.MySQLDialect
+    show_sql: false
+    format_sql: false
+    current_session_context_class: org.springframework.orm.hibernate5.SpringSessionContext
+    connection_charset: utf8
+    connection_character_encoding: utf8
+  
+path:
+    image: /mnt/data1/image/campusipr
+    video: /mnt/data1/image/campusipr
+    file: /mnt/data1/image/campusipr/file
+    imagemagick: 
+    graphicsmagick: 
+   
+url:
+    image: "http://192.168.56.130/imageservice/campusipr/"
+    video: "http://192.168.56.130/imageservice/campusipr/"
+    file:  "http://192.168.56.130/imageservice/campusipr/"
+
+
+jieba: 
+    dic_path : /mnt/data1/image/dic/dict.txt
+    usrdic_path : /mnt/data1/image/dic/userdict.dict
+    stop_word_path : /mnt/data1/image/dic/stopword.txt
+    prob_emit_path : /mnt/data1/image/dic/prob_emit.txt
+
+duckling: 
+    duckling_http_url : "http://192.168.2.61:8000/parse"
+elasticsearch: 
+    elasticsearch_ip : "192.168.2.61"
+    port : "9200"
+google: 
+    recaptcha : 6LesJYQUAAAAAE1OFDeCDjVkGtuCjbS-AIMLeZGW
+ 
+patent_api:
+    patent_webservice_tw : "https://tiponet.tipo.gov.tw/OpenDataApi/OpenData/API"
+    patent_key_tw : 8rSwrxyD
+    patent_webservice_us : "https://developer.uspto.gov/ibd-api/v1/patent/application"
+    patent_inventor_webservice_us : "https://ped.uspto.gov/api/queries"
+    patent_context_webservice_us : "http://patft.uspto.gov/netacgi/nph-Parser?Sect2=PTO1&Sect2=HITOFF&p=1&u=%2Fnetahtml%2FPTO%2Fsearch-bool.html&r=1&f=G&l=50&d=PALL&RefSrch=yes&Query=PN%2F"
+    patent_webservice_eu : "https://ops.epo.org/3.2"
+    patent_token_eu : QWV0UjhhdGlmeTZiRzBzRDNiZkdsaHBObVBmUkRlZ0E6YTY1bXVjUzZobm5yMGNRUg==
+    
+mail:
+    mail_username : contact@mercue.biz
+    mail_pwd : Mercue_5024
+    mail_host : smtp.gmail.com
+    mail_host_port : 587
+    mail_starttls : true
+    mail_from : contact@mercue.biz
+
+html:
+    forget_password : /opt/impact/html/forgetpwd.html
+    new_account : /opt/impact/html/accountactivation.html
+    one_patent_change :  /opt/impact/html/onepatent.html
+    multiple_patent_change :  /opt/impact/html/multiplepatent.html
+    annuity_reminder :  /opt/impact/html/annuity_reminder.html
+    url_reset_password_transfer :  http://192.168.56.130/campusipr_console/resetpassword
+    url_enable_password_transfer :  http://192.168.56.130/campusipr_console/enablepassword
+    url_login : http://192.168.56.130/impact
+    url_reset_password :  http://192.168.56.130/impact/app/html/resetpwd.html
+    url_enable_password :  http://192.168.56.130/impact/app/html/enablepwd.html
+    url_patent_content :  http://192.168.56.130/impact/html/patent-content/search?patent_id=

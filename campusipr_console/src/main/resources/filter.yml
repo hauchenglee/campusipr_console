@@ -1,27 +1,53 @@
 [
   {
      name: "leo",
+     ip: "",
+     hostname: "",
      path: "/leo.yml" 
   },
   {
      name: "audio",
+     ip: "",
+     hostname: "",
      path: "/charles.yml" 
   },
   {
      name: "tomcat",
+     ip: "192.168.2.71;192.168.2.72",
+     hostname: "apache",
      path: "/server.yml" 
   },
   {
      name: "Ian",
+     ip: "",
+     hostname: "",
      path: "/buki.yml" 
   },
   {
      name: "Zoe",
+     ip: "",
+     hostname: "",
      path: "/zoe.yml" 
   },
   {
      name: "kevin",
      path: "/leo.yml" 
+     name: "wangshoubo",
+     ip: "",
+     hostname: "",
+     path: "/wangshoubo.yml" 
+  },
+  {
+     name: "tomcat",
+     ip: "192.168.0.37",
+     hostname: "mercueipr37",
+     path: "/ipr_server.yml" 
+  },
+  {
+     name: "tomcat",
+     ip: "192.168.56.130",
+     hostname: "mercueipr130paul",
+     path: "/ipr_server_paul.yml" 
   }
 ]
   

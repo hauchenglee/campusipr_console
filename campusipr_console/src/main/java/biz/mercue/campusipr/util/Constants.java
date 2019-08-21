@@ -182,7 +182,9 @@ public class Constants {
 	public static final String MSG_DATA_DUPLICATE =  "資料重複" ;
 	public static final String MSG_EN_DATA_DUPLICATE =  "The data you entered is not correct" ;
 
-
+	public static final int INT_INCORRECT_SYNTAX =  -17 ;
+	public static final String MSG_INCORRECT_SYNTAX =  "語法錯誤" ;
+	public static final String MSG_EN_INCORRECT_SYNTAX =  "The syntax is incorrect" ;
 
 
 	
@@ -370,6 +372,8 @@ public class Constants {
 	public static String URL_ENABLE_PASSWORD  = "";
 	public static String URL_LOGIN  = "";
 	public static String URL_PATENT_CONTENT  = "";
+	public static String LOCAL_IP = "";
+	public static String IPs = "";
 	
 	public static final List<Integer> defaultReminderDays = Arrays.asList(90, 30, 7, -1); 
 
