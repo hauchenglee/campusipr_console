@@ -160,13 +160,14 @@ public class TestController {
 			log.info("1");
 //			String htmlContent = String.format(html, "黃富榆",Constants.URL_RESET_PASSWORD +"?token=" + KeyGeneratorUtils.generateRandomString(),
 //					"黃富榆",Constants.URL_RESET_PASSWORD + "?token=" + KeyGeneratorUtils.generateRandomString());
-			String htmlContent =html.replaceAll("admin_name", "黃富榆");
-			htmlContent =htmlContent.replaceAll("forget_link", Constants.URL_RESET_PASSWORD + "?token=" + KeyGeneratorUtils.generateRandomString());
+			 
+			//htmlContent =htmlContent.replaceAll("forget_link", Constants.URL_RESET_PASSWORD + "?token=" + KeyGeneratorUtils.generateRandomString());
 			log.info("2");
 			List<String> list = new ArrayList<String>();
-			list.add("leohuang@mercue.biz");
+			list.add("kevinhsieh@mercue.biz");
 			log.info("3");
-			new MailSender().sendHTMLMail(list, "忘記密碼", htmlContent);
+			new MailSender().sendSimpleMail(list, "asd", "asd");
+			 
 			log.info("4");
 		}catch (Exception e) {
 			log.error("Exception :"+e.getMessage());

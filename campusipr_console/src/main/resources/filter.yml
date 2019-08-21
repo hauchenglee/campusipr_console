@@ -18,6 +18,10 @@
   {
      name: "Zoe",
      path: "/zoe.yml" 
+  },
+  {
+     name: "kevin",
+     path: "/leo.yml" 
   }
 ]
   
