@@ -3110,7 +3110,6 @@ public class PatentServiceImpl implements PatentService {
 				log.info("getListContact==null");
 				if (dbPatent.getListContact() != null) {
 					patentDao.deletePatentContact(dbPatent.getPatent_id());
-					log.info("dbgetListContact==null");
 				}
 			}
 		} catch (Exception e) {
