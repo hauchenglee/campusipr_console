@@ -273,44 +273,91 @@ public class ServiceChinaPatent {
 								String publicateNo = pubNode.getTextContent().substring(0, pubNode.getTextContent().length());
 								
 								log.info(pubKindNo);
-								
-								if ("A".equals(pubKindNo)) {
-									log.info("發明類型Kind A 公開號: "+publicateNo);
-									patent.setPatent_notice_no(countryId+publicateNo);
-								}
-								if ("B".equals(pubKindNo)) {
-									log.info("發明類型Kind B 公告號: "+publicateNo);
-									if (publicateNo.length() > 9) {
-										publicateNo = publicateNo.substring(0, publicateNo.length()-1);
-									}
-									patent.setPatent_publish_no(countryId+publicateNo);
-								}
-								//實用新型只需放公告號/日
-								if ("U".equals(pubKindNo)) {
-									log.info("實用新型 kind U 公告號: "+publicateNo);
-									if (publicateNo.length() > 9) {
-										publicateNo = publicateNo.substring(0, publicateNo.length()-1);
-									}
-									patent.setPatent_publish_no(countryId+publicateNo);
-								}
-								
 								try {
-									String publishDateStr =pubDateNode.getTextContent();
+									String publishDateStr = pubDateNode.getTextContent();
+									// 發明類型。註:1985-1992 kind B是審定號非公告號，但調整後類同，請查詢中國申請號體系
+									if ("A".equals(pubKindNo)) {
+										log.info("發明類型Kind A 公開號: " + publicateNo);
+										patent.setPatent_notice_no(countryId + publicateNo);
+									}
+									if ("B".equals(pubKindNo)) {
+										log.info("發明類型Kind B 公告號: " + publicateNo);
+										if (publicateNo.length() > 9) {
+											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
+										}
+										patent.setPatent_publish_no(countryId + publicateNo);
+									}
+									// 實用新型只需放公告號/日
+									if ("U".equals(pubKindNo)) {
+										log.info("實用新型 kind U 公告號: " + publicateNo);
+										if (publicateNo.length() > 9) {
+											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
+										}
+										patent.setPatent_publish_no(countryId + publicateNo);
+									}
+									//1993-20040630的發明類型的公告號/日
+									if ("C".equals(pubKindNo)) {
+										log.info("實用新型 kind C 公告號: " + publicateNo);
+										if (publicateNo.length() > 9) {
+											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
+										}
+										patent.setPatent_publish_no(countryId + publicateNo);
+									}
+									//1993-20040630的實用新型的公告號/日
+									if ("Y".equals(pubKindNo)) {
+										log.info("實用新型 kind Y 公告號: " + publicateNo);
+										if (publicateNo.length() > 9) {
+											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
+										}
+										patent.setPatent_publish_no(countryId + publicateNo);
+									}
+									//1993-20040630的外觀設計的公告號/日
+									if ("D".equals(pubKindNo)) {
+										log.info("實用新型 kind D 公告號: " + publicateNo);
+										if (publicateNo.length() > 9) {
+											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
+										}
+										patent.setPatent_publish_no(countryId + publicateNo);
+									}
+									//20040701迄今的外觀設計的公告號/日
+									if ("S".equals(pubKindNo)) {
+										log.info("實用新型 kind S 公告號: " + publicateNo);
+										if (publicateNo.length() > 9) {
+											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
+										}
+										patent.setPatent_publish_no(countryId + publicateNo);
+									}
+									
 									if (!StringUtils.isNULL(publishDateStr)) {
 										Date publishDate = DateUtils.parserSimpleDateFormatDate(publishDateStr);
-										if("A".equals(pubKindNo)) {
-											log.info("發明類型Kind A 公開日: "+publishDate);
+										if ("A".equals(pubKindNo)) {
+											log.info("發明類型Kind A 公開日: " + publishDate);
 											patent.setPatent_notice_date(publishDate);
 										}
 										if ("B".equals(pubKindNo)) {
-											log.info("發明類型Kind B 公告日: "+publishDate);
+											log.info("發明類型Kind B 公告日: " + publishDate);
 											patent.setPatent_publish_date(publishDate);
 										}
 										if ("U".equals(pubKindNo)) {
-											log.info("實用新型 kind U 公告日: "+publishDate);
+											log.info("實用新型 kind U 公告日: " + publishDate);
 											patent.setPatent_publish_date(publishDate);
 										}
-										
+										if ("C".equals(pubKindNo)) {
+											log.info("實用新型 kind C 公告日: " + publishDate);
+											patent.setPatent_publish_date(publishDate);
+										}
+										if ("Y".equals(pubKindNo)) {
+											log.info("實用新型 kind Y 公告日: " + publishDate);
+											patent.setPatent_publish_date(publishDate);
+										}
+										if ("D".equals(pubKindNo)) {
+											log.info("實用新型 kind D 公告日: " + publishDate);
+											patent.setPatent_publish_date(publishDate);
+										}
+										if ("S".equals(pubKindNo)) {
+											log.info("實用新型 kind S 公告日: " + publishDate);
+											patent.setPatent_publish_date(publishDate);
+										}
 									}
 								} catch (ParseException e) {
 									// TODO Auto-generated catch block
