@@ -487,10 +487,13 @@ public class PatentServiceImpl implements PatentService {
 
 		if (Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
 			// us patent appl no
-			String appl_us_onlyNO = originApplNo.replace("/", "").replace(",", "");
+			String appl_us_onlyNO = originApplNo
+					.replace("/", "")
+					.replace(",", "")
+					.replace(".", "");
 			log.info("appl_us_onlyNO: " + appl_us_onlyNO);
 
-			if (originApplNo.length() == 10 || originApplNo.length() == 12) {
+			if (appl_us_onlyNO.length() == 10 || appl_us_onlyNO.length() == 12) {
 				patent.setPatent_appl_no(appl_us_onlyNO);
 				syncResult = ServiceUSPatent.getPatentRightByapplNo(patent);
 			} else {
@@ -1687,12 +1690,23 @@ public class PatentServiceImpl implements PatentService {
 			case Constants.PATENT_NAME_FIELD:
 			case Constants.PATENT_NAME_EN_FIELD:
 			case Constants.PATENT_NO_FIELD:
-			case Constants.PATENT_APPL_NO_FIELD:
 			case Constants.PATENT_NOTICE_NO_FIELD:
 			case Constants.PATENT_PUBLISH_NO_FIELD:
 				String text = (String) searchObj;
 				list = patentDao.searchFieldPatent('%'+text+'%', field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
 				count = patentDao.countSearchFieldPatent('%'+text+'%', field.getField_code(), businessId);
+				break;
+			case Constants.PATENT_APPL_NO_FIELD:
+				String originApplNo = (String) searchObj;
+				String appl_onlyNO = originApplNo;
+				if (String.valueOf(originApplNo.charAt(2)).equals("/")) {
+					appl_onlyNO = originApplNo
+							.replace("/", "")
+							.replace(",", "")
+							.replace(".", "");
+				}
+				list = patentDao.searchFieldPatent('%'+appl_onlyNO+'%', field.getField_code(), businessId, page, Constants.SYSTEM_PAGE_SIZE, orderList,orderFieldCode,is_asc);
+				count = patentDao.countSearchFieldPatent('%'+appl_onlyNO+'%', field.getField_code(), businessId);
 				break;
 			case Constants.PATENT_COUNTRY_FIELD:
 				String countryName = (String) searchObj;
@@ -3164,7 +3178,7 @@ public class PatentServiceImpl implements PatentService {
 				for (Annuity annuity : listAnnuity) {
 					for (Business business:listBusiness) {
 						List<AnnuityReminder> annuityReminderList = annuityReminderDao.getByBusinessId(business.getBusiness_id());
-						log.info(annuityReminderList.size());
+//						log.info(annuityReminderList.size());
 						List<AnnuityReminder> listARSendRightNow = new ArrayList<>();
 						Date now = DateUtils.getDayStart(new Date());
 						for (AnnuityReminder annuityReminder : annuityReminderList) {
@@ -3183,9 +3197,9 @@ public class PatentServiceImpl implements PatentService {
 								reminder.setIs_send(false);
 								reminder.setIs_remind(annuity.is_reminder());
 								
-								log.info("before:"+reminder.getTask_date());
-								log.info("now:"+now);
-								log.info("after:"+annuity.getAnnuity_end_date());
+//								log.info("before:"+reminder.getTask_date());
+//								log.info("now:"+now);
+//								log.info("after:"+annuity.getAnnuity_end_date());
 								if (reminder.getTask_date().after(now)) {
 									if (reminder.is_remind() && !reminder.is_send()) {
 										log.info("send on schulder");
