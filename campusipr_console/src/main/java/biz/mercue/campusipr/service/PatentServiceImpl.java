@@ -3060,6 +3060,8 @@ public class PatentServiceImpl implements PatentService {
 				List<PatentContact> listContact = editPatent.getListContact();
 				log.info(listContact.size());
 				for (PatentContact contact : listContact) {
+					
+					
 
 					// avoid a diff obejct with the same id ... exception
 					if(contact.getBusiness()==null) {
@@ -3084,8 +3086,11 @@ public class PatentServiceImpl implements PatentService {
 							log.info("update EDIT_SOURCE_HUMAN");
 						}
 						if (Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()) {
+							
 							contact.setBusiness(editPatent.getBusiness());
-							log.info("update EDIT_SOURCE_HUMAN");
+							log.info("update EDIT_SOURCE_SERVICE");
+							
+							
 						}
 						contact.setCreate_date(new Date());
 					}else {
@@ -3096,6 +3101,7 @@ public class PatentServiceImpl implements PatentService {
 							contact.setBusiness(dbContact.getBusiness());
 							contact.setCreate_date(new Date());
 						}
+						log.info("else");
 					}
 				}
 //				for (PatentContact dbContact : dbListContact) {

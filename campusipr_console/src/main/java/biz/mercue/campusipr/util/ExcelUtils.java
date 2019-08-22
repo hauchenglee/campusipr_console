@@ -132,10 +132,10 @@ public class ExcelUtils {
 		excelColumnMap.put("f08b87006f899e74c0b570f76349f49d", Constants.EXCEL_COLUMN_INVENTOR);
 		excelColumnMap.put("42437fd3b6fd38418a6d0e6068a32f2a", Constants.EXCEL_COLUMN_APPLICATION_DATE);
 		excelColumnMap.put("9de48893637f0c68664accdfe515f2ea", Constants.EXCEL_COLUMN_APPLICATION_NO);
-		excelColumnMap.put("8cec5a2fbf128bca2cbf39059e0908d4", Constants.EXCEL_COLUMN_PUBLIC_DATE);
-		excelColumnMap.put("d3fc8c21aa05c0c8e7c1c52a704d2f72", Constants.EXCEL_COLUMN_PUBLIC_NO);
-		excelColumnMap.put("eb2f853e0fefd4af566cbd1fa8f5f744", Constants.EXCEL_COLUMN_NOTICE_DATE);
-		excelColumnMap.put("76ab6a77047bd64250795aa9e1bc9e49", Constants.EXCEL_COLUMN_NOTICE_NO);
+		excelColumnMap.put("8cec5a2fbf128bca2cbf39059e0908d4", Constants.EXCEL_COLUMN_NOTICE_DATE);
+		excelColumnMap.put("d3fc8c21aa05c0c8e7c1c52a704d2f72", Constants.EXCEL_COLUMN_NOTICE_NO);
+		excelColumnMap.put("eb2f853e0fefd4af566cbd1fa8f5f744", Constants.EXCEL_COLUMN_PUBLIC_DATE);
+		excelColumnMap.put("76ab6a77047bd64250795aa9e1bc9e49", Constants.EXCEL_COLUMN_PUBLIC_NO);
 		excelColumnMap.put("0094b3bb46157502c406b50e899b0c19", Constants.EXCEL_COLUMN_PATENT_NO);
 		excelColumnMap.put("5907b02544155369f79c37c4ff0bc777", Constants.EXCEL_COLUMN_PAY_VAILD_DATE);
 		excelColumnMap.put("9c48e4dec6c90736de097b4237da33b1", Constants.EXCEL_COLUMN_PAY_EXPIRE_YEAR);
