@@ -140,12 +140,16 @@ public class PortfolioServiceImpl implements PortfolioService{
 	@Override
 	public 	ListQueryForm getByBusinessId(String businessId,int page){
 		
-		List list = portfolioDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE);
+		List<Portfolio> list = portfolioDao.getByBusinessId(businessId,page,Constants.SYSTEM_PAGE_SIZE);
 		int count = portfolioDao.getCountByBusinessId(businessId);
 		ListQueryForm form = new ListQueryForm(count,Constants.SYSTEM_PAGE_SIZE,list);
+
+		if (!list.isEmpty()) {
+			for (Portfolio portfolio : list) {
+				portfolio.getListPatent().size();
+			}
+		}
+
 		return form;
 	}
-	
-
-	
 }
