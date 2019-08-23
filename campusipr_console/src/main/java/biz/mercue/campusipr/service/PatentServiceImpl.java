@@ -671,17 +671,7 @@ public class PatentServiceImpl implements PatentService {
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
-//	private int addContact(Patent patent) {
-//		if (Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
-//				log.info("有申請號時新增聯絡人");
-//				contactData(patent);
-//		}
-//		if (Patent.EDIT_SOURCE_SERVICE != patent.getEdit_source()) {
-//			contactData(patent);
-//			log.info("申請號未公開時新增聯絡人");
-//		}
-//		return Constants.INT_SUCCESS;
-//	}
+
 	@Override
 	public Map<String, Patent> addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip) {
 		Map<String, Patent> mergeMap = new HashMap<>();
@@ -818,7 +808,7 @@ public class PatentServiceImpl implements PatentService {
 					handleExtensionExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
 					handleDepartmentExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
 					editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
-					editPatent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
+//					editPatent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
 					updatePatent(editPatent, business.getBusiness_id());
 				}
 			}
@@ -3062,18 +3052,18 @@ public class PatentServiceImpl implements PatentService {
 		try {
 			List<PatentContact> listContact = editPatent.getListContact();
 
-			if (Patent.EDIT_SOURCE_IMPORT == editPatent.getEdit_source()) {
-				for (PatentContact contact : listContact) {
-					contact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
-					contact.setPatent(dbPatent);
-					contact.setBusiness(contact.getBusiness());
-					contact.setContact_name(contact.getContact_name());
-					contact.setContact_email(contact.getContact_email());
-					contact.setContact_character(contact.getContact_character());
-					contact.setCreate_date(new Date());
-					dbPatent.addContact(contact);
-				}
-			}else {
+//			if (Patent.EDIT_SOURCE_IMPORT == editPatent.getEdit_source()) {
+//				for (PatentContact contact : listContact) {
+//					contact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
+//					contact.setPatent(dbPatent);
+//					contact.setBusiness(contact.getBusiness());
+//					contact.setContact_name(contact.getContact_name());
+//					contact.setContact_email(contact.getContact_email());
+//					contact.setContact_character(contact.getContact_character());
+//					contact.setCreate_date(new Date());
+//					dbPatent.addContact(contact);
+//				}
+//			}else {
 				if (editPatent.getListContact() != null && editPatent.getListContact().size() > 0) {
 					for (PatentContact contact : listContact) {
 						contact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
@@ -3094,7 +3084,7 @@ public class PatentServiceImpl implements PatentService {
 						patentDao.deletePatentContact(dbPatent.getPatent_id());
 					}
 				}
-			}
+//			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
