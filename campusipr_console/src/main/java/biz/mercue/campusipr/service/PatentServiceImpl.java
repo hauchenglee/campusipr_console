@@ -363,8 +363,6 @@ public class PatentServiceImpl implements PatentService {
 					pContact.setContact_character("聯絡人");
 					pContact.setContact_order(0);
 					patent.addContact(pContact);
-//					log.info("business.getContact_name(): "+business.getContact_name());
-//					log.info("pContact.getContact_name():　"+pContact.getContact_name());
 				}
 			}
 		} catch (Exception e) {
