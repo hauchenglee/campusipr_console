@@ -104,7 +104,7 @@ public class MailSender {
 		props.put("mail.smtp.starttls.enable", "true");
 		props.put("mail.smtp.port", "587");
 		props.put("mail.debug",  "true");
-	
+		props.put("mail.smtp.localhost",  "localhost");
 		props.put("mail.smtp.ssl.enable",  "true");
 		  
 		session = Session.getInstance(props,
@@ -113,6 +113,7 @@ public class MailSender {
 						return new PasswordAuthentication(username, password);
 					}
 				  });
+//		session.setDebug(true);  //if send mail have issue, use this check
 	}
 	
 	
