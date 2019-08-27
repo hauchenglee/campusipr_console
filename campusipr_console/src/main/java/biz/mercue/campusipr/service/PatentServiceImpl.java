@@ -3539,13 +3539,13 @@ public class PatentServiceImpl implements PatentService {
 				for (PatentContact dbContact : dbContactList) {
 					if (dbContact != null && !StringUtils.isNULL(dbContact.getBusiness().getBusiness_id())) {
 						if (dbContact.getBusiness().getBusiness_id().equals(businessId)) {
-							historyIds.add(dbContact.getPatent_contact_id());
+							contactIds.add(dbContact.getPatent_contact_id());
 						}
 					}
 				}
 				for (String contactId : contactIds) {
 					if (!StringUtils.isNULL(contactId)) {
-						patentDao.deleteHistory(contactId);
+						patentDao.deletePatentContactByKey(contactId);
 					}
 				}
 
