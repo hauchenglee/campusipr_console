@@ -659,7 +659,7 @@ public class PatentServiceImpl implements PatentService {
 					taskResult = Constants.INT_DATA_DUPLICATE;
 				} else {
 					editPatent.setComparePatent(dbTargetPatent);
-//					contactData(editPatent);
+					contactData(editPatent);
 					taskResult = updatePatent(editPatent, business.getBusiness_id());
 				}
 			}
