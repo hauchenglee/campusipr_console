@@ -299,17 +299,18 @@ public class PatentServiceImpl implements PatentService {
 
 			if(Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
 				log.info("patent.getPatent_appl_date() : "+patent.getPatent_appl_date());
-				Calendar calendar = Calendar.getInstance();
+//				Calendar calendar = Calendar.getInstance();
 				patent.setPatent_bdate(patent.getPatent_publish_date());
-				calendar.setTime(patent.getPatent_appl_date());
-				calendar.add(Calendar.DATE, -1);
-				calendar.add(Calendar.YEAR, 20);
-				Date edate=calendar.getTime();
-				patent.setPatent_edate(edate);
+//				calendar.setTime(patent.getPatent_appl_date());
+//				calendar.add(Calendar.DATE, -1);
+//				calendar.add(Calendar.YEAR, 20);
+//				Date edate=calendar.getTime();
+//				patent.setPatent_edate(edate);
 			}
 			if(Constants.APPL_COUNTRY_CN.endsWith(patent.getPatent_appl_country())) {
 				log.info("Patent_appl_date() : "+patent.getPatent_appl_date());
 				patent.setPatent_bdate(patent.getPatent_publish_date());
+//				patent.setPatent_edate(edate);
 			}
 		}
 
@@ -1263,12 +1264,12 @@ public class PatentServiceImpl implements PatentService {
 				if(Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
 					log.info("US 始日、止日輸入");
 					dbBean.setPatent_bdate(patent.getPatent_publish_date());
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTime(patent.getPatent_appl_date());
-					calendar.add(Calendar.DATE, -1);
-					calendar.add(Calendar.YEAR, 20);
-					Date edate=calendar.getTime();
-					dbBean.setPatent_edate(edate);
+//					Calendar calendar = Calendar.getInstance();
+//					calendar.setTime(patent.getPatent_appl_date());
+//					calendar.add(Calendar.DATE, -1);
+//					calendar.add(Calendar.YEAR, 20);
+//					Date edate=calendar.getTime();
+					dbBean.setPatent_edate(patent.getPatent_edate());
 				}
 			}
 			if (Constants.APPL_COUNTRY_CN.equals(dbBean.getPatent_appl_country())){

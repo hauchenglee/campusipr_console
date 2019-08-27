@@ -236,6 +236,8 @@ public class ServiceUSPatent {
 				
 			getPatentInventorsApplcant(patent);
 			
+			getPatantEDay(patent);
+			
 			JSONArray patentInventor = patentObj.optJSONArray("inventor");
 			int orderIn = 1;
 			if (patent.getListInventor() == null && patentInventor != null) {
@@ -433,7 +435,36 @@ public class ServiceUSPatent {
 		}
 	}
 	private static void getPatantEDay(Patent patent) {
-		
+		try {
+			String publishNo = patent.getPatent_publish_no().substring(2, 4);
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(patent.getPatent_appl_date());
+			switch (publishNo) {
+			case Patent.PATENT_KIND_PP:
+				calendar.add(Calendar.DATE, -1);
+				calendar.add(Calendar.YEAR, 20);
+				Date edatePP=calendar.getTime();
+				patent.setPatent_edate(edatePP);
+				log.info("美國發明 edate: "+patent.getPatent_edate());
+				break;
+			case Patent.PATENT_KIND_D:
+				calendar.add(Calendar.DATE, -1);
+				calendar.add(Calendar.YEAR, 14);
+				Date edateD=calendar.getTime();
+				patent.setPatent_edate(edateD);
+				log.info("美國設計 edate: "+patent.getPatent_edate());
+				break;
+			default:
+				calendar.add(Calendar.DATE, -1);
+				calendar.add(Calendar.YEAR, 20);
+				Date edate=calendar.getTime();
+				patent.setPatent_edate(edate);
+				log.info("美國發明 edate: "+patent.getPatent_edate());
+				break;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	private static void getContext(Patent patent) {
 		String url = Constants.PATENT_CONTEXT_WEB_SERVICE_US+patent.getPatent_no();
