@@ -339,7 +339,6 @@ public class ServiceUSPatent {
 		String url = Constants.PATENT_WEB_SERVICE_US+"?applicationNumber=%s";
 		url = String.format(url, patent.getPatent_appl_no());
 	
-		
 		try {
 			String responseStr = HttpRequestUtils.sendGet(url);
 			if (!StringUtils.isNULL(responseStr)) {
@@ -433,7 +432,9 @@ public class ServiceUSPatent {
 			e.printStackTrace();
 		}
 	}
-	
+	private static void getPatantEDay(Patent patent) {
+		
+	}
 	private static void getContext(Patent patent) {
 		String url = Constants.PATENT_CONTEXT_WEB_SERVICE_US+patent.getPatent_no();
 		

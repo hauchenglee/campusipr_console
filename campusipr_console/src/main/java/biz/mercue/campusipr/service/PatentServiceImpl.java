@@ -229,7 +229,7 @@ public class PatentServiceImpl implements PatentService {
     				ps.setStatus(statusDb);
          	   	}
 				ps.setPatent(patent);
-				log.info(ps.getPrimaryKey());
+//				log.info(ps.getPrimaryKey());
 			}
 		}
 
@@ -294,7 +294,7 @@ public class PatentServiceImpl implements PatentService {
 			patent.setIs_sync(true);
 		}
 		
-//		//US、CN專利權始日及估算專利權止日
+		//US、CN專利權始日及估算專利權止日
 		if(Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
 
 			if(Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
@@ -308,14 +308,8 @@ public class PatentServiceImpl implements PatentService {
 				patent.setPatent_edate(edate);
 			}
 			if(Constants.APPL_COUNTRY_CN.endsWith(patent.getPatent_appl_country())) {
-				log.info("patent.getPatent_appl_date() : "+patent.getPatent_appl_date());
-				Calendar calendar = Calendar.getInstance();
+				log.info("Patent_appl_date() : "+patent.getPatent_appl_date());
 				patent.setPatent_bdate(patent.getPatent_publish_date());
-				calendar.setTime(patent.getPatent_appl_date());
-				calendar.add(Calendar.DATE, -1);
-				calendar.add(Calendar.YEAR, 20);
-				Date edate=calendar.getTime();
-				patent.setPatent_edate(edate);
 			}
 		}
 
@@ -1281,12 +1275,7 @@ public class PatentServiceImpl implements PatentService {
 				if(Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
 					log.info("CN 始日、止日輸入");
 					dbBean.setPatent_bdate(patent.getPatent_publish_date());
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTime(patent.getPatent_appl_date());
-					calendar.add(Calendar.DATE, -1);
-					calendar.add(Calendar.YEAR, 20);
-					Date edate=calendar.getTime();
-					dbBean.setPatent_edate(edate);
+					dbBean.setPatent_edate(patent.getPatent_edate());
 				}
 			}
 			
@@ -3049,7 +3038,7 @@ public class PatentServiceImpl implements PatentService {
 		
 		try {
 			List<PatentContact> listContact = editPatent.getListContact();
-			log.info(listContact ==null);
+//			log.info(listContact ==null);
 			if (Patent.EDIT_SOURCE_IMPORT == editPatent.getEdit_source()&&listContact != null) {
 				//Excel import要分同步未同步
 				PatentContact dbcontact = new PatentContact();
@@ -3075,7 +3064,7 @@ public class PatentServiceImpl implements PatentService {
 					dbcontact.setCreate_date(new Date());
 				}
 				dbPatent.addContact(dbcontact);
-				log.info("EDIT_SOURCE_SERVICE");
+//				log.info("EDIT_SOURCE_SERVICE");
 			}else{
 				if (editPatent.getListContact() != null && editPatent.getListContact().size() > 0) {
 					for (PatentContact contact : listContact) {

@@ -253,6 +253,39 @@ public class ServiceChinaPatent {
 				Node nNode = titleList.item(temp);
 				patent.setPatent_name(nNode.getTextContent());
 			}
+			
+			//Patent_appl_no & Patent_appl_date
+			NodeList applicationList = doc.getElementsByTagName("application-reference");
+			for (int temp = 0; temp < applicationList.getLength(); temp++) {
+				Node nNode = applicationList.item(temp);
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
+					NodeList cNodeList = nNode.getChildNodes();
+					for (int tempC = 0; tempC < cNodeList.getLength(); tempC++) {
+						Node cNode = cNodeList.item(tempC);
+						if (cNode.getNodeType() == Node.ELEMENT_NODE) { 
+							Element cElement = (Element) cNode;
+							if ("epodoc".equals(cElement.getAttribute("document-id-type"))) {
+								Node applNode = cElement.getElementsByTagName("doc-number").item(0);
+								Node applDateNode = cElement.getElementsByTagName("date").item(0);
+								String applNo = applNode.getTextContent().substring(0, applNode.getTextContent().length());
+								patent.setPatent_appl_no(applNo);
+								patent.setPatent_no("CN"+applNo);
+								try {
+									String publishDateStr =applDateNode.getTextContent();
+									if (!StringUtils.isNULL(publishDateStr)) {
+										Date publishDate = DateUtils.parserSimpleDateFormatDate(publishDateStr);
+										patent.setPatent_appl_date(publishDate);
+									}
+								} catch (ParseException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+						}
+					}
+				}
+			}
+			
 			//Patent_notice_no & Patent_publish_no
 			NodeList publicationList = doc.getElementsByTagName("publication-reference");
 			for (int temp = 0; temp < publicationList.getLength(); temp++) {
@@ -328,6 +361,9 @@ public class ServiceChinaPatent {
 										patent.setPatent_publish_no(countryId + publicateNo);
 									}
 									
+									Calendar calendar = Calendar.getInstance();
+									calendar.setTime(patent.getPatent_appl_date());
+									
 									if (!StringUtils.isNULL(publishDateStr)) {
 										Date publishDate = DateUtils.parserSimpleDateFormatDate(publishDateStr);
 										if ("A".equals(pubKindNo)) {
@@ -337,26 +373,62 @@ public class ServiceChinaPatent {
 										if ("B".equals(pubKindNo)) {
 											log.info("發明類型Kind B 公告日: " + publishDate);
 											patent.setPatent_publish_date(publishDate);
+											
+											calendar.add(Calendar.DATE, -1);
+											calendar.add(Calendar.YEAR, 20);
+											Date edate=calendar.getTime();
+											patent.setPatent_edate(edate);
+											log.info("edate: "+patent.getPatent_edate());
 										}
 										if ("U".equals(pubKindNo)) {
 											log.info("實用新型 kind U 公告日: " + publishDate);
 											patent.setPatent_publish_date(publishDate);
+											
+											calendar.add(Calendar.DATE, -1);
+											calendar.add(Calendar.YEAR, 10);
+											Date edate=calendar.getTime();
+											patent.setPatent_edate(edate);
+											log.info("edate: "+patent.getPatent_edate());
 										}
 										if ("C".equals(pubKindNo)) {
 											log.info("實用新型 kind C 公告日: " + publishDate);
 											patent.setPatent_publish_date(publishDate);
+											
+											calendar.add(Calendar.DATE, -1);
+											calendar.add(Calendar.YEAR, 20);
+											Date edate=calendar.getTime();
+											patent.setPatent_edate(edate);
+											log.info("edate: "+patent.getPatent_edate());
 										}
 										if ("Y".equals(pubKindNo)) {
 											log.info("實用新型 kind Y 公告日: " + publishDate);
 											patent.setPatent_publish_date(publishDate);
+											
+											calendar.add(Calendar.DATE, -1);
+											calendar.add(Calendar.YEAR, 10);
+											Date edate=calendar.getTime();
+											patent.setPatent_edate(edate);
+											log.info("edate: "+patent.getPatent_edate());
 										}
 										if ("D".equals(pubKindNo)) {
 											log.info("實用新型 kind D 公告日: " + publishDate);
 											patent.setPatent_publish_date(publishDate);
+											
+											calendar.add(Calendar.DATE, -1);
+											calendar.add(Calendar.YEAR, 10);
+											Date edate=calendar.getTime();
+											patent.setPatent_edate(edate);
+											log.info("edate: "+patent.getPatent_edate());
 										}
 										if ("S".equals(pubKindNo)) {
 											log.info("實用新型 kind S 公告日: " + publishDate);
 											patent.setPatent_publish_date(publishDate);
+											
+											calendar.add(Calendar.DATE, -1);
+											calendar.add(Calendar.YEAR, 10);
+											Date edate=calendar.getTime();
+											patent.setPatent_edate(edate);
+											log.info("edate: "+patent.getPatent_edate());
 										}
 									}
 								} catch (ParseException e) {
@@ -369,36 +441,7 @@ public class ServiceChinaPatent {
 				}
 			}
 			
-			NodeList applicationList = doc.getElementsByTagName("application-reference");
-			for (int temp = 0; temp < applicationList.getLength(); temp++) {
-				Node nNode = applicationList.item(temp);
-				if (nNode.getNodeType() == Node.ELEMENT_NODE) { 
-					NodeList cNodeList = nNode.getChildNodes();
-					for (int tempC = 0; tempC < cNodeList.getLength(); tempC++) {
-						Node cNode = cNodeList.item(tempC);
-						if (cNode.getNodeType() == Node.ELEMENT_NODE) { 
-							Element cElement = (Element) cNode;
-							if ("epodoc".equals(cElement.getAttribute("document-id-type"))) {
-								Node applNode = cElement.getElementsByTagName("doc-number").item(0);
-								Node applDateNode = cElement.getElementsByTagName("date").item(0);
-								String applNo = applNode.getTextContent().substring(0, applNode.getTextContent().length());
-								patent.setPatent_appl_no(applNo);
-								patent.setPatent_no("CN"+applNo);
-								try {
-									String publishDateStr =applDateNode.getTextContent();
-									if (!StringUtils.isNULL(publishDateStr)) {
-										Date publishDate = DateUtils.parserSimpleDateFormatDate(publishDateStr);
-										patent.setPatent_appl_date(publishDate);
-									}
-								} catch (ParseException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							}
-						}
-					}
-				}
-			}
+
 			
 			NodeList ipcrList = doc.getElementsByTagName("classification-ipcr");
 			List<IPCClass> listIPC = new ArrayList<IPCClass>();
