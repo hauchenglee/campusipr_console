@@ -3063,7 +3063,20 @@ public class PatentServiceImpl implements PatentService {
 					dbcontact.setCreate_date(new Date());
 				}
 				dbPatent.addContact(dbcontact);
-			}else {
+			}else if(Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()&&listContact != null){
+				PatentContact dbcontact = new PatentContact();
+				for (PatentContact contact : listContact) {
+					dbcontact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
+					dbcontact.setPatent(dbPatent);
+					dbcontact.setBusiness(contact.getBusiness());
+					dbcontact.setContact_name(contact.getContact_name());
+					dbcontact.setContact_email(contact.getContact_email());
+					dbcontact.setContact_character(contact.getContact_character());
+					dbcontact.setCreate_date(new Date());
+				}
+				dbPatent.addContact(dbcontact);
+				log.info("EDIT_SOURCE_SERVICE");
+			}else{
 				if (editPatent.getListContact() != null && editPatent.getListContact().size() > 0) {
 					for (PatentContact contact : listContact) {
 						contact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
@@ -3071,9 +3084,10 @@ public class PatentServiceImpl implements PatentService {
 								&& contact.getBusiness().getBusiness_id().equals(businessId)) {
 							contact.setBusiness(editPatent.getAdmin().getBusiness());
 						}
-						if (Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()) {
-							contact.setBusiness(editPatent.getBusiness());
-						}
+//						if (Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()) {
+//							contact.setBusiness(editPatent.getBusiness());
+//							log.info("EDIT_SOURCE_SERVICE");
+//						}
 						contact.setCreate_date(new Date());
 						contact.setPatent(dbPatent);
 					}
