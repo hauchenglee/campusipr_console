@@ -446,7 +446,7 @@ public class ExcelUtils {
 					case Constants.PATENT_EDATE: // 專利截止日
 						log.info("PATENT_EDATE: " + Constants.PATENT_EDATE);
 						log.info(columnCount);
-						if (patent.getPatent_edate() != null) {
+						if (patent.getPatent_edate() != null && patent.isIs_sync() && !StringUtils.isNULL(patent.getPatent_publish_no())) {
 							Cell dateOfEDateCell = row.createCell(columnCount);
 							dateOfEDateCell.setCellValue(patent.getPatent_edate());
 							dateOfEDateCell.setCellStyle(dateCellStyle);

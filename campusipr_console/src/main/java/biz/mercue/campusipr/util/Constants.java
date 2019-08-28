@@ -328,7 +328,7 @@ public class Constants {
 	public static final String EXCEL_COLUMN_PAY_VAILD_DATE = "年費有效日期";
 	public static final String EXCEL_COLUMN_PAY_EXPIRE_YEAR = "年費有效年次";
 	public static final String EXCEL_COLUMN_PATENT_GEGIN_DATE = "專利權始日";
-	public static final String EXCEL_COLUMN_PATENT_END_DATE = "估算專利截止日";
+	public static final String EXCEL_COLUMN_PATENT_END_DATE = "估算專利權止日";
 	public static final String EXCEL_COLUMN_PATENT_CANEL_DATE = "消滅日期";
 	public static final String EXCEL_COLUMN_PATENT_ABSTRACT = "專利摘要";
 	public static final String EXCEL_COLUMN_PATENT_CLAIM = "專利權利範圍";
