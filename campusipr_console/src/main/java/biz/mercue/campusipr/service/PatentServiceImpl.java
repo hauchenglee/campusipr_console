@@ -297,15 +297,15 @@ public class PatentServiceImpl implements PatentService {
 		//US、CN專利權始日及估算專利權止日
 		if(Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
 
-			if(Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
-				log.info("patent.getPatent_appl_date() : "+patent.getPatent_appl_date());
-//				Calendar calendar = Calendar.getInstance();
+			if (Constants.APPL_COUNTRY_US.endsWith(patent.getPatent_appl_country())) {
+				log.info("patent.getPatent_appl_date() : " + patent.getPatent_appl_date());
 				patent.setPatent_bdate(patent.getPatent_publish_date());
-//				calendar.setTime(patent.getPatent_appl_date());
-//				calendar.add(Calendar.DATE, -1);
-//				calendar.add(Calendar.YEAR, 20);
-//				Date edate=calendar.getTime();
-//				patent.setPatent_edate(edate);
+//					Calendar calendar = Calendar.getInstance();
+//					calendar.setTime(patent.getPatent_appl_date());
+//					calendar.add(Calendar.DATE, -1);
+//					calendar.add(Calendar.YEAR, 14);
+//					Date edate = calendar.getTime();
+//					patent.getPatent_edate(edate);
 			}
 			if(Constants.APPL_COUNTRY_CN.endsWith(patent.getPatent_appl_country())) {
 				log.info("Patent_appl_date() : "+patent.getPatent_appl_date());
@@ -1264,11 +1264,12 @@ public class PatentServiceImpl implements PatentService {
 				if(Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
 					log.info("US 始日、止日輸入");
 					dbBean.setPatent_bdate(patent.getPatent_publish_date());
+					log.info("D");
 //					Calendar calendar = Calendar.getInstance();
 //					calendar.setTime(patent.getPatent_appl_date());
 //					calendar.add(Calendar.DATE, -1);
 //					calendar.add(Calendar.YEAR, 20);
-//					Date edate=calendar.getTime();
+//					Date edate = calendar.getTime();
 					dbBean.setPatent_edate(patent.getPatent_edate());
 				}
 			}
@@ -1673,7 +1674,7 @@ public class PatentServiceImpl implements PatentService {
 			case Constants.PATENT_APPL_NO_FIELD:
 				String originApplNo = (String) searchObj;
 				String appl_onlyNO = originApplNo;
-				if (String.valueOf(originApplNo.charAt(2)).equals("/")) {
+				if (appl_onlyNO.contains("/") || appl_onlyNO.contains(",") || appl_onlyNO.contains(".")) {
 					appl_onlyNO = originApplNo
 							.replace("/", "")
 							.replace(",", "")
@@ -2175,7 +2176,6 @@ public class PatentServiceImpl implements PatentService {
 	public void patentHistoryFirstAdd(Patent patent, String patentId, String businessId) {
 		log.info("patentHistory:");
 		Patent dbBean = patentDao.getById(patentId);
-
 		String editor = null;
 		if (patent.getEdit_source() == Patent.EDIT_SOURCE_SERVICE) {
 			editor = "Official";
@@ -2183,7 +2183,7 @@ public class PatentServiceImpl implements PatentService {
 			editor = patent.getAdmin().getAdmin_name();
 		}
 		String editor_excel = patent.getAdmin().getAdmin_name();
-
+		
 		List<PatentField> fieldList = fieldDao.getAllFields();
 		for (PatentField field : fieldList) {
 			if (Constants.PATENT_NAME_FIELD.equals(field.getField_id())) {
@@ -2271,7 +2271,7 @@ public class PatentServiceImpl implements PatentService {
 				if (patent.getListApplicant() != null) {
 					List<String> applAddData = new ArrayList<>();
 					for (Applicant appl : patent.getListApplicant()) {
-						log.info(appl.getApplicant_name());
+//						log.info(appl.getApplicant_name());
 						applAddData.add(JacksonJSONUtils.mapObjectWithView(appl, View.PatentDetail.class));
 					}
 					if (!applAddData.isEmpty()) {
@@ -2302,7 +2302,7 @@ public class PatentServiceImpl implements PatentService {
 				if (patent.getListInventor() != null) {
 					List<String> invAddData = new ArrayList<>();
 					for (Inventor inv : patent.getListInventor()) {
-						log.info(inv.getInventor_name());
+//						log.info(inv.getInventor_name());
 						invAddData.add(JacksonJSONUtils.mapObjectWithView(inv, View.PatentDetail.class));
 					}
 					if (!invAddData.isEmpty()) {
@@ -2356,6 +2356,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 		}
+		log.info("Finish");
 	}
 
 	private void comparePatent(Patent dbBean, Patent patent, String businessId) {
@@ -3041,7 +3042,6 @@ public class PatentServiceImpl implements PatentService {
 			List<PatentContact> listContact = editPatent.getListContact();
 //			log.info(listContact ==null);
 			if (Patent.EDIT_SOURCE_IMPORT == editPatent.getEdit_source()&&listContact != null) {
-				//Excel import要分同步未同步
 				PatentContact dbcontact = new PatentContact();
 				for (PatentContact contact : listContact) {
 					dbcontact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());

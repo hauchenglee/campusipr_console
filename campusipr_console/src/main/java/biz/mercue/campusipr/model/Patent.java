@@ -288,26 +288,6 @@ public class Patent extends BaseBean{
 	public String patent_excel_name_en;
 	
 	@Transient
-	public String patent_kind ;
-	
-	@Transient
-	public static final String PATENT_KIND_I = "I";
-	@Transient
-	public static final String PATENT_KIND_M = "M";
-	@Transient
-	public static final String PATENT_KIND_D = "D";
-	@Transient
-	public static final String PATENT_KIND_B = "B";
-	@Transient
-	public static final String PATENT_KIND_C = "C";
-	@Transient
-	public static final String PATENT_KIND_Y = "Y";
-	@Transient
-	public static final String PATENT_KIND_U = "U";
-	@Transient
-	public static final String PATENT_KIND_PP = "PP";
-	
-	@Transient
 	@JsonView(View.PatentHistoryExcel.class)
 	@OneToMany(mappedBy = "patent", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval=true)
 	@OrderBy("assignee_order")
@@ -954,4 +934,5 @@ public class Patent extends BaseBean{
 	public void setListDepartment(List<Department> listDepartment) {
 		this.listDepartment = listDepartment;
 	}
+	
 }

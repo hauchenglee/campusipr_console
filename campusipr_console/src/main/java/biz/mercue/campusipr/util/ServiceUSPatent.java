@@ -152,8 +152,7 @@ public class ServiceUSPatent {
 			return;
 		}
 		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/publication/DOCDB/%s/biblio";
-		url = String.format(url, "US"+patent.getPatent_publish_no());
-		
+		url = String.format(url, patent.getPatent_publish_no().subSequence(0, 10));
 		try {
 			String token = generateToken("Basic "+Constants.PATENT_TOKEN_EU);
 			if (token != null) {
@@ -394,7 +393,21 @@ public class ServiceUSPatent {
 							e.printStackTrace();
 						}
 					}
-					
+					log.info("KIND: "+patentObj.optString("documentId").substring(10,11));
+					if (patentObj.optString("documentId").substring(10,11) .equals("S")) {
+						patent.setPatent_publish_no(patentObj.optString("documentId"));
+						log.info(patent.getPatent_publish_no());
+						try {
+							String publishDateStr = patentObj.optString("publicationDate");
+							if (!StringUtils.isNULL(publishDateStr)) {
+								Date publishDate = DateUtils.parserDateTimeUTCString(publishDateStr);
+								patent.setPatent_publish_date(publishDate);
+								log.info(patentObj.optString("documentId")+": "+publishDate);
+							}
+						} catch (ParseException e) {
+							e.printStackTrace();
+						}
+					}
 					if (patentObj.optString("documentId").endsWith("B1")) {
 						patent.setPatent_publish_no("US"+patentObj.optString("documentId")
 								.substring(0, patentObj.optString("documentId").indexOf("B1")));
@@ -405,7 +418,6 @@ public class ServiceUSPatent {
 								patent.setPatent_publish_date(publishDate);
 							}
 						} catch (ParseException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
@@ -436,23 +448,26 @@ public class ServiceUSPatent {
 	}
 	private static void getPatantEDay(Patent patent) {
 		try {
-			String publishNo = patent.getPatent_publish_no().substring(2, 4);
+			String publishNo = patent.getPatent_publish_no().substring(2, 3);
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(patent.getPatent_appl_date());
+			log.info(publishNo);
+			log.info(publishNo.contains("D"));
+		
 			switch (publishNo) {
-			case Patent.PATENT_KIND_PP:
+			case "P":
 				calendar.add(Calendar.DATE, -1);
 				calendar.add(Calendar.YEAR, 20);
 				Date edatePP=calendar.getTime();
 				patent.setPatent_edate(edatePP);
-				log.info("美國發明 edate: "+patent.getPatent_edate());
+				log.info("美國發明 PP edate: "+patent.getPatent_edate());
 				break;
-			case Patent.PATENT_KIND_D:
+			case "D":
 				calendar.add(Calendar.DATE, -1);
 				calendar.add(Calendar.YEAR, 14);
 				Date edateD=calendar.getTime();
 				patent.setPatent_edate(edateD);
-				log.info("美國設計 edate: "+patent.getPatent_edate());
+				log.info("美國設計 D edate: "+patent.getPatent_edate());
 				break;
 			default:
 				calendar.add(Calendar.DATE, -1);
