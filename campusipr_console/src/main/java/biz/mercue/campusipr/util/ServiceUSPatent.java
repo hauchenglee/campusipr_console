@@ -393,6 +393,19 @@ public class ServiceUSPatent {
 							e.printStackTrace();
 						}
 					}
+					if (patentObj.optString("documentId").endsWith("P1")) {
+						patent.setPatent_notice_no("US"+patentObj.optString("documentId"));
+						try {
+							String noticeDateStr = patentObj.optString("publicationDate");
+							if (!StringUtils.isNULL(noticeDateStr)) {
+								Date noticeDate = DateUtils.parserDateTimeUTCString(noticeDateStr);
+								patent.setPatent_notice_date(noticeDate);
+							}
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 //					log.info("KIND: "+patentObj.optString("documentId").substring(10,11));
 					if (patentObj.optString("documentId").substring(10,11) .equals("S")) {
 						patent.setPatent_publish_no(patentObj.optString("documentId"));
@@ -464,7 +477,6 @@ public class ServiceUSPatent {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(patent.getPatent_appl_date());
 			log.info(publishNo);
-			log.info(publishNo.contains("D"));
 		
 			switch (publishNo) {
 			case "P":

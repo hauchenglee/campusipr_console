@@ -2350,7 +2350,6 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 		}
-		log.info("Finish");
 	}
 
 	private void comparePatent(Patent dbBean, Patent patent, String businessId) {
@@ -2529,7 +2528,7 @@ public class PatentServiceImpl implements PatentService {
 					log.info("statusAddData: is Empty");
 					statusAddData.add(emptyStatus.toString());
 				}
-//				log.info("statusAddData: "+statusAddData);
+				log.info("statusAddData: "+statusAddData);
 				if (!statusAddData.isEmpty()) {
 					PatentEditHistory peh = insertFieldHistory(patent, statusAddData, "create", field.getField_id(), editor, businessId);
 					if (peh != null) {
@@ -3410,8 +3409,10 @@ public class PatentServiceImpl implements PatentService {
 
 	private void syncPatentStatus(Patent patent) {
 		// 02/23新增根據日期同步狀態
+//		log.info("syncPatentStatus");
 		List<Status> ListStatus = statusDao.getEditable();
 		for (Status status:ListStatus) {
+//			log.info(status.getStatus_id());
 			switch (status.getStatus_id()) {
 			case Constants.STATUS_PUBLISH:
 				if (patent.getPatent_publish_date() != null) {
@@ -3428,8 +3429,8 @@ public class PatentServiceImpl implements PatentService {
 					patent.addStatus(status, patent.getPatent_notice_date());
 				}
 				break;
-			case Constants.STATUS_EXPIRED:
-				if (patent.getPatent_edate() != null) {
+			case Constants.STATUS_EXPIRED:  //專利狀態:終止。因目前只有臺灣有Patent_charge_expire_date，所以加入限制
+				if (patent.getPatent_edate() != null&&Constants.APPL_COUNTRY_TW.equals(patent.getPatent_appl_country())) {
 					if (patent.getPatent_edate().before(new Date())) {
 						patent.addStatus(status, patent.getPatent_charge_expire_date());
 					}
