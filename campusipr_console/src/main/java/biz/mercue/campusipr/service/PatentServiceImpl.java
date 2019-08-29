@@ -1668,7 +1668,7 @@ public class PatentServiceImpl implements PatentService {
 			case Constants.PATENT_APPL_NO_FIELD:
 				String originApplNo = (String) searchObj;
 				String appl_onlyNO = originApplNo;
-				if (appl_onlyNO.contains("/") || appl_onlyNO.contains(",") || appl_onlyNO.contains(".")) {
+				if (appl_onlyNO.contains("/")) {
 					appl_onlyNO = originApplNo
 							.replace("/", "")
 							.replace(",", "")
