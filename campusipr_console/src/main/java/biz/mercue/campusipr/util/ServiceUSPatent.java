@@ -393,7 +393,7 @@ public class ServiceUSPatent {
 							e.printStackTrace();
 						}
 					}
-					log.info("KIND: "+patentObj.optString("documentId").substring(10,11));
+//					log.info("KIND: "+patentObj.optString("documentId").substring(10,11));
 					if (patentObj.optString("documentId").substring(10,11) .equals("S")) {
 						patent.setPatent_publish_no(patentObj.optString("documentId"));
 						log.info(patent.getPatent_publish_no());
@@ -403,6 +403,18 @@ public class ServiceUSPatent {
 								Date publishDate = DateUtils.parserDateTimeUTCString(publishDateStr);
 								patent.setPatent_publish_date(publishDate);
 								log.info(patentObj.optString("documentId")+": "+publishDate);
+							}
+						} catch (ParseException e) {
+							e.printStackTrace();
+						}
+					}
+					if (patentObj.optString("documentId").substring(10,11) .equals("P")) {
+						patent.setPatent_publish_no(patentObj.optString("documentId"));
+						try {
+							String publishDateStr = patentObj.optString("publicationDate");
+							if (!StringUtils.isNULL(publishDateStr)) {
+								Date publishDate = DateUtils.parserDateTimeUTCString(publishDateStr);
+								patent.setPatent_publish_date(publishDate);
 							}
 						} catch (ParseException e) {
 							e.printStackTrace();

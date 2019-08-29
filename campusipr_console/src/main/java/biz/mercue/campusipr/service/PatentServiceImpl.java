@@ -1264,12 +1264,6 @@ public class PatentServiceImpl implements PatentService {
 				if(Patent.EDIT_SOURCE_SERVICE == patent.getEdit_source()) {
 					log.info("US 始日、止日輸入");
 					dbBean.setPatent_bdate(patent.getPatent_publish_date());
-					log.info("D");
-//					Calendar calendar = Calendar.getInstance();
-//					calendar.setTime(patent.getPatent_appl_date());
-//					calendar.add(Calendar.DATE, -1);
-//					calendar.add(Calendar.YEAR, 20);
-//					Date edate = calendar.getTime();
 					dbBean.setPatent_edate(patent.getPatent_edate());
 				}
 			}
@@ -1365,7 +1359,7 @@ public class PatentServiceImpl implements PatentService {
 				// source from != excel
 				handleDepartment(dbBean, patent, businessId);
 				handleExtension(dbBean, patent, businessId);
-				log.info("PATENT_EXCEL_IMPORT");
+//				log.info("PATENT_EXCEL_IMPORT");
 			}
 			
 			if(Patent.EDIT_SOURCE_HUMAN   == patent.getEdit_source()) {
@@ -1376,7 +1370,7 @@ public class PatentServiceImpl implements PatentService {
 				} else {
 					dbBean.setListFamily(null);
 				}
-				log.info("EDIT_SOURCE_HUMAN");
+//				log.info("EDIT_SOURCE_HUMAN");
 				// portfolio
 				dbBean.setListPortfolio(patent.getListPortfolio());
 			}
@@ -2525,11 +2519,15 @@ public class PatentServiceImpl implements PatentService {
 						}
 					}
 				}
+				//畫面無資料，但DB有資料，表示使用者刪除全部狀態
 				if (patent.getListPatentStatus()==null && dbBean.getListPatentStatus()!=null) {
 					if (statusAddData.isEmpty()) {
 						log.info("statusAddData: is Empty");
 						statusAddData.add(emptyStatus.toString());
 					}
+				}else if(patent.getListPatentStatus().size()==0 && dbBean.getListPatentStatus().size()>0) {
+					log.info("statusAddData: is Empty");
+					statusAddData.add(emptyStatus.toString());
 				}
 //				log.info("statusAddData: "+statusAddData);
 				if (!statusAddData.isEmpty()) {
@@ -2809,6 +2807,9 @@ public class PatentServiceImpl implements PatentService {
 						log.info("costAddData: is Empty");
 						costAddData.add(emptyCost.toString());
 					}
+				}else if(patent.getListCost().size()==0 && dbBean.getListCost().size()>0) {
+					log.info("costAddData: is Empty");
+					costAddData.add(emptyCost.toString());
 				}
 				if (!costAddData.isEmpty()) {
 					PatentEditHistory peh = insertFieldHistory(patent, costAddData, "create", field.getField_id(), editor, businessId);
