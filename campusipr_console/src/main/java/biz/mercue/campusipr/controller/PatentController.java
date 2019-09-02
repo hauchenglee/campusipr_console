@@ -455,8 +455,13 @@ public class PatentController {
 			if(tokenBean.checkPermission(permission.getPermission_id())) {
 
                 JSONObject jsonObject = new JSONObject(receiveJSONString);
-				List<String> patent_ids = (List<String>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("patent_ids").toString(), new TypeReference<List<String>>(){});
-				List<String> field_ids = (List<String>) JacksonJSONUtils.readValue(jsonObject.optJSONArray("field_ids").toString(), new TypeReference<List<String>>(){});
+                String jsonPid = jsonObject.optJSONArray("patent_ids").toString();
+                log.info(jsonPid);
+                String jsonFid = jsonObject.optJSONArray("field_ids").toString();
+                log.info(jsonFid);
+
+				List<String> patent_ids = (List<String>) JacksonJSONUtils.readValue(jsonPid, new TypeReference<List<String>>(){});
+				List<String> field_ids = (List<String>) JacksonJSONUtils.readValue(jsonFid, new TypeReference<List<String>>(){});
 
 				String bussinessId = tokenBean.getBusiness().getBusiness_id();
 				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
