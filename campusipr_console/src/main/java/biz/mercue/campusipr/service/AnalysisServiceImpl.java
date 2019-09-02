@@ -711,7 +711,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Object> combineSchoolSum = new ArrayList<Object>();
 		List<String> schoolList = analysisDao.getSchoolList();
 		Object[][]schoolListToArray = schoolList.toArray(new Object[schoolList.size()][0]);
-		
+		// Id == combineArr[0] == dataToArray[dataInx][0]
+		//Sum == combineArr[1] == dataToArray[dataInx][1]
 		try {
 			Object[] combineArr;
 			int schoolInx = 0;
@@ -811,6 +812,11 @@ public class AnalysisServiceImpl implements AnalysisService {
 							usDateList.add(combineArr);
 						}
 					}
+					
+//					combineArr[0] == busineseId == schoolListToArray[schoolInx][0]
+//					combineArr[1] == busineseName == CNDateListToArray[dataIter][1]
+//					combineArr[2] == sum == CNDateListToArray[dataIter][2]
+//					combineArr[3] ==countryId == CNDateListToArray[dataIter][3]
 					
 					Object CNDateListToArray [][]=cnDateList.toArray(new Object[cnDateList.size()][0]);
 					Object TWDateListToArray [][]=twDateList.toArray(new Object[twDateList.size()][0]);
@@ -982,7 +988,9 @@ public class AnalysisServiceImpl implements AnalysisService {
 			int combineInx = 0;
 			int yearInx = 0;
 			Integer year;
-	
+//			combineArr[0] == countryName 
+//			combineArr[1] == Sum
+//			combineArr[2] == year
 			if (yearToArray.length == 0) {
 				log.info("無任何專利");
 				Object countryN = countryId;
@@ -1042,7 +1050,6 @@ public class AnalysisServiceImpl implements AnalysisService {
 		}
 		return analList;
 	}
-
 	private List<Object> combineOverview(Object yearToArray[][]) {
 	
 			List<Integer> yearList= new ArrayList<Integer>();
@@ -1062,7 +1069,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 					int combineInx = 0;
 					int yearInx = 0 ;
 					Integer year;
-					
+//					combineArr[0] == sum
+//					combineArr[1] == year
 					for (yearInx = 0; yearInx < yearToArray.length; yearInx++) {
 						year = Integer.parseInt(yearToArray[yearInx][1].toString());
 						yearList.add(year);
@@ -1118,6 +1126,10 @@ public class AnalysisServiceImpl implements AnalysisService {
 			Integer year;
 			int range = endTime-beginTime;
 			Integer[] combineArr;
+			
+//			combineArr[0] == sum
+//			combineArr[1] == year
+			
 			try {
 				if(yearToArray.length == 0) {
 	//				log.info("都是零");
@@ -1182,6 +1194,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 			int dataInx = 0;
 			int dataIter = 0;
 			Object[] combineArr;
+//			combineArr[0] == Country
+//			combineArr[1] == sum
 			try {
 				if (statusToArray.length == 0) {
 					log.info("無狀態");
@@ -1239,6 +1253,10 @@ public class AnalysisServiceImpl implements AnalysisService {
 				List<Object> dataYearList = new ArrayList<Object>();
 				List<Object> allyearList = new ArrayList<Object>();
 				List<Object> allCountList = new ArrayList<Object>();
+				
+//				combineArr[0] == countryName
+//				combineArr[1] == sum
+//				combineArr[2] == year
 				
 				try {
 					String beginStr = yearToArray[0][1].toString();
@@ -1325,7 +1343,10 @@ public class AnalysisServiceImpl implements AnalysisService {
 			List<Object> alltwDepCount = new ArrayList<Object>();
 			List<Object> depCombine = new ArrayList<Object>();
 			List<Object> countryDepName = new ArrayList<Object>();
-	
+			
+//			combineArr[0] == DepName
+//			combineArr[1] == sum
+			
 			try {
 				if (depToArray.length == 0) {
 					log.info("無科系資料");
@@ -1650,14 +1671,15 @@ public class AnalysisServiceImpl implements AnalysisService {
 		List<Analysis> sumList = new ArrayList<Analysis>();
 		countList = analysisDao.countSchoolPatentStatusByYear(statusDesc, businessName, beginDate, endDate);
 		sumList= analysisDao.countSchoolPatentTotalByYear(businessName, beginDate, endDate);
-		//只是用log檢查時間
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-		Timestamp bd = new Timestamp(beginDate);
-		Timestamp ed = new Timestamp(endDate);
-		String beginDateFormat = sdf.format(bd);
-		String endDateFormat = sdf.format(ed);
-		log.info("開始年: "+beginDateFormat+"，結束年: "+endDateFormat);
 		try {
+			//只是用log檢查時間
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+			Timestamp bd = new Timestamp(beginDate);
+			Timestamp ed = new Timestamp(endDate);
+			String beginDateFormat = sdf.format(bd);
+			String endDateFormat = sdf.format(ed);
+			log.info("開始年: "+beginDateFormat+"，結束年: "+endDateFormat);
+			
 			int schoolInx = 0;
 			int dataInx = 0;
 			int titleInx = 0;
@@ -1680,12 +1702,14 @@ public class AnalysisServiceImpl implements AnalysisService {
 //			校名跟欄位名
 			for(schoolInx = 0;schoolInx<businessName.length();schoolInx++) {
 				schoolName = businessName.get(schoolInx).toString();
+				//schoolInx*6: 控制學校名的間距
 				row = sheet.createRow((short) 0 + (schoolInx*6));
 				cell = row.createCell((short) 0);
 				cell.setCellStyle(redStyle);
 				cell.setCellValue(schoolName);
 				
 				row = sheet.createRow((short)1 + (schoolInx*6));
+				//總數在所有狀態後面
 				for(titleInx = 0;titleInx<statusDesc.length()+1;titleInx++) {
 					cell = row.createCell((short) 1+titleInx);
 					if(statusDesc.isNull(titleInx)) {
@@ -1697,6 +1721,11 @@ public class AnalysisServiceImpl implements AnalysisService {
 				}
 			}
 			//寫入值
+			//countListToArray[dataInx][0] == BusinessId
+			//countListToArray[dataInx][1] == 學校名
+			//countListToArray[dataInx][2] == Sum
+			//countListToArray[dataInx][3] == 國家
+			//countListToArray[dataInx][4] == 狀態
 			for (countryInx=0;countryInx < countryId.length();countryInx++) {
 //				log.info(countryId.get(countryInx).toString());
 				for(schoolInx = 0;schoolInx<businessName.length();schoolInx++) {
@@ -1714,7 +1743,6 @@ public class AnalysisServiceImpl implements AnalysisService {
 										cell = row.createCell((short) 1 + titleInx);
 										data = countListToArray[dataInx][2].toString();
 										cell.setCellValue(data);
-//										log.info(countListToArray[dataInx][2].toString());
 									}
 								}
 							}

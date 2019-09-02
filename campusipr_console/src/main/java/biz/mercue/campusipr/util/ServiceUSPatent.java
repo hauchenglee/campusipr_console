@@ -349,6 +349,7 @@ public class ServiceUSPatent {
 					JSONObject patentObj = patentDocsObj.optJSONObject(index);
 					if (patentObj.has("patentNumber")) {
 						patent.setPatent_no("US"+patentObj.optString("patentNumber"));
+						log.info("美國證書號"+patent.getPatent_no());
 					}
 					
 					if (patentObj.optString("documentId").endsWith("A1")) {

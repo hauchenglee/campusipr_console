@@ -298,7 +298,7 @@ public class ServiceTaiwanPatent {
 			
 			if (patentObj.optJSONObject("patent-right") != null) {
 				patent.setPatent_no("TW"+patentObj.optJSONObject("patent-right").optString("patent-no"));
-				
+//				log.info("台灣證書號"+patent.getPatent_no());
 				try {
 					String patentBeginDateStr = patentObj.optJSONObject("patent-right").optString("patent-bdate");
 					if (!StringUtils.isNULL(patentBeginDateStr)) {

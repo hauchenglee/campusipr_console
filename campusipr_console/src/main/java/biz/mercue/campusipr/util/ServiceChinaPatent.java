@@ -269,7 +269,8 @@ public class ServiceChinaPatent {
 								Node applDateNode = cElement.getElementsByTagName("date").item(0);
 								String applNo = applNode.getTextContent().substring(0, applNode.getTextContent().length());
 								patent.setPatent_appl_no(applNo);
-								patent.setPatent_no("CN"+applNo);
+//								patent.setPatent_no("ZL"+applNo);
+//								log.info("中國證書號"+patent.getPatent_no());
 								try {
 									String publishDateStr =applDateNode.getTextContent();
 									if (!StringUtils.isNULL(publishDateStr)) {
@@ -318,7 +319,7 @@ public class ServiceChinaPatent {
 										if (publicateNo.length() > 9) {
 											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
 										}
-										patent.setPatent_publish_no(countryId + publicateNo);
+										patent.setPatent_publish_no(countryId + publicateNo + pubKindNo);
 									}
 									// 實用新型只需放公告號/日
 									if ("U".equals(pubKindNo)) {
@@ -326,7 +327,8 @@ public class ServiceChinaPatent {
 										if (publicateNo.length() > 9) {
 											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
 										}
-										patent.setPatent_publish_no(countryId + publicateNo);
+										patent.setPatent_publish_no(countryId + publicateNo + pubKindNo);
+										log.info(patent.getPatent_publish_no());
 									}
 									//1993-20040630的發明類型的公告號/日
 									if ("C".equals(pubKindNo)) {
@@ -334,7 +336,7 @@ public class ServiceChinaPatent {
 										if (publicateNo.length() > 9) {
 											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
 										}
-										patent.setPatent_publish_no(countryId + publicateNo);
+										patent.setPatent_publish_no(countryId + publicateNo + pubKindNo);
 									}
 									//1993-20040630的實用新型的公告號/日
 									if ("Y".equals(pubKindNo)) {
@@ -342,7 +344,7 @@ public class ServiceChinaPatent {
 										if (publicateNo.length() > 9) {
 											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
 										}
-										patent.setPatent_publish_no(countryId + publicateNo);
+										patent.setPatent_publish_no(countryId + publicateNo + pubKindNo);
 									}
 									//1993-20040630的外觀設計的公告號/日
 									if ("D".equals(pubKindNo)) {
@@ -350,7 +352,7 @@ public class ServiceChinaPatent {
 										if (publicateNo.length() > 9) {
 											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
 										}
-										patent.setPatent_publish_no(countryId + publicateNo);
+										patent.setPatent_publish_no(countryId + publicateNo + pubKindNo);
 									}
 									//20040701迄今的外觀設計的公告號/日
 									if ("S".equals(pubKindNo)) {
@@ -358,7 +360,7 @@ public class ServiceChinaPatent {
 										if (publicateNo.length() > 9) {
 											publicateNo = publicateNo.substring(0, publicateNo.length() - 1);
 										}
-										patent.setPatent_publish_no(countryId + publicateNo);
+										patent.setPatent_publish_no(countryId + publicateNo + pubKindNo);
 									}
 									
 									Calendar calendar = Calendar.getInstance();

@@ -113,8 +113,8 @@ public class PatentServiceImpl implements PatentService {
 			PatentFamily family = familyDao.getByPatentIdAndBusinessId(id, businessId);
 			if(family!=null) {
 				log.info("family id :"+family.getPatent_family_id());
-				log.info(patent.getListFamily().size());
-				log.info(family.getListPatent().size());
+//				log.info(patent.getListFamily().size());
+//				log.info(family.getListPatent().size());
 			}else {
 				log.info("family is null");
 			}
@@ -310,7 +310,7 @@ public class PatentServiceImpl implements PatentService {
 			if(Constants.APPL_COUNTRY_CN.endsWith(patent.getPatent_appl_country())) {
 				log.info("Patent_appl_date() : "+patent.getPatent_appl_date());
 				patent.setPatent_bdate(patent.getPatent_publish_date());
-//				patent.setPatent_edate(edate);
+				log.info(patent.getPatent_edate());
 			}
 		}
 

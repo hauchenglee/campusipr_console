@@ -7,20 +7,35 @@ import javax.persistence.Transient;
 public class Analysis extends BaseBean{
 	
 	@Transient
-	public int schoolSum;
-	
-	@Transient
-	public int applSum;
-	
-	@Transient
-	public int porfolioSum;
-	
-	@Transient
 	public List<Object> plantformSchoolUSPatentData;
 	@Transient
 	public List<Object> plantformSchoolTWPatentData;
 	@Transient
 	public List<Object> plantformSchoolCNPatentData;
+	
+	//test
+	@Transient
+	public List<Object> patentDataList;
+	@Transient
+	public List<Object> patentYearList;
+	@Transient
+	public List<Object> perYearCountList;
+	
+	
+	
+	public List<Object> getPatentYearList() {
+		return patentYearList;
+	}
+	public void setPatentYearList(List<Object> patentYearList) {
+		this.patentYearList = patentYearList;
+	}
+	//沒用到
+	@Transient
+	public int schoolSum;
+	@Transient
+	public int applSum;
+	@Transient
+	public int porfolioSum;
 	
 	public int getSchoolSum() {
 		return schoolSum;
