@@ -185,6 +185,9 @@ public class StringUtils {
 
 	public static String getApplNoWithoutAt(String sourceString) {
 		String patentApplNoWithoutAt = "";
+		if (StringUtils.isNULL(sourceString)) {
+			return "";
+		}
 		int indexOfAtEdit = sourceString.indexOf("@");
 		if (indexOfAtEdit != -1) {
 			patentApplNoWithoutAt = sourceString.substring(0, indexOfAtEdit);

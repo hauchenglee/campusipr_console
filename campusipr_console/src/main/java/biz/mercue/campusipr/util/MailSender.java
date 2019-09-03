@@ -246,7 +246,8 @@ public class MailSender {
 			
 			String htmlContent = html.replaceAll("@patent_name", patent.getPatent_name());
 			htmlContent = htmlContent.replaceAll("@country_name", patent.getCountry_name());
-			htmlContent = htmlContent.replaceAll("@patent_appl_no", patent.getPatent_appl_no());
+			String applNo = StringUtils.getApplNoWithoutAt(patent.getPatent_appl_no());
+			htmlContent = htmlContent.replaceAll("@patent_appl_no", applNo);
 			htmlContent = htmlContent.replaceAll("@annuity_date", patent.getAnnuity_date());
 			htmlContent =htmlContent.replaceAll("@patent_link", Constants.URL_PATENT_CONTENT  + patent.getPatent_id());
 			List<String> list = new ArrayList<String>();
