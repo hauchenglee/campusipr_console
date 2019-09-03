@@ -255,7 +255,7 @@ public class MailSender {
 				list.add(contact.getContact_email());
 			}
 
-			sendHTMLMail(list, "專利繳費通知 "+patent.getCountry_name() + " " +patent.getPatent_appl_no(), htmlContent);
+			sendHTMLMail(list, "專利繳費通知 " + patent.getCountry_name() + " " + applNo, htmlContent);
 		}
 		
 	}
