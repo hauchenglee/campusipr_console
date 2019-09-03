@@ -948,6 +948,9 @@ public class PatentServiceImpl implements PatentService {
 			String editPatentApplNo = editPatent.getPatent_appl_no();
 			log.info(editPatentApplNo);
 
+			if (StringUtils.isNULL(editPatentApplNo)) {
+				return jsonObject.put("sourceFrom", Constants.PATENT_UPDATE);
+			}
 			List<Patent> dbPatentList = patentDao.getPatentListByApplNo(editPatentApplNo);
 
 			if (dbPatentList == null || dbPatentList.isEmpty()) {
@@ -996,6 +999,13 @@ public class PatentServiceImpl implements PatentService {
 			String editApplNoWithoutAt = StringUtils.getApplNoWithoutAt(editPatentApplNo);
 			String dbPatentId = "";
 			log.info(editPatentApplNo);
+
+			if (StringUtils.isNULL(editPatentApplNo)) {
+				log.info("申請號為空 -> 存入資料庫，申請號random");
+				editPatent.setPatent_appl_no(StringUtils.generateApplNoRandom(editPatentApplNo));
+				return patentDao.updatePatentApplNo(editPatent.getPatent_id(), editPatent.getPatent_appl_no());
+			}
+
 			List<Patent> dbPatentList = patentDao.getPatentListByApplNo(editApplNoWithoutAt);
 			
 			if (dbPatentList.isEmpty()) {
