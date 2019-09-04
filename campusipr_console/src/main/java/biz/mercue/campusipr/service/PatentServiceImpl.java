@@ -5,6 +5,7 @@ import java.util.*;
 import biz.mercue.campusipr.dao.*;
 import biz.mercue.campusipr.model.*;
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.formula.functions.Now;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -2800,6 +2801,7 @@ public class PatentServiceImpl implements PatentService {
 
 			// TODO
 			if (Constants.PATENT_COST_FIELD.equals(field.getField_id())) {
+				boolean costListIsChange = compareCostList(dbBean, patent);
 				List<String> costAddData = new ArrayList<>();
 				JSONObject emptyCost = new JSONObject();
 				emptyCost.put("cost_name", emptyItem);
@@ -2820,7 +2822,7 @@ public class PatentServiceImpl implements PatentService {
 					log.info("costAddData: is Empty");
 					costAddData.add(emptyCost.toString());
 				}
-				if (!costAddData.isEmpty()) {
+				if (!costAddData.isEmpty() && costListIsChange==true) {
 					PatentEditHistory peh = insertFieldHistory(patent, costAddData, "create", field.getField_id(), editor, businessId);
 					if (peh != null) {
 						dbBean.addHistory(peh);
@@ -3030,11 +3032,58 @@ public class PatentServiceImpl implements PatentService {
 		return peh;
 	}
 
+	private boolean compareCostList(Patent dbPatent, Patent editPatent) {
+		List<PatentCost> listCost = editPatent.getListCost();
+		List<PatentCost> dblistCost = dbPatent.getListCost();
+		int sameCostData = 0;
+		boolean costListIsChange = true;
+		if (editPatent.getListCost() != null && editPatent.getListCost().size() > 0) {
+			for (PatentCost cost : listCost) {
+				for (PatentCost dbcost : dblistCost) {
+					if (cost.getCost_name() == null) {
+						cost.setCost_name("");
+					}
+					if (cost.getCost_unit() == null) {
+						log.info("getCost_unit() == null");
+						cost.setCost_unit("");
+					}
+					if (cost.getCost_memo() == null) {
+						cost.setCost_memo("");
+					}
+					if(cost.getCost_id()==null) {
+						break;
+					}else if (cost.getCost_id().equals(dbcost.getCost_id()) && cost.getCost_name().equals(dbcost.getCost_name())
+							&& cost.getCost_unit().equals(dbcost.getCost_unit())
+							&& cost.getCost_price() == (dbcost.getCost_price())
+							&& cost.getCost_currency().equals(dbcost.getCost_currency())
+							&& cost.getCost_memo().equals(dbcost.getCost_memo())
+							&& cost.getCost_date().equals(dbcost.getCost_date())) {
+						sameCostData++;
+					}
+				}
+			}
+		}
+		if(sameCostData==listCost.size()&&listCost.size()!=0&&sameCostData==dblistCost.size()) {
+			costListIsChange=false;
+			log.info("costListIsChange=false");
+		}
+		if(dblistCost.size()==0&&listCost.size()==0) {
+			costListIsChange=false;
+			log.info("costListIsChange=false");
+		}
+		log.info("costListIsChange: "+costListIsChange);
+		return costListIsChange;
+	}
+	
 	private void handleCost(Patent dbPatent, Patent editPatent, String business_id) {
 		if (editPatent.getListCost() != null && editPatent.getListCost().size() > 0) {
+//			log.info(compareCostList(dbPatent, editPatent));
 			List<PatentCost> listCost = editPatent.getListCost();
 			for (PatentCost cost : listCost) {
-				cost.setCost_id(KeyGeneratorUtils.generateRandomString());
+				cost.setCost_id(KeyGeneratorUtils.generateRandomString());				
+				if(cost.getCost_date()==null) {
+					cost.setCost_date(new Date());
+				}
 				cost.setPatent(dbPatent);
 			}
 			patentDao.deletePatentCost(dbPatent.getPatent_id());
