@@ -26,6 +26,8 @@ public interface StatusDao {
 	List<Status> getByCountry(String countryId);
 	
 	List<Status> getEditable();
+
+	void updateStatus(Status status);
 	
 
 

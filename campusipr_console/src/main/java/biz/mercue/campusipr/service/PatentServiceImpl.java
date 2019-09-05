@@ -1364,7 +1364,7 @@ public class PatentServiceImpl implements PatentService {
 			handleCost(dbBean, patent, businessId);
 			handleContact(dbBean, patent, businessId);
 			handleAnnuity(dbBean, patent, businessId);
-			handlePatentStatus(dbBean, patent);
+			handlePatentStatus(dbBean, patent, businessId);
 
 			if (patent.getSourceFrom() != Constants.PATENT_EXCEL_IMPORT) {
 				// source from != excel
@@ -2539,7 +2539,7 @@ public class PatentServiceImpl implements PatentService {
 					log.info("statusAddData: is Empty");
 					statusAddData.add(emptyStatus.toString());
 				}
-				log.info("statusAddData: "+statusAddData);
+//				log.info("statusAddData: "+statusAddData);
 				if (!statusAddData.isEmpty()) {
 					PatentEditHistory peh = insertFieldHistory(patent, statusAddData, "create", field.getField_id(), editor, businessId);
 					if (peh != null) {
@@ -2832,6 +2832,8 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 			if (Constants.SCHOOL_NO_FIELD.equals(field.getField_id())) {
+				boolean businessNumIsChange = compareSchoolNumList(dbBean, patent);
+				
 				// excel data
 				String sourceField_excel = null;
 				String newField_excel = patent.getPatent_excel_school_no();
@@ -2849,7 +2851,7 @@ public class PatentServiceImpl implements PatentService {
 						sourceField = dbExtension.getBusiness_num();
 					}
 				}
-				if (patent.getListExtension() != null) {
+				if (patent.getListExtension() != null && businessNumIsChange ==true) {
 					for (PatentExtension editExtension : patent.getListExtension()) {
 						newField = editExtension.getBusiness_num();
 						if(sourceField!=null&&newField==""&&!sourceField.equals(newField)) {
@@ -3039,36 +3041,41 @@ public class PatentServiceImpl implements PatentService {
 		List<PatentCost> dblistCost = dbPatent.getListCost();
 		int sameCostData = 0;
 		boolean costListIsChange = true;
-		if (editPatent.getListCost() != null && editPatent.getListCost().size() > 0) {
-			for (PatentCost cost : listCost) {
-				for (PatentCost dbcost : dblistCost) {
-					if (cost.getCost_name() == null) {
-						cost.setCost_name("");
-					}
-					if (cost.getCost_unit() == null) {
-						cost.setCost_unit("");
-					}
-					if (cost.getCost_memo() == null) {
-						cost.setCost_memo("");
-					}
-					if(cost.getCost_id()==null) {
-						break;
-					}else if (cost.getCost_id().equals(dbcost.getCost_id()) && cost.getCost_name().equals(dbcost.getCost_name())
-							&& cost.getCost_unit().equals(dbcost.getCost_unit())
-							&& cost.getCost_price() == (dbcost.getCost_price())
-							&& cost.getCost_currency().equals(dbcost.getCost_currency())
-							&& cost.getCost_memo().equals(dbcost.getCost_memo())
-							&& cost.getCost_date().equals(dbcost.getCost_date())) {
-						sameCostData++;
+		try {
+			if (editPatent.getListCost() != null && editPatent.getListCost().size() > 0) {
+				for (PatentCost cost : listCost) {
+					for (PatentCost dbcost : dblistCost) {
+						if (cost.getCost_name() == null) {
+							cost.setCost_name("");
+						}
+						if (cost.getCost_unit() == null) {
+							cost.setCost_unit("");
+						}
+						if (cost.getCost_memo() == null) {
+							cost.setCost_memo("");
+						}
+						if(cost.getCost_id()==null) {
+							break;
+						}else if (cost.getCost_id().equals(dbcost.getCost_id()) && cost.getCost_name().equals(dbcost.getCost_name())
+								&& cost.getCost_unit().equals(dbcost.getCost_unit())
+								&& cost.getCost_price() == (dbcost.getCost_price())
+								&& cost.getCost_currency().equals(dbcost.getCost_currency())
+								&& cost.getCost_memo().equals(dbcost.getCost_memo())
+								&& cost.getCost_date().equals(dbcost.getCost_date())) {
+							sameCostData++;
+						}
 					}
 				}
 			}
-		}
-		if(sameCostData==listCost.size()&&listCost.size()!=0&&sameCostData==dblistCost.size()) {
-			costListIsChange=false;
-		}
-		if(dblistCost.size()==0&&listCost.size()==0) {
-			costListIsChange=false;
+			if(sameCostData==listCost.size()&&listCost.size()!=0&&sameCostData==dblistCost.size()) {
+				costListIsChange=false;
+			}
+			if(dblistCost.size()==0&&listCost.size()==0) {
+				costListIsChange=false;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 //		log.info("costListIsChange: "+costListIsChange);
 		return costListIsChange;
@@ -3090,7 +3097,11 @@ public class PatentServiceImpl implements PatentService {
 						}else if(app.getApplicant_name() == null && dbapp.getApplicant_name() == null
 								&& app.getApplicant_name_en().equals(dbapp.getApplicant_name_en())) {
 							sameData++;
-						}else if(app.getApplicant_name().equals(dbapp.getApplicant_name())
+						}else if((app.getApplicant_name() == null && app.getApplicant_name_en().equals(dbapp.getApplicant_name_en())
+								|| app.getApplicant_name_en() == null&& app.getApplicant_name().equals(dbapp.getApplicant_name()))) {
+							sameData++;
+						}else if(app.getApplicant_name() != null && app.getApplicant_name_en() != null
+								&& app.getApplicant_name().equals(dbapp.getApplicant_name())
 								&& app.getApplicant_name_en().equals(dbapp.getApplicant_name_en())) {
 							sameData++;
 						}
@@ -3129,6 +3140,13 @@ public class PatentServiceImpl implements PatentService {
 						}else if(asg.getAssignee_name().equals(dbasg.getAssignee_name())
 								&& asg.getAssignee_name_en().equals(dbasg.getAssignee_name_en())) {
 							sameData++;
+						}else if((asg.getAssignee_name() == null && asg.getAssignee_name_en().equals(dbasg.getAssignee_name_en()))
+								|| asg.getAssignee_name_en() == null && asg.getAssignee_name().equals(dbasg.getAssignee_name())) {
+							sameData++;
+						}else if(asg.getAssignee_name() != null && asg.getAssignee_name_en() != null
+								&& asg.getAssignee_name().equals(dbasg.getAssignee_name())
+								&& asg.getAssignee_name_en().equals(dbasg.getAssignee_name_en())) {
+								sameData++;
 						}
 					}
 				}
@@ -3165,6 +3183,13 @@ public class PatentServiceImpl implements PatentService {
 							sameData++;
 						}else if(inv.getInventor_name().equals(dbinv.getInventor_name())
 								&& inv.getInventor_name_en().equals(dbinv.getInventor_name_en())) {
+							sameData++;
+						}else if((inv.getInventor_name() == null && inv.getInventor_name_en().equals(dbinv.getInventor_name_en()))
+								|| (inv.getInventor_name_en() == null && inv.getInventor_name().equals(dbinv.getInventor_name()))) {
+							sameData++;
+						}else if(inv.getInventor_name() == null &&  inv.getInventor_name_en() == null 
+								&& inv.getInventor_name_en().equals(dbinv.getInventor_name_en())
+								&& inv.getInventor_name().equals(dbinv.getInventor_name())) {
 							sameData++;
 						}
 					}
@@ -3224,8 +3249,26 @@ public class PatentServiceImpl implements PatentService {
 	}
 	private boolean compareSchoolNumList(Patent dbPatent, Patent editPatent) {
 		boolean schoolNumListIsChange = true;
-		int sameData = 0;
-		
+		List<PatentExtension> listExtension = editPatent.getListExtension();
+		List<PatentExtension> dbListExtension = dbPatent.getListExtension();
+		try {
+			if (editPatent.getListExtension() != null && editPatent.getListExtension().size() > 0) {
+				for (PatentExtension extension : listExtension) {
+					for(PatentExtension dbExtension : dbListExtension) {
+						if(extension.getBusiness_num()==null && dbExtension.getBusiness_num()==null) {
+							log.info("1");
+							schoolNumListIsChange = false;
+						}else if(extension.getBusiness_num().equals(dbExtension.getBusiness_num())) {
+							log.info("2");
+							schoolNumListIsChange = false;
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		log.info("schoolNumListIsChange: "+schoolNumListIsChange);
 		return schoolNumListIsChange;
 	}
 	private void handleCost(Patent dbPatent, Patent editPatent, String business_id) {
@@ -3459,7 +3502,7 @@ public class PatentServiceImpl implements PatentService {
 		}
 	}
 
-	private void handlePatentStatus(Patent dbPatent, Patent editPatent) {
+	private void handlePatentStatus(Patent dbPatent, Patent editPatent, String businessId) {
 		HashMap<String, PatentStatus> newMapping = new HashMap<String, PatentStatus>();
 		HashMap<String, PatentStatus> dbMapping = new HashMap<String, PatentStatus>();
 		if (editPatent.getListPatentStatus() != null) {
@@ -3487,6 +3530,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 
+			// add status
 			for (PatentStatus patentStatus : editPatent.getListPatentStatus()) {
 				Status status = patentStatus.getStatus();
 				if (patentStatus.getCreate_date() != null) {
@@ -3497,6 +3541,8 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 		}
+
+		// delete status
 		if (dbPatent.getListPatentStatus() != null) {
 			Iterator<PatentStatus> iterator = dbPatent.getListPatentStatus().iterator();
 			while (iterator.hasNext()) {
@@ -3518,6 +3564,18 @@ public class PatentServiceImpl implements PatentService {
 							editPatent.addStatus(status);
 						}
 					}
+				}
+			}
+		}
+
+		// update status
+		List<PatentStatus> patentStatusList = editPatent.getListPatentStatus();
+		for (PatentStatus patentStatus : patentStatusList) {
+			String patentStatusBusinessId = patentStatus.getBusiness_id();
+			if (!StringUtils.isNULL(patentStatusBusinessId) && patentStatusBusinessId.equals(businessId)) {
+				Status status = patentStatus.getStatus();
+				if (status.getStatus_from().equals("user")) {
+					statusDao.updateStatus(status);
 				}
 			}
 		}
@@ -3570,8 +3628,16 @@ public class PatentServiceImpl implements PatentService {
 						List<String> name1 = new ArrayList<String>();
 						List<String> name2 = new ArrayList<String>();
 						for (Inventor inventor : listInventor) {
-							name1.add(inventor.getInventor_name());
+							//為解決顯示問題
+							if(inventor.getInventor_name() == null) {
+								name1.add(inventor.getInventor_name_en());
+							}else {
+								name1.add(inventor.getInventor_name());
+							}
 							name2.add(inventor.getInventor_name_en());
+							//2019/9/5之前
+//							name1.add(inventor.getInventor_name());
+//							name2.add(inventor.getInventor_name_en());
 						}
 						String result1 = String.join("\n", name1);
 						String result2 = String.join("\n", name2);
@@ -3586,8 +3652,15 @@ public class PatentServiceImpl implements PatentService {
 						List<String> name1 = new ArrayList<String>();
 						List<String> name2 = new ArrayList<String>();
 						for(Assignee assignee : listAssignee) {
-							name1.add(assignee.getAssignee_name());
+							if(assignee.getAssignee_name()==null) {
+								name1.add(assignee.getAssignee_name_en());
+							}else {
+								name1.add(assignee.getAssignee_name());
+							}
 							name2.add(assignee.getAssignee_name_en());
+							//2019/9/5之前
+//							name1.add(assignee.getAssignee_name());
+//							name2.add(assignee.getAssignee_name_en());
 						}
 						String result1 = String.join("\n", name1);
 						String result2 = String.join("\n", name2);
@@ -3602,8 +3675,15 @@ public class PatentServiceImpl implements PatentService {
 						List<String> name1 = new ArrayList<String>();
 						List<String> name2 = new ArrayList<String>();
 						for (Applicant applicant : listApplicant) {
-							name1.add(applicant.getApplicant_name());
+							if(applicant.getApplicant_name() == null) {
+								name1.add(applicant.getApplicant_name_en());
+							}else {
+								name1.add(applicant.getApplicant_name());
+							}
 							name2.add(applicant.getApplicant_name_en());
+							//2019/9/5之前
+//							name1.add(applicant.getApplicant_name());
+//							name2.add(applicant.getApplicant_name_en());
 						}
 						String result1 = String.join("\n", name1);
 						String result2 = String.join("\n", name2);

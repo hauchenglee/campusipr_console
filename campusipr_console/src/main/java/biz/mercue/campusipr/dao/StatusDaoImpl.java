@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import biz.mercue.campusipr.model.Status;
@@ -80,5 +82,21 @@ public class StatusDaoImpl extends AbstractDao<String,  Status> implements Statu
 		criteria.add(Restrictions.eq("status_from", "sys"));
 		return criteria.list();
 	}
-
+	
+	@Override
+	public void updateStatus(Status status) {
+		String statusId = status.getStatus_id();
+		String statusDesc = status.getStatus_desc();
+		String statusDescEn = status.getStatus_desc_en();
+		String statusColor = status.getStatus_color();
+		String hql = "Update Status s set s.status_desc = :statusDesc, s.status_desc_en = :statusDescEn, s.status_color = :statusColor " +
+				"where s.status_id = :statusId";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("statusDesc", statusDesc);
+		query.setParameter("statusDescEn", statusDescEn);
+		query.setParameter("statusColor", statusColor);
+		query.setParameter("statusId", statusId);
+		query.executeUpdate();
+	}
 }
