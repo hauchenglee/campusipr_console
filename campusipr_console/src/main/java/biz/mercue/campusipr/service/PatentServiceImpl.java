@@ -2364,7 +2364,7 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	private void comparePatent(Patent dbBean, Patent patent, String businessId) {
-		log.info("comparePatent");
+//		log.info("comparePatent");
 		List<PatentField> fieldList = fieldDao.getAllFields();
 		Object emptyItem= "(無資料)";
 		String editor = null;
@@ -2513,7 +2513,7 @@ public class PatentServiceImpl implements PatentService {
 			if (Constants.PATENT_STATUS_FIELD.equals(field.getField_id())) {
 				JSONObject emptyStatus = new JSONObject();
 				emptyStatus.put("status_desc", emptyItem);
-				
+//				boolean statusListIsChange = compareStatusList(dbBean, patent);
 				List<String> statusAddData = new ArrayList<>();
 				if (dbBean.getListPatentStatus() != null && patent.getListPatentStatus() != null) {
 					for (PatentStatus patentStatus : patent.getListPatentStatus()) {
@@ -2550,7 +2550,8 @@ public class PatentServiceImpl implements PatentService {
 			if (Constants.ASSIGNEE_NAME_FIELD.equals(field.getField_id()) && patent.getListAssignee() != null) {
 				JSONObject emptyAssinee = new JSONObject();
 				emptyAssinee.put("assignee_name", emptyItem);
-
+				boolean assigneeListIsChange = compareAssigneeList(dbBean, patent);
+				
 				//add
 				List<String> assigneeAddData = new ArrayList<>();
 				HashMap<String, Assignee> mapping = new HashMap<String, Assignee>();
@@ -2613,7 +2614,7 @@ public class PatentServiceImpl implements PatentService {
 				if (assigneeAddData.isEmpty()&&!assigneeRemoveData.isEmpty()) {
 					assigneeAddData.add(emptyAssinee.toString());
 				}
-				if (!assigneeAddData.isEmpty()) {
+				if (!assigneeAddData.isEmpty() && assigneeListIsChange==true) {
 					PatentEditHistory peh = insertFieldHistory(patent, assigneeAddData, "create", field.getField_id(), editor, businessId);
 					if (peh != null) {
 						dbBean.addHistory(peh);
@@ -2632,6 +2633,7 @@ public class PatentServiceImpl implements PatentService {
 				
 				JSONObject emptyAppliant = new JSONObject();
 				emptyAppliant.put("applicant_name", emptyItem);
+				boolean applicantListIsChange = compareApplicantList(dbBean, patent);
 				
 				//add
 				List<String> applAddData = new ArrayList<>();
@@ -2696,7 +2698,7 @@ public class PatentServiceImpl implements PatentService {
 					applAddData.add(emptyAppliant.toString());
 				}
 //				log.info("applAddData: "+applAddData);
-				if (!applAddData.isEmpty()) {
+				if (!applAddData.isEmpty() && applicantListIsChange==true) {
 					PatentEditHistory peh = insertFieldHistory(patent, applAddData, "create", field.getField_id(), editor, businessId);
 					if (peh != null) {dbBean.addHistory(peh);}
 				}
@@ -2713,7 +2715,7 @@ public class PatentServiceImpl implements PatentService {
 				
 				JSONObject emptyInventor = new JSONObject();
 				emptyInventor.put("inventor_name", emptyItem);
-				
+				boolean inventorListIsChange = compareInventorList(dbBean, patent);
 				//add
 				List<String> invAddData = new ArrayList<>();
 				HashMap<String, Inventor> mapping = new HashMap<String, Inventor>();
@@ -2784,7 +2786,7 @@ public class PatentServiceImpl implements PatentService {
 					invAddData.add(emptyInventor.toString());
 				}
 //				log.info("invAddData: "+invAddData);
-				if (!invAddData.isEmpty()) {
+				if (!invAddData.isEmpty() && inventorListIsChange==true) {
 					PatentEditHistory peh = insertFieldHistory(patent, invAddData, "create", field.getField_id(), editor, businessId);
 					if (peh != null) {dbBean.addHistory(peh);}
 				}
@@ -3044,7 +3046,6 @@ public class PatentServiceImpl implements PatentService {
 						cost.setCost_name("");
 					}
 					if (cost.getCost_unit() == null) {
-						log.info("getCost_unit() == null");
 						cost.setCost_unit("");
 					}
 					if (cost.getCost_memo() == null) {
@@ -3065,16 +3066,168 @@ public class PatentServiceImpl implements PatentService {
 		}
 		if(sameCostData==listCost.size()&&listCost.size()!=0&&sameCostData==dblistCost.size()) {
 			costListIsChange=false;
-			log.info("costListIsChange=false");
 		}
 		if(dblistCost.size()==0&&listCost.size()==0) {
 			costListIsChange=false;
-			log.info("costListIsChange=false");
 		}
-		log.info("costListIsChange: "+costListIsChange);
+//		log.info("costListIsChange: "+costListIsChange);
 		return costListIsChange;
 	}
-	
+	private boolean compareApplicantList(Patent dbPatent, Patent editPatent) {
+		boolean applicantListIsChange = true;
+		List<Applicant> listApplicant = editPatent.getListApplicant();
+		List<Applicant> dblistApplicant = dbPatent.getListApplicant();
+		int sameData = 0;
+		try {
+			if (editPatent.getListApplicant() != null && editPatent.getListApplicant().size() > 0) {
+				for (Applicant app : listApplicant) {
+					for(Applicant dbapp : dblistApplicant) {
+						if(app.getApplicant_id()==null) {
+							break;
+						}else if (app.getApplicant_name_en() == null && dbapp.getApplicant_name_en() == null
+								&& app.getApplicant_name().equals(dbapp.getApplicant_name())) {
+							sameData++;
+						}else if(app.getApplicant_name() == null && dbapp.getApplicant_name() == null
+								&& app.getApplicant_name_en().equals(dbapp.getApplicant_name_en())) {
+							sameData++;
+						}else if(app.getApplicant_name().equals(dbapp.getApplicant_name())
+								&& app.getApplicant_name_en().equals(dbapp.getApplicant_name_en())) {
+							sameData++;
+						}
+					}
+				}
+			}
+			if(sameData==listApplicant.size()&&listApplicant.size()!=0&&sameData==dblistApplicant.size()) {
+				applicantListIsChange=false;
+			}
+			if(dblistApplicant.size()==0&&listApplicant.size()==0) {
+				applicantListIsChange=false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		log.info("applicantListIsChange: "+applicantListIsChange);
+		return applicantListIsChange;
+	}
+	private boolean compareAssigneeList(Patent dbPatent, Patent editPatent) {
+		boolean assigneeListIsChange = true;
+		List<Assignee> listAssignee = editPatent.getListAssignee();
+		List<Assignee> dblistAssignee = dbPatent.getListAssignee();
+		int sameData = 0;
+		try {
+			if (editPatent.getListAssignee() != null && editPatent.getListAssignee().size() > 0) {
+				for (Assignee asg : listAssignee) {
+					for(Assignee dbasg : dblistAssignee) {
+						if(asg.getAssignee_id()==null) {
+							break;
+						}else if (asg.getAssignee_name_en() == null && dbasg.getAssignee_name_en() == null
+								&& asg.getAssignee_name().equals(dbasg.getAssignee_name())) {
+							sameData++;
+						}else if(asg.getAssignee_name() == null && dbasg.getAssignee_name() == null
+								&& asg.getAssignee_name_en().equals(dbasg.getAssignee_name_en())) {
+							sameData++;
+						}else if(asg.getAssignee_name().equals(dbasg.getAssignee_name())
+								&& asg.getAssignee_name_en().equals(dbasg.getAssignee_name_en())) {
+							sameData++;
+						}
+					}
+				}
+			}
+//			log.info("sameData: "+sameData);
+			if(sameData==listAssignee.size()&&listAssignee.size()!=0&&sameData==dblistAssignee.size()) {
+				assigneeListIsChange=false;
+			}
+			if(dblistAssignee.size()==0&&listAssignee.size()==0) {
+				assigneeListIsChange=false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		log.info("assigneeListIsChange: "+assigneeListIsChange);
+		return assigneeListIsChange;
+	}
+	private boolean compareInventorList(Patent dbPatent, Patent editPatent) {
+		boolean inventorListIsChange = true;
+		List<Inventor> listInventor = editPatent.getListInventor();
+		List<Inventor> dblistInventor = dbPatent.getListInventor();
+		int sameData = 0;
+		try {
+			if (editPatent.getListInventor() != null && editPatent.getListInventor().size() > 0) {
+				for (Inventor inv : listInventor) {
+					for(Inventor dbinv : dblistInventor) {
+						if(inv.getInventor_id()==null) {
+							break;
+						}else if (inv.getInventor_name_en() == null && dbinv.getInventor_name_en() == null
+								&& inv.getInventor_name().equals(dbinv.getInventor_name())) {
+							sameData++;
+						}else if(inv.getInventor_name() == null && dbinv.getInventor_name() == null
+								&& inv.getInventor_name_en().equals(dbinv.getInventor_name_en())) {
+							sameData++;
+						}else if(inv.getInventor_name().equals(dbinv.getInventor_name())
+								&& inv.getInventor_name_en().equals(dbinv.getInventor_name_en())) {
+							sameData++;
+						}
+					}
+				}
+			}
+//			log.info("sameData: "+sameData);
+			if(sameData==listInventor.size()&&listInventor.size()!=0&&sameData==dblistInventor.size()) {
+				inventorListIsChange=false;
+			}
+			if(dblistInventor.size()==0&&listInventor.size()==0) {
+				inventorListIsChange=false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		log.info("inventorListIsChange: "+inventorListIsChange);
+		return inventorListIsChange;
+	}
+	private boolean compareStatusList(Patent dbPatent, Patent editPatent) {
+		boolean statusListIsChange = true;
+		List<PatentStatus> listStatus = editPatent.getListPatentStatus();
+		List<PatentStatus> dblistStatus = dbPatent.getListPatentStatus();
+		int sameData = 0;
+		if (listStatus != null || listStatus.size()>0) {
+			for (PatentStatus patentStatus : listStatus) {
+				Status status = patentStatus.getStatus();
+				for(PatentStatus dbPatentStatus:dblistStatus) {
+					Status dbstatus = dbPatentStatus.getStatus();
+					log.info("Id: "+status.getStatus_id()+" CreateDate: "+status.getCreate_date());
+					log.info("Id: "+dbstatus.getStatus_id()+" dbCreateDate: "+dbstatus.getCreate_date());
+					if (StringUtils.isNULL(status.getStatus_id())) {
+					}else if(status.getStatus_id().equals(dbstatus.getStatus_id())){
+						sameData++;
+					}
+					
+					if(status.getStatus_id()!=null &&status.getStatus_id().equals(dbstatus.getStatus_id()) && status.getCreate_date()!=null) {
+						log.info("1");;
+					}
+					if(status.getStatus_id()==null && status.getCreate_date()!=null) {
+						log.info("2");;
+					}
+					
+				}
+			}
+		}
+		log.info("sameData: "+sameData);
+		if(sameData==listStatus.size()&&listStatus.size()!=0&&sameData==dblistStatus.size()) {
+			statusListIsChange=false;
+			log.info("statusListIsChange=false");
+		}
+		if(dblistStatus.size()==0&&listStatus.size()==0) {
+			statusListIsChange=false;
+			log.info("statusListIsChange=false");
+		}
+		log.info("statusListIsChange: "+statusListIsChange);
+		return statusListIsChange;
+	}
+	private boolean compareSchoolNumList(Patent dbPatent, Patent editPatent) {
+		boolean schoolNumListIsChange = true;
+		int sameData = 0;
+		
+		return schoolNumListIsChange;
+	}
 	private void handleCost(Patent dbPatent, Patent editPatent, String business_id) {
 		if (editPatent.getListCost() != null && editPatent.getListCost().size() > 0) {
 //			log.info(compareCostList(dbPatent, editPatent));
