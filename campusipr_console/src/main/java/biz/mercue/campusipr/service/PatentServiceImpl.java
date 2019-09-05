@@ -2513,7 +2513,7 @@ public class PatentServiceImpl implements PatentService {
 			if (Constants.PATENT_STATUS_FIELD.equals(field.getField_id())) {
 				JSONObject emptyStatus = new JSONObject();
 				emptyStatus.put("status_desc", emptyItem);
-//				boolean statusListIsChange = compareStatusList(dbBean, patent);
+				boolean statusListIsChange = compareStatusList(dbBean, patent);
 				List<String> statusAddData = new ArrayList<>();
 				if (dbBean.getListPatentStatus() != null && patent.getListPatentStatus() != null) {
 					for (PatentStatus patentStatus : patent.getListPatentStatus()) {
@@ -2540,7 +2540,7 @@ public class PatentServiceImpl implements PatentService {
 					statusAddData.add(emptyStatus.toString());
 				}
 //				log.info("statusAddData: "+statusAddData);
-				if (!statusAddData.isEmpty()) {
+				if (!statusAddData.isEmpty() && statusListIsChange ==true) {
 					PatentEditHistory peh = insertFieldHistory(patent, statusAddData, "create", field.getField_id(), editor, businessId);
 					if (peh != null) {
 						dbBean.addHistory(peh);
@@ -3218,31 +3218,20 @@ public class PatentServiceImpl implements PatentService {
 				Status status = patentStatus.getStatus();
 				for(PatentStatus dbPatentStatus:dblistStatus) {
 					Status dbstatus = dbPatentStatus.getStatus();
-					log.info("Id: "+status.getStatus_id()+" CreateDate: "+status.getCreate_date());
-					log.info("Id: "+dbstatus.getStatus_id()+" dbCreateDate: "+dbstatus.getCreate_date());
+					log.info("status: "+dbstatus.getStatus_desc()+" dbCreateDate: "+dbstatus.getCreate_date());
 					if (StringUtils.isNULL(status.getStatus_id())) {
-					}else if(status.getStatus_id().equals(dbstatus.getStatus_id())){
+						
+					}else if(status.getStatus_desc().equals(dbstatus.getStatus_desc())){
 						sameData++;
 					}
-					
-					if(status.getStatus_id()!=null &&status.getStatus_id().equals(dbstatus.getStatus_id()) && status.getCreate_date()!=null) {
-						log.info("1");;
-					}
-					if(status.getStatus_id()==null && status.getCreate_date()!=null) {
-						log.info("2");;
-					}
-					
 				}
 			}
 		}
-		log.info("sameData: "+sameData);
 		if(sameData==listStatus.size()&&listStatus.size()!=0&&sameData==dblistStatus.size()) {
 			statusListIsChange=false;
-			log.info("statusListIsChange=false");
 		}
 		if(dblistStatus.size()==0&&listStatus.size()==0) {
 			statusListIsChange=false;
-			log.info("statusListIsChange=false");
 		}
 		log.info("statusListIsChange: "+statusListIsChange);
 		return statusListIsChange;
@@ -3256,10 +3245,8 @@ public class PatentServiceImpl implements PatentService {
 				for (PatentExtension extension : listExtension) {
 					for(PatentExtension dbExtension : dbListExtension) {
 						if(extension.getBusiness_num()==null && dbExtension.getBusiness_num()==null) {
-							log.info("1");
 							schoolNumListIsChange = false;
 						}else if(extension.getBusiness_num().equals(dbExtension.getBusiness_num())) {
-							log.info("2");
 							schoolNumListIsChange = false;
 						}
 					}
