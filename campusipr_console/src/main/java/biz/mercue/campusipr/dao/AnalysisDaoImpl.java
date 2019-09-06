@@ -892,11 +892,16 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	@Override
 	public int countPorfolio() {
 		Session session = getSession();
-		String queryStr = "SELECT count(distinct lpf.portfolio_id)"
-						+ "FROM Patent as p " 
-						+ "JOIN p.listPortfolio as lpf "
-						+ "WHERE lpf.create_date IS NOT NULL "
-						+ "and p.is_sync = 1 "; 
+		//如果只要計算大於0的專利組合
+//		String queryStr = "SELECT count(distinct lpf.portfolio_id)"
+//						+ "FROM Patent as p " 
+//						+ "JOIN p.listPortfolio as lpf "
+//						+ "WHERE lpf.create_date IS NOT NULL "
+//						+ "and p.is_sync = 1 "; 
+		//以Portfolio為主
+		String queryStr = "SELECT  count(distinct pfo.portfolio_id) "
+						+ "FROM Portfolio as pfo "
+						+ "WHERE pfo.create_date IS NOT NULL";
 		Query q = session.createQuery(queryStr);
 
 		long count = (long) q.uniqueResult();
@@ -907,11 +912,16 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	@Override
 	public int countPorfolioByYear(Long beginDate, Long endDate) {
 		Session session = getSession();
-		String queryStr = "SELECT count(distinct lpf.portfolio_id)"
-						+ "FROM Patent as p " 
-						+ "JOIN p.listPortfolio as lpf " 
-						+ "WHERE (date_format(lpf.create_date, '%Y') between :beginDate and :endDate) "
-						+ "and p.is_sync = 1 ";
+		//如果只要計算大於0的專利組合
+//		String queryStr = "SELECT count(distinct lpf.portfolio_id)"
+//						+ "FROM Patent as p " 
+//						+ "JOIN p.listPortfolio as lpf " 
+//						+ "WHERE (date_format(lpf.create_date, '%Y') between :beginDate and :endDate) "
+//						+ "and p.is_sync = 1 ";
+		//以Portfolio為主
+		String queryStr = "SELECT count(distinct pfo.portfolio_id)"
+				+ "FROM Portfolio as pfo " 
+				+ "WHERE (date_format(pfo.create_date, '%Y') between :beginDate and :endDate) ";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		Timestamp bd = new Timestamp(beginDate);
