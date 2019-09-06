@@ -3880,6 +3880,7 @@ public class PatentServiceImpl implements PatentService {
 							}
 						}
 					}
+					dbPortfolio.setPortfolio_patent_num(dbPortfolio.getListPatent().size());
 				}
 
 				// delete family

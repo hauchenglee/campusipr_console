@@ -73,6 +73,7 @@ public class PortfolioServiceImpl implements PortfolioService{
 			//TODO count patent family
 			portfolio.setPortfolio_patent_num(portfolio.getListPatent().size());
 			portfolio.setPortfolio_family_num(portfolio.getListPatent().size());
+			portfolio.setCreate_date(new Date());
 		}else {
 			portfolio.setPortfolio_patent_num(0);
 			portfolio.setPortfolio_family_num(0);
