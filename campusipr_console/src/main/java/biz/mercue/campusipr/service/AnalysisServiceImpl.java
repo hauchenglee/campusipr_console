@@ -1312,8 +1312,9 @@ public class AnalysisServiceImpl implements AnalysisService {
 					}
 		
 				} catch (Exception e) {
-	//				e.printStackTrace();
 					log.error("無任何資料");
+					log.error("ArrayIndexOutOfBoundsException，因為沒有專利沒有年份");
+//					e.printStackTrace();
 					log.error(e);
 				}
 				return analList;
