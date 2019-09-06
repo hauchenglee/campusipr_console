@@ -2,23 +2,15 @@ package biz.mercue.campusipr.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.collections4.map.HashedMap;
 import org.apache.log4j.Logger;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -30,18 +22,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import biz.mercue.campusipr.dao.AnalysisDao;
-import biz.mercue.campusipr.dao.CountryDao;
-import biz.mercue.campusipr.dao.FieldDao;
 import biz.mercue.campusipr.dao.PatentDao;
 import biz.mercue.campusipr.dao.StatusDao;
 import biz.mercue.campusipr.model.Analysis;
-import biz.mercue.campusipr.model.Country;
-import biz.mercue.campusipr.model.ListQueryForm;
-import biz.mercue.campusipr.model.Patent;
-import biz.mercue.campusipr.model.PatentField;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.util.Constants;
-import javassist.expr.NewArray;
 
 @Service("analysisService")
 @Transactional
@@ -741,6 +726,12 @@ public class AnalysisServiceImpl implements AnalysisService {
 					}
 				}
 			}else {
+				for(schoolInx = 0;schoolInx<schoolListToArray.length;schoolInx++) {
+					combineArr = new Object[2];
+					combineArr[0] = schoolListToArray[schoolInx][0];
+					combineArr[1] = 0;
+					combineSchoolSum.add(combineArr);
+				}
 				log.info(dataToArray.length);
 				log.info(schoolListToArray.length);
 			}
@@ -942,7 +933,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 //						log.info("usDateList is Empty");
 					}
 				}else if(dataToArray.length==0) {
-					log.info("dataToArray is null");
+//					log.info("dataToArray is null");
 					for(schoolInx = 0;schoolInx<schoolList.size();schoolInx++) {
 						combineArr = new Object[4];
 						combineArr[0] = schoolListToArray[schoolInx][0];
@@ -1864,32 +1855,4 @@ public class AnalysisServiceImpl implements AnalysisService {
 		return result;
 	}
 	
-	public JSONObject testAnalysis(JSONArray statusDesc, JSONArray businessId) {
-//		int counttt = 0;
-//		counttt = analysisDao.countPorfolio(businessId);
-//		log.info(unApplPatent);
-//		return unApplPatent;
-		List<Analysis> countList = new ArrayList<Analysis>();
-//		countList = analysisDao.countSchoolPatentStatus(statusDesc, businessId);
-		log.info(countList.size());
-//		log.info(countList);
-		JSONObject result = new JSONObject();
-		result.put("getSchoolPatentTest",countList);
-		return result;
-	}
-
-	@Override
-	public JSONObject testAnalysis(String businessId, Long beginDate, Long endDate) {
-		int counttt = 0;
-//		List<Analysis> countList = new ArrayList<Analysis>();
-//		countList = analysisDao.countInventorEn(businessId, beginDate, endDate);
-//		log.info(countList);
-		counttt = analysisDao.countPorfolioByYear(beginDate, endDate);
-		log.info(counttt);
-		JSONObject result = new JSONObject();
-		result.put("countSchoolByYear",counttt);
-		return result;
-	}
-
-
 }

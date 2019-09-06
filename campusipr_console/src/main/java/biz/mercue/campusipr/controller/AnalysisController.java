@@ -34,6 +34,7 @@ import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.service.AdminTokenService;
 import biz.mercue.campusipr.service.AnalysisService;
 import biz.mercue.campusipr.service.PermissionService;
+import biz.mercue.campusipr.util.BeanResponseBody;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.ExcelUtils;
 import biz.mercue.campusipr.util.JSONResponseBody;
@@ -56,45 +57,6 @@ public class AnalysisController {
 	@Autowired
 	PermissionService permissionService;
 	
-	@RequestMapping(value="/api/analysistest", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public String analysisTest(HttpServletRequest request,
-			@RequestBody String receiveJSONString,
-			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysisTest ");
-		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		JSONResponseBody responseBody = new JSONResponseBody();
-		JSONArray businessName = jsonObject.optJSONArray("business_name");
-		JSONArray statusDesc=jsonObject.optJSONArray("statusDesc");
-		JSONArray countryId = jsonObject.optJSONArray("country_id");
-		log.info(jsonObject.optJSONArray("statusDesc").length());
-		log.info(statusDesc);
-		JSONObject analyizeData = analysisService.schoolData(statusDesc, businessName, countryId);
-//		JSONObject analyizeData = analysisService.testAnalysis(businessId, beginTime, endTime);
-//		log.info(analyizeData);
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setData(analyizeData);
-		return responseBody.toString();
-	}
-	@RequestMapping(value="/api/analysistestbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public String analysisTestByYear(HttpServletRequest request,
-			@RequestBody String receiveJSONString,
-			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysisTest ");
-		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		JSONResponseBody responseBody = new JSONResponseBody();
-		String businessId = jsonObject.optString("business_id");
-		Long beginTime = jsonObject.getLong("beginTime");
-		Long endTime = jsonObject.getLong("endTime");
-		JSONObject analyizeData = analysisService.testAnalysis(businessId, beginTime, endTime);
-		log.info(analyizeData);
-		responseBody.setCode(Constants.INT_SUCCESS);
-		responseBody.setData(analyizeData);
-		return responseBody.toString();
-	}
 	
 	// 學校端 分析總覽預設畫面
 	@RequestMapping(value = "/api/analysisschooloverview", method = {

@@ -13,8 +13,6 @@ import biz.mercue.campusipr.model.ListQueryForm;
 import biz.mercue.campusipr.model.Patent;
 
 public interface AnalysisService {
-	JSONObject testAnalysis (JSONArray statusDesc, JSONArray businessId);
-	JSONObject testAnalysis (String businessId, Long beginDate, Long endDate);
 	
 	JSONObject schoolOverview(String businessId);
 	JSONObject schoolOverviewByYear(String businessId, Long beginDate, Long endDate);

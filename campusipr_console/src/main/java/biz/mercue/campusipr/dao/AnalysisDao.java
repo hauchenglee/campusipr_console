@@ -24,7 +24,6 @@ public interface AnalysisDao {
 	
 	List<Analysis> countYearPatent(String businessId);
 	List<Analysis> countYearPatentByYear(String businessId, Long beginDate, Long endDate);
-	List<Analysis> testPatent(String businessId);
 	
 	
 	List<Analysis> countCountry(String businessId);
@@ -79,7 +78,6 @@ public interface AnalysisDao {
 	List<Analysis> countSchoolSum();
 	List<Analysis> countSchoolSumByYear(Long beginDate, Long endDate);
 	List<Analysis> getDefaultYear();
-	List<Analysis> testPatent();
 	List<Analysis> countSchoolPatentTotalByYear(JSONArray schoolArray, Long beginDate, Long endDate);
 	List<Analysis> countSchoolPatentStatusByYear(JSONArray statusDesc, JSONArray schoolArray, Long beginDate,
 			Long endDate);

@@ -3,22 +3,15 @@ package biz.mercue.campusipr.dao;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.hibernate.Criteria;
-import org.hibernate.Filter;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.json.JSONArray;
 import org.springframework.stereotype.Repository;
 
 import biz.mercue.campusipr.model.Analysis;
-import biz.mercue.campusipr.model.Patent;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.StringUtils;
 
@@ -1086,7 +1079,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "GROUP BY lb.business_id";
 		Query q = session.createQuery(queryStr);
 		q.setParameter("role",Constants.BUSINESS_PLATFORM);
-		log.info(q.list().size());
+//		log.info(q.list().size());
 		return q.list();
 	}
 	//取得各校專利數量總和By Year
@@ -1779,33 +1772,5 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 				}
 				return schoolData;
 			}
-
-	@Override
-	public List<Analysis> testPatent() {
-		Session session = getSession();
-		String queryStr = "SELECT p.patent_appl_country, count(distinct p.patent_id), s.status_desc "
-				+ "FROM Patent as p " 
-				+ "JOIN p.listPatentStatus as ls "
-				+ "JOIN ls.primaryKey.status as s "
-				+ "WHERE s.status_desc = :statusDesc "
-				+ "and p.patent_appl_country in ('tw','us','cn') "
-				+ "and ls.create_date = ( select MAX(ls.create_date) " 
-									  + "FROM p.listPatentStatus as ls " 
-									  + "where p.patent_id = ls.primaryKey.patent.patent_id ) "
-				+ "group by s.status_desc";
-		Query q = session.createQuery(queryStr);
-//		String statusDesc = "'申請','公開','公告'"; 
-		String statusDesc = "'申請','公開'"; 
-		q.setParameter("statusDesc", statusDesc);
-		
-		log.info(q.list().isEmpty());
-		return q.list();
-	}
-
-	@Override
-	public List<Analysis> testPatent(String businessId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 }
