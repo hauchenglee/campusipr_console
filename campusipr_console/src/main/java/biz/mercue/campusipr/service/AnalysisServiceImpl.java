@@ -710,7 +710,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 			if(schoolListToArray.length!=0 && dataToArray.length!=0) {
 				for(schoolInx = 0;schoolInx<schoolListToArray.length;schoolInx++) {
 					combineArr = new Object[2];
-					if(dataInx < schoolListToArray.length) {
+					if(dataInx < schoolListToArray.length && dataInx<dataToArray.length) {
+						
 						if(schoolListToArray[schoolInx][0].equals(dataToArray[dataInx][0])) {
 							combineArr[0] = dataToArray[dataInx][0];
 							combineArr[1] = dataToArray[dataInx][1];
