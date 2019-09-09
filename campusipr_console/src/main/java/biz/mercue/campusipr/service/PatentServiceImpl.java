@@ -3823,10 +3823,8 @@ public class PatentServiceImpl implements PatentService {
 				// delete portfolio relationship
 				List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
 				for (Portfolio dbPortfolio : dbPortfolioList) {
-//					log.info(dbPortfolio.getPortfolio_id());
 					List<Patent> patentList = dbPortfolio.getListPatent();
 					if (patentList != null || !patentList.isEmpty()) {
-//						log.info(patentList.size());
 						for (Patent patent : patentList) {
 							if (patent.getPatent_id().equals(deletePatentId)) {
 								patentList.remove(patent);
@@ -3869,19 +3867,20 @@ public class PatentServiceImpl implements PatentService {
 			} else {
 				// delete portfolio
 				List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
-				for (Portfolio dbPortfolio : dbPortfolioList) {
-//					log.info(dbPortfolio.getPortfolio_id());
-					List<Patent> patentList = dbPortfolio.getListPatent();
-					if (patentList != null || !patentList.isEmpty()) {
-//						log.info(patentList.size());
-						for (Patent patent : patentList) {
-							if (patent.getPatent_id().equals(deletePatentId)) {
-								patentList.remove(patent);
-							}
-						}
-					}
-					dbPortfolio.setPortfolio_patent_num(dbPortfolio.getListPatent().size());
-				}
+				Iterator<Portfolio> portfolioIter = dbPortfolioList.iterator();
+                while (portfolioIter.hasNext()) {
+                    Portfolio dbPortfolio = portfolioIter.next();
+                    List<Patent> patentList = dbPortfolio.getListPatent();
+                    if (patentList != null || !patentList.isEmpty()) {
+                        Iterator<Patent> patentIter = patentList.iterator();
+                        while (patentIter.hasNext()) {
+                            Patent patent = patentIter.next();
+                            if (patent.getPatent_id().equals(deletePatentId)) {
+                                patentIter.remove();
+                            }
+                        }
+                    }
+                }
 
 				// delete family
 				PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
