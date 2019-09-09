@@ -3218,7 +3218,7 @@ public class PatentServiceImpl implements PatentService {
 				Status status = patentStatus.getStatus();
 				for(PatentStatus dbPatentStatus:dblistStatus) {
 					Status dbstatus = dbPatentStatus.getStatus();
-					log.info("status: "+dbstatus.getStatus_desc()+" dbCreateDate: "+dbstatus.getCreate_date());
+//					log.info("status: "+dbstatus.getStatus_desc()+" dbCreateDate: "+dbstatus.getCreate_date());
 					if (StringUtils.isNULL(status.getStatus_id())) {
 						
 					}else if(status.getStatus_desc().equals(dbstatus.getStatus_desc())){
