@@ -71,7 +71,9 @@ public class MessageServiceImpl implements MessageService{
 
 	@Override
 	public List<Message> getMessagesBeforeTime(String senderId, String receiverId, long timeStamp) {
-		return mDao.getMessagesBeforeTime(senderId, receiverId, timeStamp);
+		List<Message> previousMessage = mDao.getMessagesBeforeTime(senderId, receiverId, timeStamp);
+		Collections.reverse(previousMessage);
+		return previousMessage;
 	}
 
 	@Override
