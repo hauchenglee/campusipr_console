@@ -74,7 +74,7 @@ public class MessageDaoImpl extends AbstractDao<String,  Message> implements Mes
 		criteria.add(Restrictions.or(
 				Restrictions.and(Restrictions.eq("sender_id", senderId),Restrictions.eq("receiver_id", receiverId)),
 				Restrictions.and(Restrictions.eq("receiver_id", senderId),Restrictions.eq("sender_id", receiverId))));
-		criteria.addOrder(Order.asc("message_date"));
+		criteria.addOrder(Order.desc("message_date"));
 		criteria.setMaxResults(20);
 		criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 		return criteria.list();
@@ -119,7 +119,9 @@ public class MessageDaoImpl extends AbstractDao<String,  Message> implements Mes
 
 	@Override
 	public List<Message> searchText(String senderId, String receiverId, String text) {
-		String hql = "select m from Message m where m.sender_id = :senderId and m.receiver_id = :receiverId and m.message_text like :text";
+		String hql = "select m from Message m where ((m.sender_id = :senderId and m.receiver_id = :receiverId)" +
+				" or (m.receiver_id = :senderId and m.sender_id = :receiverId))" +
+				" and m.message_text like :text order by m.message_date asc";
 		Session session = getSession();
 		Query query = session.createQuery(hql);
 		query.setParameter("senderId", senderId);
