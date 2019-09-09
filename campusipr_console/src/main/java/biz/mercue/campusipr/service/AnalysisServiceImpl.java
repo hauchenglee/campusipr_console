@@ -44,10 +44,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 	@Autowired
 	private StatusDao statusDao;
-	
-	@Autowired
-	private CountryDao countryDao;
-	
+		
 	@Override
 	public JSONObject schoolOverview(String businessId) {
 		log.info("analysis All Patent");
