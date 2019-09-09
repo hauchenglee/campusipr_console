@@ -150,6 +150,8 @@ public class SettingController {
 			for (int index = 0; index < reminderArr.length(); index++) {
 				JSONObject reminderObj = reminderArr.optJSONObject(index);
 				AnnuityReminder reminder = (AnnuityReminder) JacksonJSONUtils.readValue(reminderObj.toString(), AnnuityReminder.class);
+				reminder.setBusiness(tokenBean.getBusiness());
+				reminder.setReminder_text("專利{@patent_number}將於{@charges_edate}到期，請記得聯絡事務所進行繳費");
 				reminders.add(reminder);
 			}
 			log.info(reminders.size());

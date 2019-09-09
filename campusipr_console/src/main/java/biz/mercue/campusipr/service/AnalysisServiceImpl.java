@@ -22,9 +22,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import biz.mercue.campusipr.dao.AnalysisDao;
+import biz.mercue.campusipr.dao.CountryDao;
 import biz.mercue.campusipr.dao.PatentDao;
 import biz.mercue.campusipr.dao.StatusDao;
 import biz.mercue.campusipr.model.Analysis;
+import biz.mercue.campusipr.model.Country;
 import biz.mercue.campusipr.model.Status;
 import biz.mercue.campusipr.util.Constants;
 
@@ -42,6 +44,9 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 	@Autowired
 	private StatusDao statusDao;
+	
+	@Autowired
+	private CountryDao countryDao;
 	
 	@Override
 	public JSONObject schoolOverview(String businessId) {
@@ -1539,6 +1544,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			XSSFRow row ;
 			XSSFCell cell; 
 			int dataInx = 0;
+			String countryName = null ;
 			row = sheet.createRow((short)0);
 			String title [] = {"國家","申請","公開","公告","總數"};
 			for(dataInx = 0;dataInx<title.length;dataInx++) {
@@ -1549,8 +1555,16 @@ public class AnalysisServiceImpl implements AnalysisService {
 			for(dataInx = 0;dataInx<countCountryTotal.length();dataInx++) {
 				row = sheet.createRow((short) 1+dataInx);
 				cell = row.createCell((short) 0);
-				Object countryName = countCountryTotal.optJSONArray(dataInx).get(0);
-				cell.setCellValue(countryName.toString().toUpperCase()); 
+				Object countryId = countCountryTotal.optJSONArray(dataInx).get(0);
+				String countryIdStr = countryId.toString().toUpperCase();
+				if(countryIdStr.equals("TW")) {
+					countryName = "中華民國";
+				}else if(countryIdStr.equals("US")){
+					countryName = "美國";
+				}else if(countryIdStr.equals("CN")) {
+					countryName = "中國";
+				}
+				cell.setCellValue(countryName); 
 				cell = row.createCell((short) 1);
 				Object applCount = countCountryApplStatusTotal.optJSONArray(dataInx).get(1);
 				cell.setCellValue(applCount.toString()); 
@@ -1567,7 +1581,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			
 			row = sheet.createRow((short) 6);
 			cell = row.createCell((short) 0);
-			cell.setCellValue("臺灣歷年專利");
+			cell.setCellValue("中華民國歷年專利");
 			cell = row.createCell((short) 3);
 			cell.setCellValue("美國歷年專利");
 			cell = row.createCell((short) 6);
@@ -1623,7 +1637,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			XSSFCell cell = row.createCell((short) 0); 
 			cell.setCellValue("科系"); 
 			int dataInx = 0;
-			String countryId [] = {"美國","臺灣","中國大陸","總數"};
+			String countryId [] = {"美國","中華民國","中國大陸","總數"};
 			for(dataInx = 0;dataInx<countryId.length;dataInx++) {
 				cell = row.createCell((short) 1+dataInx);
 				Object countryData =countryId [dataInx];
@@ -1726,7 +1740,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 					case "中華民國":
 						row = sheet.createRow((short) 2 + (schoolInx * 6));
 						cell = row.createCell((short) 0);
-						cell.setCellValue("臺灣");
+						cell.setCellValue("中華民國");
 						for (titleInx = 0; titleInx < statusDesc.length(); titleInx++) {
 							title = statusDesc.opt(titleInx).toString();
 							for (dataInx = 0; dataInx < countList.size(); dataInx++) {
