@@ -3166,11 +3166,12 @@ public class PatentServiceImpl implements PatentService {
 	}
 	private boolean compareInventorList(Patent dbPatent, Patent editPatent) {
 		boolean inventorListIsChange = true;
+		String countryId = editPatent.getPatent_appl_country().toString();
 		List<Inventor> listInventor = editPatent.getListInventor();
 		List<Inventor> dblistInventor = dbPatent.getListInventor();
 		int sameData = 0;
 		try {
-			if (editPatent.getListInventor() != null && editPatent.getListInventor().size() > 0) {
+			if (editPatent.getListInventor() != null && editPatent.getListInventor().size() > 0 && !("us").equals(countryId) ) {
 				for (Inventor inv : listInventor) {
 					for(Inventor dbinv : dblistInventor) {
 						if(inv.getInventor_id()==null) {
@@ -3194,6 +3195,17 @@ public class PatentServiceImpl implements PatentService {
 						}
 					}
 				}
+			}else {
+				for (Inventor inv : listInventor) {
+					for (Inventor dbinv : dblistInventor) {
+						if ((inv.getInventor_name() == null
+								&& inv.getInventor_name_en().equals(dbinv.getInventor_name_en()))) {
+							sameData++;
+						}
+						
+					}
+				}
+				
 			}
 //			log.info("sameData: "+sameData);
 			if(sameData==listInventor.size()&&listInventor.size()!=0&&sameData==dblistInventor.size()) {
