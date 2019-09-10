@@ -125,6 +125,7 @@ public class SettingController {
 				log.info("cross business");
 				reminderList = annuityReminderService.getByBusinessId(businessId);
 			}else {
+				log.info("改別人的");
 				reminderList = annuityReminderService.getByBusinessId(tokenBean.getBusiness().getBusiness_id());
 			}
 			responseBody.setCode(Constants.INT_SUCCESS);
@@ -139,8 +140,9 @@ public class SettingController {
 	
 	@RequestMapping(value="/api/updateannuityreminder", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String updateAnnuityReminder(HttpServletRequest request,@RequestBody String receiveJSONString) {
-		log.info("updateAnnuityReminder ");
+	public String updateAnnuityReminder(HttpServletRequest request,@RequestBody String receiveJSONString,
+			@RequestParam(value ="business",required=false,defaultValue ="") String businessId) {
+		log.info("updateAnnuityReminder: " + businessId);
 		
 		ListResponseBody responseBody  = new ListResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
@@ -159,7 +161,7 @@ public class SettingController {
 				
 			}else {
 				for (AnnuityReminder reminder:reminders) {
-					reminder.setBusiness(tokenBean.getBusiness());
+					reminder.setBusiness(businessService.getById(businessId));
 				}
 			}
 			int taskResult = annuityReminderService.update(reminders, tokenBean.getBusiness().getBusiness_id());

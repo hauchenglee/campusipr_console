@@ -306,7 +306,7 @@ public class BusinessServiceImpl implements BusinessService{
 	
 	@Override
 	public Business getById(String id) {
-		log.info("get by id: " + id);
+//		log.info("get by id: " + id);
 		Business bean = businessDao.getById(id);
 
 		return bean;
