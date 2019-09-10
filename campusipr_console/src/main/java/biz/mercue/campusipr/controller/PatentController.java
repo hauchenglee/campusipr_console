@@ -246,16 +246,10 @@ public class PatentController {
 			patent.setAdmin(tokenBean.getAdmin());
 			patent.setAdmin_ip(ip);
 			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.EDIT);
-			if(tokenBean.checkPermission(permission.getPermission_id())) {
-				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					int taskResult =  patentService.authorizedUpdatePatent(null, patent);
-					responseBody.setCode(taskResult);
-				}else {
-					int taskResult =  patentService.authorizedUpdatePatent(tokenBean.getBusiness().getBusiness_id(), patent);
-					responseBody.setCode(taskResult);
-				}
-				
-			}else {
+            if (tokenBean.checkPermission(permission.getPermission_id())) {
+                int taskResult = patentService.authorizedUpdatePatent(tokenBean.getBusiness().getBusiness_id(), patent);
+                responseBody.setCode(taskResult);
+            } else {
 				responseBody.setCode(Constants.INT_NO_PERMISSION);
 			}
 		}else {
@@ -464,9 +458,6 @@ public class PatentController {
 				List<String> field_ids = (List<String>) JacksonJSONUtils.readValue(jsonFid, new TypeReference<List<String>>(){});
 
 				String bussinessId = tokenBean.getBusiness().getBusiness_id();
-				if(tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
-					bussinessId = null;
-				}
 				
 				List<Patent> listPatent = patentService.getExcelByPatentIds(patent_ids, bussinessId);
 				
