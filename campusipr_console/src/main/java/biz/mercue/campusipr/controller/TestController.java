@@ -87,7 +87,7 @@ public class TestController {
 		log.info("/api/demo");
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
-		String str = jsonObject.optString("str");
+		String str = jsonObject.optString("str1");
 		int result = patentService.demo("", tokenBean.getBusiness_id(), patentId, str);
 		return "{\"aaa\": \"" + result + "\"}";
 	}
