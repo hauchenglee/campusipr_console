@@ -134,7 +134,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 
 	@Override
 	public List<Patent> getByBusinessId(String businessId,int page,int pageSize, String orderList, String orderFieldCode,int is_asc){
-		log.info("businessId:"+businessId);
 		Session session = getSession();
 		String queryStr = "SELECT p from Patent as p";
 		if (orderList != null) {
@@ -145,7 +144,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		}
 		if (businessId.equals(Constants.BUSINESS_PLATFORM)) {
 			// platform
-			log.info("platform: " + businessId);
 			queryStr += " JOIN p.listBusiness as lb WHERE (lb.business_id = :businessId)" +
 					" or (lb.business_id not in :businessId and p.is_sync = 1)";
 		} else {
@@ -190,14 +188,24 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 	
 	@Override
 	public int  getCountByBusinessId(String businessId) {
-		Criteria criteria =  createEntityCriteria();
-		if(!StringUtils.isNULL(businessId)) {
-			criteria.createAlias("listBusiness","bs");
-			criteria.add(Restrictions.eq("bs.business_id", businessId));
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct p) from Patent as p";
+		if (businessId.equals(Constants.BUSINESS_PLATFORM)) {
+			// platform
+			queryStr += " JOIN p.listBusiness as lb WHERE (lb.business_id = :businessId)" +
+					" or (lb.business_id not in :businessId and p.is_sync = 1)";
+		} else {
+			// school
+			Filter filter = session.enableFilter("businessFilter");
+			filter.setParameter("business_id", businessId);
+			queryStr += " JOIN p.listBusiness as lb WHERE lb.business_id = :businessId";
 		}
-		criteria.setProjection(Projections.rowCount());
-		long count = (long)criteria.uniqueResult();
-		return (int)count;
+		Query q = session.createQuery(queryStr);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		long count = (long) q.uniqueResult();
+		return (int) count;
 	}
 	
 	@Override
