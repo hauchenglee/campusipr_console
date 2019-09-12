@@ -2846,7 +2846,7 @@ public class PatentServiceImpl implements PatentService {
 						log.info("costAddData: is Empty");
 						costAddData.add(emptyCost.toString());
 					}
-				}else if(patent.getListCost().size()==0 && dbBean.getListCost().size()>0) {
+				}else if(patent.getListCost()!=null && patent.getListCost().size()==0 && dbBean.getListCost().size()>0) {
 					log.info("costAddData: is Empty");
 					costAddData.add(emptyCost.toString());
 				}
@@ -3093,10 +3093,10 @@ public class PatentServiceImpl implements PatentService {
 					}
 				}
 			}
-			if(sameCostData==listCost.size()&&listCost.size()!=0&&sameCostData==dblistCost.size()) {
+			if(listCost != null && sameCostData==listCost.size()&&listCost.size()!=0&&sameCostData==dblistCost.size()) {
 				costListIsChange=false;
 			}
-			if(dblistCost.size()==0&&listCost.size()==0) {
+			if(listCost != null && dblistCost.size()==0&&listCost.size()==0) {
 				costListIsChange=false;
 			}
 		} catch (Exception e) {
@@ -3929,5 +3929,198 @@ public class PatentServiceImpl implements PatentService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public String deleteAll(String businessId) {
+		Business business = businessDao.getById(businessId);
+		List<String> patentIdList = patentDao.getPatentIdByBusinessId(businessId);
+		log.info("businessId: " + businessId);
+		try {
+//		for(int index = 0; index<=250 ;index++) {
+//			String patentId = patentIdList.get(index);
+			for (String patentId : patentIdList) {
+				Patent dbPatent = patentDao.getById(patentId);
+				List<Business> businessList = dbPatent.getListBusiness();
+				if (businessList.size() > 1) {
+					// delete business id relationship
+					List<Business> newBusinessList = new ArrayList<>();
+					for (Business dbPatentBusiness : businessList) {
+						if (!dbPatentBusiness.getBusiness_id().equals(businessId)) {
+							newBusinessList.add(dbPatentBusiness);
+						}
+					}
+					if (!newBusinessList.isEmpty()) {
+						dbPatent.setListBusiness(newBusinessList);
+					}
+
+					// delete extension bus
+					String extensionId = "";
+					List<PatentExtension> dbExtensionList = dbPatent.getListExtension();
+					for (PatentExtension dbExtension : dbExtensionList) {
+						if (dbExtension != null && !StringUtils.isNULL(dbExtension.getBusiness_id())) {
+							if (dbExtension.getBusiness_id().equals(businessId)) {
+								extensionId = dbExtension.getExtension_id();
+							}
+						}
+					}
+					if (!StringUtils.isNULL(extensionId)) {
+						patentDao.deletePatentExtension(extensionId);
+					}
+
+					// delete cost
+					List<PatentCost> dbCostList = dbPatent.getListCost();
+					List<String> costIds = new ArrayList<>();
+					for (PatentCost dbCost : dbCostList) {
+						if (dbCost != null && !StringUtils.isNULL(dbCost.getBusiness_id())) {
+							if (dbCost.getBusiness_id().equals(businessId)) {
+								costIds.add(dbCost.getCost_id());
+							}
+						}
+					}
+					for (String costId : costIds) {
+						if (!StringUtils.isNULL(costId)) {
+							patentDao.deleteCost(costId);
+						}
+					}
+
+					// delete status
+					List<PatentStatus> dbPatentStatusList = dbPatent.getListPatentStatus();
+					List<String> statusIds = new ArrayList<>();
+					for (PatentStatus dbPatentStatus : dbPatentStatusList) {
+						if (dbPatentStatus != null && !StringUtils.isNULL(dbPatentStatus.getBusiness_id())) {
+							if (dbPatentStatus.getBusiness_id().equals(businessId)) {
+								Status status = dbPatentStatus.getStatus();
+								if (status.getStatus_from().equals("user")) {
+									statusIds.add(status.getStatus_id());
+								}
+							}
+						}
+					}
+					for (String statusId : statusIds) {
+						if (!StringUtils.isNULL(statusId)) {
+							patentDao.deleteStatus(statusId);
+							patentDao.deletePatentStatus(patentId, statusId);
+						}
+					}
+
+					// delete history
+					List<PatentEditHistory> dbHistoryList = dbPatent.getListHistory();
+					List<String> historyIds = new ArrayList<>();
+					for (PatentEditHistory dbHistory : dbHistoryList) {
+						if (dbHistory != null && !StringUtils.isNULL(dbHistory.getBusiness_id())) {
+							if (dbHistory.getBusiness_id().equals(businessId)) {
+								historyIds.add(dbHistory.getHistory_id());
+							}
+						}
+					}
+					for (String historyId : historyIds) {
+						if (!StringUtils.isNULL(historyId)) {
+							patentDao.deleteHistory(historyId);
+						}
+					}
+
+					// delete contact
+					List<PatentContact> dbContactList = dbPatent.getListContact();
+					List<String> contactIds = new ArrayList<>();
+					for (PatentContact dbContact : dbContactList) {
+						if (dbContact != null && !StringUtils.isNULL(dbContact.getBusiness().getBusiness_id())) {
+							if (dbContact.getBusiness().getBusiness_id().equals(businessId)) {
+								contactIds.add(dbContact.getPatent_contact_id());
+							}
+						}
+					}
+					for (String contactId : contactIds) {
+						if (!StringUtils.isNULL(contactId)) {
+							patentDao.deletePatentContactByKey(contactId);
+						}
+					}
+
+					// delete portfolio relationship
+					List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
+					for (Portfolio dbPortfolio : dbPortfolioList) {
+//				log.info(dbPortfolio.getPortfolio_id());
+						List<Patent> patentList = dbPortfolio.getListPatent();
+						if (patentList != null || !patentList.isEmpty()) {
+//					log.info(patentList.size());
+							for (Patent patent : patentList) {
+								if (patent.getPatent_id().equals(patentId)) {
+									patentList.remove(patent);
+								}
+							}
+						}
+					}
+
+					// delete family
+					PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(patentId, businessId);
+					if (dbFamily != null) {
+						List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
+						for (Patent patent : dbPatentFamilyList) {
+							if (patent.getPatent_id().equals(patentId) && dbPatentFamilyList.size() >= 2) {
+								dbPatentFamilyList.remove(patent);
+							}
+						}
+						if (dbPatentFamilyList.size() < 2) {
+							familyDao.delete(dbFamily.getPatent_family_id());
+						}
+					}
+
+					// delete department
+					List<Department> dbDepartmentList = dbPatent.getListDepartment();
+					List<String> newDepartmentIds = new ArrayList<>();
+					for (Department dbDepartment : dbDepartmentList) {
+						if (dbDepartment != null && !StringUtils.isNULL(dbDepartment.getBusiness_id())) {
+							if (dbDepartment.getBusiness_id().equals(businessId)) {
+								newDepartmentIds.add(dbDepartment.getDepartment_id());
+							}
+						}
+					}
+					for (String departmentId : newDepartmentIds) {
+						if (!StringUtils.isNULL(departmentId)) {
+							patentDao.deleteDepartment(departmentId);
+						}
+					}
+
+//			log.info("start to delete patent one by one");
+				} else {
+					// delete portfolio
+					List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
+					for (Portfolio dbPortfolio : dbPortfolioList) {
+//				log.info(dbPortfolio.getPortfolio_id());
+						List<Patent> patentList = dbPortfolio.getListPatent();
+						if (patentList != null || !patentList.isEmpty()) {
+//					log.info(patentList.size());
+							for (Patent patent : patentList) {
+								if (patent.getPatent_id().equals(patentId)) {
+									patentList.remove(patent);
+								}
+							}
+						}
+					}
+
+					// delete family
+					PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(patentId, businessId);
+					if (dbFamily != null) {
+						List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
+						for (Patent patent : dbPatentFamilyList) {
+							if (patent.getPatent_id().equals(patentId) && dbPatentFamilyList.size() >= 2) {
+								dbPatentFamilyList.remove(patent);
+							}
+						}
+						if (dbPatentFamilyList.size() < 2) {
+							familyDao.delete(dbFamily.getPatent_family_id());
+						}
+					}
+
+					log.info(patentId + ": start to delete patent all");
+					patentDao.delete(patentId);
+				}
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			log.error(e);
+//		e.printStackTrace();
+		}
+		return null;
 	}
 }

@@ -1081,4 +1081,15 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 		query.executeUpdate();
 	}
 
+	@Override
+	public List<String> getPatentIdByBusinessId(String businessId){
+		String hql ="Select p.patent_id "
+				+ "FROM Patent as p "
+				+ "JOIN p.listBusiness as lb "
+				+ "Where lb.business_id = :businessId";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		query.setParameter("businessId", businessId);
+		return query.list();
+	}
 }

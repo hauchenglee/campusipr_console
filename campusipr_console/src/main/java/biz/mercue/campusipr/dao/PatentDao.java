@@ -84,4 +84,6 @@ public interface PatentDao {
 	void deleteCost(String costId);
 	void deleteHistory(String extensionId);
 	void deleteDepartment(String departmentId);
+
+	List<String> getPatentIdByBusinessId(String businessId);
 }

@@ -151,9 +151,10 @@ public class ServiceUSPatent {
 		if (StringUtils.isNULL(patent.getPatent_publish_no())) {
 			return;
 		}
-		String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/publication/DOCDB/%s/biblio";
-		url = String.format(url, patent.getPatent_publish_no().subSequence(0, 10));
 		try {
+			String url = Constants.PATENT_WEB_SERVICE_EU+"/rest-services/published-data/publication/DOCDB/%s/biblio";
+			int pubNum = patent.getPatent_publish_no().length();
+			url = String.format(url, patent.getPatent_publish_no().subSequence(0, (pubNum-1)));
 			String token = generateToken("Basic "+Constants.PATENT_TOKEN_EU);
 			if (token != null) {
 				String content = (HttpRequestUtils.sendGetByToken(url, token));
@@ -235,7 +236,9 @@ public class ServiceUSPatent {
 				
 			getPatentInventorsApplcant(patent);
 			
-			getPatantEDay(patent);
+			if(patent.getPatent_publish_no()!=null) {
+				getPatantEDay(patent);
+			}
 			
 			JSONArray patentInventor = patentObj.optJSONArray("inventor");
 			int orderIn = 1;
