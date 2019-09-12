@@ -285,7 +285,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			cndepCombine.addAll(combineDepartment(depToArray, cnToArray));
 			usdepCombine.addAll(combineDepartment(depToArray, usToArray));
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage());
 		}
 		
 		log.info("各科系專利申請數量: " + countEachDepartmentTotal.size());
@@ -340,7 +340,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 				usdepCombine.addAll(combineDepartment(depToArray, usToArray));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		
 		JSONObject result = new JSONObject();
@@ -667,7 +667,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			patentUSPublish.addAll(combineSchoolData(publishStatusToArray).getPlantformSchoolUSPatentData());
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 			
 		}
 		
@@ -739,7 +739,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 				log.info(schoolListToArray.length);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		return combineSchoolSum;
 	}
@@ -954,7 +954,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 				analysis.setPlantformSchoolTWPatentTotal(combineTWPatentTotal);
 				analysis.setPlantformSchoolUSPatentTotal(combineUSPatentTotal);			
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error(e.getMessage());
 			}
 			return analysis;
 		}
@@ -1034,7 +1034,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 				log.info("分析期間年數:  " + analList.size());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+//			log.error(e);
 			if(yearToArray.length==0) {
 				log.info("CountryId 未傳入");
 				boolean errCondition = yearToArray.length==0;
@@ -1092,8 +1092,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 				}
 	
 			} catch (Exception e) {
-	//			e.printStackTrace();
-				log.error(e);
+				log.error(e.getMessage());
 			}
 			return analList;
 		}
@@ -1167,7 +1166,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 				}
 				log.info("分析期間年數:  "+analList.size());
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error(e.getMessage());
 			}
 			return analList;
 		}
@@ -1233,8 +1232,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 				}
 	
 			} catch (Exception e) {
-				log.error(e);
-	//			e.printStackTrace();
+				log.error(e.getMessage());
 			}
 			return combineStatus;
 	
@@ -1315,10 +1313,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 					}
 		
 				} catch (Exception e) {
-					log.error("無任何資料");
-					log.error("ArrayIndexOutOfBoundsException，因為沒有專利沒有年份");
-//					e.printStackTrace();
-					log.error(e);
+					//ArrayIndexOutOfBoundsException :沒有專利沒有年份時發生
+					log.error("無任何資料: " +e);
 				}
 				return analList;
 			}
@@ -1389,7 +1385,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 					}
 				}
 			} catch (Exception e) {
-				log.error(e);
+				log.error(e.getMessage());
 			}
 			return depCombine;
 		}
@@ -1442,7 +1438,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			workbook.write(fileOut);
 			fileOut.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		return new ByteArrayInputStream(fileOut.toByteArray());
 	}
@@ -1499,7 +1495,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			workbook.write(fileOut);
 			fileOut.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		return new ByteArrayInputStream(fileOut.toByteArray());
 	}
@@ -1613,7 +1609,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			workbook.write(fileOut);
 			fileOut.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		return new ByteArrayInputStream(fileOut.toByteArray());
 		
@@ -1663,7 +1659,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			workbook.write(fileOut);
 			fileOut.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		return new ByteArrayInputStream(fileOut.toByteArray());
 	}
@@ -1849,7 +1845,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			workbook.write(fileOut);
 			fileOut.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		return new ByteArrayInputStream(fileOut.toByteArray());
 	}

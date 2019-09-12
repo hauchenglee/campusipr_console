@@ -54,8 +54,7 @@ public class RouterController {
 		try {
 			url = new URI(redirectUrl);
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	    HttpHeaders httpHeaders = new HttpHeaders();
 	    httpHeaders.setLocation(url);
@@ -77,8 +76,7 @@ public class RouterController {
 		try {
 			url = new URI(redirectUrl);
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	    HttpHeaders httpHeaders = new HttpHeaders();
 	    httpHeaders.setLocation(url);

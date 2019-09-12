@@ -41,8 +41,7 @@ public class PDFUtils {
 
 	        
 		} catch (IOException | DocumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		
 		

@@ -278,7 +278,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				return mapPatent;
 			}
 		}catch (Exception e) {
-			e.printStackTrace();
 			log.error("Exception :"+e.getMessage());
 		}finally {
 			if(fileInputStream!=null) {
@@ -306,7 +305,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			log.info("匯出結束");
 			log.info(f);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 //		File fileName = new File("https://api.mercue.biz:663/imageservice/campusipr/file/");
 //		File f = new File("C:/mercue/errFile.xls");
@@ -324,7 +323,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			log.info("匯出結束");
 			log.info(f);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	}
 
@@ -878,8 +877,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			log.info("XSSF上色");
 
 		} catch (Exception e) {
-//			log.info(e);
-			
+			log.error("HSSF or "+e.getMessage());
 			String sheetName = "錯誤回報";
 			book.getSheet(sheetName);
 			CellStyle style = book.createCellStyle();
@@ -905,8 +903,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 						cell.setCellStyle(style);
 					}
 				}
-				
-//				e.printStackTrace();
 				y++;
 			}
 			log.info("HSSF上色");
@@ -955,7 +951,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		                    LinkedHashMap::new));
 		    return sorted;
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 			return new HashMap<>();
 		}
 	}

@@ -314,7 +314,7 @@ public class TestController {
 		return list;
 	}
 
-	@RequestMapping(value="/api/analysistest", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+	@RequestMapping(value="/api/deleteAllFortest", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String analysisTest(HttpServletRequest request,
 			@RequestBody String receiveJSONString,

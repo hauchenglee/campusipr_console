@@ -81,11 +81,9 @@ public class ServiceUSPatent {
 						}
 					}
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error(e.getMessage());
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error(e.getMessage());
 				}
 			}
 		}
@@ -119,8 +117,7 @@ public class ServiceUSPatent {
 							temp = compareDate;
 						}
 					} catch (ParseException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						log.error(e.getMessage());
 					}
 				}
 				// sync correct
@@ -137,12 +134,10 @@ public class ServiceUSPatent {
 			}
 			return Constants.INT_SUCCESS;
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 			return Constants.INT_SYSTEM_PROBLEM; 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 			return Constants.INT_SYSTEM_PROBLEM; 
 		}
 	}
@@ -196,19 +191,16 @@ public class ServiceUSPatent {
 						}
 						patent.setListIPC(listIPC);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						log.error("token must not null");
 					}
 				} else {
 					log.error("token must not null");
 				}
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	}
 	
@@ -228,8 +220,7 @@ public class ServiceUSPatent {
 					patent.setPatent_appl_date(applDate);
 				}
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e.getMessage());
 			}
 				
 			getPatentNoticeAndPublish(patent);
@@ -332,8 +323,7 @@ public class ServiceUSPatent {
 					}
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error(e.getMessage());
 			}
 		}
 		
@@ -365,8 +355,7 @@ public class ServiceUSPatent {
 								patent.setPatent_notice_date(noticeDate);
 							}
 						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							log.error(e.getMessage());
 						}
 					}
 					if (patentObj.optString("documentId").endsWith("A2")) {
@@ -379,8 +368,7 @@ public class ServiceUSPatent {
 								patent.setPatent_notice_date(noticeDate);
 							}
 						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							log.error(e.getMessage());
 						}
 					}
 					if (patentObj.optString("documentId").endsWith("A9")) {
@@ -393,8 +381,7 @@ public class ServiceUSPatent {
 								patent.setPatent_notice_date(noticeDate);
 							}
 						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							log.error(e.getMessage());
 						}
 					}
 					if (patentObj.optString("documentId").endsWith("P1")) {
@@ -406,8 +393,7 @@ public class ServiceUSPatent {
 								patent.setPatent_notice_date(noticeDate);
 							}
 						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							log.error(e.getMessage());
 						}
 					}
 //					log.info("KIND: "+patentObj.optString("documentId").substring(10,11));
@@ -422,7 +408,7 @@ public class ServiceUSPatent {
 								log.info(patentObj.optString("documentId")+": "+publishDate);
 							}
 						} catch (ParseException e) {
-							e.printStackTrace();
+							log.error(e.getMessage());
 						}
 					}
 					if (patentObj.optString("documentId").substring(10,11) .equals("P")) {
@@ -434,7 +420,7 @@ public class ServiceUSPatent {
 								patent.setPatent_publish_date(publishDate);
 							}
 						} catch (ParseException e) {
-							e.printStackTrace();
+							log.error(e.getMessage());
 						}
 					}
 					if (patentObj.optString("documentId").endsWith("B1")) {
@@ -447,7 +433,7 @@ public class ServiceUSPatent {
 								patent.setPatent_publish_date(publishDate);
 							}
 						} catch (ParseException e) {
-							e.printStackTrace();
+							log.error(e.getMessage());
 						}
 					}
 					
@@ -461,18 +447,15 @@ public class ServiceUSPatent {
 								patent.setPatent_publish_date(publishDate);
 							}
 						} catch (ParseException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							log.error(e.getMessage());
 						}
 					}
 				}
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	}
 	private static void getPatantEDay(Patent patent) {
@@ -506,7 +489,7 @@ public class ServiceUSPatent {
 				break;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("無公告號: "+e);
 		}
 	}
 	private static void getContext(Patent patent) {
@@ -518,11 +501,9 @@ public class ServiceUSPatent {
 			convertPatentContextHtml(doc, patent);
 			
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	}
 		
@@ -612,8 +593,7 @@ public class ServiceUSPatent {
 				log.info("AuthTokn:"+authToken);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		
 		return authToken;

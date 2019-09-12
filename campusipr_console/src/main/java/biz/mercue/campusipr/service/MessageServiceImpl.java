@@ -51,7 +51,6 @@ public class MessageServiceImpl implements MessageService{
 			mDao.addMessage(message);
 		} catch (Exception e) {
 			log.error(e.getMessage());
-			e.printStackTrace();
 		}
 	}
 
@@ -134,7 +133,7 @@ public class MessageServiceImpl implements MessageService{
 			}
 			return adminList;
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 			return null;
 		}
 	}

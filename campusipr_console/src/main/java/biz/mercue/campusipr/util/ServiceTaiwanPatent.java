@@ -148,11 +148,9 @@ public class ServiceTaiwanPatent {
 					}
 				}
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.info(e.getMessage());
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.info(e.getMessage());
 			}
 		}
 		return list;
@@ -234,13 +232,9 @@ public class ServiceTaiwanPatent {
 			}
 			return Constants.INT_SUCCESS;
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			log.error(e.getMessage());
 			return Constants.INT_SYSTEM_PROBLEM;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			log.error(e.getMessage());
 			return Constants.INT_SYSTEM_PROBLEM;
 		} 
@@ -259,8 +253,7 @@ public class ServiceTaiwanPatent {
 					patent.setPatent_appl_date(applDate);
 				}
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.info(e.getMessage());
 			}
 			patent.setPatent_appl_no(patentObj.optJSONObject("application-reference").optString("appl-no"));
 					
@@ -276,8 +269,7 @@ public class ServiceTaiwanPatent {
 					patent.setPatent_notice_date(noticeDate);
 				}
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.info(e.getMessage());
 			}
 			
 			if (!"0".equals(patentObj.optJSONObject("publication-reference").optString("publish-no"))) {
@@ -292,8 +284,7 @@ public class ServiceTaiwanPatent {
 					patent.setPatent_publish_date(publishDate);
 				}
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.info(e.getMessage());
 			}
 			
 			if (patentObj.optJSONObject("patent-right") != null) {
@@ -325,8 +316,7 @@ public class ServiceTaiwanPatent {
 					}
 							
 				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.info(e.getMessage());
 				}
 						
 				String expireYear = patentObj.optJSONObject("patent-right").optString("charge-expir-year");
@@ -475,12 +465,8 @@ public class ServiceTaiwanPatent {
 				}
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			log.error(e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			log.error(e.getMessage());
 		}
 	}
@@ -512,12 +498,8 @@ public class ServiceTaiwanPatent {
 				}
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			log.error(e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			log.error(e.getMessage());
 		}
 		
@@ -659,7 +641,6 @@ public class ServiceTaiwanPatent {
 			}
 			
 		}catch(Exception e){
-			e.printStackTrace();
 			log.error(e.getMessage());
 		}
 	}
@@ -673,8 +654,7 @@ public class ServiceTaiwanPatent {
 			}
 			return Constants.INT_SUCCESS;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}

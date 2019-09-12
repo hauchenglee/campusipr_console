@@ -100,19 +100,16 @@ public class ServiceChinaPatent {
 									}
 								}
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								log.error(e.getMessage());
 							}
 						}
 					} else {
 						log.error("token must not null");
 					}
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error(e.getMessage());
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					log.error(e.getMessage());
 				}
 			}
 		}
@@ -134,11 +131,9 @@ public class ServiceChinaPatent {
 				convertPatentIdXml(patent, content);
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	}
 	
@@ -184,8 +179,7 @@ public class ServiceChinaPatent {
 				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	}
 	
@@ -204,12 +198,10 @@ public class ServiceChinaPatent {
 				return Constants.INT_CANNOT_FIND_DATA;
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 			return Constants.INT_SYSTEM_PROBLEM;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
@@ -224,11 +216,9 @@ public class ServiceChinaPatent {
 				convertPatentInfoXml(patent ,content);
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 	}
 	
@@ -278,8 +268,7 @@ public class ServiceChinaPatent {
 										patent.setPatent_appl_date(publishDate);
 									}
 								} catch (ParseException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									log.error(e.getMessage());
 								}
 							}
 						}
@@ -434,8 +423,7 @@ public class ServiceChinaPatent {
 										}
 									}
 								} catch (ParseException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
+									log.error(e.getMessage());
 								}
 							}
 						}
@@ -657,8 +645,7 @@ public class ServiceChinaPatent {
 				patent.setPatentAbstract(patentAbstract);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		
 	}
@@ -675,8 +662,7 @@ public class ServiceChinaPatent {
 				log.info("AuthTokn:"+authToken);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		
 		return authToken;
