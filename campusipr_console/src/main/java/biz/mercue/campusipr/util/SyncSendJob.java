@@ -104,7 +104,7 @@ public class SyncSendJob  implements Job {
 			}
 		} catch (Exception e) {
 		
-			log.error(e.getMessage());
+			log.error(e);
 		}
 		
 	}

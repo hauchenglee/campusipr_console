@@ -121,7 +121,7 @@ public class BusinessServiceImpl implements BusinessService{
 				result = Constants.INT_DATA_ERROR;
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 		
 		return result;
@@ -239,7 +239,7 @@ public class BusinessServiceImpl implements BusinessService{
 				result = Constants.INT_CANNOT_FIND_DATA;
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 		return result;
 	}
@@ -259,7 +259,7 @@ public class BusinessServiceImpl implements BusinessService{
 				quartzService.removeJob(syncTaskDB);
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 	

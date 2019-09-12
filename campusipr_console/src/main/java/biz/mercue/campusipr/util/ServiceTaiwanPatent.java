@@ -232,10 +232,10 @@ public class ServiceTaiwanPatent {
 			}
 			return Constants.INT_SUCCESS;
 		} catch (JSONException e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM;
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM;
 		} 
 	}
@@ -465,9 +465,9 @@ public class ServiceTaiwanPatent {
 				}
 			}
 		} catch (JSONException e) {
-			log.error(e.getMessage());
+			log.error(e);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 	
@@ -498,9 +498,9 @@ public class ServiceTaiwanPatent {
 				}
 			}
 		} catch (JSONException e) {
-			log.error(e.getMessage());
+			log.error(e);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 		
 	}
@@ -641,7 +641,7 @@ public class ServiceTaiwanPatent {
 			}
 			
 		}catch(Exception e){
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 	
@@ -654,7 +654,7 @@ public class ServiceTaiwanPatent {
 			}
 			return Constants.INT_SUCCESS;
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}

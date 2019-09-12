@@ -61,9 +61,9 @@ public class ServiceStatusPatent {
 					log.error("token must not null");
 				}
 			} catch (JSONException e) {
-				log.error(e.getMessage());
+				log.error(e);
 			} catch (Exception e) {
-				log.error(e.getMessage());
+				log.error(e);
 			}
 		} else {
 			String url = Constants.PATENT_INVENTOR_WEB_SERVICE_US;
@@ -80,7 +80,7 @@ public class ServiceStatusPatent {
 						convertPatentStatusInfoUSTPOXml(patent, getObject);
 					}
 				} catch (Exception e) {
-					log.error(e.getMessage());
+					log.error(e);
 				}
 			}
 		}
@@ -102,7 +102,7 @@ public class ServiceStatusPatent {
 						psCreateDate = DateUtils.parserDateTimeString(psCreateDateStr);
 					}
 				} catch (ParseException e) {
-					log.error(e.getMessage());
+					log.error(e);
 				}
 				if (!duplicateData.contains(transactionObj.optString("code")+"-"+DateUtils.getDashFormatDate(psCreateDate))) {
 					Status status = new Status();

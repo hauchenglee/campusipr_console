@@ -83,7 +83,7 @@ public class AnnuityReminderServiceImpl implements AnnuityReminderService{
 				try {
 					quartzService.removeJob(reminder);
 				} catch (Exception e) {
-					log.error(e.getMessage());
+					log.error(e);
 				}
 			}
 			if (patent.getListAnnuity() != null && patent.getListAnnuity().size() > 0) {
@@ -117,7 +117,7 @@ public class AnnuityReminderServiceImpl implements AnnuityReminderService{
 									try {
 										quartzService.createJob(reminder);
 									} catch (Exception e) {
-										log.error(e.getMessage());
+										log.error(e);
 									}
 								}
 							}

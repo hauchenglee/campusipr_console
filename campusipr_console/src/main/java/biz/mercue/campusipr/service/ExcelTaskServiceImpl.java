@@ -305,7 +305,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			log.info("匯出結束");
 			log.info(f);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 //		File fileName = new File("https://api.mercue.biz:663/imageservice/campusipr/file/");
 //		File f = new File("C:/mercue/errFile.xls");
@@ -323,7 +323,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			log.info("匯出結束");
 			log.info(f);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 
@@ -951,7 +951,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		                    LinkedHashMap::new));
 		    return sorted;
 		} catch (IOException e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return new HashMap<>();
 		}
 	}
@@ -995,7 +995,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			}
 			return date;
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return null;
 		}
     }
@@ -1027,7 +1027,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 					return null;
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return null;
 		}
 	}

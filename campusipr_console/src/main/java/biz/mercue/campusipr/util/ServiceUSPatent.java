@@ -81,9 +81,9 @@ public class ServiceUSPatent {
 						}
 					}
 				} catch (JSONException e) {
-					log.error(e.getMessage());
+					log.error(e);
 				} catch (Exception e) {
-					log.error(e.getMessage());
+					log.error(e);
 				}
 			}
 		}
@@ -117,7 +117,7 @@ public class ServiceUSPatent {
 							temp = compareDate;
 						}
 					} catch (ParseException e) {
-						log.error(e.getMessage());
+						log.error(e);
 					}
 				}
 				// sync correct
@@ -134,10 +134,10 @@ public class ServiceUSPatent {
 			}
 			return Constants.INT_SUCCESS;
 		} catch (JSONException e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM; 
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM; 
 		}
 	}
@@ -198,9 +198,9 @@ public class ServiceUSPatent {
 				}
 			}
 		} catch (JSONException e) {
-			log.error(e.getMessage());
+			log.error(e);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 	
@@ -220,7 +220,7 @@ public class ServiceUSPatent {
 					patent.setPatent_appl_date(applDate);
 				}
 			} catch (ParseException e) {
-				log.error(e.getMessage());
+				log.error(e);
 			}
 				
 			getPatentNoticeAndPublish(patent);
@@ -323,7 +323,7 @@ public class ServiceUSPatent {
 					}
 				}
 			} catch (Exception e) {
-				log.error(e.getMessage());
+				log.error(e);
 			}
 		}
 		
@@ -355,7 +355,7 @@ public class ServiceUSPatent {
 								patent.setPatent_notice_date(noticeDate);
 							}
 						} catch (ParseException e) {
-							log.error(e.getMessage());
+							log.error(e);
 						}
 					}
 					if (patentObj.optString("documentId").endsWith("A2")) {
@@ -368,7 +368,7 @@ public class ServiceUSPatent {
 								patent.setPatent_notice_date(noticeDate);
 							}
 						} catch (ParseException e) {
-							log.error(e.getMessage());
+							log.error(e);
 						}
 					}
 					if (patentObj.optString("documentId").endsWith("A9")) {
@@ -381,7 +381,7 @@ public class ServiceUSPatent {
 								patent.setPatent_notice_date(noticeDate);
 							}
 						} catch (ParseException e) {
-							log.error(e.getMessage());
+							log.error(e);
 						}
 					}
 					if (patentObj.optString("documentId").endsWith("P1")) {
@@ -393,7 +393,7 @@ public class ServiceUSPatent {
 								patent.setPatent_notice_date(noticeDate);
 							}
 						} catch (ParseException e) {
-							log.error(e.getMessage());
+							log.error(e);
 						}
 					}
 //					log.info("KIND: "+patentObj.optString("documentId").substring(10,11));
@@ -408,7 +408,7 @@ public class ServiceUSPatent {
 								log.info(patentObj.optString("documentId")+": "+publishDate);
 							}
 						} catch (ParseException e) {
-							log.error(e.getMessage());
+							log.error(e);
 						}
 					}
 					if (patentObj.optString("documentId").substring(10,11) .equals("P")) {
@@ -420,7 +420,7 @@ public class ServiceUSPatent {
 								patent.setPatent_publish_date(publishDate);
 							}
 						} catch (ParseException e) {
-							log.error(e.getMessage());
+							log.error(e);
 						}
 					}
 					if (patentObj.optString("documentId").endsWith("B1")) {
@@ -433,7 +433,7 @@ public class ServiceUSPatent {
 								patent.setPatent_publish_date(publishDate);
 							}
 						} catch (ParseException e) {
-							log.error(e.getMessage());
+							log.error(e);
 						}
 					}
 					
@@ -447,15 +447,15 @@ public class ServiceUSPatent {
 								patent.setPatent_publish_date(publishDate);
 							}
 						} catch (ParseException e) {
-							log.error(e.getMessage());
+							log.error(e);
 						}
 					}
 				}
 			}
 		} catch (JSONException e) {
-			log.error(e.getMessage());
+			log.error(e);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 	private static void getPatantEDay(Patent patent) {
@@ -501,9 +501,9 @@ public class ServiceUSPatent {
 			convertPatentContextHtml(doc, patent);
 			
 		} catch (JSONException e) {
-			log.error(e.getMessage());
+			log.error(e);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 		
@@ -593,7 +593,7 @@ public class ServiceUSPatent {
 				log.info("AuthTokn:"+authToken);
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 		
 		return authToken;

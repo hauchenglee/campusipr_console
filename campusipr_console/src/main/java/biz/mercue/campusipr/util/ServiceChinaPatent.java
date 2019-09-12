@@ -100,16 +100,16 @@ public class ServiceChinaPatent {
 									}
 								}
 							} catch (Exception e) {
-								log.error(e.getMessage());
+								log.error(e);
 							}
 						}
 					} else {
 						log.error("token must not null");
 					}
 				} catch (JSONException e) {
-					log.error(e.getMessage());
+					log.error(e);
 				} catch (Exception e) {
-					log.error(e.getMessage());
+					log.error(e);
 				}
 			}
 		}
@@ -131,9 +131,9 @@ public class ServiceChinaPatent {
 				convertPatentIdXml(patent, content);
 			}
 		} catch (JSONException e) {
-			log.error(e.getMessage());
+			log.error(e);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 	
@@ -179,7 +179,7 @@ public class ServiceChinaPatent {
 				}
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 	
@@ -198,10 +198,10 @@ public class ServiceChinaPatent {
 				return Constants.INT_CANNOT_FIND_DATA;
 			}
 		} catch (JSONException e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM;
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
@@ -216,9 +216,9 @@ public class ServiceChinaPatent {
 				convertPatentInfoXml(patent ,content);
 			}
 		} catch (JSONException e) {
-			log.error(e.getMessage());
+			log.error(e);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 	
@@ -268,7 +268,7 @@ public class ServiceChinaPatent {
 										patent.setPatent_appl_date(publishDate);
 									}
 								} catch (ParseException e) {
-									log.error(e.getMessage());
+									log.error(e);
 								}
 							}
 						}
@@ -423,7 +423,7 @@ public class ServiceChinaPatent {
 										}
 									}
 								} catch (ParseException e) {
-									log.error(e.getMessage());
+									log.error(e);
 								}
 							}
 						}
@@ -645,7 +645,7 @@ public class ServiceChinaPatent {
 				patent.setPatentAbstract(patentAbstract);
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 		
 	}
@@ -662,7 +662,7 @@ public class ServiceChinaPatent {
 				log.info("AuthTokn:"+authToken);
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 		
 		return authToken;

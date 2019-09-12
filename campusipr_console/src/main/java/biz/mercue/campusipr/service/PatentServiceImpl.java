@@ -436,7 +436,7 @@ public class PatentServiceImpl implements PatentService {
 			}
 			return taskResult;
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
@@ -675,7 +675,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
@@ -710,7 +710,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 
 	}
@@ -1087,7 +1087,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return jsonObject.put(Constants.JSON_CODE, Constants.INT_SYSTEM_PROBLEM);
 		}
 	}
@@ -1236,7 +1236,7 @@ public class PatentServiceImpl implements PatentService {
 
 			return Constants.INT_SUCCESS;
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
@@ -1249,7 +1249,7 @@ public class PatentServiceImpl implements PatentService {
 			}
 			return Constants.INT_SUCCESS;
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
@@ -1536,7 +1536,7 @@ public class PatentServiceImpl implements PatentService {
 
 			return Constants.INT_SUCCESS;
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 			return Constants.INT_SYSTEM_PROBLEM;
 		}
 	}
@@ -3097,7 +3097,7 @@ public class PatentServiceImpl implements PatentService {
 				costListIsChange=false;
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 //		log.info("costListIsChange: "+costListIsChange);
 		return costListIsChange;
@@ -3137,7 +3137,7 @@ public class PatentServiceImpl implements PatentService {
 				applicantListIsChange=false;
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 		log.info("applicantListIsChange: "+applicantListIsChange);
 		return applicantListIsChange;
@@ -3181,7 +3181,7 @@ public class PatentServiceImpl implements PatentService {
 				assigneeListIsChange=false;
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 		log.info("assigneeListIsChange: "+assigneeListIsChange);
 		return assigneeListIsChange;
@@ -3226,7 +3226,7 @@ public class PatentServiceImpl implements PatentService {
 				inventorListIsChange=false;
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 		log.info("inventorListIsChange: "+inventorListIsChange);
 		return inventorListIsChange;
@@ -3276,7 +3276,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 		log.info("schoolNumListIsChange: "+schoolNumListIsChange);
 		return schoolNumListIsChange;
@@ -3356,7 +3356,7 @@ public class PatentServiceImpl implements PatentService {
 			}
 
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 
 	}
@@ -3486,7 +3486,7 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 
@@ -3922,7 +3922,7 @@ public class PatentServiceImpl implements PatentService {
 				patentDao.delete(deletePatentId);
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.error(e);
 		}
 	}
 	

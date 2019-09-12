@@ -48,7 +48,7 @@ public class HttpRequestUtils {
 			    Response response = call.execute();
 			    responseStr = response.body().string();
 			} catch (IOException e) {
-				log.error(e.getMessage());
+				log.error(e);
 			}
 			
 			//print result
@@ -127,7 +127,7 @@ public class HttpRequestUtils {
 				    Response response = call.execute();
 				    responseStr = response.body().string();
 				} catch (IOException e) {
-					log.error(e.getMessage());
+					log.error(e);
 				}
 				
 				//print result
