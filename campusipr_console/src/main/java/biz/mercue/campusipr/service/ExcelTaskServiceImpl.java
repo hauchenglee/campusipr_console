@@ -435,7 +435,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			int emptyRowIndex = emptyRowList.get(r);
 			log.info("emptyRowList.size(): "+emptyRowList.size()+", emptyRowIndex: "+emptyRowIndex);
 			book.getSheetAt(0).removeRow(sheet.getRow(emptyRowIndex));
-//			book.getSheetAt(0).shiftRows(emptyRowIndex, emptyRowIndex+1, -10);
+//			book.getSheetAt(0).shiftRows(emptyRowIndex+1, sheet.getLastRowNum(), -1);
 			log.info("移除成功第"+emptyRowIndex+"行");
 		}
 		
@@ -460,6 +460,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				log.info("Title Row");
 			} else {
 				if(sheet.getRow(rowIndex)== null){
+					log.info("break");
 					break;
 				}else {
 					String countryName = null;
@@ -565,13 +566,13 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 									}
 									// type is string
 									if (cellType == 1) {
-										if(row.getCell(excelFieldIndex).getStringCellValue()=="") {
+										patentApplNo = row.getCell(excelFieldIndex).getStringCellValue().replaceAll("[\\s\\u00A0]+","").trim();
+										if(row.getCell(excelFieldIndex).getStringCellValue()=="" ||patentApplNo.isEmpty()) {
 											errorRowList.add(rowIndex);
 											errorColumnList.add(fieldMap.getExcel_field_index());
 											log.info("ErrorIndex:申請號為''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
 											break;
 										}
-										patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
 										log.info(patentApplNo);
 									}
 									patent.setPatent_appl_no(patentApplNo);
