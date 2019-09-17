@@ -249,6 +249,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 					    Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
 						String extensionName =FilenameUtils.getExtension(excel.getName());
 						log.info(extensionName);
+//						List<Patent> listPatent = this.readBook2Patent(removeRow(book), filedList, other_info_index, bean.getExcel_task_id());
 						List<Patent> listPatent = this.readBook2Patent(book, filedList, other_info_index, bean.getExcel_task_id());
 						if (listPatent == null || listPatent.size() == 0) {
 							mapPatent.put(Constants.INT_DATA_ERROR, null);
@@ -279,6 +280,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			}
 		}catch (Exception e) {
 			log.error("Exception :"+e.getMessage());
+			e.printStackTrace();
 		}finally {
 			if(fileInputStream!=null) {
 				try {
@@ -373,59 +375,192 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		}
 		
 	}
-		
+	
+	private Workbook removeRow (Workbook book) {
+//		Sheet sheet = book.getSheetAt(0);
+//		int physicalNumberOfRows =  sheet.getPhysicalNumberOfRows();
+//		log.info(physicalNumberOfRows);
+//		int emptyCell = 0;
+//		int x = 0;
+//		int y = 0;
+//		List<Integer> emptyRowList = new ArrayList<Integer>();
+////		List<Integer> formatRowList = new ArrayList<Integer>();
+//		log.info("Row: "+sheet.getLastRowNum());
+//		Row testRow = sheet.getRow(y);
+//		Set<Integer> emptySet = new HashSet<Integer>();
+//		for (y = 0; y < sheet.getLastRowNum(); y++) {
+//			log.info(y +"行，有 "+testRow.getLastCellNum()+"格");
+//						
+//			if (sheet.getRow(y) == null) {
+//				book.getSheetAt(0).createRow(y);
+////				log.info(sheet.getRow(y).getLastCellNum());
+//				if(sheet.getRow(y).getLastCellNum()==-1){
+//					emptyRowList.add(y);
+//					emptySet.add(y);
+//					log.info(y +": Row is null");
+//				}
+//			}
+//
+//			if (sheet.getRow(y) != null&&sheet.getRow(y).isFormatted()&&sheet.getRow(y).getLastCellNum()==-1) {
+//				emptyRowList.add(y);
+//				emptySet.add(y);
+//				log.info(y + "行有格式");
+//			}
+//			if(sheet.getRow(y) != null) {
+//				if(sheet.getRow(y).getLastCellNum()== -1&&!sheet.getRow(y).isFormatted()) {
+//					emptyRowList.add(y);
+//					emptySet.add(y);
+//					log.info(y + "行有格式，ROW == -1");
+//				}
+//				for (x = 0; x < sheet.getRow(y).getLastCellNum(); x++) {
+//					if (sheet.getRow(y).getCell(x) == null || sheet.getRow(y).getCell(x).getCellType() == 3
+//							|| sheet.getRow(y).getCell(x).getCellType() == Cell.CELL_TYPE_BLANK
+//							|| sheet.getRow(y).getLastCellNum() == -1) {
+//						emptyCell++;
+//					}
+//					
+//					if (testRow.getCell(x).getCellTypeEnum() == CellType.STRING) {
+//						if (sheet.getRow(y).getCell(x) != null) {
+//							sheet.getRow(y).getCell(x).setCellType(CellType.STRING);
+//						}
+//					}
+//					if (emptyCell == sheet.getRow(y).getLastCellNum()) {
+//						log.info(y);
+//						emptyRowList.add(y);
+//						emptySet.add(y);
+//						log.info(y + "行是空行");
+//					}
+//				}
+//				emptyCell=0;
+//			}
+//		}
+//		for(int r = 0;r<emptyRowList.size();r++) {
+//			int emptyRowIndex = emptyRowList.get(r);
+//			if(sheet.getRow(emptyRowIndex) != null) {
+//				log.info("emptyRowList.size(): "+emptyRowList.size()+", emptyRowIndex: "+emptyRowIndex);
+//				book.getSheetAt(0).removeRow(sheet.getRow(emptyRowIndex));
+////				log.info("成功移除第"+emptyRowIndex+"行");
+//			}
+//		}
+//		if (sheet.getRow(y) == null) {
+//			book.getSheetAt(0).createRow(y);
+//			log.info(sheet.getRow(y).getLastCellNum());
+//			if(sheet.getRow(y).getLastCellNum()==-1){
+//				log.info(y +": Row is null");
+//			}
+//		}
+//		if (sheet.getRow(y) != null&&sheet.getRow(y).isFormatted()) {
+//			if(sheet.getRow(y).getLastCellNum()==-1){
+//				log.info(y + "行有格式");
+//			}
+//		}
+//		Iterator<Integer> shiftIndex = emptySet.iterator();
+//		List<Integer> sortEmpty = new ArrayList<Integer>(emptySet); 
+//		Collections.sort(sortEmpty);
+//		log.info(sortEmpty);
+//		for(int r = 0;r<sortEmpty.size();r++) {
+//			int emptyRowIndex = sortEmpty.get(r);
+//			book.getSheetAt(0).shiftRows((emptyRowIndex+1-r), sheet.getLastRowNum(), -1);
+////			log.info("移除成功第"+(emptyRowIndex+1-r)+"行");
+//		}
+//				
+//		File f = null;
+//		String fName = KeyGeneratorUtils.generateRandomString();
+//		f = new File(Constants.FILE_UPLOAD_PATH + fName +".xls");
+//		try {
+//			FileOutputStream fos = new FileOutputStream(f);
+//			book.write(fos);
+//			fos.close();
+//			log.info("內容移除結束");
+//			log.info(f);
+//		} catch (Exception e) {
+//			log.error(e);
+//		}
+		return book;
+	}
+
 	private List<Patent> readBook2Patent(Workbook book, List<FieldMap> listField, List<Integer> other_info_index, String excelTaskId) {
 		log.info("readBook2Patent");
 		String pattern = "[0-9]";
-
 		List<Patent> listPatent = new ArrayList<Patent>();
 		Sheet sheet = book.getSheetAt(0);
+		int physicalNumberOfRows =  sheet.getPhysicalNumberOfRows();
+		log.info(physicalNumberOfRows);
 		int rowIndex = 0;
-		int emptyRow = 0;
 		int emptyCell = 0;
 		int x = 0;
 		int y = 0;
 		List<Integer> errorRowList = new ArrayList<Integer>();
 		List<Integer> errorColumnList = new ArrayList<Integer>();
 		List<Integer> emptyRowList = new ArrayList<Integer>();
-		List<Integer> formatRowList = new ArrayList<Integer>();
 		List<Country> listCountry = countryDao.getAll();
-		log.info("Row: "+sheet.getLastRowNum());
-		Row testRow = sheet.getRow(y);
-		
+		log.info("getLastRowNum: "+sheet.getLastRowNum());
+		Set<Integer> emptySet = new HashSet<Integer>();
 		for (y = 0; y < sheet.getLastRowNum(); y++) {
-//			log.info(y +"行，有 "+testRow.getLastCellNum()+"格");
 			
+//			log.info(y +"行，有 "+sheet.getRow(y).getLastCellNum()+"格");
+						
 			if (sheet.getRow(y) == null) {
-				log.info(y +": Row is null");
 				book.getSheetAt(0).createRow(y);
-				log.info(sheet.getRow(y).getLastCellNum());
+//				log.info(sheet.getRow(y).getLastCellNum());
 				if(sheet.getRow(y).getLastCellNum()==-1){
 					emptyRowList.add(y);
+					emptySet.add(y);
+//					log.info(y +": Row is null");
 				}
 			}
-			if (sheet.getRow(y) != null&&sheet.getRow(y).isFormatted()) {
-				formatRowList.add(y);
+
+			if (sheet.getRow(y) != null&&sheet.getRow(y).isFormatted()&&sheet.getRow(y).getLastCellNum()==-1) {
+				emptyRowList.add(y);
+				emptySet.add(y);
 //				log.info(y + "行有格式");
-				if(sheet.getRow(y).getLastCellNum()==-1){
-					emptyRowList.add(y);
-				}
 			}
 			if(sheet.getRow(y) != null) {
+				if(sheet.getRow(y).getLastCellNum()== -1&&!sheet.getRow(y).isFormatted()) {
+					emptyRowList.add(y);
+					emptySet.add(y);
+//					log.info(y + "行有格式，ROW == -1");
+				}
 				for (x = 0; x < sheet.getRow(y).getLastCellNum(); x++) {
+
 					if (sheet.getRow(y).getCell(x) == null || sheet.getRow(y).getCell(x).getCellType() == 3
 							|| sheet.getRow(y).getCell(x).getCellType() == Cell.CELL_TYPE_BLANK
 							|| sheet.getRow(y).getLastCellNum() == -1) {
 						emptyCell++;
+//						if(sheet.getRow(y).getCell(x) == null) {
+//							log.info("a");
+//						}else if(sheet.getRow(y).getCell(x).getCellType() == 3) {
+//							log.info("b");
+//						}else if(sheet.getRow(y).getCell(x).getCellType() == Cell.CELL_TYPE_BLANK) {
+//							log.info("c");
+//						}else if(sheet.getRow(y).getLastCellNum() == -1) {
+//							log.info("d");
+//						}else {
+//							log.info("e");
+//						}
+//						log.info(emptyCell);
 					}
-					
-					if (testRow.getCell(x).getCellTypeEnum() == CellType.STRING) {
-						if (sheet.getRow(y).getCell(x) != null) {
-							sheet.getRow(y).getCell(x).setCellType(CellType.STRING);
+					if(sheet.getRow(y).getCell(x) != null) {
+						int type = sheet.getRow(y).getCell(x).getCellType();
+						if (type == 1) {
+							String value =sheet.getRow(y).getCell(x).getStringCellValue().trim().replaceAll("[\\s\\u00A0]+","");
+							if(value.isEmpty() || value==null || value=="") {
+								emptyCell++;
+//								log.info("type 1 empty ");
+							}
+//							log.info("type 1 :" + value);
 						}
 					}
 					if (emptyCell == sheet.getRow(y).getLastCellNum()) {
 						emptyRowList.add(y);
+						emptySet.add(y);
+//						log.info(y + "行是空行");
+					}
+					
+					if(sheet.getRow(y).getLastCellNum()==1 && sheet.getRow(y).getCell(sheet.getRow(rowIndex).getLastCellNum())==null) {
+						emptyRowList.add(y);
+						emptySet.add(y);
+//						log.info(y + "行是空行，有空格的那種");
 					}
 				}
 				emptyCell=0;
@@ -433,36 +568,34 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		}
 		for(int r = 0;r<emptyRowList.size();r++) {
 			int emptyRowIndex = emptyRowList.get(r);
-			log.info("emptyRowList.size(): "+emptyRowList.size()+", emptyRowIndex: "+emptyRowIndex);
-			book.getSheetAt(0).removeRow(sheet.getRow(emptyRowIndex));
-//			book.getSheetAt(0).shiftRows(emptyRowIndex+1, sheet.getLastRowNum(), -1);
-			log.info("移除成功第"+emptyRowIndex+"行");
-		}
-		
-		if (sheet.getRow(y) == null) {
-			log.info(y +": Row is null");
-			book.getSheetAt(0).createRow(y);
-			log.info(sheet.getRow(y).getLastCellNum());
-			if(sheet.getRow(y).getLastCellNum()==-1){
-				log.info(y +": Row is null");
+			if(sheet.getRow(emptyRowIndex) != null) {
+//				log.info("emptyRowList.size(): "+emptyRowList.size()+", emptyRowIndex: "+emptyRowIndex);
+				book.getSheetAt(0).removeRow(sheet.getRow(emptyRowIndex));
+//				log.info("成功移除第"+emptyRowIndex+"行");
 			}
 		}
-		if (sheet.getRow(y) != null&&sheet.getRow(y).isFormatted()) {
-			formatRowList.add(y);
-			log.info(y + "行有格式");
-			if(sheet.getRow(y).getLastCellNum()==-1){
-				log.info(y + "行有格式");
-			}
+		List<Integer> sortEmpty = new ArrayList<Integer>(emptySet); 
+		Collections.sort(sortEmpty);
+		log.info("emptyRow: "+sortEmpty);
+		for(int r = 0;r<sortEmpty.size();r++) {
+			int emptyRowIndex = sortEmpty.get(r);
+			book.getSheetAt(0).shiftRows((emptyRowIndex+1-r), sheet.getLastRowNum(), -1);
+//			log.info("移除成功第"+(emptyRowIndex+1-r)+"行");
 		}
 		for (Row row : sheet) {
 //			log.info("Row");
 			if (rowIndex == 0) {
 				log.info("Title Row");
 			} else {
-				if(sheet.getRow(rowIndex)== null){
+				if(sheet.getRow(rowIndex)== null ||sheet.getRow(rowIndex).getLastCellNum()==-1 
+						|| (sheet.getRow(rowIndex).getLastCellNum()==1 && row.getCell(sheet.getRow(rowIndex).getLastCellNum())==null)
+						|| (rowIndex >= (sheet.getLastRowNum()))){
 					log.info("break");
 					break;
 				}else {
+					int lastCell = sheet.getRow(rowIndex).getLastCellNum();
+					log.info(lastCell);
+					
 					String countryName = null;
 					Patent patent = new Patent();
 					PatentExtension patentExtension = new PatentExtension();
@@ -832,7 +965,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 //		log.info("rowIndex: "+rowIndex);
 		int errorRowIndex = errorRowList.size();
 		log.info(errorRowIndex);
-//		if (errorColumnList.isEmpty() || errorRowList.isEmpty() || book.getSheetAt(0).getRow(errorRowIndex)==null)
 		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
 			return listPatent;
 		} else {

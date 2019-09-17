@@ -707,7 +707,7 @@ public class ExcelUtils {
 
 
 		for (Cell cell : row) {
-			log.info("cell :"+cell.getColumnIndex()+" /"+cell.getStringCellValue());
+//			log.info("cell :"+cell.getColumnIndex()+" /"+cell.getStringCellValue());
 			titleMap.put(cell.getStringCellValue(), cell.getColumnIndex());
 			
 		}
