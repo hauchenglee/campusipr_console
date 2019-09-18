@@ -589,7 +589,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			} else {
 				if(sheet.getRow(rowIndex)== null ||sheet.getRow(rowIndex).getLastCellNum()==-1 
 						|| (sheet.getRow(rowIndex).getLastCellNum()==1 && row.getCell(sheet.getRow(rowIndex).getLastCellNum())==null)
-						|| (rowIndex >= (sheet.getLastRowNum()))){
+						|| (rowIndex >= (sheet.getLastRowNum())&&sheet.getLastRowNum()>1)){
 					log.info("break");
 					break;
 				}else {
@@ -636,7 +636,8 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 									log.info("無國家- row:"+rowIndex+"、col:" +fieldMap.getExcel_field_index());
 								}
 								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-									countryName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue();
+									countryName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue().trim().replaceAll("[\\s\\u00A0]+","");
+									log.info(countryName);
 									if (!StringUtils.isNULL(countryName)) {
 										for (Country country : listCountry) {
 											if (country.getCountry_name().contains(countryName)
