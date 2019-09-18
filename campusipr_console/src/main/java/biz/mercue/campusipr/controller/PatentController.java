@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+import biz.mercue.campusipr.model.*;
+import biz.mercue.campusipr.service.*;
 import biz.mercue.campusipr.util.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -42,50 +44,31 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import biz.mercue.campusipr.model.Admin;
-import biz.mercue.campusipr.model.AdminToken;
-import biz.mercue.campusipr.model.ExcelTask;
-import biz.mercue.campusipr.model.ListQueryForm;
-import biz.mercue.campusipr.model.Patent;
-import biz.mercue.campusipr.model.PatentEditHistory;
-import biz.mercue.campusipr.model.PatentFamily;
-import biz.mercue.campusipr.model.PatentField;
-import biz.mercue.campusipr.model.PatentStatus;
-import biz.mercue.campusipr.model.Permission;
-import biz.mercue.campusipr.model.Status;
-import biz.mercue.campusipr.model.View;
 import biz.mercue.campusipr.model.View.PatentDetail;
 import biz.mercue.campusipr.model.View.Reminder;
-import biz.mercue.campusipr.service.AdminService;
-import biz.mercue.campusipr.service.AdminTokenService;
-import biz.mercue.campusipr.service.ExcelTaskService;
-import biz.mercue.campusipr.service.ExcelTaskServiceImpl;
-import biz.mercue.campusipr.service.FieldService;
-import biz.mercue.campusipr.service.PatentService;
-import biz.mercue.campusipr.service.PermissionService;
 
 @Controller
 public class PatentController {
-
 	private Logger log = Logger.getLogger(this.getClass().getName());
-	
-	
+
 	@Autowired
 	PatentService patentService;
-	
-	
+
 	@Autowired
 	PermissionService permissionService;
-	
+
 	@Autowired
 	AdminService adminService;
-	
+
 	@Autowired
 	AdminTokenService adminTokenService;
-	
+
+	@Autowired
+	BusinessService businessService;
+
 	@Autowired
 	ExcelTaskService excelTaskService;
-	
+
 	@Autowired
 	FieldService fieldService;
 	
@@ -149,7 +132,7 @@ public class PatentController {
 	
 	@RequestMapping(value="/api/addpatentbyapplno", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String addPatentByApplNo(HttpServletRequest request,@RequestBody String receiveJSONString) {
+	public String addPatentByApplNo(HttpServletRequest request,@RequestBody String receiveJSONString, @RequestParam(value ="businessId",required=false) String businessId) {
 		log.info("addPatentByApplNo ");
 		
 		BeanResponseBody responseBody  = new BeanResponseBody();
@@ -160,17 +143,20 @@ public class PatentController {
 			String ip = request.getRemoteAddr();
 			Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
 			Admin admin = adminService.getById(Constants.SYSTEM_ADMIN);
+			if (StringUtils.isNULL(businessId)) {
+				businessId = tokenBean.getBusiness_id();
+			}
+			Business business = businessService.getById(businessId);
 			patent.setAdmin(admin);
 			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
-			patent.setBusiness(tokenBean.getBusiness());
+			patent.setBusiness(business);
 			patent.setAdmin_ip(ip);
-			int taskResult = patentService.addPatentByApplNo(patent, tokenBean.getAdmin(), tokenBean.getBusiness(), patent.getSourceFrom());
+			int taskResult = patentService.addPatentByApplNo(patent, tokenBean.getAdmin(), business, patent.getSourceFrom());
 			
 			//TODO charles
 //			patentService.syncPatentStatus(patent);
 			responseBody.setCode(taskResult);
 			responseBody.setBean(patent);
-			
 		}else {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}

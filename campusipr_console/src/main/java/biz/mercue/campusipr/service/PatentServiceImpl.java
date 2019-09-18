@@ -249,6 +249,17 @@ public class PatentServiceImpl implements PatentService {
 		}
 		patent.addBusiness(patent.getBusiness());
 
+		/*
+		如果專利已同步公開，自動賦予平台中心端權限（加上business）
+		排除：平台方自己新增情況。
+		排除原因：add patent已在patent.addBusiness(patent.getBusiness());新增過一次
+		 */
+		String adderBusinessId = patent.getBusiness().getBusiness_id();
+		if (patent.isIs_sync() && !adderBusinessId.equals(Constants.BUSINESS_PLATFORM)) {
+            Business platformBusiness = businessDao.getById(Constants.BUSINESS_PLATFORM);
+            patent.addBusiness(platformBusiness);
+        }
+
 		List<Assignee> listAssignee = patent.getListAssignee();
 		if (listAssignee != null && listAssignee.size() > 0) {
 			for (Assignee assignee : listAssignee) {
@@ -380,6 +391,11 @@ public class PatentServiceImpl implements PatentService {
 				}
 			}
 
+            /*
+            新增全新專利條件：
+            條件一：如果資料庫沒有任何同樣申請號並且已同步公開的專利
+            條件二：如果資料庫沒有任何兩筆同樣primary key的專利
+             */
 			if (!isSync && !isSamePatent) {
 				this.addPatent(editPatent);
 				patentHistoryFirstAdd(editPatent, editPatent.getPatent_id(), business.getBusiness_id());
@@ -1422,6 +1438,20 @@ public class PatentServiceImpl implements PatentService {
 					dbBean.addBusiness(patent.getBusiness());
 				}
 			}
+
+			// 如果專利已公開，將平台權限加入專利
+            boolean hasPlatform = false;
+            for (Business business : dbBean.getListBusiness()) {
+                if (business.getBusiness_id().equals(Constants.BUSINESS_PLATFORM)) {
+                    hasPlatform = true;
+                    break;
+                }
+            }
+            if (patent.isIs_sync() && !hasPlatform) {
+                Business platformBusiness = businessDao.getById(Constants.BUSINESS_PLATFORM);
+                dbBean.addBusiness(platformBusiness);
+            }
+
 			handleReminder(patent, dbBean.getListBusiness());
 			return Constants.INT_SUCCESS;
 		} else {
