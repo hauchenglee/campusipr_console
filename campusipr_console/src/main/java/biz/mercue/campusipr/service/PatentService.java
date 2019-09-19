@@ -27,6 +27,8 @@ public interface PatentService {
 
 	Map<String, Patent> addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip);
 
+    void syncPatentDataBySchedule(Patent patent);
+
 	JSONObject checkNoPublicApplNo(Patent editPatent, Business business);
 
 	int addPatentByNoPublicApplNo(Patent editPatent, Business business, Admin admin);
@@ -44,6 +46,8 @@ public interface PatentService {
 	int authorizedUpdatePatent(String businessId, Patent patent);
 
 	List<Patent> getExcelByPatentIds(List<String> idList, String businessId);
+
+	List<Patent> getPatentList();
 
 	ListQueryForm getByBusinessId(String businessId, int page, String orderFieldId, int is_asc);
 

@@ -121,7 +121,25 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 			delete(dbBean);
 		}
 	}
-	
+
+	@Override
+	public List<String> getBusinessIdsByPatentId(String patentId) {
+		String hql = "select plb.business_id from Patent as p join p.listBusiness as plb where p.patent_id = :patentId";
+		Session session = getSession();
+		session.disableFilter("businessFilter");
+		Query query = session.createQuery(hql);
+		query.setParameter("patentId", patentId);
+		return query.list();
+	}
+
+	@Override
+	public List<Patent> getPatentList() {
+		String hql = "select p from Patent as p";
+		Session session = getSession();
+		Query query = session.createQuery(hql);
+		return query.list();
+	}
+
 	@Override
 	public List<Patent> getByBusinessId(String businessId) {
 		Criteria criteria =  createEntityCriteria();

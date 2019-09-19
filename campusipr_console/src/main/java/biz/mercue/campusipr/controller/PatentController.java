@@ -471,75 +471,53 @@ public class PatentController {
 
     @RequestMapping(value = "/api/getallexcelfield", method = {RequestMethod.GET }, produces = Constants.CONTENT_TYPE_JSON)
     @ResponseBody
-    public String getAllExcelField(HttpServletRequest request) {
-        log.info("getAllExcelField");
-        ListResponseBody responseBody  = new ListResponseBody();
-        try {
-            AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-            //tokenBean = new AdminToken();
-            if (tokenBean != null) {
-                responseBody.setCode(Constants.INT_SUCCESS);
-                responseBody.setList(fieldService.getAllFields());
-            } else {
-                responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-            }
-        } catch (Exception e) {
-            log.error("Exception :" + e.getMessage());
-            responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
-        }
-
-        return responseBody.getJacksonString(View.FieldMap.class);
-    }
+	public String getAllExcelField(HttpServletRequest request) {
+		log.info("getAllExcelField");
+		ListResponseBody responseBody = new ListResponseBody();
+		AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+		//tokenBean = new AdminToken();
+		if (tokenBean != null) {
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setList(fieldService.getAllFields());
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		}
+		return responseBody.getJacksonString(View.FieldMap.class);
+	}
 		
 	@RequestMapping(value = "/api/importpatentexcel", method = {
 			RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON, consumes = { "multipart/mixed",
 					"multipart/form-data" })
 	@ResponseBody
-	public String importPatentExcel(HttpServletRequest request, @RequestParam("file") MultipartFile file) {
+	public String importPatentExcel(HttpServletRequest request, @RequestParam("file") MultipartFile file) throws IOException {
 		log.info("importPatentExcel");
 		BeanResponseBody responseBody = new BeanResponseBody();
-		try {
-			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-			//tokenBean = new AdminToken();
-			if (tokenBean != null) {
-				log.info("1");
-				if (file != null && !file.getOriginalFilename().isEmpty()) {
-					ExcelTask task = excelTaskService.addTaskByFile(file, tokenBean.getAdmin());
-					responseBody.setCode(Constants.INT_SUCCESS);
-					responseBody.setBean(task);
-				}
-
-			} else {
-				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+		//tokenBean = new AdminToken();
+		if (tokenBean != null) {
+			if (file != null && !file.getOriginalFilename().isEmpty()) {
+				ExcelTask task = excelTaskService.addTaskByFile(file, tokenBean.getAdmin());
+				responseBody.setCode(Constants.INT_SUCCESS);
+				responseBody.setBean(task);
 			}
-		} catch (Exception e) {
-			log.error("Exception :" + e.getMessage());
-			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
-
 		return responseBody.getJacksonString(View.ExcelTask.class);
 	}
 	
-	
-	
 	@RequestMapping(value = "/api/gettaskfield/{taskId}", method = {RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String getTaskField(HttpServletRequest request, @PathVariable String taskId) {
+	public String getTaskField(HttpServletRequest request, @PathVariable String taskId) throws IOException {
 		log.info("getTaskField ");
 		BeanResponseBody responseBody = new BeanResponseBody();
-		try {
-			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-			if (tokenBean != null) {
-				ExcelTask task = excelTaskService.getTaskField(tokenBean.getAdmin(), taskId);
-				responseBody.setCode(Constants.INT_SUCCESS);
-				responseBody.setBean(task);
-
-			} else {
-				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-			}
-		} catch (Exception e) {
-			log.error("Exception :" + e.getMessage());
-			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if (tokenBean != null) {
+			ExcelTask task = excelTaskService.getTaskField(tokenBean.getAdmin(), taskId);
+			responseBody.setCode(Constants.INT_SUCCESS);
+			responseBody.setBean(task);
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
 		return responseBody.getJacksonString(View.ExcelTask.class);
 	}
@@ -551,22 +529,16 @@ public class PatentController {
 	public String previewExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) {
 		log.info("previewExcelTask ");
 		BeanResponseBody responseBody = new BeanResponseBody();
-		try {
-			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-			if (tokenBean != null) {
-				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
-				int result = excelTaskService.previewTask(task, tokenBean.getAdmin());
-				responseBody.setCode(result);
-				responseBody.setBean(task);
-			} else {
-				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
-			}
-			
-			responseBody.setCode(Constants.INT_SUCCESS);
-		} catch (Exception e) {
-			log.error("Exception :" + e.getMessage());
-			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+		AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if (tokenBean != null) {
+			ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
+			int result = excelTaskService.previewTask(task, tokenBean.getAdmin());
+			responseBody.setCode(result);
+			responseBody.setBean(task);
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
+		responseBody.setCode(Constants.INT_SUCCESS);
 		return responseBody.getJacksonString(View.ExcelTask.class);
 	}
 	
@@ -577,17 +549,14 @@ public class PatentController {
 		BeanResponseBody responseBody = new BeanResponseBody();
 		Map<Integer, List<Patent>> mapPatent = new HashMap<>();
 		String ip = request.getRemoteAddr();
-		try {
-			AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-			if (tokenBean != null) {
-				ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
-
-				mapPatent = excelTaskService.submitTask(task, tokenBean.getAdmin());
-				int responseBodyCode = Constants.INT_SYSTEM_PROBLEM;
-
-				for (Integer mapPatentKey : mapPatent.keySet()) {
-					log.info("mapPatentKey: " + mapPatentKey);
-					switch (mapPatentKey) {
+		AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if (tokenBean != null) {
+			ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
+			mapPatent = excelTaskService.submitTask(task, tokenBean.getAdmin());
+			int responseBodyCode = Constants.INT_SYSTEM_PROBLEM;
+			for (Integer mapPatentKey : mapPatent.keySet()) {
+				log.info("mapPatentKey: " + mapPatentKey);
+				switch (mapPatentKey) {
 					case Constants.INT_SUCCESS:
 						Map<String, Patent> mergeMap = patentService.addPatentByExcel(mapPatent.get(mapPatentKey), tokenBean.getAdmin(), tokenBean.getBusiness(), ip);
 						if (mergeMap != null && !mergeMap.isEmpty()) {
@@ -605,24 +574,16 @@ public class PatentController {
 					case Constants.INT_SYSTEM_PROBLEM:
 						responseBodyCode = Constants.INT_SYSTEM_PROBLEM;
 						break;
-					}
 				}
-				responseBody.setCode(responseBodyCode);
-				responseBody.setBean(task);
-			} else {
-				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			}
-			
-		} catch (Exception e) {
-			log.error("Exception :" + e.getMessage());
-			responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
+			responseBody.setCode(responseBodyCode);
+			responseBody.setBean(task);
+		} else {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 		}
 		return responseBody.getJacksonString(View.ExcelTask.class);
 	}
-	
-	
-	
-	
+
 	@RequestMapping(value="/api/searchpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String searchPatent(HttpServletRequest request,

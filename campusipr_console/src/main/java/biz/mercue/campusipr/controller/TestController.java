@@ -8,6 +8,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import biz.mercue.campusipr.model.*;
+import biz.mercue.campusipr.service.*;
 import biz.mercue.campusipr.util.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.fileupload.disk.DiskFileItem;
@@ -28,13 +29,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
-
-import biz.mercue.campusipr.service.AdminTokenService;
-import biz.mercue.campusipr.service.PatentService;
-import biz.mercue.campusipr.service.PermissionService;
-import biz.mercue.campusipr.service.RoleService;
-import biz.mercue.campusipr.service.StatusService;
-import biz.mercue.campusipr.service.SysRolePermissionService;
 
 @Controller
 public class TestController {
@@ -64,6 +58,9 @@ public class TestController {
 	
 	@Autowired
 	ServletContext servletContext;
+
+	@Autowired
+	QuartzService quartzService;
 	
 	@RequestMapping(value="/test", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
@@ -86,9 +83,16 @@ public class TestController {
 	public String demo(HttpServletRequest request, @PathVariable String patentId, @RequestBody String receiveJSONString) {
 		log.info("/api/demo");
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
+		String businessId;
+		if (tokenBean != null) {
+			businessId = tokenBean.getBusiness_id();
+		} else {
+			businessId = Constants.BUSINESS_PLATFORM;
+		}
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
 		String str = jsonObject.optString("str1");
-		int result = patentService.demo("", tokenBean.getBusiness_id(), patentId, str);
+//		quartzService.createJob();
+		int result = patentService.demo("", businessId, patentId, str);
 		return "{\"aaa\": \"" + result + "\"}";
 	}
 	

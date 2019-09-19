@@ -28,6 +28,10 @@ public interface PatentDao {
 	
 	void delete(String id);
 
+    List<String> getBusinessIdsByPatentId(String patentId);
+
+    List<Patent> getPatentList();
+
 	List<Patent> getByBusinessId(String businessId,int page,int pageSize, String orderList, String orderFieldCode,int is_asc);
 	int  getCountByBusinessId(String businessId);	
 	

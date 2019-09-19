@@ -4,14 +4,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 
+import biz.mercue.campusipr.util.*;
 import org.apache.log4j.Logger;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SimpleTrigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.TriggerKey;
+import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +16,6 @@ import biz.mercue.campusipr.dao.ReminderDao;
 import biz.mercue.campusipr.model.PushTask;
 import biz.mercue.campusipr.model.ReminderTask;
 import biz.mercue.campusipr.model.SynchronizeTask;
-import biz.mercue.campusipr.util.PushSendJob;
-import biz.mercue.campusipr.util.ReminderSendJob;
-import biz.mercue.campusipr.util.ScheduleUtils;
-import biz.mercue.campusipr.util.SyncSendJob;
-
 
 
 @Service
@@ -148,5 +138,17 @@ public class QuartzService {
 	public void updateJob(SynchronizeTask bean) throws Exception {
 		removeJob(bean);
 		createJob(bean);
+	}
+
+	public void createJob() throws Exception {
+		JobDetail job = JobBuilder.newJob(AutoSyncPatentJob.class)
+				.withIdentity("syncPatent_job", "syncPatent")
+				.build();
+		SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
+				.withIdentity("syncPatent_tri", "syncPatent")
+				.startNow()
+				.withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(30).repeatForever())
+				.build();
+		scheduler.scheduleJob(job, trigger);
 	}
 }
