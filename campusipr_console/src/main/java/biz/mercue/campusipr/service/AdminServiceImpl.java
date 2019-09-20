@@ -59,45 +59,24 @@ public class AdminServiceImpl implements AdminService{
 
 	@Override
 	public int login(String email, String password) {
-		
 		Admin dbBean = dao.getByEmail(email);
-		
-		if(dbBean != null){
-			try {
-				if (encoder.matches(password, dbBean.getAdmin_password())) {
-					
-					Role roleBean = dbBean.getRole();
-					if(roleBean!= null) {
-
-						List<Permission> list = roleBean.getPermissionList();
-						boolean hasPermission = false;
-						
-						if(!list.isEmpty()){
-							hasPermission = true;
-						}
-						
-						if(hasPermission){
-							return Constants.INT_SUCCESS;
-						}else{
-							return Constants.INT_NO_PERMISSION;
-						}
-					}else {
-						return Constants.INT_NO_PERMISSION;
-					}
-				} else {
-					log.info("login fail, password error");
-					return Constants.INT_PASSWORD_ERROR;
-				}
-			} catch (Exception e) {
-				log.error("Exception : " + e.getMessage());
-			} 
-			
-		}else{
+		if (dbBean == null) {
 			return Constants.INT_CANNOT_FIND_DATA;
-			
 		}
-		
-		return Constants.INT_SYSTEM_PROBLEM;
+		if (!encoder.matches(password, dbBean.getAdmin_password())) {
+			log.info("login fail, password error");
+			return Constants.INT_PASSWORD_ERROR;
+		}
+		Role roleBean = dbBean.getRole();
+		if (roleBean == null) {
+			return Constants.INT_NO_PERMISSION;
+		}
+		List<Permission> list = roleBean.getPermissionList();
+		if (!list.isEmpty() && dbBean.isAvailable()) {
+			return Constants.INT_SUCCESS;
+		} else {
+			return Constants.INT_NO_PERMISSION;
+		}
 	}
 
 	@Override
