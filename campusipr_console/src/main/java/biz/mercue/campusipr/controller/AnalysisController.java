@@ -2,6 +2,7 @@ package biz.mercue.campusipr.controller;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -463,32 +464,39 @@ public class AnalysisController {
 
 	@RequestMapping(value="/api/exportschooloverviewbyyear", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<InputStreamResource> exportSchoolByYear(HttpServletRequest request,@RequestBody String receiveJSONString){
+	public ResponseEntity<InputStreamResource> exportSchoolByYear(HttpServletRequest request,@RequestBody String receiveJSONString) throws IOException{
 		log.info("export Patent By Year ");
 		StringResponseBody responseBody  = new StringResponseBody();
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		if(tokenBean!=null) {
-			JSONObject jsonObject = new JSONObject(receiveJSONString);
-			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			String businessId = jsonObject.optString("business_id");
-			Long beginTime = jsonObject.optLong("beginTime");
-			Long endTime = jsonObject.optLong("endTime");
-			if(tokenBean.checkPermission(permission.getPermission_id())) {			
-				HttpHeaders headers = new HttpHeaders();
-				String fileName = "school_Overview";
-				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
-				ByteArrayInputStream fileOut = analysisService.exportSchoolOverviewByYear(businessId, beginTime, endTime);
-				return ResponseEntity
-		                .ok()
-		                .headers(headers)
-		                .contentType(MediaType.parseMediaType("application/ms-excel"))
-		                .body(new InputStreamResource(fileOut));
+		try {
+			if(tokenBean!=null) {
+				JSONObject jsonObject = new JSONObject(receiveJSONString);
+				Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+				String businessId = jsonObject.optString("business_id");
+				Long beginTime = jsonObject.optLong("beginTime");
+				Long endTime = jsonObject.optLong("endTime");
+				if(tokenBean.checkPermission(permission.getPermission_id())) {
+					HttpHeaders headers = new HttpHeaders();
+					String fileName = "school_Overview";
+					headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
+					ByteArrayInputStream fileOut = analysisService.exportSchoolOverviewByYear(businessId, beginTime, endTime);
+										
+					return ResponseEntity
+			                .ok()
+			                .headers(headers)
+			                .contentType(MediaType.parseMediaType("application/ms-excel"))
+			                .body(new InputStreamResource(fileOut));
+				} else {
+					responseBody.setCode(Constants.INT_NO_PERMISSION);
+					return null;
+				}
 			} else {
-				responseBody.setCode(Constants.INT_NO_PERMISSION);
+				responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 				return null;
 			}
-		} else {
-			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			log.error(e);
 			return null;
 		}
 	}

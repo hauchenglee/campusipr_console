@@ -64,7 +64,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 //		log.info("歷年專利申請數量");
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct patent_appl_no), date_format(p.patent_appl_date, '%Y')"
-						+ "FROM Patent as p " + "JOIN p.listBusiness as lb " 
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb " 
 						+ "WHERE p.is_sync = 1 " 
 						+ "and lb.business_id = :businessId "
 						+ "GROUP BY date_format(patent_appl_date, '%Y') "
@@ -887,6 +888,140 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
+	
+	//NEW FUNCTION學校預設"任狀態"專利數量，歷年長條圖
+	@Override
+	public List<Analysis> getNoticePatent(String businessId){
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct patent_appl_no), date_format(p.patent_appl_date, '%Y') "
+					+ "FROM Patent as p " 
+					+ "JOIN p.listBusiness as lb "
+					+ "JOIN p.listPatentStatus as ls "
+					+ "JOIN ls.primaryKey.status as lsps "
+					+ "where lb.business_id = :businessId "
+					+ "and lsps.status_desc = :statusDesc "
+					+ "and p.is_sync = 1 "
+					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "and ls.create_date = "
+						+ "( select MAX(ls.create_date) "
+						+ "FROM p.listPatentStatus as ls "
+						+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+					+ "group by date_format(p.patent_appl_date, '%Y')";
+			
+		Query q = session.createQuery(queryStr);
+		String statusDesc = "公開";
+		if (!StringUtils.isNULL(businessId)) {
+				q.setParameter("businessId", businessId);
+		}
+		q.setParameter("statusDesc", statusDesc);
+	//	log.info(q.list().isEmpty());
+		return q.list();
+	}
+
+	//NEW FUNCTION學校"任狀態"專利數量By year，歷年長條圖
+	@Override
+	public List<Analysis> getNoticePatentByyear(String businessId, Long beginDate, Long endDate){
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct patent_appl_no), date_format(p.patent_appl_date, '%Y') "
+					+ "FROM Patent as p " 
+					+ "JOIN p.listBusiness as lb "
+					+ "JOIN p.listPatentStatus as ls "
+					+ "JOIN ls.primaryKey.status as lsps "
+					+ "where lb.business_id = :businessId "
+					+ "and lsps.status_desc = :statusDesc "
+					+ "and p.is_sync = 1 "
+					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "
+					+ "and ls.create_date = "
+						+ "( select MAX(ls.create_date) "
+						+ "FROM p.listPatentStatus as ls "
+						+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+					+ "group by date_format(p.patent_appl_date, '%Y')";
+			
+		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		String statusDesc = "公開";
+		if (!StringUtils.isNULL(businessId)) {
+				q.setParameter("businessId", businessId);
+		}
+		q.setParameter("statusDesc", statusDesc);
+	//	log.info(q.list().isEmpty());
+		return q.list();
+	}
+	
+	//NEW FUNCTION學校預設"任狀態"專利數量
+	@Override
+	public int countNoticePatent(String businessId){
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct patent_appl_no)"
+					+ "FROM Patent as p " 
+					+ "JOIN p.listBusiness as lb "
+					+ "JOIN p.listPatentStatus as ls "
+					+ "JOIN ls.primaryKey.status as lsps "
+					+ "where lb.business_id = :businessId "
+					+ "and lsps.status_desc = :statusDesc "
+					+ "and p.is_sync = 1 "
+					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "and ls.create_date = "
+						+ "( select MAX(ls.create_date) "
+						+ "FROM p.listPatentStatus as ls "
+						+ "where p.patent_id = ls.primaryKey.patent.patent_id ) ";
+			
+		Query q = session.createQuery(queryStr);
+		String statusDesc = "公開";
+		if (!StringUtils.isNULL(businessId)) {
+				q.setParameter("businessId", businessId);
+		}
+		q.setParameter("statusDesc", statusDesc);
+		long count = (long) q.uniqueResult();
+//		log.info(count);
+		return (int) count;
+	}
+	
+	//NEW FUNCTION學校預設"任狀態"專利數量By year
+	@Override
+	public int countNoticePatentByYear(String businessId, Long beginDate, Long endDate){
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct patent_appl_no)"
+					+ "FROM Patent as p " 
+					+ "JOIN p.listBusiness as lb "
+					+ "JOIN p.listPatentStatus as ls "
+					+ "JOIN ls.primaryKey.status as lsps "
+					+ "where lb.business_id = :businessId "
+					+ "and lsps.status_desc = :statusDesc "
+					+ "and p.is_sync = 1 "
+					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "
+					+ "and ls.create_date = "
+						+ "( select MAX(ls.create_date) "
+						+ "FROM p.listPatentStatus as ls "
+						+ "where p.patent_id = ls.primaryKey.patent.patent_id ) ";
+		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		String statusDesc = "公開";
+		if (!StringUtils.isNULL(businessId)) {
+				q.setParameter("businessId", businessId);
+		}
+		q.setParameter("statusDesc", statusDesc);
+		long count = (long) q.uniqueResult();
+//		log.info(count);
+		return (int) count;
+	}
+	
 	//平台端
 	//預設：專利組合
 	@Override
@@ -1013,7 +1148,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct p.patent_appl_no), date_format(p.patent_appl_date, '%Y')"
 						+ "FROM Patent as p " 
-						+ "WHERE p.is_sync = 1 " 
+						+ "WHERE p.is_sync = 1 "
+						+ "AND patent_appl_date is not null " 
 						+ "GROUP BY date_format(patent_appl_date, '%Y') "
 						+ "Order by date_format(patent_appl_date, '%Y') asc";
 

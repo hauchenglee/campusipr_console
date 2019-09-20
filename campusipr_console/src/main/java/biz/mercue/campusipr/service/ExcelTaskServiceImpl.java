@@ -376,109 +376,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		
 	}
 	
-	private Workbook removeRow (Workbook book) {
-//		Sheet sheet = book.getSheetAt(0);
-//		int physicalNumberOfRows =  sheet.getPhysicalNumberOfRows();
-//		log.info(physicalNumberOfRows);
-//		int emptyCell = 0;
-//		int x = 0;
-//		int y = 0;
-//		List<Integer> emptyRowList = new ArrayList<Integer>();
-////		List<Integer> formatRowList = new ArrayList<Integer>();
-//		log.info("Row: "+sheet.getLastRowNum());
-//		Row testRow = sheet.getRow(y);
-//		Set<Integer> emptySet = new HashSet<Integer>();
-//		for (y = 0; y < sheet.getLastRowNum(); y++) {
-//			log.info(y +"行，有 "+testRow.getLastCellNum()+"格");
-//						
-//			if (sheet.getRow(y) == null) {
-//				book.getSheetAt(0).createRow(y);
-////				log.info(sheet.getRow(y).getLastCellNum());
-//				if(sheet.getRow(y).getLastCellNum()==-1){
-//					emptyRowList.add(y);
-//					emptySet.add(y);
-//					log.info(y +": Row is null");
-//				}
-//			}
-//
-//			if (sheet.getRow(y) != null&&sheet.getRow(y).isFormatted()&&sheet.getRow(y).getLastCellNum()==-1) {
-//				emptyRowList.add(y);
-//				emptySet.add(y);
-//				log.info(y + "行有格式");
-//			}
-//			if(sheet.getRow(y) != null) {
-//				if(sheet.getRow(y).getLastCellNum()== -1&&!sheet.getRow(y).isFormatted()) {
-//					emptyRowList.add(y);
-//					emptySet.add(y);
-//					log.info(y + "行有格式，ROW == -1");
-//				}
-//				for (x = 0; x < sheet.getRow(y).getLastCellNum(); x++) {
-//					if (sheet.getRow(y).getCell(x) == null || sheet.getRow(y).getCell(x).getCellType() == 3
-//							|| sheet.getRow(y).getCell(x).getCellType() == Cell.CELL_TYPE_BLANK
-//							|| sheet.getRow(y).getLastCellNum() == -1) {
-//						emptyCell++;
-//					}
-//					
-//					if (testRow.getCell(x).getCellTypeEnum() == CellType.STRING) {
-//						if (sheet.getRow(y).getCell(x) != null) {
-//							sheet.getRow(y).getCell(x).setCellType(CellType.STRING);
-//						}
-//					}
-//					if (emptyCell == sheet.getRow(y).getLastCellNum()) {
-//						log.info(y);
-//						emptyRowList.add(y);
-//						emptySet.add(y);
-//						log.info(y + "行是空行");
-//					}
-//				}
-//				emptyCell=0;
-//			}
-//		}
-//		for(int r = 0;r<emptyRowList.size();r++) {
-//			int emptyRowIndex = emptyRowList.get(r);
-//			if(sheet.getRow(emptyRowIndex) != null) {
-//				log.info("emptyRowList.size(): "+emptyRowList.size()+", emptyRowIndex: "+emptyRowIndex);
-//				book.getSheetAt(0).removeRow(sheet.getRow(emptyRowIndex));
-////				log.info("成功移除第"+emptyRowIndex+"行");
-//			}
-//		}
-//		if (sheet.getRow(y) == null) {
-//			book.getSheetAt(0).createRow(y);
-//			log.info(sheet.getRow(y).getLastCellNum());
-//			if(sheet.getRow(y).getLastCellNum()==-1){
-//				log.info(y +": Row is null");
-//			}
-//		}
-//		if (sheet.getRow(y) != null&&sheet.getRow(y).isFormatted()) {
-//			if(sheet.getRow(y).getLastCellNum()==-1){
-//				log.info(y + "行有格式");
-//			}
-//		}
-//		Iterator<Integer> shiftIndex = emptySet.iterator();
-//		List<Integer> sortEmpty = new ArrayList<Integer>(emptySet); 
-//		Collections.sort(sortEmpty);
-//		log.info(sortEmpty);
-//		for(int r = 0;r<sortEmpty.size();r++) {
-//			int emptyRowIndex = sortEmpty.get(r);
-//			book.getSheetAt(0).shiftRows((emptyRowIndex+1-r), sheet.getLastRowNum(), -1);
-////			log.info("移除成功第"+(emptyRowIndex+1-r)+"行");
-//		}
-//				
-//		File f = null;
-//		String fName = KeyGeneratorUtils.generateRandomString();
-//		f = new File(Constants.FILE_UPLOAD_PATH + fName +".xls");
-//		try {
-//			FileOutputStream fos = new FileOutputStream(f);
-//			book.write(fos);
-//			fos.close();
-//			log.info("內容移除結束");
-//			log.info(f);
-//		} catch (Exception e) {
-//			log.error(e);
-//		}
-		return book;
-	}
-
 	private List<Patent> readBook2Patent(Workbook book, List<FieldMap> listField, List<Integer> other_info_index, String excelTaskId) {
 		log.info("readBook2Patent");
 		String pattern = "[0-9]";
@@ -690,6 +587,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 										errorRowList.add(rowIndex);
 										errorColumnList.add(fieldMap.getExcel_field_index());
 										log.info("ErrorIndex:申請號為null，cellType == 3- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+										break;
 									}
 									
 									// type is numeric --> need to add country name
@@ -697,6 +595,13 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 										log.info("type is numeric");
 										row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
 										patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
+										//有沒有含中文字or非需求字的判斷
+//										if(checkApplyNo(patentApplNo) ==true) {
+//											errorRowList.add(rowIndex);
+//											errorColumnList.add(fieldMap.getExcel_field_index());
+//											log.info("歐北輸入申請號''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+//											break;
+//										}
 									}
 									// type is string
 									if (cellType == 1) {
@@ -707,6 +612,13 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 											log.info("ErrorIndex:申請號為''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
 											break;
 										}
+										//有沒有含中文字or非需求字的判斷
+//										if(checkApplyNo(patentApplNo) ==true) {
+//										errorRowList.add(rowIndex);
+//										errorColumnList.add(fieldMap.getExcel_field_index());
+//										log.info("歐北輸入申請號''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());										
+//										break;
+//										}
 										log.info(patentApplNo);
 									}
 									patent.setPatent_appl_no(patentApplNo);

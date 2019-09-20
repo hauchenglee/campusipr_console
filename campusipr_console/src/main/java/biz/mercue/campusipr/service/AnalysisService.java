@@ -1,7 +1,10 @@
 package biz.mercue.campusipr.service;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
@@ -34,5 +37,6 @@ public interface AnalysisService {
 	JSONObject schoolData(JSONArray statusDesc, JSONArray businessId, JSONArray countryId);
 	ByteArrayInputStream exportPlatformSchoolByYear(JSONArray statusDesc, JSONArray businessName, JSONArray countryId,
 			Long beginDate, Long endDate);
-
+	
+	JSONObject statusData(String businessId, Long beginDate, Long endDate);
 }

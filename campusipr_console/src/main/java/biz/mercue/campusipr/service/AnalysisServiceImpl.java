@@ -2,6 +2,13 @@ package biz.mercue.campusipr.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,6 +17,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -1093,6 +1101,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 	
 			} catch (Exception e) {
 				log.error(e);
+				e.printStackTrace();
 			}
 			return analList;
 		}
@@ -1850,7 +1859,6 @@ public class AnalysisServiceImpl implements AnalysisService {
 		return new ByteArrayInputStream(fileOut.toByteArray());
 	}
 	
-	
 	@Override
 	public JSONObject schoolData (JSONArray statusDesc, JSONArray businessName, JSONArray countryId) {
 		List<Analysis> countList = new ArrayList<Analysis>();
@@ -1864,4 +1872,20 @@ public class AnalysisServiceImpl implements AnalysisService {
 		return result;
 	}
 	
+	@Override
+	public JSONObject statusData(String businessId, Long beginDate, Long endDate) {
+		List<Analysis> statusList = analysisDao.getNoticePatent(businessId);
+		List<Analysis> statusListByYear = analysisDao.getNoticePatentByyear(businessId, beginDate, endDate);
+//		statusList = analysisDao.getNoticePatent(businessId);
+//		statusListByYear = analysisDao.getNoticePatentByyear(businessId, beginDate, endDate);
+		int statusCount = analysisDao.countNoticePatent(businessId);
+		int statusCountByYear = analysisDao.countNoticePatentByYear(businessId, beginDate, endDate);
+		
+		JSONObject result = new JSONObject();
+		result.put("statusList", statusList);
+		result.put("statusListByYear", statusListByYear);
+		result.put("statusCount", statusCount);
+		result.put("statusCountByYear", statusCountByYear);
+		return result;
+	}
 }

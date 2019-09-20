@@ -12,6 +12,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -207,6 +209,18 @@ public class StringUtils {
 		}
 		return newApplNo;
 	}
-
+	public static boolean checkApplyNo(String applyNo) {
+		// Zoe 190920
+		boolean containOther = false;
+		String pattern = "[^A-Za-z0-9\\./,-]";
+		Pattern r  = Pattern.compile(pattern);
+		Matcher m = r.matcher(applyNo);
+		if(m.find()) {
+			containOther = true;
+		}else {
+			containOther = false;
+		}
+		return containOther;
+	}
 
 }
