@@ -80,7 +80,7 @@ public class TestController {
 
 	@RequestMapping(value="/api/demo/{patentId}", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String demo(HttpServletRequest request, @PathVariable String patentId, @RequestBody String receiveJSONString) {
+	public String demo(HttpServletRequest request, @PathVariable String patentId, @RequestBody String receiveJSONString) throws Exception {
 		log.info("/api/demo");
 		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
 		String businessId;
@@ -91,7 +91,7 @@ public class TestController {
 		}
 		JSONObject jsonObject = new JSONObject(receiveJSONString);
 		String str = jsonObject.optString("str1");
-//		quartzService.createJob();
+		quartzService.createAutoSyncPatentJob();
 		int result = patentService.demo("", businessId, patentId, str);
 		return "{\"aaa\": \"" + result + "\"}";
 	}

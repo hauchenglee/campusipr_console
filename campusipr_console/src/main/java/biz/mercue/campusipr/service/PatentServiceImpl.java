@@ -90,8 +90,6 @@ public class PatentServiceImpl implements PatentService {
 		List<Date> dateList = new ArrayList<>();
 		ListQueryForm form = new ListQueryForm();
 //			objectList = patentDao.demo(patentId, businessId);
-
-		log.info(objectList.size());
 		return Constants.INT_SUCCESS;
 	}
 	
@@ -813,6 +811,25 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	@Override
+	public void syncPatentDataBySchedule(Patent patent) {
+		String applNo = patent.getPatent_appl_no();
+		String applNoWithoutAt = StringUtils.getApplNoWithoutAt(applNo);
+		patent.setPatent_appl_no(applNoWithoutAt);
+		patent.setSourceFrom(Constants.PATENT_SCHEDULED);
+		// 為了避免重複，先在同步前註記已存在的annuity
+		List<Annuity> annuityList = patent.getListAnnuity();
+		for (Annuity annuity : annuityList) {
+			annuity.setSource_from(Constants.PATENT_SCHEDULED);
+		}
+
+		syncPatentData(patent);
+		if (!patent.isIs_sync()) {
+			patent.setPatent_appl_no(StringUtils.generateApplNoRandom(patent.getPatent_appl_no()));
+		}
+		updatePatent(patent, Constants.SYSTEM_ADMIN);
+	}
+
+	@Override
 	public int syncPatentsByApplicant(List<Patent> list, String adminId, String businessId, String ip) {
 		int taskResult = -1;
 		Business ownBusiness = businessDao.getById(businessId);
@@ -903,12 +920,6 @@ public class PatentServiceImpl implements PatentService {
 			}
 		}
 		return taskResult;
-	}
-
-	@Override
-	public void syncPatentDataBySchedule(Patent patent) {
-		syncPatentData(patent);
-		updatePatent(patent, Constants.SYSTEM_ADMIN);
 	}
 
 	public void handleDepartmentAddAsList(Patent editPatent, String businessId) {
@@ -2411,6 +2422,9 @@ public class PatentServiceImpl implements PatentService {
 		} else {
 			editor = patent.getAdmin().getAdmin_name();
 		}
+		if (patent.getEdit_source() == Constants.PATENT_SCHEDULED) {
+			businessId = null;
+		}
 
 		String editor_excel = patent.getAdmin().getAdmin_name();
 		
@@ -3379,6 +3393,26 @@ public class PatentServiceImpl implements PatentService {
 	private void handleAnnuity(Patent dbPatent, Patent editPatent, String businessId) {
 		if (editPatent.getListAnnuity() != null && editPatent.getListAnnuity().size() > 0) {
 			List<Annuity> listAnnuity = editPatent.getListAnnuity();
+
+			/*
+			 * 問題：如果已同步專利又再次同步，會出現annuity重複新增
+			 * 解決：檢查是不是前端傳來的annuity，依據同步成功的edit_source
+			 * 如果是官方同步的資料 -> 比對每一項欄位；否則（前端傳來的資料）-> 依據現有流程繼續進程
+			 */
+			if (editPatent.getSourceFrom() == Constants.PATENT_SCHEDULED) {
+				for (int i = 0; i < listAnnuity.size(); i++) {
+					for (int j = i; j < listAnnuity.size(); j++) {
+						Annuity front_annuity = listAnnuity.get(i);
+						Annuity back_annuity = listAnnuity.get(j);
+						if (front_annuity.getSource_from() != Constants.PATENT_SCHEDULED) {
+							if (front_annuity.getAnnuity_date().equals(back_annuity.getAnnuity_date())) {
+								listAnnuity.remove(i);
+							}
+						}
+					}
+				}
+			}
+
 			for (Annuity annuity : listAnnuity) {
 				if (StringUtils.isNULL(annuity.getAnnuity_id())) {
 					annuity.setAnnuity_id(KeyGeneratorUtils.generateRandomString());
@@ -3390,7 +3424,7 @@ public class PatentServiceImpl implements PatentService {
 					calendar.add(Calendar.DATE, -1);
 					annuity.setAnnuity_end_date(calendar.getTime());
 				}
-				annuity.setBusiness_id(businessId);
+				annuity.setBusiness_id(annuity.getBusiness_id());
 				annuity.setPatent(dbPatent);
 			}
 			patentDao.deletePatentAnnuity(dbPatent.getPatent_id());

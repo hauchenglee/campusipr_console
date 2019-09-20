@@ -51,6 +51,9 @@ public class Annuity extends BaseBean{
 	@JsonView(View.PatentDetail.class)
 	private String business_id;
 
+	@Transient
+	private Integer source_from;
+
 	public Date getAnnuity_date() {
 		return annuity_date;
 	}
@@ -122,6 +125,12 @@ public class Annuity extends BaseBean{
 	public void setBusiness_id(String business_id) {
 		this.business_id = business_id;
 	}
-	
 
+	public Integer getSource_from() {
+		return source_from;
+	}
+
+	public void setSource_from(Integer source_from) {
+		this.source_from = source_from;
+	}
 }

@@ -35,6 +35,8 @@ public class AutoSyncPatentJob implements Job {
         long end = System.nanoTime();
         long total = end - start;
         double second = (double) total / 1_000_000_000.0;
-        log.info("total auto sync patent spend time: " + second);
+        double minutes = second / 60.0;
+        log.info("total auto sync patent spend time (seconds): " + second);
+        log.info("total auto sync patent spend time (minutes): " + minutes);
     }
 }

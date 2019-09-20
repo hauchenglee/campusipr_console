@@ -383,6 +383,7 @@ public class Constants {
 	public static final int PATENT_EXCEL_IMPORT = 3;
 	public static final int PATENT_UPDATE = 4;
 	public static final int PATENT_NO_PUBLIC_MERGE = 5;
+	public static final int PATENT_SCHEDULED = 6;
 
 	public static final String STATUS_DESC_STOP_MAINTENANCE = "停止維護";
 	public static final String STATUS_DESC_ISSUED = "公告";
