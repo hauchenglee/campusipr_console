@@ -4,10 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Constants {
-	
-
-	
-	
 	public static String SYSTEM_LANGUAGE_TW = "tw";
 	public static String SYSTEM_LANGUAGE_US = "us";
 	public static String SYSTEM_LANGUAGE_CN = "cn";
