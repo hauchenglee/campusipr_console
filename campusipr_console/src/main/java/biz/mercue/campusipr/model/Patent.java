@@ -315,6 +315,9 @@ public class Patent extends BaseBean{
 	
 	@Transient
 	private String patent_excel_memo;
+
+	@Transient
+	private boolean schedule_is_sync = false;
 	
 	public String getPatent_id() {
 		return patent_id;
@@ -934,5 +937,12 @@ public class Patent extends BaseBean{
 	public void setListDepartment(List<Department> listDepartment) {
 		this.listDepartment = listDepartment;
 	}
-	
+
+	public boolean isSchedule_is_sync() {
+		return schedule_is_sync;
+	}
+
+	public void setSchedule_is_sync(boolean schedule_is_sync) {
+		this.schedule_is_sync = schedule_is_sync;
+	}
 }

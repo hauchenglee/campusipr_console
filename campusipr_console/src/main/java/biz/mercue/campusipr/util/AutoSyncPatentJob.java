@@ -10,6 +10,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AutoSyncPatentJob implements Job {
@@ -28,6 +29,10 @@ public class AutoSyncPatentJob implements Job {
         String systemAdmin = Constants.SYSTEM_ADMIN;
         Admin admin = adminService.getById(systemAdmin);
         List<Patent> patentList = patentService.getPatentList();
+//        List<Patent> patentList = new ArrayList<>();
+//        Patent patent1 = patentService.getById("007d5e7b54f0497a9b3252573d04594b");
+//        patentList.add(patent1);
+        log.info("scheduled -> auto sync patent size: " + patentList.size());
         for (Patent patent : patentList) {
             patent.setAdmin(admin);
             patentService.syncPatentDataBySchedule(patent);
