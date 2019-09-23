@@ -6,6 +6,7 @@ import biz.mercue.campusipr.dao.*;
 import biz.mercue.campusipr.model.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.formula.functions.Now;
+import org.im4java.test.Test;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import biz.mercue.campusipr.util.DateUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.MailSender;
+import biz.mercue.campusipr.util.MyThread;
 import biz.mercue.campusipr.util.ServiceChinaPatent;
 import biz.mercue.campusipr.util.ServiceTaiwanPatent;
 import biz.mercue.campusipr.util.ServiceUSPatent;
@@ -440,6 +442,33 @@ public class PatentServiceImpl implements PatentService {
 		return taskResult;
 	}
 
+	@Override
+	public void setTask(List<Patent> patentList) {
+//		List taskList = new ArrayList();
+		
+//		Patent editPatent = null;
+		
+//		for(int i = 0;i<patentList.size();i++) {
+//			taskList.add(new MyThread(addPatentByExcel(editPatent,admin,business,ip),i));
+//		}
+//		for(int i = 0;i<taskList.size();i++) {
+//			editPatent = patentList.get(i);
+//			Thread workTheard = new MyThread(addPatentByExcel(editPatent,admin,business,ip),i);
+//			workTheard.start();
+//		}
+		Thread t1 = new MyThread(test(patentList),0);
+		t1.start();
+		Thread t2 = new MyThread(test(patentList),1);
+		t2.start();
+
+	}
+	public static int test(List<Patent> patentList) {
+		for(Patent patent:patentList) {
+			System.out.println((patent.getPatent_appl_no()));;
+		}
+		return 1;
+	}
+	
 	/**
 	 * 	excel匯入最終有三種結果，其相對應的條件判斷：
 	 * 	1. add new patent（新增專利）：
@@ -464,7 +493,7 @@ public class PatentServiceImpl implements PatentService {
 		if (patentList == null) {
 			return null;
 		}
-
+//		setTask(patentList);
 		String businessId = business.getBusiness_id();
 		for (Patent editPatent : patentList) {
 			int syncResult = syncPatentData(editPatent);
@@ -485,7 +514,8 @@ public class PatentServiceImpl implements PatentService {
 			handleExtensionAddAsList(editPatent, business.getBusiness_id());
 			handleDepartmentAddAsList(editPatent, business.getBusiness_id());
 
-			List<Patent> dbPatentList = patentDao.getPatentListByApplNo(StringUtils.getApplNoWithoutAt(editPatent.getPatent_appl_no()));
+			List<Patent> dbPatentList = patentDao
+					.getPatentListByApplNo(StringUtils.getApplNoWithoutAt(editPatent.getPatent_appl_no()));
 			Patent dbTargetPatent = new Patent(); // 將要作用（update or merge）的db patent bean
 			boolean isNotSync = true;
 			boolean isNotSameBusiness = true;
@@ -812,21 +842,24 @@ public class PatentServiceImpl implements PatentService {
 
 	@Override
 	public void syncPatentDataBySchedule(Patent patent) {
-		String applNo = patent.getPatent_appl_no();
-		String applNoWithoutAt = StringUtils.getApplNoWithoutAt(applNo);
-		patent.setPatent_appl_no(applNoWithoutAt);
-		patent.setSourceFrom(Constants.PATENT_SCHEDULED);
-		// 為了避免重複，先在同步前註記已存在的annuity
-		List<Annuity> annuityList = patent.getListAnnuity();
-		for (Annuity annuity : annuityList) {
-			annuity.setSource_from(Constants.PATENT_SCHEDULED);
-		}
+		try {
+			String applNo = patent.getPatent_appl_no();
+			String applNoWithoutAt = StringUtils.getApplNoWithoutAt(applNo);
+			patent.setPatent_appl_no(applNoWithoutAt);
+			patent.setSourceFrom(Constants.PATENT_SCHEDULED);
+			// 為了避免重複，先在同步前註記已存在的annuity
+			if (patent.isIs_sync()) {
+				patent.setSchedule_is_sync(true);
+			}
 
-		syncPatentData(patent);
-		if (!patent.isIs_sync()) {
-			patent.setPatent_appl_no(StringUtils.generateApplNoRandom(patent.getPatent_appl_no()));
+			syncPatentData(patent);
+			if (!patent.isIs_sync()) {
+				patent.setPatent_appl_no(StringUtils.generateApplNoRandom(patent.getPatent_appl_no()));
+			}
+			updatePatent(patent, Constants.SYSTEM_ADMIN);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		updatePatent(patent, Constants.SYSTEM_ADMIN);
 	}
 
 	@Override
@@ -3347,7 +3380,7 @@ public class PatentServiceImpl implements PatentService {
 					dbcontact.setCreate_date(new Date());
 				}
 				dbPatent.addContact(dbcontact);
-			}else if(Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()&&listContact != null){
+			}else if(Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()&&listContact != null && listContact.size() > 0){
 				PatentContact dbcontact = new PatentContact();
 				for (PatentContact contact : listContact) {
 					dbcontact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
@@ -3399,16 +3432,13 @@ public class PatentServiceImpl implements PatentService {
 			 * 解決：檢查是不是前端傳來的annuity，依據同步成功的edit_source
 			 * 如果是官方同步的資料 -> 比對每一項欄位；否則（前端傳來的資料）-> 依據現有流程繼續進程
 			 */
-			if (editPatent.getSourceFrom() == Constants.PATENT_SCHEDULED) {
-				for (int i = 0; i < listAnnuity.size(); i++) {
-					for (int j = i; j < listAnnuity.size(); j++) {
-						Annuity front_annuity = listAnnuity.get(i);
-						Annuity back_annuity = listAnnuity.get(j);
-						if (front_annuity.getSource_from() != Constants.PATENT_SCHEDULED) {
-							if (front_annuity.getAnnuity_date().equals(back_annuity.getAnnuity_date())) {
-								listAnnuity.remove(i);
-							}
-						}
+			if (editPatent.isSchedule_is_sync()) {
+				Iterator<Annuity> iterator = listAnnuity.iterator();
+				while (iterator.hasNext()) {
+					Annuity annuity = iterator.next();
+					String annuityId = annuity.getAnnuity_id();
+					if (StringUtils.isNULL(annuityId)) {
+						iterator.remove();
 					}
 				}
 			}

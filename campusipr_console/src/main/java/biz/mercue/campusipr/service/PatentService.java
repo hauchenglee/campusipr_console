@@ -75,4 +75,7 @@ public interface PatentService {
 	void deleteById(String id, String businessId);
 
 	String deleteAll(String businessId);
+
+	void setTask(List<Patent> patentList);
+
 }

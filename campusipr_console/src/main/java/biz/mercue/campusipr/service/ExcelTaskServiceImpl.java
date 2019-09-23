@@ -37,6 +37,7 @@ import biz.mercue.campusipr.util.DateUtils;
 import biz.mercue.campusipr.util.ExcelUtils;
 import biz.mercue.campusipr.util.FileUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
+import biz.mercue.campusipr.util.MyThread;
 import biz.mercue.campusipr.util.StringUtils;
 
 
@@ -262,7 +263,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							log.info(dbBean.getExcel_task_id());
 							return mapPatent;
 						}
-
 						mapPatent.put(Constants.INT_SUCCESS, listPatent);
 					    return mapPatent;
 					}else {
@@ -376,6 +376,39 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		
 	}
 	
+	private boolean checkRow(Row row) {
+		boolean rowIsEmpty = true;
+//		Sheet sheet = book.getSheetAt(0);
+		List<Integer> emptyRowList = new ArrayList<Integer>();
+		int emptyCell;
+//		for (int y = 0; y < sheet.getLastRowNum(); y++) {
+			if(row != null) {
+				for (int x = 0; x < row.getLastCellNum(); x++) {
+					if (row.getCell(x) == null || row.getCell(x).getCellType() == 3
+							|| row.getCell(x).getCellType() == Cell.CELL_TYPE_BLANK
+							|| row.getLastCellNum() == -1) {
+					}else {
+						rowIsEmpty = false;
+					}
+					if(row.getCell(x) != null) {
+						int type = row.getCell(x).getCellType();
+						if (type == 1) {
+							String value =row.getCell(x).getStringCellValue().trim().replaceAll("[\\s\\u00A0]+","");
+							if(value.isEmpty() || value==null || value=="") {
+							}else {
+								rowIsEmpty = false;
+							}
+						}
+					}
+				}
+
+			}else {
+				rowIsEmpty = true;
+			}
+//		}
+		return rowIsEmpty;
+	}
+	
 	private List<Patent> readBook2Patent(Workbook book, List<FieldMap> listField, List<Integer> other_info_index, String excelTaskId) {
 		log.info("readBook2Patent");
 		String pattern = "[0-9]";
@@ -394,7 +427,6 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		log.info("getLastRowNum: "+sheet.getLastRowNum());
 		Set<Integer> emptySet = new HashSet<Integer>();
 		for (y = 0; y < sheet.getLastRowNum(); y++) {
-			
 //			log.info(y +"行，有 "+sheet.getRow(y).getLastCellNum()+"格");
 						
 			if (sheet.getRow(y) == null) {
@@ -477,7 +509,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 		for(int r = 0;r<sortEmpty.size();r++) {
 			int emptyRowIndex = sortEmpty.get(r);
 			book.getSheetAt(0).shiftRows((emptyRowIndex+1-r), sheet.getLastRowNum(), -1);
-//			log.info("移除成功第"+(emptyRowIndex+1-r)+"行");
+//			log.info("移除成功第"+(emptyRowIndex)+"行");
 		}
 		for (Row row : sheet) {
 //			log.info("Row");
@@ -486,12 +518,13 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 			} else {
 				if(sheet.getRow(rowIndex)== null ||sheet.getRow(rowIndex).getLastCellNum()==-1 
 						|| (sheet.getRow(rowIndex).getLastCellNum()==1 && row.getCell(sheet.getRow(rowIndex).getLastCellNum())==null)
-						|| (rowIndex >= (sheet.getLastRowNum())&&sheet.getLastRowNum()>1)){
+						|| (rowIndex >= (sheet.getLastRowNum())&&sheet.getLastRowNum()>1 &&  checkRow(row)) 
+						){
 					log.info("break");
 					break;
 				}else {
 					int lastCell = sheet.getRow(rowIndex).getLastCellNum();
-					log.info(lastCell);
+//					log.info(lastCell);
 					
 					String countryName = null;
 					Patent patent = new Patent();
@@ -530,11 +563,11 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 									errorRowList.add(rowIndex);
 									errorColumnList.add(fieldMap.getExcel_field_index());
 									emptyCell++;
-									log.info("無國家- row:"+rowIndex+"、col:" +fieldMap.getExcel_field_index());
+//									log.info("無國家- row:"+rowIndex+"、col:" +fieldMap.getExcel_field_index());
 								}
 								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
 									countryName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue().trim().replaceAll("[\\s\\u00A0]+","");
-									log.info(countryName);
+//									log.info(countryName);
 									if (!StringUtils.isNULL(countryName)) {
 										for (Country country : listCountry) {
 											if (country.getCountry_name().contains(countryName)
@@ -551,11 +584,11 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 										if (!StringUtils.isNULL(patent.getPatent_appl_no())) {
 											errorRowList.add(rowIndex);
 											errorColumnList.add(fieldMap.getExcel_field_index());
-											log.info("countryName is null and apply no isn't null- row:" +rowIndex+"、col:" +fieldMap.getExcel_field_index());
+//											log.info("countryName is null and apply no isn't null- row:" +rowIndex+"、col:" +fieldMap.getExcel_field_index());
 										}
 										errorRowList.add(rowIndex);
 										errorColumnList.add(fieldMap.getExcel_field_index());
-										log.info("countryName is null- row:" +rowIndex+"、col:" +fieldMap.getExcel_field_index());
+//										log.info("countryName is null- row:" +rowIndex+"、col:" +fieldMap.getExcel_field_index());
 									} 
 								}
 								break;
@@ -567,15 +600,15 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 										patent.setPatent_no(cellValue);
 									}
 								}
-								log.info("patent no:"+patent.getPatent_no());
+//								log.info("patent no:"+patent.getPatent_no());
 								break;
 							case Constants.PATENT_APPL_NO_FIELD:
 								if (row.getCell(fieldMap.getExcel_field_index()) == null) {
 									row.createCell(fieldMap.getExcel_field_index()).setCellValue("");
-									errorRowList.add(rowIndex);
-									errorColumnList.add(fieldMap.getExcel_field_index());
-									log.info("patentApplNo補空");
-									log.info("Cell==null(跟Type3不同)- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+//									errorRowList.add(rowIndex);
+//									errorColumnList.add(fieldMap.getExcel_field_index());
+//									log.info("patentApplNo補空");
+//									log.info("Cell==null(跟Type3不同)- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
 									break;
 								}
 								String patentApplNo = "";
@@ -584,9 +617,9 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 									int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
 									// type is null --> jump out for loop
 									if (cellType == 3) {
-										errorRowList.add(rowIndex);
-										errorColumnList.add(fieldMap.getExcel_field_index());
-										log.info("ErrorIndex:申請號為null，cellType == 3- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+//										errorRowList.add(rowIndex);
+//										errorColumnList.add(fieldMap.getExcel_field_index());
+//										log.info("ErrorIndex:申請號為null，cellType == 3- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
 										break;
 									}
 									
@@ -607,9 +640,9 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 									if (cellType == 1) {
 										patentApplNo = row.getCell(excelFieldIndex).getStringCellValue().replaceAll("[\\s\\u00A0]+","").trim();
 										if(row.getCell(excelFieldIndex).getStringCellValue()=="" ||patentApplNo.isEmpty()) {
-											errorRowList.add(rowIndex);
-											errorColumnList.add(fieldMap.getExcel_field_index());
-											log.info("ErrorIndex:申請號為''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+//											errorRowList.add(rowIndex);
+//											errorColumnList.add(fieldMap.getExcel_field_index());
+//											log.info("ErrorIndex:申請號為''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
 											break;
 										}
 										//有沒有含中文字or非需求字的判斷
@@ -833,7 +866,7 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 							default:
 								break;
 							}
-							log.info("errorList: Column" + errorColumnList + "Row" + errorRowList);
+//							log.info("errorList: Column" + errorColumnList + "Row" + errorRowList);
 						}
 					} // close for (FieldMap fieldMap : listField)
 					// handle not select title and index, and iterator field not select value
@@ -872,10 +905,10 @@ public class ExcelTaskServiceImpl implements ExcelTaskService{
 				}
 			}
 			rowIndex++;
-			log.info("rowIndex: "+rowIndex);
+//			log.info("rowIndex: "+rowIndex);
 
 		}
-//		log.info("rowIndex: "+rowIndex);
+		log.info("rowIndex: "+rowIndex);
 		int errorRowIndex = errorRowList.size();
 		log.info(errorRowIndex);
 		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
