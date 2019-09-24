@@ -20,7 +20,6 @@ import biz.mercue.campusipr.util.DateUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.MailSender;
-import biz.mercue.campusipr.util.MyThread;
 import biz.mercue.campusipr.util.ServiceChinaPatent;
 import biz.mercue.campusipr.util.ServiceTaiwanPatent;
 import biz.mercue.campusipr.util.ServiceUSPatent;
@@ -456,10 +455,10 @@ public class PatentServiceImpl implements PatentService {
 //			Thread workTheard = new MyThread(addPatentByExcel(editPatent,admin,business,ip),i);
 //			workTheard.start();
 //		}
-		Thread t1 = new MyThread(test(patentList),0);
-		t1.start();
-		Thread t2 = new MyThread(test(patentList),1);
-		t2.start();
+//		Thread t1 = new MyThread(test(patentList),0);
+//		t1.start();
+//		Thread t2 = new MyThread(test(patentList),1);
+//		t2.start();
 
 	}
 	public static int test(List<Patent> patentList) {
@@ -841,24 +840,77 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	@Override
-	public void syncPatentDataBySchedule(Patent patent) {
+	public Map<String, Patent> syncPatentDataBySchedule(Patent patent) {
+		Map<String, Patent> mergeMap = new HashMap<>();
 		try {
 			String applNo = patent.getPatent_appl_no();
 			String applNoWithoutAt = StringUtils.getApplNoWithoutAt(applNo);
 			patent.setPatent_appl_no(applNoWithoutAt);
 			patent.setSourceFrom(Constants.PATENT_SCHEDULED);
+			String businessId = null;
+			Business newBusiness = null;
+			Admin admin = new Admin();
+			admin.setAdmin_id(Constants.SYSTEM_ADMIN);
+			Patent syncPatent = new Patent();
 			// 為了避免重複，先在同步前註記已存在的annuity
 			if (patent.isIs_sync()) {
 				patent.setSchedule_is_sync(true);
+			} else {
+				// 取得未公開專利的business id
+				List<Business> businessList = patent.getListBusiness();
+				for (Business business : businessList) {
+					businessId = business.getBusiness_id();
+					newBusiness = business;
+				}
 			}
 
 			syncPatentData(patent);
 			if (!patent.isIs_sync()) {
 				patent.setPatent_appl_no(StringUtils.generateApplNoRandom(patent.getPatent_appl_no()));
 			}
+
+			/*
+			 * 如果a b學校各自擁有不互相隸屬的未公開專利
+			 * 如果排程同步成功，就會造成資料庫存在兩筆以上已公開申請號專利
+			 * 違反資料庫設計原則
+			 * 解決：判斷該專利是否update或是merge
+			 */
+
+
+			/*
+			 * merge發生條件：資料庫存在另外一筆已同步專利，並且其他的專利是跟資料庫那筆同步成功的專利有同樣申請號
+			 * 解決作法：先判斷資料庫是否存在同樣申請號並且已同步專利，且現在的專利跟資料庫那筆專利是不同pk的
+			 *   將現在這筆合併到資料庫已同步那筆
+			 */
+			if (!StringUtils.isNULL(businessId)) {
+				List<Patent> dbPatentList = patentDao.getPatentListByApplNo(applNoWithoutAt);
+				// 找出在db中唯一同步的專利
+				for (Patent dbPatent : dbPatentList) {
+					if (dbPatent.isIs_sync()) {
+						syncPatent = dbPatent;
+						break;
+					}
+				}
+
+				if (!StringUtils.isNULL(syncPatent.getPatent_id())) {
+					log.info("merge patent by scheduled: " + patent.getPatent_appl_no());
+					patent.setBusiness(newBusiness);
+					updatePatent(patent, Constants.SYSTEM_ADMIN);
+//					mergeDiffPatent(syncPatent.getPatent_id(), patent, admin, newBusiness);
+
+					/*
+					 * 以下寫法類似add patent by excel
+					 */
+					mergeMap.put(syncPatent.getPatent_id(), patent);
+					return mergeMap;
+				}
+			}
+
 			updatePatent(patent, Constants.SYSTEM_ADMIN);
+			return null;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return null;
 		}
 	}
 
@@ -1418,7 +1470,8 @@ public class PatentServiceImpl implements PatentService {
 			handleAnnuity(dbBean, patent, businessId);
 			handlePatentStatus(dbBean, patent, businessId);
 
-			if (patent.getSourceFrom() != Constants.PATENT_EXCEL_IMPORT) {
+			if (patent.getSourceFrom() != Constants.PATENT_EXCEL_IMPORT
+					&& patent.getSourceFrom() != Constants.PATENT_SCHEDULED) {
 				// source from != excel
 				handleDepartment(dbBean, patent, businessId);
 				handleExtension(dbBean, patent, businessId);
@@ -4003,6 +4056,43 @@ public class PatentServiceImpl implements PatentService {
 		} catch (Exception e) {
 			log.error(e);
 		}
+	}
+
+	@Override
+	public void deletePatentByScheduled(String deletePatentId, String businessId) {
+		// delete portfolio
+		List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
+		Iterator<Portfolio> portfolioIter = dbPortfolioList.iterator();
+		while (portfolioIter.hasNext()) {
+			Portfolio dbPortfolio = portfolioIter.next();
+			List<Patent> patentList = dbPortfolio.getListPatent();
+			if (patentList != null || !patentList.isEmpty()) {
+				Iterator<Patent> patentIter = patentList.iterator();
+				while (patentIter.hasNext()) {
+					Patent patent = patentIter.next();
+					if (patent.getPatent_id().equals(deletePatentId)) {
+						patentIter.remove();
+					}
+				}
+			}
+		}
+
+		// delete family
+		PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
+		if (dbFamily != null) {
+			List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
+			for (Patent patent : dbPatentFamilyList) {
+				if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
+					dbPatentFamilyList.remove(patent);
+				}
+			}
+			if (dbPatentFamilyList.size() < 2) {
+				familyDao.delete(dbFamily.getPatent_family_id());
+			}
+		}
+
+		log.info("start to delete patent all");
+		patentDao.delete(deletePatentId);
 	}
 	
 	@Override

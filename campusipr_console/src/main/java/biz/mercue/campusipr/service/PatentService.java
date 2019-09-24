@@ -27,7 +27,7 @@ public interface PatentService {
 
 	Map<String, Patent> addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip);
 
-    void syncPatentDataBySchedule(Patent patent);
+    Map<String, Patent> syncPatentDataBySchedule(Patent patent);
 
 	JSONObject checkNoPublicApplNo(Patent editPatent, Business business);
 
@@ -73,6 +73,8 @@ public interface PatentService {
 	List<Status> getEditStatus();
 
 	void deleteById(String id, String businessId);
+
+	void deletePatentByScheduled(String deletePatentId, String businessId);
 
 	String deleteAll(String businessId);
 

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AutoSyncPatentJob implements Job {
     private Logger log = Logger.getLogger(this.getClass().getName());
@@ -35,7 +36,16 @@ public class AutoSyncPatentJob implements Job {
         log.info("scheduled -> auto sync patent size: " + patentList.size());
         for (Patent patent : patentList) {
             patent.setAdmin(admin);
-            patentService.syncPatentDataBySchedule(patent);
+            Map<String, Patent> mergeMap = patentService.syncPatentDataBySchedule(patent);
+            if (mergeMap != null && !mergeMap.isEmpty()) {
+                String dbPatentId = "";
+                Patent editPatent = new Patent();
+                for (Map.Entry<String, Patent> entry : mergeMap.entrySet()) {
+                    dbPatentId = entry.getKey();
+                    editPatent = entry.getValue();
+                }
+                patentService.mergeDiffPatent(dbPatentId, editPatent, admin, editPatent.getBusiness());
+            }
         }
         long end = System.nanoTime();
         long total = end - start;
