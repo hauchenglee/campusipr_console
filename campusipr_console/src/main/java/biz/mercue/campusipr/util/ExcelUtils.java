@@ -222,7 +222,7 @@ public class ExcelUtils {
 							countryCN = "美國";
 						}
 						if (countryEN.equals("cn")) {
-							countryCN = "中國大陸";
+							countryCN = "中國";
 						}
 						row.createCell(columnCount).setCellValue(countryCN);
 						columnCount++;

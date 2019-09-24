@@ -19,17 +19,21 @@ import biz.mercue.campusipr.util.StringUtils;
 public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements AnalysisDao {
 
 	private Logger log = Logger.getLogger(this.getClass().getName());
-
+	
+	//所有日期都依申請日選擇??
 	// 預設：未官方同步專利
 	@Override
 	public int countUnApplPatent(String businessId) {
 //		log.info("未申請完成的申請號數量");
 		Session session = getSession();
-		String queryStr = "SELECT count(distinct p.patent_id)" 
+		String queryStr = "SELECT count(distinct p.patent_id) " 
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
 						+ "WHERE p.is_sync = 0 "
-						+ "and lb.business_id = :businessId ";
+						+ "and lb.business_id = :businessId "
+						+ "AND p.patent_appl_no IS NOT NULL " 
+						+ "AND p.patent_notice_no IS NULL " 
+						+ "AND p.patent_publish_no IS NULL";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
@@ -98,7 +102,40 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		return (int) count;
 	}
 	// 預設：年度合計技術總數
+	@Override
+	public int countTech(String businessId) {
+		Session session = getSession();
+		String queryStr = "SELECT count(*) " 
+				+ "FROM Patent as p " 
+				+ "JOIN p.listBusiness as lb "
+				+ "WHERE p.is_sync = 0 "
+				+ "and lb.business_id = :businessId "
+				+ "AND p.patent_appl_no Is NULL "
+				+ "AND p.patent_notice_no Is NULL "
+				+ "AND p.patent_publish_no Is NULL ";
+//		String queryStr = "SELECT count(distinct p.patent_id) "
+//						+ "FROM Patent as p "
+//						+ "JOIN p.listBusiness as lb "
+//						+ "JOIN p.listInventor as li "
+//						+ "JOIN p.listDepartment as ld "
+//						+ "JOIN p.listAssignee as la " 
+//						+ "WHERE lb.business_id = :businessId "
+//						+ "AND p.patent_appl_no IS NULL "
+//						+ "AND p.patent_notice_no IS NULL "
+//						+ "AND p.patent_publish_no IS NULL "
+//						+ "AND (p.patent_name IS NOT NULL or "
+//							+ "p.patent_name_en IS NOT NULL or "
+//							+ "li.inventor_id IS NOT NULL or "
+//							+ "la.assignee_id IS NOT NULL or "
+//							+ "ld.department_id IS NOT NULL) ";
+		Query q = session.createQuery(queryStr);
 
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		long count = (long) q.uniqueResult();
+		return (int) count;
+	}
 	// 預設：科系總數
 	@Override
 	public int countDepartment(String businessId) {
@@ -216,8 +253,35 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 //		log.info(count);
 		return (int) count;
 	}
-	// 特定年度合計技術總數
+	// 特定年度合計技術總數，目前沒有時間
+	@Override
+	public int countTechByYear(String businessId, Long beginDate, Long endDate) {
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct p.patent_id) "
+						+ "FROM Patent as p "
+						+ "WHERE lb.business_id = :businessId "
+						+ "AND (date_format(patent_appl_date, '%Y') between :beginDate and :endDate)"
+						+ "AND  p.is_sync = 0 "
+						+ "AND p.patent_appl_no IS NULL "
+						+ "AND p.patent_notice_no IS NULL "
+						+ "AND p.patent_publish_no IS NULL ";
+		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
 
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		long count = (long) q.uniqueResult();
+		return (int) count;
+	}
+	
+	
 	// 特定年度科系總數
 	@Override
 	public int countDepartmentByYear(String businessId, Long beginDate, Long endDate) {
@@ -368,18 +432,24 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listPatentStatus as ls "
 						+ "JOIN ls.primaryKey.status as lsps "
 						+ "where lb.business_id = :businessId "
-						+ "and lsps.status_desc = :statusDesc "
+						+ "and lsps.status_desc = :statusApp "
 						+ "and p.is_sync = 1 "
 						+ "and p.patent_appl_country in ('tw','us','cn') "
 						+ "and ls.create_date = "
 							+ "( select MAX(ls.create_date) "
 							+ "FROM p.listPatentStatus as ls "
+							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+							+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp) ) "
 						+ "group by p.patent_appl_country";
 
 		Query q = session.createQuery(queryStr);
-		String statusDesc = "申請";
-		q.setParameter("statusDesc", statusDesc);
+		String statusApp = "申請";
+		String statusNotice = "公開";
+		String statusPublish = "公告";
+		q.setParameter("statusApp", statusApp);
+		q.setParameter("statusNotice", statusNotice);
+		q.setParameter("statusPublish", statusPublish);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
@@ -400,21 +470,27 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 				+ "JOIN p.listPatentStatus as ls "
 				+ "JOIN ls.primaryKey.status as lsps "
 				+ "where lb.business_id = :businessId "
-				+ "and lsps.status_desc = :statusDesc "
+				+ "and lsps.status_desc = :statusNotice "
 				+ "and p.is_sync = 1 "
 				+ "and p.patent_appl_country in ('tw','us','cn') "
 				+ "and ls.create_date = "
 					+ "( select MAX(ls.create_date) "
 					+ "FROM p.listPatentStatus as ls "
+					+ "JOIN ls.primaryKey.status as lsps "
 					+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+					+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp) ) "
 				+ "group by p.patent_appl_country";
 		
 		Query q = session.createQuery(queryStr);
-		String statusDesc = "公開";
+		String statusApp = "申請";
+		String statusNotice = "公開";
+		String statusPublish = "公告";
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
-		q.setParameter("statusDesc", statusDesc);
+		q.setParameter("statusApp", statusApp);
+		q.setParameter("statusNotice", statusNotice);
+		q.setParameter("statusPublish", statusPublish);
 //		log.info(q.list().isEmpty());
 		return q.list();
 	}
@@ -430,18 +506,24 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 				+ "JOIN p.listPatentStatus as ls "
 				+ "JOIN ls.primaryKey.status as lsps "
 				+ "where lb.business_id = :businessId "
-				+ "and lsps.status_desc = :statusDesc "
+				+ "and lsps.status_desc = :statusPublish "
 				+ "and p.is_sync = 1 "
 				+ "and p.patent_appl_country in ('tw','us','cn') "
 				+ "and ls.create_date = "
 					+ "( select MAX(ls.create_date) "
 					+ "FROM p.listPatentStatus as ls "
-					+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+					+ "JOIN ls.primaryKey.status as lsps "
+					+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+					+ "and lsps.status_desc in (:statusPublish, :statusApp, :statusNotice) ) "
 				+ "group by p.patent_appl_country";
-		
+
 		Query q = session.createQuery(queryStr);
-		String statusDesc = "公告";
-		q.setParameter("statusDesc", statusDesc);
+		String statusApp = "申請";
+		String statusNotice = "公開";
+		String statusPublish = "公告";
+		q.setParameter("statusApp", statusApp);
+		q.setParameter("statusNotice", statusNotice);
+		q.setParameter("statusPublish", statusPublish);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
 		}
@@ -512,13 +594,15 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 				+ "JOIN p.listPatentStatus as ls "
 				+ "JOIN ls.primaryKey.status as s "
 				+ "where lb.business_id = :businessId "
-				+ "and s.status_desc = :statusDesc "
+				+ "and s.status_desc = :statusApp "
 				+ "and p.is_sync = 1 "
 				+ "and p.patent_appl_country in ('tw','us','cn') "
 				+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 				+ "and ls.create_date = ( select MAX(ls.create_date) " 
 									  + "FROM p.listPatentStatus as ls " 
-									  + "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+									  + "JOIN ls.primaryKey.status as s "
+									  + "where p.patent_id = ls.primaryKey.patent.patent_id "
+									  + "and s.status_desc in (:statusPublish, :statusNotice, :statusApp)) "
 				+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -527,8 +611,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String beginDateFormat = sdf.format(bd);
 		String endDateFormat = sdf.format(ed);
 		
-		String statusDesc = "申請";
-		q.setParameter("statusDesc", statusDesc);
+		String statusApp = "申請";
+		String statusNotice = "公開";
+		String statusPublish = "公告";
+		q.setParameter("statusApp", statusApp);
+		q.setParameter("statusNotice", statusNotice);
+		q.setParameter("statusPublish", statusPublish);
 		q.setParameter("beginDate", beginDateFormat);
 		q.setParameter("endDate", endDateFormat);
 		if (!StringUtils.isNULL(businessId)) {
@@ -549,13 +637,15 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listPatentStatus as ls "
 						+ "JOIN ls.primaryKey.status as s "
 						+ "where lb.business_id = :businessId "
-						+ "and s.status_desc = :statusDesc "
+						+ "and s.status_desc = :statusNotice "
 						+ "and p.is_sync = 1 "
 						+ "and p.patent_appl_country in ('tw','us','cn') "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "and ls.create_date = (select MAX(ls.create_date) " 
 											  + "FROM p.listPatentStatus as ls " 
-											  + "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+											  + "JOIN ls.primaryKey.status as s "
+											  + "where p.patent_id = ls.primaryKey.patent.patent_id "
+											  + "and s.status_desc in (:statusPublish, :statusNotice, :statusApp)) "
 						+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -564,8 +654,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String beginDateFormat = sdf.format(bd);
 		String endDateFormat = sdf.format(ed);
 		
-		String statusDesc = "公開";
-		q.setParameter("statusDesc", statusDesc);
+		String statusApp = "申請";
+		String statusNotice = "公開";
+		String statusPublish = "公告";
+		q.setParameter("statusApp", statusApp);
+		q.setParameter("statusNotice", statusNotice);
+		q.setParameter("statusPublish", statusPublish);
 		q.setParameter("beginDate", beginDateFormat);
 		q.setParameter("endDate", endDateFormat);
 		if (!StringUtils.isNULL(businessId)) {
@@ -578,7 +672,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	// 各個國家在公告狀態的特定日期區間的專利總數
 	@Override
 	public List<Analysis> countCountryPublishStatusByYear(String businessId, Long beginDate, Long endDate) {
-//		log.info("各個國家在特定日期區間的公各狀態專利總數");
+//		log.info("各個國家在特定日期區間的公告狀態專利總數");
 		Session session = getSession();
 		String queryStr = "SELECT p.patent_appl_country, count(distinct patent_appl_no), s.status_desc "
 						+ "FROM Patent as p " 
@@ -586,13 +680,15 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listPatentStatus as ls "
 						+ "JOIN ls.primaryKey.status as s "
 						+ "where lb.business_id = :businessId "
-						+ "and s.status_desc = :statusDesc "
+						+ "and s.status_desc = :statusPublish "
 						+ "and p.is_sync = 1 "
 						+ "and p.patent_appl_country in ('tw','us','cn') "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "and ls.create_date = ( select MAX(ls.create_date) " 
 											  + "FROM  p.listPatentStatus as ls " 
-											  + "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+											  + "JOIN ls.primaryKey.status as s "
+											  + "where p.patent_id = ls.primaryKey.patent.patent_id "
+											  + "and s.status_desc in (:statusPublish, :statusNotice, :statusApp)) "
 						+ "group by p.patent_appl_country";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -601,8 +697,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String beginDateFormat = sdf.format(bd);
 		String endDateFormat = sdf.format(ed);
 		
-		String statusDesc = "公告";
-		q.setParameter("statusDesc", statusDesc);
+		String statusApp = "申請";
+		String statusNotice = "公開";
+		String statusPublish = "公告";
+		q.setParameter("statusApp", statusApp);
+		q.setParameter("statusNotice", statusNotice);
+		q.setParameter("statusPublish", statusPublish);
 		q.setParameter("beginDate", beginDateFormat);
 		q.setParameter("endDate", endDateFormat);
 		if (!StringUtils.isNULL(businessId)) {
@@ -888,38 +988,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		log.info(q.list().isEmpty());
 		return q.list();
 	}
-	
-	//NEW FUNCTION學校預設"任狀態"專利數量，歷年長條圖
-	@Override
-	public List<Analysis> getNoticePatent(String businessId){
-		Session session = getSession();
-		String queryStr = "SELECT count(distinct patent_appl_no), date_format(p.patent_appl_date, '%Y') "
-					+ "FROM Patent as p " 
-					+ "JOIN p.listBusiness as lb "
-					+ "JOIN p.listPatentStatus as ls "
-					+ "JOIN ls.primaryKey.status as lsps "
-					+ "where lb.business_id = :businessId "
-					+ "and lsps.status_desc = :statusDesc "
-					+ "and p.is_sync = 1 "
-					+ "and p.patent_appl_country in ('tw','us','cn') "
-					+ "and ls.create_date = "
-						+ "( select MAX(ls.create_date) "
-						+ "FROM p.listPatentStatus as ls "
-						+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
-					+ "group by date_format(p.patent_appl_date, '%Y')";
-			
-		Query q = session.createQuery(queryStr);
-		String statusDesc = "公開";
-		if (!StringUtils.isNULL(businessId)) {
-				q.setParameter("businessId", businessId);
-		}
-		q.setParameter("statusDesc", statusDesc);
-	//	log.info(q.list().isEmpty());
-		return q.list();
-	}
-
-	//NEW FUNCTION學校"任狀態"專利數量By year，歷年長條圖
-	@Override
+		
+	//NEW FUNCTION學校"任狀態"專利數量By year，歷年長條圖-尚未啟用
 	public List<Analysis> getNoticePatentByyear(String businessId, Long beginDate, Long endDate){
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct patent_appl_no), date_format(p.patent_appl_date, '%Y') "
@@ -956,7 +1026,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		return q.list();
 	}
 	
-	//NEW FUNCTION學校預設"任狀態"專利數量
+	//學校預設"公開"專利數量，沒有管下方自訂的專利狀態
 	@Override
 	public int countNoticePatent(String businessId){
 		Session session = getSession();
@@ -966,6 +1036,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as lsps "
 					+ "where lb.business_id = :businessId "
+					+ "and (p.patent_publish_date is NULL ) "
 					+ "and lsps.status_desc = :statusDesc "
 					+ "and p.is_sync = 1 "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
@@ -985,9 +1056,77 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		return (int) count;
 	}
 	
-	//NEW FUNCTION學校預設"任狀態"專利數量By year
+	//學校預設"公告"專利數量
+	@Override
+	public int countPublishPatent(String businessId){
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct patent_appl_no)"
+					+ "FROM Patent as p " 
+					+ "JOIN p.listBusiness as lb "
+					+ "JOIN p.listPatentStatus as ls "
+					+ "JOIN ls.primaryKey.status as lsps "
+					+ "where lb.business_id = :businessId "
+					+ "and lsps.status_desc = :statusDesc "
+					+ "and p.is_sync = 1 "
+					+ "and p.patent_appl_country in ('tw','us','cn') ";
+			
+		Query q = session.createQuery(queryStr);
+		String statusDesc = "公告";
+		if (!StringUtils.isNULL(businessId)) {
+				q.setParameter("businessId", businessId);
+		}
+		q.setParameter("statusDesc", statusDesc);
+		long count = (long) q.uniqueResult();
+//		log.info(count);
+		return (int) count;
+	}
+	
+	//學校預設"公開"專利數量By year，沒有管下方自訂的專利狀態
 	@Override
 	public int countNoticePatentByYear(String businessId, Long beginDate, Long endDate){
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct patent_appl_no)"
+					+ "FROM Patent as p " 
+					+ "JOIN p.listBusiness as lb "
+					+ "JOIN p.listPatentStatus as ls "
+					+ "JOIN ls.primaryKey.status as lsps "
+					+ "where lb.business_id = :businessId "
+					+ "and lsps.status_desc = :statusNotice "
+					+ "and p.is_sync = 1 "
+					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "
+					+ "and ls.create_date = "
+						+ "( select MAX(ls.create_date) "
+						+ "FROM p.listPatentStatus as ls "
+						+ "JOIN ls.primaryKey.status as lsps "
+						+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+						+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp)) ";
+		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		String statusApp = "申請";
+		String statusNotice = "公開";
+		String statusPublish = "公告";
+		q.setParameter("statusApp", statusApp);
+		q.setParameter("statusNotice", statusNotice);
+		q.setParameter("statusPublish", statusPublish);
+		if (!StringUtils.isNULL(businessId)) {
+				q.setParameter("businessId", businessId);
+		}
+		long count = (long) q.uniqueResult();
+//		log.info(count);
+		return (int) count;
+	}
+	
+	//學校預設"公告"專利數量By year，沒有管下方自訂的專利狀態
+	@Override
+	public int countPublishPatentByYear(String businessId, Long beginDate, Long endDate){
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct patent_appl_no)"
 					+ "FROM Patent as p " 
@@ -998,11 +1137,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "and lsps.status_desc = :statusDesc "
 					+ "and p.is_sync = 1 "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
-					+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "
-					+ "and ls.create_date = "
-						+ "( select MAX(ls.create_date) "
-						+ "FROM p.listPatentStatus as ls "
-						+ "where p.patent_id = ls.primaryKey.patent.patent_id ) ";
+					+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) ";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		Timestamp bd = new Timestamp(beginDate);
@@ -1012,7 +1147,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 
 		q.setParameter("beginDate", beginDateFormat);
 		q.setParameter("endDate", endDateFormat);
-		String statusDesc = "公開";
+		String statusDesc = "公告";
 		if (!StringUtils.isNULL(businessId)) {
 				q.setParameter("businessId", businessId);
 		}
@@ -1182,6 +1317,122 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		return q.list();
 	}
 	
+	//中心預設"公開"專利數量，沒有管下方自訂的專利狀態
+	@Override
+	public int countAllNoticePatent(){
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct patent_appl_no)"
+					+ "FROM Patent as p " 
+					+ "JOIN p.listBusiness as lb "
+					+ "JOIN p.listPatentStatus as ls "
+					+ "JOIN ls.primaryKey.status as lsps "
+					+ "where p.patent_publish_date is NULL "
+					+ "and lsps.status_desc = :statusDesc "
+					+ "and p.is_sync = 1 "
+					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "and ls.create_date = "
+						+ "( select MAX(ls.create_date) "
+						+ "FROM p.listPatentStatus as ls "
+						+ "where p.patent_id = ls.primaryKey.patent.patent_id ) ";
+			
+		Query q = session.createQuery(queryStr);
+		String statusDesc = "公開";
+		q.setParameter("statusDesc", statusDesc);
+		long count = (long) q.uniqueResult();
+//		log.info(count);
+		return (int) count;
+	}
+	
+	//學校預設"公告"專利數量
+	@Override
+	public int countAllPublishPatent(){
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct patent_appl_no)"
+					+ "FROM Patent as p " 
+					+ "JOIN p.listBusiness as lb "
+					+ "JOIN p.listPatentStatus as ls "
+					+ "JOIN ls.primaryKey.status as lsps "
+					+ "where lsps.status_desc = :statusDesc "
+					+ "and p.is_sync = 1 "
+					+ "and p.patent_appl_country in ('tw','us','cn') ";
+			
+		Query q = session.createQuery(queryStr);
+		String statusDesc = "公告";
+		q.setParameter("statusDesc", statusDesc);
+		long count = (long) q.uniqueResult();
+//		log.info(count);
+		return (int) count;
+	}
+	
+	//學校預設"公開"專利數量By year，沒有管下方自訂的專利狀態
+	@Override
+	public int countAllNoticePatentByYear(Long beginDate, Long endDate){
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct patent_appl_no)"
+					+ "FROM Patent as p " 
+					+ "JOIN p.listBusiness as lb "
+					+ "JOIN p.listPatentStatus as ls "
+					+ "JOIN ls.primaryKey.status as lsps "
+					+ "where lsps.status_desc = :statusNotice  "
+					+ "and p.is_sync = 1 "
+					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "
+					+ "and ls.create_date = "
+						+ "( select MAX(ls.create_date) "
+						+ "FROM p.listPatentStatus as ls "
+						+ "JOIN ls.primaryKey.status as lsps "
+						+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+						+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp) )";
+		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		String statusApp = "申請";
+		String statusNotice = "公開";
+		String statusPublish = "公告";
+		q.setParameter("statusApp", statusApp);
+		q.setParameter("statusNotice", statusNotice);
+		q.setParameter("statusPublish", statusPublish);
+		long count = (long) q.uniqueResult();
+//		log.info(count);
+		return (int) count;
+	}
+	
+	//學校預設"公告"專利數量By year，沒有管下方自訂的專利狀態
+	@Override
+	public int countAllPublishPatentByYear(Long beginDate, Long endDate){
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct patent_appl_no)"
+					+ "FROM Patent as p " 
+					+ "JOIN p.listBusiness as lb "
+					+ "JOIN p.listPatentStatus as ls "
+					+ "JOIN ls.primaryKey.status as lsps "
+					+ "where lsps.status_desc = :statusDesc "
+					+ "and p.is_sync = 1 "
+					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) ";
+		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		String statusDesc = "公告";
+		q.setParameter("statusDesc", statusDesc);
+		long count = (long) q.uniqueResult();
+//		log.info(count);
+		return (int) count;
+	}
+	
+	
 	//Constants.BUSINESS_PLATFORM 平台管理者
 	//取得學校清單
 	@Override
@@ -1301,16 +1552,22 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
-							+ "and lsps.status_desc = :statusDesc "
+							+ "and lsps.status_desc = :statusApp "
 							+ "and p.is_sync = 1 "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "
-												+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+												+ "JOIN ls.primaryKey.status as lsps "
+												+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+												+ "and lsps.status_desc in (:statusNotice, :statusApp, :statusPublish) ) "
 							+ "GROUP BY p.patent_appl_country ";
 			Query q = session.createQuery(queryStr);
-			String statusDesc = "申請";
-			q.setParameter("statusDesc", statusDesc);
+			String statusPublish = "公告";
+			String statusNotice = "公開";
+			String statusApp = "申請";
+			q.setParameter("statusPublish", statusPublish);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusApp", statusApp);
 			if (!StringUtils.isNULL(businessId)) {
 				q.setParameter("businessId", businessId);
 			}
@@ -1338,16 +1595,22 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
-							+ "and lsps.status_desc = :statusDesc "
+							+ "and lsps.status_desc = :statusNotice "
 							+ "and p.is_sync = 1 "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "
-												+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+												+ "JOIN ls.primaryKey.status as lsps "
+												+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+												+ "and lsps.status_desc in (:statusNotice, :statusApp, :statusPublish) ) "
 							+ "GROUP BY p.patent_appl_country ";
 			Query q = session.createQuery(queryStr);
-			String statusDesc = "公開";
-			q.setParameter("statusDesc", statusDesc);
+			String statusPublish = "公告";
+			String statusNotice = "公開";
+			String statusApp = "申請";
+			q.setParameter("statusPublish", statusPublish);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusApp", statusApp);
 			if (!StringUtils.isNULL(businessId)) {
 				q.setParameter("businessId", businessId);
 			}
@@ -1375,16 +1638,22 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
-							+ "and lsps.status_desc = :statusDesc "
+							+ "and lsps.status_desc = :statusPublish "
 							+ "and p.is_sync = 1 "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "
-												+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+												+ "JOIN ls.primaryKey.status as lsps "
+												+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+												+ "and lsps.status_desc in (:statusNotice, :statusApp, :statusPublish) ) "
 							+ "GROUP BY p.patent_appl_country ";
 			Query q = session.createQuery(queryStr);
-			String statusDesc = "公告";
-			q.setParameter("statusDesc", statusDesc);
+			String statusPublish = "公告";
+			String statusNotice = "公開";
+			String statusApp = "申請";
+			q.setParameter("statusPublish", statusPublish);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusApp", statusApp);
 			if (!StringUtils.isNULL(businessId)) {
 				q.setParameter("businessId", businessId);
 			}
@@ -1449,17 +1718,23 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
-							+ "and lsps.status_desc = :statusDesc "
+							+ "and lsps.status_desc = :statusApp "
 							+ "AND p.is_sync = 1  "
 							+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "
-												+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+												+ "JOIN ls.primaryKey.status as lsps "
+												+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+												+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp) )"
 							+ "GROUP BY p.patent_appl_country ";
 			Query q = session.createQuery(queryStr);
-			String statusDesc = "申請";
-			q.setParameter("statusDesc", statusDesc);
+			String statusApp = "申請";
+			String statusNotice = "公開";
+			String statusPublish = "公告";
+			q.setParameter("statusApp", statusApp);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusPublish", statusPublish);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 			Timestamp bd = new Timestamp(beginDate);
 			Timestamp ed = new Timestamp(endDate);
@@ -1495,17 +1770,23 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
-							+ "and lsps.status_desc = :statusDesc "
+							+ "and lsps.status_desc = :statusNotice "
 							+ "AND p.is_sync = 1 "
 							+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "
-												+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+												+ "JOIN ls.primaryKey.status as lsps "
+												+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+												+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp)) "
 							+ "GROUP BY p.patent_appl_country ";
 			Query q = session.createQuery(queryStr);
-			String statusDesc = "公開";
-			q.setParameter("statusDesc", statusDesc);
+			String statusApp = "申請";
+			String statusNotice = "公開";
+			String statusPublish = "公告";
+			q.setParameter("statusApp", statusApp);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusPublish", statusPublish);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 			Timestamp bd = new Timestamp(beginDate);
 			Timestamp ed = new Timestamp(endDate);
@@ -1541,17 +1822,23 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
 							+ "where lb.business_id = :businessId "
-							+ "and lsps.status_desc = :statusDesc "
+							+ "and lsps.status_desc = :statusPublish "
 							+ "AND p.is_sync = 1 "
 							+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 							+ "and ls.create_date = "
 												+ "( select MAX(ls.create_date) "
 												+ "FROM p.listPatentStatus as ls "
-												+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+												+ "JOIN ls.primaryKey.status as lsps "
+												+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+												+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp)) "
 							+ "GROUP BY p.patent_appl_country ";
 			Query q = session.createQuery(queryStr);
-			String statusDesc = "公告";
-			q.setParameter("statusDesc", statusDesc);
+			String statusApp = "申請";
+			String statusNotice = "公開";
+			String statusPublish = "公告";
+			q.setParameter("statusApp", statusApp);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusPublish", statusPublish);
 			if (!StringUtils.isNULL(businessId)) {
 				q.setParameter("businessId", businessId);
 			}
@@ -1592,18 +1879,24 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "FROM Patent as p " 
 							+ "JOIN p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
-							+ "where lsps.status_desc = :statusDesc "
+							+ "where lsps.status_desc = :statusApp "
 							+ "and p.patent_appl_country in ('tw','us','cn') "
 							+ "and p.is_sync = 1 "
 							+ "and ls.create_date = "
 								+ "( select MAX(ls.create_date) "
 								+ "FROM p.listPatentStatus as ls "
-								+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+								+ "JOIN ls.primaryKey.status as lsps "
+								+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+								+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp)) "
 							+ "group by p.patent_appl_country";
 	
 			Query q = session.createQuery(queryStr);
-			String statusDesc = "申請";
-			q.setParameter("statusDesc", statusDesc);
+			String statusApp = "申請";
+			String statusNotice = "公開";
+			String statusPublish = "公告";
+			q.setParameter("statusApp", statusApp);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusPublish", statusPublish);
 
 	//		log.info(q.list().isEmpty());
 			return q.list();
@@ -1618,19 +1911,24 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "FROM Patent as p " 
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as lsps "
-					+ "where lsps.status_desc = :statusDesc "
+					+ "where lsps.status_desc = :statusNotice "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
 					+ "and  p.is_sync = 1 "
 					+ "and ls.create_date = "
 						+ "( select MAX(ls.create_date) "
 						+ "FROM p.listPatentStatus as ls "
-						+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+						+ "JOIN ls.primaryKey.status as lsps "
+						+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+						+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp)) "
 					+ "group by p.patent_appl_country";
 			
 			Query q = session.createQuery(queryStr);
-			String statusDesc = "公開";
-
-			q.setParameter("statusDesc", statusDesc);
+			String statusApp = "申請";
+			String statusNotice = "公開";
+			String statusPublish = "公告";
+			q.setParameter("statusApp", statusApp);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusPublish", statusPublish);
 	//		log.info(q.list().isEmpty());
 			return q.list();
 		}
@@ -1644,18 +1942,24 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "FROM Patent as p " 
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as lsps "
-					+ "where lsps.status_desc = :statusDesc "
+					+ "where lsps.status_desc = :statusPublish "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
 					+ "and p.is_sync = 1 "
 					+ "and ls.create_date = "
 						+ "( select MAX(ls.create_date) "
 						+ "FROM p.listPatentStatus as ls "
-						+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+						+ "JOIN ls.primaryKey.status as lsps "
+						+ "where p.patent_id = ls.primaryKey.patent.patent_id "
+						+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp)) "
 					+ "group by p.patent_appl_country";
 			
 			Query q = session.createQuery(queryStr);
-			String statusDesc = "公告";
-			q.setParameter("statusDesc", statusDesc);
+			String statusApp = "申請";
+			String statusNotice = "公開";
+			String statusPublish = "公告";
+			q.setParameter("statusApp", statusApp);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusPublish", statusPublish);
 
 	//		log.info(q.list().isEmpty());
 			return q.list();
@@ -1712,13 +2016,15 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "FROM Patent as p " 
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as s "
-					+ "where s.status_desc = :statusDesc "
+					+ "where s.status_desc = :statusApp "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
 					+ "AND p.is_sync = 1 "
 					+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 					+ "and ls.create_date = ( select MAX(ls.create_date) " 
 										  + "FROM p.listPatentStatus as ls " 
-										  + "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+										  + "JOIN ls.primaryKey.status as lsps "
+										  + "where p.patent_id = ls.primaryKey.patent.patent_id "
+										  + "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp)) "
 					+ "group by p.patent_appl_country";
 			Query q = session.createQuery(queryStr);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -1727,8 +2033,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 			String beginDateFormat = sdf.format(bd);
 			String endDateFormat = sdf.format(ed);
 			
-			String statusDesc = "申請";
-			q.setParameter("statusDesc", statusDesc);
+			String statusApp = "申請";
+			String statusNotice = "公開";
+			String statusPublish = "公告";
+			q.setParameter("statusApp", statusApp);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusPublish", statusPublish);
 			q.setParameter("beginDate", beginDateFormat);
 			q.setParameter("endDate", endDateFormat);
 
@@ -1745,14 +2055,16 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "FROM Patent as p " 
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as s "
-					+ "where s.status_desc = :statusDesc "
+					+ "where s.status_desc = :statusNotice "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
 					+ "AND p.is_sync = 1 "
 					+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 					+ "and ls.create_date = " 
 					  + "( select MAX(ls.create_date) " 
 					  + "FROM p.listPatentStatus as ls " 
-					  + "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+					  + "JOIN ls.primaryKey.status as lsps "
+					  + "where p.patent_id = ls.primaryKey.patent.patent_id "
+					  + "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp)) "
 					+ "group by p.patent_appl_country";
 			Query q = session.createQuery(queryStr);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -1761,8 +2073,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 			String beginDateFormat = sdf.format(bd);
 			String endDateFormat = sdf.format(ed);
 			
-			String statusDesc = "公開";
-			q.setParameter("statusDesc", statusDesc);
+			String statusApp = "申請";
+			String statusNotice = "公開";
+			String statusPublish = "公告";
+			q.setParameter("statusApp", statusApp);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusPublish", statusPublish);
 			q.setParameter("beginDate", beginDateFormat);
 			q.setParameter("endDate", endDateFormat);
 
@@ -1779,13 +2095,15 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "FROM Patent as p " 
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as s "
-					+ "WHERE s.status_desc = :statusDesc "
+					+ "WHERE s.status_desc = :statusPublish "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
 					+ "AND p.is_sync = 1 "
 					+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 					+ "and ls.create_date = ( select MAX(ls.create_date) " 
 										  + "FROM p.listPatentStatus as ls " 
-										  + "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+										  + "JOIN ls.primaryKey.status as lsps "
+										  + "where p.patent_id = ls.primaryKey.patent.patent_id "
+										  + "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp) ) "
 					+ "group by p.patent_appl_country";
 			Query q = session.createQuery(queryStr);
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -1794,8 +2112,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 			String beginDateFormat = sdf.format(bd);
 			String endDateFormat = sdf.format(ed);
 			
-			String statusDesc = "公告";
-			q.setParameter("statusDesc", statusDesc);
+			String statusApp = "申請";
+			String statusNotice = "公開";
+			String statusPublish = "公告";
+			q.setParameter("statusApp", statusApp);
+			q.setParameter("statusNotice", statusNotice);
+			q.setParameter("statusPublish", statusPublish);
 			q.setParameter("beginDate", beginDateFormat);
 			q.setParameter("endDate", endDateFormat);
 	//		log.info(q.list().isEmpty());

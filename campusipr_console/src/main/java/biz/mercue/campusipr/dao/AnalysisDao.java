@@ -82,8 +82,15 @@ public interface AnalysisDao {
 	List<Analysis> countSchoolPatentStatusByYear(JSONArray statusDesc, JSONArray schoolArray, Long beginDate,
 			Long endDate);
 	
-	List<Analysis> getNoticePatent(String businessId);
-	List<Analysis> getNoticePatentByyear(String businessId, Long beginDate, Long endDate);
+
 	int countNoticePatent(String businessId);
 	int countNoticePatentByYear(String businessId, Long beginDate, Long endDate);
+	int countPublishPatent(String businessId);
+	int countPublishPatentByYear(String businessId, Long beginDate, Long endDate);
+	int countAllNoticePatent();
+	int countAllPublishPatent();
+	int countAllNoticePatentByYear(Long beginDate, Long endDate);
+	int countAllPublishPatentByYear(Long beginDate, Long endDate);
+	int countTech(String businessId);
+	int countTechByYear(String businessId, Long beginDate, Long endDate);
 }

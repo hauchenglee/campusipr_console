@@ -57,19 +57,20 @@ public class AnalysisServiceImpl implements AnalysisService {
 	public JSONObject schoolOverview(String businessId) {
 		log.info("analysis All Patent");
 		//技術名稱analyticBean.analTechTotal
-		int unApplPatent;
-		int analYearsTotal;
-		int analFamilyTotal;
-		int analDepartmentTotal;
-		int analInventorToltal;
+		int unApplPatent = analysisDao.countUnApplPatent(businessId);;
+		int analYearsTotal = analysisDao.countAllPatent(businessId);
+		int analFamilyTotal = analysisDao.countPatentFamily(businessId);
+		int analDepartmentTotal = analysisDao.countDepartment(businessId);
+		int analInventorToltal = analysisDao.countInventor(businessId) + analysisDao.countInventorEn(businessId);
+		
+		int noticeAmount = analysisDao.countNoticePatent(businessId);
+		int publishAmount = analysisDao.countPublishPatent(businessId);
+		int analTechTotal = analysisDao.countTech(businessId);
+		
+		
 		List<Analysis> analAllYearsList = new ArrayList<Analysis>();
 		List<Object> combineOverview = new ArrayList<Object>();
 		
-		unApplPatent = analysisDao.countUnApplPatent(businessId);
-		analYearsTotal = analysisDao.countAllPatent(businessId);
-		analFamilyTotal = analysisDao.countPatentFamily(businessId);
-		analDepartmentTotal = analysisDao.countDepartment(businessId);
-		analInventorToltal = analysisDao.countInventor(businessId) + analysisDao.countInventorEn(businessId);
 		analAllYearsList = analysisDao.countYearPatent(businessId);
 
 		log.info("未官方同步專利: "+unApplPatent);
@@ -77,7 +78,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 		log.info("專利家族總數: "+analFamilyTotal);
 		log.info("科系總數: "+analDepartmentTotal);
 		log.info("發明人總數: "+analInventorToltal);
-
+		log.info("科技總數: "+analTechTotal);
+		
 		Object yearToArray[][] = analAllYearsList.toArray(new Object[analAllYearsList.size()][0]);
 		combineOverview.addAll(combineOverview(yearToArray));
 
@@ -89,26 +91,30 @@ public class AnalysisServiceImpl implements AnalysisService {
 		result.put("analInventorToltal",analInventorToltal);
 		result.put("analAllYearsList",combineOverview);
 		
+		//0924，公開公告分開
+		result.put("noticeAmount", noticeAmount);
+		result.put("publishAmount", publishAmount);
+		result.put("analTechTotal", analTechTotal);
+		
 		return result;
 	}
 	
 	@Override
 	public JSONObject schoolOverviewByYear(String businessId, Long beginDate, Long endDate) {
 		log.info("analysis Patent By Year");
-		int unApplPatent;
-		int analYearsTotal ;
-		int analFamilyTotal;
-		int analDepartmentTotal;
-		int analInventorToltal;
-		List<Analysis> countPatentByYear = new ArrayList<Analysis>();
+		int unApplPatent = analysisDao.countUnApplPatent(businessId);
+		int analYearsTotal = analysisDao.countAllPatentByYear(businessId, beginDate, endDate);
+		int analFamilyTotal = analysisDao.countPatentFamilyByYear(businessId, beginDate, endDate);
+		int analDepartmentTotal = analysisDao.countDepartmentByYear(businessId, beginDate, endDate);
+		int analInventorToltal = analysisDao.countInventorByYear(businessId, beginDate, endDate) + analysisDao.countInventorEnByYear(businessId, beginDate, endDate);
 		
+		int noticeAmount = analysisDao.countNoticePatentByYear(businessId, beginDate, endDate);
+		int publishAmount = analysisDao.countPublishPatentByYear(businessId, beginDate, endDate);
+		int analTechTotal = analysisDao.countTech(businessId);
+		
+		List<Analysis> countPatentByYear = new ArrayList<Analysis>();
 		List<Object> combineOverview = new ArrayList<Object>();
 		
-		unApplPatent = analysisDao.countUnApplPatent(businessId);
-		analYearsTotal= analysisDao.countAllPatentByYear(businessId, beginDate, endDate);
-		analFamilyTotal = analysisDao.countPatentFamilyByYear(businessId, beginDate, endDate);
-		analDepartmentTotal = analysisDao.countDepartmentByYear(businessId, beginDate, endDate);
-		analInventorToltal = analysisDao.countInventorByYear(businessId, beginDate, endDate) + analysisDao.countInventorEnByYear(businessId, beginDate, endDate);
 		countPatentByYear = analysisDao.countYearPatentByYear(businessId, beginDate, endDate);
 
 		log.info("未官方同步專利: "+unApplPatent);
@@ -116,6 +122,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 		log.info("專利家族總數: "+analFamilyTotal);
 		log.info("科系總數: "+analDepartmentTotal);
 		log.info("發明人總數: "+analInventorToltal);
+		log.info("科技總數: "+analTechTotal);
 		
 		Object yearToArray[][] = countPatentByYear.toArray(new Object[countPatentByYear.size()][0]);
 		combineOverview.addAll(combineOverviewByYear(yearToArray, beginDate, endDate));
@@ -127,6 +134,11 @@ public class AnalysisServiceImpl implements AnalysisService {
 		result.put("analDepartmentTotal",analDepartmentTotal);
 		result.put("analInventorToltal",analInventorToltal);
 		result.put("analAllYearsList",combineOverview);
+		
+		//0924，公開公告分開
+		result.put("noticeAmount", noticeAmount);
+		result.put("publishAmount", publishAmount);
+		result.put("analTechTotal", analTechTotal);
 		
 		return result;
 	}
@@ -362,15 +374,15 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 	@Override
 	public JSONObject platformOverview() {
-		int schoolSum = 0;
-		int applSum = 0;
-		int porfolioSum = 0;
+		int schoolSum = analysisDao.countSchool();
+		int applSum  = analysisDao.countAllPatent();
+		int porfolioSum = analysisDao.countPorfolio();
 		List<Analysis> countYearPatent= new ArrayList<Analysis>();
 		List<Object> combineOverview = new ArrayList<Object>();
 		
-		schoolSum = analysisDao.countSchool();
-		applSum = analysisDao.countAllPatent();
-		porfolioSum = analysisDao.countPorfolio();
+		int noticeAmount = analysisDao.countAllNoticePatent();
+		int publishAmount = analysisDao.countAllPublishPatent();
+		
 		countYearPatent = analysisDao.countYearPatent();
 		
 		Object yearToArray[][] = countYearPatent.toArray(new Object[countYearPatent.size()][0]);
@@ -381,22 +393,27 @@ public class AnalysisServiceImpl implements AnalysisService {
 		result.put("applSum",applSum);
 		result.put("porfolioSum",porfolioSum);
 		result.put("analAllYearsList",combineOverview);
-		log.info(result);
+		
+		//0924
+		result.put("noticeAmount", noticeAmount);
+		result.put("publishAmount", publishAmount);
+//		log.info(result);
 		return result;
 	}
 
 	@Override
 	public JSONObject platformOverviewByYear(Long beginDate, Long endDate) {
 		
-		int schoolSum = 0;
-		int applSum = 0;
-		int porfolioSum = 0;
+		int schoolSum = analysisDao.countSchoolByYear(beginDate, endDate);
+		int applSum = analysisDao.countAllPatentByYear(beginDate, endDate);
+		int porfolioSum = analysisDao.countPorfolioByYear(beginDate, endDate);
+		
+		int noticeAmount = analysisDao.countAllNoticePatent();
+		int publishAmount = analysisDao.countAllPublishPatent();
+		
+		
 		List<Analysis> countYearPatent= new ArrayList<Analysis>();
 		List<Object> combineOverview = new ArrayList<Object>();
-		
-		schoolSum = analysisDao.countSchoolByYear(beginDate, endDate);
-		applSum = analysisDao.countAllPatentByYear(beginDate, endDate);
-		porfolioSum = analysisDao.countPorfolioByYear(beginDate, endDate);
 		countYearPatent = analysisDao.countYearPatentByYear(beginDate, endDate);
 		
 		Object yearToArray[][] = countYearPatent.toArray(new Object[countYearPatent.size()][0]);
@@ -407,7 +424,11 @@ public class AnalysisServiceImpl implements AnalysisService {
 		result.put("applSum",applSum);
 		result.put("porfolioSum",porfolioSum);
 		result.put("analAllYearsList",combineOverview);
-		log.info(result);
+		
+		//0924
+		result.put("noticeAmount", noticeAmount);
+		result.put("publishAmount", publishAmount);
+//		log.info(result);
 		return result;
 	}
 	
@@ -621,7 +642,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 		result.put("getDefaultYear", getDefaultYear);
 		result.put("combineSchoolSum", combineSchoolSum);
 		result.put("statusList", statusList);
-		log.info(result);
+//		log.info(result);
 		return result;
 	}
 	
@@ -1640,7 +1661,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 			XSSFCell cell = row.createCell((short) 0); 
 			cell.setCellValue("科系"); 
 			int dataInx = 0;
-			String countryId [] = {"美國","中華民國","中國大陸","總數"};
+			String countryId [] = {"美國","中華民國","中國","總數"};
 			for(dataInx = 0;dataInx<countryId.length;dataInx++) {
 				cell = row.createCell((short) 1+dataInx);
 				Object countryData =countryId [dataInx];
@@ -1809,10 +1830,10 @@ public class AnalysisServiceImpl implements AnalysisService {
 							cell.setCellValue(sum);
 						}
 						break;
-					case "中國大陸":
+					case "中國":
 						row = sheet.createRow((short) (2 + countryInx) + (schoolInx * 6));
 						cell = row.createCell((short) 0);
-						cell.setCellValue("中國大陸");
+						cell.setCellValue("中國");
 						for (titleInx = 0; titleInx < statusDesc.length(); titleInx++) {
 							title = statusDesc.get(titleInx).toString();
 							for (dataInx = 0; dataInx < countList.size(); dataInx++) {
@@ -1874,18 +1895,18 @@ public class AnalysisServiceImpl implements AnalysisService {
 	
 	@Override
 	public JSONObject statusData(String businessId, Long beginDate, Long endDate) {
-		List<Analysis> statusList = analysisDao.getNoticePatent(businessId);
-		List<Analysis> statusListByYear = analysisDao.getNoticePatentByyear(businessId, beginDate, endDate);
-//		statusList = analysisDao.getNoticePatent(businessId);
-//		statusListByYear = analysisDao.getNoticePatentByyear(businessId, beginDate, endDate);
-		int statusCount = analysisDao.countNoticePatent(businessId);
-		int statusCountByYear = analysisDao.countNoticePatentByYear(businessId, beginDate, endDate);
-		
+//		List<Analysis> statusList = analysisDao.getNoticePatent(businessId);
+//		List<Analysis> statusListByYear = analysisDao.getNoticePatentByyear(businessId, beginDate, endDate);
+////		statusList = analysisDao.getNoticePatent(businessId);
+////		statusListByYear = analysisDao.getNoticePatentByyear(businessId, beginDate, endDate);
+//		int statusCount = analysisDao.countNoticePatent(businessId);
+//		int statusCountByYear = analysisDao.countNoticePatentByYear(businessId, beginDate, endDate);
+//		
 		JSONObject result = new JSONObject();
-		result.put("statusList", statusList);
-		result.put("statusListByYear", statusListByYear);
-		result.put("statusCount", statusCount);
-		result.put("statusCountByYear", statusCountByYear);
+//		result.put("statusList", statusList);
+//		result.put("statusListByYear", statusListByYear);
+//		result.put("statusCount", statusCount);
+//		result.put("statusCountByYear", statusCountByYear);
 		return result;
 	}
 }
