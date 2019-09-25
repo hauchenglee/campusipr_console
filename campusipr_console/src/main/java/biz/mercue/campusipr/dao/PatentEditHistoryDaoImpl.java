@@ -53,6 +53,28 @@ public class PatentEditHistoryDaoImpl extends AbstractDao<String,  PatentEditHis
 			criteria.createAlias("admin","admin");
 			Criterion re1 = Restrictions.eq("admin.business.business_id", businessId);
 			Criterion re2 = Restrictions.eq("admin.admin_id", Constants.SYSTEM_ADMIN);
+//			Criterion re3 = Restrictions.eq("admin.business.business_id", Constants.SYSTEM_ADMIN);
+			criteria.add(Restrictions.or(re1,re2));
+		}
+		criteria.createAlias("patent","patent");
+		criteria.add(Restrictions.eq("patent.patent_id", patentId));
+		criteria.add(Restrictions.eq("field_id", fieldId));
+		criteria.add(Restrictions.or(Restrictions.eq("business_id", Constants.SYSTEM_ADMIN),Restrictions.eq("business_id", businessId)));
+		criteria.setFirstResult((page - 1) * pageSize);
+		criteria.setMaxResults(pageSize);
+		criteria.addOrder(Order.desc("create_date"));
+		return criteria.list();
+	}
+
+//	@Override
+	public List<PatentEditHistory> getSysHistory(String patentId, String fieldId, String businessId,int page,int pageSize) {
+		// TODO Auto-generated method stub
+		Criteria criteria =  createEntityCriteria();
+		if(!StringUtils.isNULL(businessId)) {
+			criteria.createAlias("admin","admin");
+			Criterion re1 = Restrictions.eq("admin.business.business_id", businessId);
+			Criterion re2 = Restrictions.eq("admin.admin_id", Constants.SYSTEM_ADMIN);
+//			Criterion re3 = Restrictions.or(Restrictions.eq("admin.business.business_id", businessId),Restrictions.eq("admin.business.business_id", Constants.SYSTEM_ADMIN));
 			criteria.add(Restrictions.or(re1,re2));
 		}
 		criteria.createAlias("patent","patent");
@@ -64,7 +86,7 @@ public class PatentEditHistoryDaoImpl extends AbstractDao<String,  PatentEditHis
 		criteria.addOrder(Order.desc("create_date"));
 		return criteria.list();
 	}
-
+	
 	@Override
 	public int countByPatentAndField(String patentId, String fieldId, String businessId) {
 		// TODO Auto-generated method stub

@@ -20,10 +20,12 @@ import biz.mercue.campusipr.util.DateUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.MailSender;
+import biz.mercue.campusipr.util.MyThread;
 import biz.mercue.campusipr.util.ServiceChinaPatent;
 import biz.mercue.campusipr.util.ServiceTaiwanPatent;
 import biz.mercue.campusipr.util.ServiceUSPatent;
 import biz.mercue.campusipr.util.StringUtils;
+import biz.mercue.campusipr.util.Task;
 
 
 
@@ -441,31 +443,81 @@ public class PatentServiceImpl implements PatentService {
 		return taskResult;
 	}
 
-	@Override
+//	@Override
 	public void setTask(List<Patent> patentList) {
+//		// 初始化要執行的任務列表
 //		List taskList = new ArrayList();
-		
-//		Patent editPatent = null;
+//		for (int i = 0; i < 100; i++) {
+//			taskList.add(new Task(i));
+//		}
+//		// 設定要啟動的工作執行緒數為 4 個
+//		int threadCount = 4;
+//		List[] taskListPerThread = distributeTasks(taskList, threadCount);
+//		System.out.println("實際要啟動的工作執行緒數：" + taskListPerThread.length);
+//		for (int i = 0; i < taskListPerThread.length; i++) {
+//			Thread workThread = new MyThread(taskListPerThread[i], i);
+//			workThread.start();
+//		}
 		
 //		for(int i = 0;i<patentList.size();i++) {
-//			taskList.add(new MyThread(addPatentByExcel(editPatent,admin,business,ip),i));
+//			editPatent = patentList.get(i);
+//			taskList.add(new MyThread(test(editPatent),i));
 //		}
+//		int threadCount = 4;
+//		List[] taskListPerThread = distributeTasks(taskList, threadCount);
+//		System.out.println("實際要啟動的工作執行緒數：" + taskListPerThread.length);
 //		for(int i = 0;i<taskList.size();i++) {
 //			editPatent = patentList.get(i);
-//			Thread workTheard = new MyThread(addPatentByExcel(editPatent,admin,business,ip),i);
+//			Thread workTheard = new MyThread(syncPatentData(editPatent),i);
 //			workTheard.start();
 //		}
-//		Thread t1 = new MyThread(test(patentList),0);
-//		t1.start();
-//		Thread t2 = new MyThread(test(patentList),1);
-//		t2.start();
-
 	}
-	public static int test(List<Patent> patentList) {
-		for(Patent patent:patentList) {
-			System.out.println((patent.getPatent_appl_no()));;
-		}
-		return 1;
+	@SuppressWarnings("unchecked")
+	public static List[] distributeTasks(List taskList, int threadCount) {
+//		// 每個執行緒至少要執行的任務數,假如不為零則表示每個執行緒都會分配到任務
+//		int minTaskCount = taskList.size() / threadCount;
+//		// 平均分配後還剩下的任務數，不為零則還有任務依個附加到前面的執行緒中
+//		int remainTaskCount = taskList.size() % threadCount;
+//		// 實際要啟動的執行緒數,如果工作執行緒比任務還多
+//		// 自然只需要啟動與任務相同個數的工作執行緒，一對一的執行
+//		// 畢竟不打算實現了執行緒池，所以用不著預先初始化好休眠的執行緒
+//		int actualThreadCount = minTaskCount > 0 ? threadCount
+//				: remainTaskCount;
+//		// 要啟動的執行緒陣列，以及每個執行緒要執行的任務列表
+//		List[] taskListPerThread = new List[actualThreadCount];
+//		int taskIndex = 0;
+//		// 平均分配後多餘任務，每附加給一個執行緒後的剩餘數，重新宣告與 remainTaskCount
+//		// 相同的變數，不然會在執行中改變 remainTaskCount 原有值，產生麻煩
+//		int remainIndces = remainTaskCount;
+//		for (int i = 0; i < taskListPerThread.length; i++) {
+//			taskListPerThread[i] = new ArrayList();
+//			// 如果大於零，執行緒要分配到基本的任務
+//			if (minTaskCount > 0) {
+//				for (int j = taskIndex; j < minTaskCount + taskIndex; j++) {
+//					taskListPerThread[i].add(taskList.get(j));
+//				}
+//				taskIndex += minTaskCount;
+//			}
+//			// 假如還有剩下的，則補一個到這個執行緒中
+//			if (remainIndces > 0) {
+//				taskListPerThread[i].add(taskList.get(taskIndex++));
+//				remainIndces--;
+//			}
+//		}
+//		// 列印任務的分配情況
+//		for (int i = 0; i < taskListPerThread.length; i++) {
+//			System.out.println("執行緒 "
+//					+ i
+//					+ " 的任務數："
+//					+ taskListPerThread[i].size()
+//					+ " 區間["
+//					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
+//					+ ","
+//					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
+//							.getTaskId() + "]");
+//		}
+//		return taskListPerThread;
+		return null;
 	}
 	
 	/**
@@ -2226,7 +2278,7 @@ public class PatentServiceImpl implements PatentService {
 
 	public void patentHistoryMerge(Patent dbPatent, String businessId) {
 		String editor = "Official";
-
+		log.info("patentHistoryMerge");
 		List<PatentField> fieldList = fieldDao.getAllFields();
 		for (PatentField field : fieldList) {
 			if (Constants.PATENT_NAME_FIELD.equals(field.getField_id())) {
@@ -2314,7 +2366,7 @@ public class PatentServiceImpl implements PatentService {
 
 	@Override
 	public void patentHistoryFirstAdd(Patent patent, String patentId, String businessId) {
-		log.info("patentHistory:");
+//		log.info("patentHistoryFirstAdd:");
 		Patent dbBean = patentDao.getById(patentId);
 		String editor = null;
 		if (patent.getEdit_source() == Patent.EDIT_SOURCE_SERVICE) {
@@ -2499,7 +2551,7 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	private void comparePatent(Patent dbBean, Patent patent, String businessId) {
-//		log.info("comparePatent");
+		log.info("comparePatent");
 		List<PatentField> fieldList = fieldDao.getAllFields();
 		Object emptyItem= "(無資料)";
 		String editor = null;
@@ -2508,10 +2560,9 @@ public class PatentServiceImpl implements PatentService {
 		} else {
 			editor = patent.getAdmin().getAdmin_name();
 		}
-		if (patent.getEdit_source() == Constants.PATENT_SCHEDULED) {
-			businessId = null;
+		if (patent.getSourceFrom() == Constants.PATENT_SCHEDULED) {
+//			businessId = null;
 		}
-
 		String editor_excel = patent.getAdmin().getAdmin_name();
 		
 		for (PatentField field:fieldList) {
@@ -2651,19 +2702,27 @@ public class PatentServiceImpl implements PatentService {
 			if (Constants.PATENT_STATUS_FIELD.equals(field.getField_id())) {
 				JSONObject emptyStatus = new JSONObject();
 				emptyStatus.put("status_desc", emptyItem);
+				log.info("getEdit_source: "+patent.getEdit_source());
+				log.info("getSourceFrom: "+patent.getSourceFrom());
+				log.info("ListPatentStatus().size(): "+patent.getListPatentStatus().size());
 				boolean statusListIsChange = compareStatusList(dbBean, patent);
 				List<String> statusAddData = new ArrayList<>();
 				if (dbBean.getListPatentStatus() != null && patent.getListPatentStatus() != null) {
 					for (PatentStatus patentStatus : patent.getListPatentStatus()) {
 						Status status = patentStatus.getStatus();
-						if (patentStatus.getCreate_date() != null) {
+						if (patentStatus.getCreate_date() != null && patent.getSourceFrom()!=Constants.PATENT_SCHEDULED) {
 							if (StringUtils.isNULL(patentStatus.getBusiness_id())) { // official
 								status.setCreate_date(patentStatus.getCreate_date());
 								statusAddData.add(JacksonJSONUtils.mapObjectWithView(status, View.Patent.class));
+//								log.info("official: "+statusAddData);
 							} else if (patentStatus.getBusiness_id().equals(businessId)) { // user status
 								status.setCreate_date(patentStatus.getCreate_date());
 								statusAddData.add(JacksonJSONUtils.mapObjectWithView(status, View.Patent.class));
+//								log.info("user: "+statusAddData);
 							}
+						}else if(patentStatus.getCreate_date() != null && patent.getSourceFrom()==Constants.PATENT_SCHEDULED) {
+							
+							log.info("statusAddData: " + statusAddData);
 						}
 					}
 				}
@@ -2677,11 +2736,12 @@ public class PatentServiceImpl implements PatentService {
 					log.info("statusAddData: is Empty");
 					statusAddData.add(emptyStatus.toString());
 				}
-//				log.info("statusAddData: "+statusAddData);
+				log.info("statusAddData: "+statusAddData);
 				if (!statusAddData.isEmpty() && statusListIsChange ==true) {
 					PatentEditHistory peh = insertFieldHistory(patent, statusAddData, "create", field.getField_id(), editor, businessId);
 					if (peh != null) {
 						dbBean.addHistory(peh);
+//						log.info("history In");
 					}
 				}
 			}
@@ -3069,6 +3129,7 @@ public class PatentServiceImpl implements PatentService {
 	}
 	
 	private PatentEditHistory insertFieldHistoryFirstAdd(Patent patent, List<String> historyDataList, String status, String fieldId, String editor, String businessId) {
+//		log.info("insertFieldHistoryFirstAdd");
 		Date now = new Date();
 		PatentEditHistory peh = new PatentEditHistory();
 		peh.setHistory_id(KeyGeneratorUtils.generateRandomString());
@@ -3420,7 +3481,9 @@ public class PatentServiceImpl implements PatentService {
 		
 		try {
 			List<PatentContact> listContact = editPatent.getListContact();
-//			log.info(listContact ==null);
+			
+//			log.info("getSourceFrom: "+editPatent.getSourceFrom());
+			
 			if (Patent.EDIT_SOURCE_IMPORT == editPatent.getEdit_source()&&listContact != null) {
 				PatentContact dbcontact = new PatentContact();
 				for (PatentContact contact : listContact) {
@@ -3433,7 +3496,8 @@ public class PatentServiceImpl implements PatentService {
 					dbcontact.setCreate_date(new Date());
 				}
 				dbPatent.addContact(dbcontact);
-			}else if(Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()&&listContact != null && listContact.size() > 0){
+			}else if(Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()&&listContact != null && listContact.size() > 0
+					&& editPatent.getSourceFrom() !=Constants.PATENT_SCHEDULED){
 				PatentContact dbcontact = new PatentContact();
 				for (PatentContact contact : listContact) {
 					dbcontact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
@@ -3446,7 +3510,10 @@ public class PatentServiceImpl implements PatentService {
 				}
 				dbPatent.addContact(dbcontact);
 //				log.info("EDIT_SOURCE_SERVICE");
-			}else{
+			}else if(editPatent.getSourceFrom() ==Constants.PATENT_SCHEDULED){
+				log.info("系統同步，聯絡人不更新");
+			}
+			else{
 				if (editPatent.getListContact() != null && editPatent.getListContact().size() > 0) {
 					for (PatentContact contact : listContact) {
 						contact.setPatent_contact_id(KeyGeneratorUtils.generateRandomString());
