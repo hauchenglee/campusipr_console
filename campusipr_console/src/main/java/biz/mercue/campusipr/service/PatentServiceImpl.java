@@ -6,7 +6,6 @@ import biz.mercue.campusipr.dao.*;
 import biz.mercue.campusipr.model.*;
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.formula.functions.Now;
-import org.im4java.test.Test;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,12 +19,10 @@ import biz.mercue.campusipr.util.DateUtils;
 import biz.mercue.campusipr.util.JacksonJSONUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
 import biz.mercue.campusipr.util.MailSender;
-import biz.mercue.campusipr.util.MyThread;
 import biz.mercue.campusipr.util.ServiceChinaPatent;
 import biz.mercue.campusipr.util.ServiceTaiwanPatent;
 import biz.mercue.campusipr.util.ServiceUSPatent;
 import biz.mercue.campusipr.util.StringUtils;
-import biz.mercue.campusipr.util.Task;
 
 
 
@@ -2710,7 +2707,7 @@ public class PatentServiceImpl implements PatentService {
 				if (dbBean.getListPatentStatus() != null && patent.getListPatentStatus() != null) {
 					for (PatentStatus patentStatus : patent.getListPatentStatus()) {
 						Status status = patentStatus.getStatus();
-						if (patentStatus.getCreate_date() != null && patent.getSourceFrom()!=Constants.PATENT_SCHEDULED) {
+						if (patentStatus.getCreate_date() != null) {
 							if (StringUtils.isNULL(patentStatus.getBusiness_id())) { // official
 								status.setCreate_date(patentStatus.getCreate_date());
 								statusAddData.add(JacksonJSONUtils.mapObjectWithView(status, View.Patent.class));
@@ -2720,9 +2717,6 @@ public class PatentServiceImpl implements PatentService {
 								statusAddData.add(JacksonJSONUtils.mapObjectWithView(status, View.Patent.class));
 //								log.info("user: "+statusAddData);
 							}
-						}else if(patentStatus.getCreate_date() != null && patent.getSourceFrom()==Constants.PATENT_SCHEDULED) {
-							
-							log.info("statusAddData: " + statusAddData);
 						}
 					}
 				}
