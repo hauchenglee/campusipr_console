@@ -78,6 +78,6 @@ public interface PatentService {
 
 	String deleteAll(String businessId);
 
-//	void setTask(List<Patent> patentList);
+	void setTask(List<Patent> patentList);
 
 }
