@@ -24,14 +24,15 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	// 預設：未官方同步專利
 	@Override
 	public int countUnApplPatent(String businessId) {
-//		log.info("未申請完成的申請號數量");
+//		log.info("申請案數量");
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct p.patent_id) " 
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
-						+ "WHERE p.is_sync = 0 "
-						+ "and lb.business_id = :businessId "
-						+ "AND p.patent_appl_no IS NOT NULL " 
+						+ "WHERE lb.business_id = :businessId "
+						+ "AND p.is_sync = 1 "
+						+ "AND p.patent_appl_no IS NOT NULL "
+						+ "AND p.patent_appl_date IS NOT NULL "
 						+ "AND p.patent_notice_no IS NULL " 
 						+ "AND p.patent_publish_no IS NULL";
 		Query q = session.createQuery(queryStr);
@@ -42,7 +43,36 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 //		log.info(count);
 		return (int) count;
 	}
-
+	@Override
+	public int countUnApplPatentByYear(String businessId, Long beginDate, Long endDate) {
+//		log.info("申請案數量");
+		Session session = getSession();
+		String queryStr = "SELECT count(distinct p.patent_id) " 
+						+ "FROM Patent as p " 
+						+ "JOIN p.listBusiness as lb "
+						+ "WHERE lb.business_id = :businessId "
+						+ "AND p.patent_appl_no IS NOT NULL "
+						+ "AND p.patent_appl_date IS NOT NULL "
+						+ "AND p.is_sync = 1 "
+						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "AND p.patent_notice_no IS NULL " 
+						+ "AND p.patent_publish_no IS NULL";
+		Query q = session.createQuery(queryStr);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+		Timestamp bd = new Timestamp(beginDate);
+		Timestamp ed = new Timestamp(endDate);
+		String beginDateFormat = sdf.format(bd);
+		String endDateFormat = sdf.format(ed);
+		log.info(beginDateFormat +", "+ endDateFormat);
+		q.setParameter("beginDate", beginDateFormat);
+		q.setParameter("endDate", endDateFormat);
+		if (!StringUtils.isNULL(businessId)) {
+			q.setParameter("businessId", businessId);
+		}
+		long count = (long) q.uniqueResult();
+//		log.info(count);
+		return (int) count;
+	}
 	// 預設：專利申請總數
 		@Override
 		public int countAllPatent(String businessId) {
@@ -1036,7 +1066,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as lsps "
 					+ "where lb.business_id = :businessId "
-					+ "and (p.patent_publish_date is NULL ) "
+					+ "and p.patent_publish_date is NULL "
 					+ "and lsps.status_desc = :statusDesc "
 					+ "and p.is_sync = 1 "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
@@ -1091,6 +1121,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as lsps "
 					+ "where lb.business_id = :businessId "
+					+ "and p.patent_publish_date is NULL "
 					+ "and lsps.status_desc = :statusNotice "
 					+ "and p.is_sync = 1 "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
@@ -1373,7 +1404,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "JOIN p.listBusiness as lb "
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as lsps "
-					+ "where lsps.status_desc = :statusNotice  "
+					+ "where lsps.status_desc = :statusNotice "
+					+ "and p.patent_publish_date IS NULL "
 					+ "and p.is_sync = 1 "
 					+ "and p.patent_appl_country in ('tw','us','cn') "
 					+ "and (date_format(p.patent_appl_date, '%Y') between :beginDate and :endDate) "

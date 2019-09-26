@@ -102,7 +102,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 	@Override
 	public JSONObject schoolOverviewByYear(String businessId, Long beginDate, Long endDate) {
 		log.info("analysis Patent By Year");
-		int unApplPatent = analysisDao.countUnApplPatent(businessId);
+		int unApplPatent = analysisDao.countUnApplPatentByYear(businessId, beginDate, endDate);
 		int analYearsTotal = analysisDao.countAllPatentByYear(businessId, beginDate, endDate);
 		int analFamilyTotal = analysisDao.countPatentFamilyByYear(businessId, beginDate, endDate);
 		int analDepartmentTotal = analysisDao.countDepartmentByYear(businessId, beginDate, endDate);
@@ -117,7 +117,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 		
 		countPatentByYear = analysisDao.countYearPatentByYear(businessId, beginDate, endDate);
 
-		log.info("未官方同步專利: "+unApplPatent);
+		log.info("未公開公告申請案: "+unApplPatent);
 		log.info("專利申請總數: "+analYearsTotal);
 		log.info("專利家族總數: "+analFamilyTotal);
 		log.info("科系總數: "+analDepartmentTotal);
@@ -408,8 +408,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 		int applSum = analysisDao.countAllPatentByYear(beginDate, endDate);
 		int porfolioSum = analysisDao.countPorfolioByYear(beginDate, endDate);
 		
-		int noticeAmount = analysisDao.countAllNoticePatent();
-		int publishAmount = analysisDao.countAllPublishPatent();
+		int noticeAmount = analysisDao.countAllNoticePatentByYear(beginDate, endDate);
+		int publishAmount = analysisDao.countAllPublishPatentByYear(beginDate, endDate);
 		
 		
 		List<Analysis> countYearPatent= new ArrayList<Analysis>();

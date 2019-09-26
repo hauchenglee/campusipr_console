@@ -93,4 +93,5 @@ public interface AnalysisDao {
 	int countAllPublishPatentByYear(Long beginDate, Long endDate);
 	int countTech(String businessId);
 	int countTechByYear(String businessId, Long beginDate, Long endDate);
+	int countUnApplPatentByYear(String businessId, Long beginDate, Long endDate);
 }
