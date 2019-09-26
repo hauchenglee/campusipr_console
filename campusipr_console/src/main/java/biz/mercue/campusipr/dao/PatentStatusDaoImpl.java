@@ -71,6 +71,18 @@ public class PatentStatusDaoImpl extends AbstractDao<String,  PatentStatus> impl
 	}
 
 	@Override
+	public String checkStatusIdExist(String patentId, String statusId) {
+		String queryStr = "select ps.primaryKey.status.status_id from PatentStatus as ps" +
+				" join ps.primaryKey.status as jst" +
+				" where ps.primaryKey.patent.patent_id = :patentId and jst.status_id = :statusId";
+		Session session = getSession();
+		Query query = session.createQuery(queryStr);
+		query.setParameter("patentId", patentId);
+		query.setParameter("statusId", statusId);
+		return (String) query.uniqueResult();
+	}
+
+	@Override
 	public void create(PatentStatus ps) {
 		persist(ps);
 	}

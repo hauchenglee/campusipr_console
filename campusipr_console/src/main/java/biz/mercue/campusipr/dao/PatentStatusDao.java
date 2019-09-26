@@ -18,8 +18,10 @@ public interface PatentStatusDao {
 	List<PatentStatus> getByPatent(String patentId);
 
 	List<String> getStatusIds(String patentId);
-	
-	void create(PatentStatus ps);
+
+    String checkStatusIdExist(String patentId, String statusId);
+
+    void create(PatentStatus ps);
 
     void updateStatusPatent(List<String> targetId, String updateId);
 

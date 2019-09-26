@@ -3905,26 +3905,40 @@ public class PatentServiceImpl implements PatentService {
 		// 02/23新增根據日期同步狀態
 //		log.info("syncPatentStatus");
 		List<Status> ListStatus = statusDao.getEditable();
+		String patentId = patent.getPatent_id();
 		for (Status status:ListStatus) {
 //			log.info(status.getStatus_id());
 			switch (status.getStatus_id()) {
 			case Constants.STATUS_PUBLISH:
 				if (patent.getPatent_publish_date() != null) {
-					patent.addStatus(status, patent.getPatent_publish_date());
+					String result = patentStatusDao.checkStatusIdExist(patentId, Constants.STATUS_PUBLISH);
+					if (StringUtils.isNULL(result)) {
+						patent.addStatus(status, patent.getPatent_publish_date());
+					}
 				}
 				break;
 			case Constants.STATUS_APPLICANTING:
 				if (patent.getPatent_appl_date() != null) {
-					patent.addStatus(status, patent.getPatent_appl_date());
+					String result = patentStatusDao.checkStatusIdExist(patentId, Constants.STATUS_APPLICANTING);
+					if (StringUtils.isNULL(result)) {
+						patent.addStatus(status, patent.getPatent_appl_date());
+					}
 				}
 				break;
 			case Constants.STATUS_NOTICE:
 				if (patent.getPatent_notice_date() != null) {
-					patent.addStatus(status, patent.getPatent_notice_date());
+					String result = patentStatusDao.checkStatusIdExist(patentId, Constants.STATUS_NOTICE);
+					if (StringUtils.isNULL(result)) {
+						patent.addStatus(status, patent.getPatent_notice_date());
+					}
 				}
 				break;
 			case Constants.STATUS_EXPIRED:  //專利狀態:終止。因目前只有臺灣有Patent_charge_expire_date，所以加入限制
 				if (patent.getPatent_edate() != null&&Constants.APPL_COUNTRY_TW.equals(patent.getPatent_appl_country())) {
+					String result = patentStatusDao.checkStatusIdExist(patentId, Constants.STATUS_EXPIRED);
+					if (!StringUtils.isNULL(result)) {
+						break;
+					}
 					if (patent.getPatent_edate().before(new Date())) {
 						patent.addStatus(status, patent.getPatent_charge_expire_date());
 					}
