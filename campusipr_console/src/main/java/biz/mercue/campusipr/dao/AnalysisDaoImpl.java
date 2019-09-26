@@ -1315,6 +1315,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		String queryStr = "SELECT count(distinct p.patent_appl_no), date_format(p.patent_appl_date, '%Y')"
 						+ "FROM Patent as p " 
 						+ "WHERE p.is_sync = 1 "
+						+ "AND NOT (p.patent_notice_no is null and p.patent_publish_no is null) "
 						+ "AND patent_appl_date is not null " 
 						+ "GROUP BY date_format(patent_appl_date, '%Y') "
 						+ "Order by date_format(patent_appl_date, '%Y') asc";
@@ -1330,8 +1331,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		String queryStr = "SELECT count(distinct p.patent_appl_no), date_format(p.patent_appl_date, '%Y')"
 						+ "FROM Patent as p " 
-						+ "WHERE p.is_sync = 1 " 
+						+ "WHERE p.is_sync = 1 "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "AND NOT (p.patent_notice_no is null and p.patent_publish_no is null) "
 						+ "GROUP BY date_format(patent_appl_date, '%Y') "
 						+ "Order by date_format(patent_appl_date, '%Y') asc";
 
