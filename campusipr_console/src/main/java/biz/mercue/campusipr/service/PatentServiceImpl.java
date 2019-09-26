@@ -452,7 +452,7 @@ public class PatentServiceImpl implements PatentService {
 //			taskList.add(new Task(i,editPatent));
 			taskList.add(syncPatentData(editPatent));
 		}
-		// 設定要啟動的工作執行緒數為 5 個
+		// 設定要啟動的工作執行緒數為 10 個
 		int threadCount = 10;
 		List[] taskListPerThread = distributeTasks(taskList, threadCount);
 		log.info("實際要啟動的工作執行緒數：" + taskListPerThread.length);
