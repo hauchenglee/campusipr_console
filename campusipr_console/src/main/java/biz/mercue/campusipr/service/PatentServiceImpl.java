@@ -541,10 +541,10 @@ public class PatentServiceImpl implements PatentService {
 		if (patentList == null) {
 			return null;
 		}
-//		setTask(patentList);
+		setTask(patentList);
 		String businessId = business.getBusiness_id();
 		for (Patent editPatent : patentList) {
-			int syncResult = syncPatentData(editPatent);
+//			int syncResult = syncPatentData(editPatent);
 			if (!editPatent.isIs_sync()) {
 				editPatent.setPatent_appl_no(StringUtils.generateApplNoRandom(editPatent.getPatent_appl_no()));
 			}

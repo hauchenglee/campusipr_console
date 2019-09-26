@@ -2,10 +2,11 @@ package biz.mercue.campusipr.util;
 
 import java.util.List;
 
+import biz.mercue.campusipr.model.Patent;
+
 public class SyncThread extends Thread {
 	// 本執行緒待執行的任務列表，你也可以指為任務索引的起始值
-		private List<Task> taskList = null;
-		@SuppressWarnings("unused")
+		private List<Patent> taskList = null;
 		private int threadId;
 
 		/**
@@ -16,8 +17,8 @@ public class SyncThread extends Thread {
 		 * @param threadId
 		 *            執行緒 ID
 		 */
-		@SuppressWarnings("unchecked")
-		public SyncThread(List taskList, int threadId) {
+//		@SuppressWarnings("unchecked")
+		public SyncThread(List<Patent> taskList, int threadId) {
 			this.taskList = taskList;
 			this.threadId = threadId;
 		}
@@ -26,10 +27,9 @@ public class SyncThread extends Thread {
 		 * 執行被指派的所有任務
 		 */
 		public void run() {
-//			for (Task task : taskList) {
-//				System.out.println(threadId);
-//				task.execute();
-//			}
+			for (Patent patent : taskList) {
+				System.out.println(threadId);
+			}
 		}
 	
 	
