@@ -541,10 +541,10 @@ public class PatentServiceImpl implements PatentService {
 		if (patentList == null) {
 			return null;
 		}
-		setTask(patentList);
+//		setTask(patentList);
 		String businessId = business.getBusiness_id();
 		for (Patent editPatent : patentList) {
-//			int syncResult = syncPatentData(editPatent);
+			int syncResult = syncPatentData(editPatent);
 			if (!editPatent.isIs_sync()) {
 				editPatent.setPatent_appl_no(StringUtils.generateApplNoRandom(editPatent.getPatent_appl_no()));
 			}
@@ -2699,9 +2699,7 @@ public class PatentServiceImpl implements PatentService {
 			if (Constants.PATENT_STATUS_FIELD.equals(field.getField_id())) {
 				JSONObject emptyStatus = new JSONObject();
 				emptyStatus.put("status_desc", emptyItem);
-				log.info("getEdit_source: "+patent.getEdit_source());
-				log.info("getSourceFrom: "+patent.getSourceFrom());
-				log.info("ListPatentStatus().size(): "+patent.getListPatentStatus().size());
+				
 				boolean statusListIsChange = compareStatusList(dbBean, patent);
 				List<String> statusAddData = new ArrayList<>();
 				if (dbBean.getListPatentStatus() != null && patent.getListPatentStatus() != null) {
@@ -3406,25 +3404,30 @@ public class PatentServiceImpl implements PatentService {
 		List<PatentStatus> listStatus = editPatent.getListPatentStatus();
 		List<PatentStatus> dblistStatus = dbPatent.getListPatentStatus();
 		int sameData = 0;
-		if (listStatus != null || listStatus.size()>0) {
-			for (PatentStatus patentStatus : listStatus) {
-				Status status = patentStatus.getStatus();
-				for(PatentStatus dbPatentStatus:dblistStatus) {
-					Status dbstatus = dbPatentStatus.getStatus();
+		try {
+			if (listStatus != null ||listStatus.size()>0) {
+				for (PatentStatus patentStatus : listStatus) {
+					Status status = patentStatus.getStatus();
+					for(PatentStatus dbPatentStatus:dblistStatus) {
+						Status dbstatus = dbPatentStatus.getStatus();
 //					log.info("status: "+dbstatus.getStatus_desc()+" dbCreateDate: "+dbstatus.getCreate_date());
-					if (StringUtils.isNULL(status.getStatus_id())) {
-						
-					}else if(status.getStatus_desc().equals(dbstatus.getStatus_desc())){
-						sameData++;
+						if (StringUtils.isNULL(status.getStatus_id())) {
+							
+						}else if(status.getStatus_desc().equals(dbstatus.getStatus_desc())){
+							sameData++;
+						}
 					}
 				}
 			}
-		}
-		if(sameData==listStatus.size()&&listStatus.size()!=0&&sameData==dblistStatus.size()) {
-			statusListIsChange=false;
-		}
-		if(dblistStatus.size()==0&&listStatus.size()==0) {
-			statusListIsChange=false;
+			if(sameData==listStatus.size()&&listStatus.size()!=0&&sameData==dblistStatus.size()) {
+				statusListIsChange=false;
+			}
+			if(dblistStatus.size()==0&&listStatus.size()==0) {
+				statusListIsChange=false;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		log.info("statusListIsChange: "+statusListIsChange);
 		return statusListIsChange;
@@ -3772,12 +3775,14 @@ public class PatentServiceImpl implements PatentService {
 
 		// update status
 		List<PatentStatus> patentStatusList = editPatent.getListPatentStatus();
-		for (PatentStatus patentStatus : patentStatusList) {
-			String patentStatusBusinessId = patentStatus.getBusiness_id();
-			if (!StringUtils.isNULL(patentStatusBusinessId) && patentStatusBusinessId.equals(businessId)) {
-				Status status = patentStatus.getStatus();
-				if (status.getStatus_from().equals("user")) {
-					statusDao.updateStatus(status);
+		if(patentStatusList!=null) {
+			for (PatentStatus patentStatus : patentStatusList) {
+				String patentStatusBusinessId = patentStatus.getBusiness_id();
+				if (!StringUtils.isNULL(patentStatusBusinessId) && patentStatusBusinessId.equals(businessId)) {
+					Status status = patentStatus.getStatus();
+					if (status.getStatus_from().equals("user")) {
+						statusDao.updateStatus(status);
+					}
 				}
 			}
 		}
