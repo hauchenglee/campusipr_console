@@ -260,7 +260,7 @@ public class ServiceTaiwanPatent {
 			if (!"0".equals(patentObj.optJSONObject("publication-reference").optString("notice-no"))) {
 				patent.setPatent_notice_no("TW"+patentObj.optJSONObject("publication-reference").optString("notice-no"));
 			} else {
-				patent.setPatent_notice_no(null);
+//				patent.setPatent_notice_no(null);
 			}
 			try {
 				String noticeDateStr = patentObj.optJSONObject("publication-reference").optString("notice-date");

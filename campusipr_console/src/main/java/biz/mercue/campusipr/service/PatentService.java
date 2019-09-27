@@ -80,4 +80,6 @@ public interface PatentService {
 
 	void setTask(List<Patent> patentList);
 
+	int test(Patent editPatent);
+
 }

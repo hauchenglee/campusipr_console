@@ -443,41 +443,27 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	@Override
-	public void setTask(List<Patent> patentList) {
+	public  void setTask(List<Patent> patentList) {
 		// 初始化要執行的任務列表
 		Patent editPatent;
 //		List taskList = new ArrayList();
 //		for (int i = 0; i < patentList.size(); i++) {
 //			editPatent = patentList.get(i);
-////			log.info(editPatent);
 //			taskList.add(new Task(i,editPatent));
-////			taskList.add(syncPatentData(editPatent));
+//			log.info(Thread.currentThread().getState());
 //		}
-//		// 設定要啟動的工作執行緒數為 10 個
-//		int threadCount = 10;
-//		List[] taskListPerThread = distributeTasks(taskList, threadCount);
-//		log.info("實際要啟動的工作執行緒數：" + taskListPerThread.length);
+		// 設定要啟動的工作執行緒數為 5 個
+//		int threadCount = 5;
+//		List[] taskListPerThread = distributeTasks(patentList, threadCount);
+//		System.out.println("實際要啟動的工作執行緒數：" + taskListPerThread.length);
 //		for (int i = 0; i < taskListPerThread.length; i++) {
 //			Thread workThread = new SyncThread(taskListPerThread[i], i);
 //			workThread.start();
 //		}
-		
-//		for(int i = 0;i<patentList.size();i++) {
-//			editPatent = patentList.get(i);
-//			taskList.add(new MyThread(test(editPatent),i));
-//		}
-//		int threadCount = 4;
-//		List[] taskListPerThread = distributeTasks(taskList, threadCount);
-//		System.out.println("實際要啟動的工作執行緒數：" + taskListPerThread.length);
-//		for(int i = 0;i<taskList.size();i++) {
-//			editPatent = patentList.get(i);
-//			Thread workTheard = new MyThread(syncPatentData(editPatent),i);
-//			workTheard.start();
-//		}
 	}
-	@SuppressWarnings("unchecked")
+
 	public static List[] distributeTasks(List taskList, int threadCount) {
-//		// 每個執行緒至少要執行的任務數,假如不為零則表示每個執行緒都會分配到任務
+		// 每個執行緒至少要執行的任務數,假如不為零則表示每個執行緒都會分配到任務
 //		int minTaskCount = taskList.size() / threadCount;
 //		// 平均分配後還剩下的任務數，不為零則還有任務依個附加到前面的執行緒中
 //		int remainTaskCount = taskList.size() % threadCount;
@@ -513,11 +499,12 @@ public class PatentServiceImpl implements PatentService {
 //					+ i
 //					+ " 的任務數："
 //					+ taskListPerThread[i].size()
-//					+ " 區間["
-//					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
-//					+ ","
-//					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
-//							.getTaskId() + "]");
+////					+ " 區間["
+////					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
+////					+ ","
+////					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
+////							.getTaskId() + "]"
+//							);
 //		}
 //		return taskListPerThread;
 		return null;
@@ -871,7 +858,6 @@ public class PatentServiceImpl implements PatentService {
 		// 02/23更新停止同步api狀態資料
 		// ServiceStatusPatent.getPatentStatus(patent);
 		syncPatentStatus(patent);
-
 		if (syncResult == Constants.INT_SUCCESS) {
 			patent.setIs_sync(true);
 			if (patent.getPatentDesc() != null) {
@@ -4375,4 +4361,11 @@ public class PatentServiceImpl implements PatentService {
 		}
 		return null;
 	}
+	
+	public int test(Patent patent) {
+		log.info("test ");
+		log.info(patent.getPatent_appl_no());
+		return 0;
+	}
+	
 }
