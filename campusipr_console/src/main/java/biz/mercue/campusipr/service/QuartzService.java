@@ -160,4 +160,16 @@ public class QuartzService {
 				.build();
 		scheduler.scheduleJob(job, trigger);
 	}
+
+	public void createUpdateContactJob(String businessId) throws SchedulerException {
+		JobDetail job = JobBuilder.newJob(UpdateContactJob.class)
+				.withIdentity("updateContact_job", "updateContact")
+				.usingJobData("business_id", businessId)
+				.build();
+		SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
+				.withIdentity("updateContact_tri", "updateContact")
+				.startNow()
+				.build();
+		scheduler.scheduleJob(job, trigger);
+	}
 }

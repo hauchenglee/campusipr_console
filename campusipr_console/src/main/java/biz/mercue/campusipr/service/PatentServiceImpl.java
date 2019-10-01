@@ -3490,6 +3490,7 @@ public class PatentServiceImpl implements PatentService {
 					dbcontact.setContact_name(contact.getContact_name());
 					dbcontact.setContact_email(contact.getContact_email());
 					dbcontact.setContact_character(contact.getContact_character());
+					dbcontact.setContact_order(contact.getContact_order());
 					dbcontact.setCreate_date(new Date());
 				}
 				dbPatent.addContact(dbcontact);
@@ -3503,6 +3504,7 @@ public class PatentServiceImpl implements PatentService {
 					dbcontact.setContact_name(contact.getContact_name());
 					dbcontact.setContact_email(contact.getContact_email());
 					dbcontact.setContact_character(contact.getContact_character());
+					dbcontact.setContact_order(contact.getContact_order());
 					dbcontact.setCreate_date(new Date());
 				}
 				dbPatent.addContact(dbcontact);

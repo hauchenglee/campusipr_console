@@ -9,20 +9,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import biz.mercue.campusipr.dao.*;
+import biz.mercue.campusipr.model.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import biz.mercue.campusipr.dao.AnnuityReminderDao;
-import biz.mercue.campusipr.dao.BusinessDao;
-import biz.mercue.campusipr.dao.SynchronizeBusinessDao;
-import biz.mercue.campusipr.dao.SynchronizeTaskDao;
-import biz.mercue.campusipr.model.AnnuityReminder;
-import biz.mercue.campusipr.model.Business;
-import biz.mercue.campusipr.model.ListQueryForm;
-import biz.mercue.campusipr.model.SynchronizeBusiness;
-import biz.mercue.campusipr.model.SynchronizeTask;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.DateUtils;
 import biz.mercue.campusipr.util.KeyGeneratorUtils;
@@ -176,64 +169,71 @@ public class BusinessServiceImpl implements BusinessService{
 					}
 				}
 				
+//				if (business.isAvailable()) {
+//					List<SynchronizeBusiness> syncList = syncDao.getAllSyncTask();
+//					SynchronizeBusiness sync = syncDao.getByBusinessId(business.getBusiness_id());
+//					if (sync == null) {
+//						Calendar c = Calendar.getInstance();
+//						c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+//						c.add(Calendar.DATE, 7);
+//
+//						sync = new SynchronizeBusiness();
+//						sync.setSync_id(KeyGeneratorUtils.generateRandomString());
+//						sync.setSync_date(DateUtils.getDayStart(c.getTime()));
+//						c.add(Calendar.DATE, 7);
+//						sync.setSync_next_date(DateUtils.getDayStart(c.getTime()));
+//						sync.setBusiness(business);
+//						Random rand = new Random();
+//						int n = rand.nextInt(60);
+//						//get max random number
+//						int random_time = n;
+//						if (syncList.size() > 0) {
+//							random_time = syncList.get(syncList.size()-1).getRandom_time() + n;
+//						}
+//						sync.setRandom_time(random_time);
+//
+//						syncDao.create(sync);
+//					}
+//
+//					//remove job
+//					SynchronizeTask syncTaskDB = syncTaskDao.getAvailableBusinessId(business.getBusiness_id());
+//					if (syncTaskDB != null) {
+//						syncTaskDao.delete(syncTaskDB.getTask_id());
+//						quartzService.removeJob(syncTaskDB);
+//					}
+//
+//					SynchronizeTask syncTask = new SynchronizeTask();
+//					syncTask.setTask_id(KeyGeneratorUtils.generateRandomString());
+//					syncTask.setSync(sync);
+//					Calendar cTask = Calendar.getInstance();
+//					cTask.setTime(DateUtils.getDayStart(sync.getSync_date()));
+//					cTask.add(Calendar.MINUTE, sync.getRandom_time());
+//					syncTask.setTask_date(cTask.getTime());
+//					syncTask.setBusiness_id(business.getBusiness_id());
+//					syncTask.setIs_sync(false);
+//					syncTaskDao.create(syncTask);
+//
+//					quartzService.createJob(syncTask);
+//
+//				} else {
+//					//remove sync business
+//					SynchronizeBusiness sync = syncDao.getByBusinessId(business.getBusiness_id());
+//					if  (sync != null) {
+//						syncDao.delete(sync.getSync_id());
+//					}
+//					//remove job
+//					SynchronizeTask syncTaskDB = syncTaskDao.getAvailableBusinessId(business.getBusiness_id());
+//					if (syncTaskDB != null) {
+//						syncTaskDao.delete(syncTaskDB.getTask_id());
+//						quartzService.removeJob(syncTaskDB);
+//					}
+//				}
+
+				// 如果更新business，也更新相對應的patent contact
 				if (business.isAvailable()) {
-					List<SynchronizeBusiness> syncList = syncDao.getAllSyncTask();
-					SynchronizeBusiness sync = syncDao.getByBusinessId(business.getBusiness_id());
-					if (sync == null) {
-						Calendar c = Calendar.getInstance();
-						c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-						c.add(Calendar.DATE, 7);
-						
-						sync = new SynchronizeBusiness();
-						sync.setSync_id(KeyGeneratorUtils.generateRandomString());
-						sync.setSync_date(DateUtils.getDayStart(c.getTime()));
-						c.add(Calendar.DATE, 7);
-						sync.setSync_next_date(DateUtils.getDayStart(c.getTime()));
-						sync.setBusiness(business);
-						Random rand = new Random();
-						int n = rand.nextInt(60);
-						//get max random number
-						int random_time = n;
-						if (syncList.size() > 0) {
-							random_time = syncList.get(syncList.size()-1).getRandom_time() + n;
-						}
-						sync.setRandom_time(random_time);
-						
-						syncDao.create(sync);
-					}
-					
-					//remove job
-					SynchronizeTask syncTaskDB = syncTaskDao.getAvailableBusinessId(business.getBusiness_id());
-					if (syncTaskDB != null) {
-						syncTaskDao.delete(syncTaskDB.getTask_id());
-						quartzService.removeJob(syncTaskDB);
-					}
-					
-					SynchronizeTask syncTask = new SynchronizeTask();
-					syncTask.setTask_id(KeyGeneratorUtils.generateRandomString());
-					syncTask.setSync(sync);
-					Calendar cTask = Calendar.getInstance();
-					cTask.setTime(DateUtils.getDayStart(sync.getSync_date()));
-					cTask.add(Calendar.MINUTE, sync.getRandom_time());
-					syncTask.setTask_date(cTask.getTime());
-					syncTask.setBusiness_id(business.getBusiness_id());
-					syncTask.setIs_sync(false);
-					syncTaskDao.create(syncTask);
-					
-					quartzService.createJob(syncTask);
-				} else {
-					//remove sync business
-					SynchronizeBusiness sync = syncDao.getByBusinessId(business.getBusiness_id());
-					if  (sync != null) {
-						syncDao.delete(sync.getSync_id());
-					}
-					//remove job
-					SynchronizeTask syncTaskDB = syncTaskDao.getAvailableBusinessId(business.getBusiness_id());
-					if (syncTaskDB != null) {
-						syncTaskDao.delete(syncTaskDB.getTask_id());
-						quartzService.removeJob(syncTaskDB);
-					}
+					quartzService.createUpdateContactJob(business.getBusiness_id());
 				}
+
 				result = Constants.INT_SUCCESS;
 			}else {
 				result = Constants.INT_CANNOT_FIND_DATA;
