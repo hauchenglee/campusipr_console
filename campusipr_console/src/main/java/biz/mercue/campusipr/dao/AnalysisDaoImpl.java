@@ -30,7 +30,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
 						+ "WHERE lb.business_id = :businessId "
-						+ "AND p.is_sync = 1 "
+						+ "AND p.is_sync = 0 "
 						+ "AND p.patent_appl_no IS NOT NULL "
 						+ "AND p.patent_appl_date IS NOT NULL "
 						+ "AND p.patent_notice_no IS NULL " 
@@ -51,10 +51,10 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "FROM Patent as p " 
 						+ "JOIN p.listBusiness as lb "
 						+ "WHERE lb.business_id = :businessId "
-						+ "AND p.patent_appl_no IS NOT NULL "
-						+ "AND p.patent_appl_date IS NOT NULL "
-						+ "AND p.is_sync = 1 "
+						+ "AND p.is_sync = 0 "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "AND p.patent_appl_date IS NOT NULL "
+						+ "AND p.patent_appl_no IS NOT NULL "
 						+ "AND p.patent_notice_no IS NULL " 
 						+ "AND p.patent_publish_no IS NULL";
 		Query q = session.createQuery(queryStr);

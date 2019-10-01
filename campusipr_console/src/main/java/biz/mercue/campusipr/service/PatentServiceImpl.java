@@ -445,16 +445,20 @@ public class PatentServiceImpl implements PatentService {
 	@Override
 	public  void setTask(List<Patent> patentList) {
 		// 初始化要執行的任務列表
-		Patent editPatent;
-//		List taskList = new ArrayList();
-//		for (int i = 0; i < patentList.size(); i++) {
-//			editPatent = patentList.get(i);
-//			taskList.add(new Task(i,editPatent));
+//		List <Patent> patentLists = new ArrayList<Patent>();
+//		for(int i = 0; i < patentLists.size(); i++) {
+//			patentLists.add(new Patent());
+//		}
+//		Patent editPatent;
+//		List<Task> taskList = new ArrayList();
+//		for (int i = 0; i < patentLists.size(); i++) {
+//			editPatent = patentLists.get(i);
+//			patentLists.add(new Task(i,editPatent));
 //			log.info(Thread.currentThread().getState());
 //		}
-		// 設定要啟動的工作執行緒數為 5 個
+//		 設定要啟動的工作執行緒數為 5 個
 //		int threadCount = 5;
-//		List[] taskListPerThread = distributeTasks(patentList, threadCount);
+//		List[] taskListPerThread = distributeTasks(patentLists, threadCount);
 //		System.out.println("實際要啟動的工作執行緒數：" + taskListPerThread.length);
 //		for (int i = 0; i < taskListPerThread.length; i++) {
 //			Thread workThread = new SyncThread(taskListPerThread[i], i);
@@ -463,7 +467,7 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	public static List[] distributeTasks(List taskList, int threadCount) {
-		// 每個執行緒至少要執行的任務數,假如不為零則表示每個執行緒都會分配到任務
+//		// 每個執行緒至少要執行的任務數,假如不為零則表示每個執行緒都會分配到任務
 //		int minTaskCount = taskList.size() / threadCount;
 //		// 平均分配後還剩下的任務數，不為零則還有任務依個附加到前面的執行緒中
 //		int remainTaskCount = taskList.size() % threadCount;

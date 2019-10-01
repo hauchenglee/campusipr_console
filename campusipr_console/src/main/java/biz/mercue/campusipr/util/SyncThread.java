@@ -35,31 +35,24 @@ public class SyncThread extends Thread {
 			this.threadId = threadId;
 			log.info(Thread.currentThread().getState());
 		}
-
+//		public SyncThread(List<Task> taskList, int threadId) {
+//			this.taskList = taskList;
+//			this.threadId = threadId;
+//			log.info(Thread.currentThread().getState());
+//		}
 		/**
 		 * 執行被指派的所有任務
 		 */
 		public void run() {
-			List<Patent> patentList = new ArrayList<Patent>();
-			
-			for (Patent patent : patentList) {
-				this.patent= patent;
-				patentService.test(this.patent);
-//				task.execute(this.patent);
+			try {
+				for(Patent patent:patentList) {
+//				for (Task task:taskList) {
+//					patentList.get(i);
+					patentService.test(patent);
+//					task.execute(this.patent);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
-	
-	
-//	int syncCode;
-//	int taskId;
-//	public MyThread(int syncCode  ,int taskId) {
-//		this.syncCode = syncCode;
-//		this.taskId = taskId;
-//	}
-//
-//	public void run(){
-//		synchronized (this) {
-//			System.out.println("Start " + taskId);
-//		}
-//    }
 }
