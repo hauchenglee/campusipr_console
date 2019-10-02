@@ -46,7 +46,7 @@ public class Annuity extends BaseBean{
 	private boolean is_paid;
 
 	@JsonView(View.PatentDetail.class)
-	private boolean is_reminder;
+	private boolean is_reminder = true;
 	
 	@JsonView(View.PatentDetail.class)
 	private String business_id;

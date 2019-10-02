@@ -1,30 +1,10 @@
 package biz.mercue.campusipr.controller;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLConnection;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-
 import biz.mercue.campusipr.model.*;
 import biz.mercue.campusipr.service.*;
 import biz.mercue.campusipr.util.*;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -32,20 +12,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.core.type.TypeReference;
-
-import biz.mercue.campusipr.model.View.PatentDetail;
-import biz.mercue.campusipr.model.View.Reminder;
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class PatentController {
@@ -71,6 +47,9 @@ public class PatentController {
 
 	@Autowired
 	FieldService fieldService;
+
+	@Autowired
+	ExcelExportService excelExportService;
 	
 	@RequestMapping(value="/api/addpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
@@ -421,52 +400,46 @@ public class PatentController {
 
 		return responseBody.getJacksonString(View.Patent.class);
 	}
-	
-	
-	@RequestMapping(value="/api/exportpatentexcel", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
+
+
+	@RequestMapping(value = "/api/exportpatentexcel", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public ResponseEntity<InputStreamResource> exportPatentexcel(HttpServletRequest request,@RequestBody String receiveJSONString){
-		log.info("exportpatent ");
-		StringResponseBody responseBody  = new StringResponseBody();
-		AdminToken tokenBean =  adminTokenService.getById(JWTUtils.getJwtToken(request));
-		if(tokenBean!=null) {
-			Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-			
-			if(tokenBean.checkPermission(permission.getPermission_id())) {
-
-                JSONObject jsonObject = new JSONObject(receiveJSONString);
-                String jsonPid = jsonObject.optJSONArray("patent_ids").toString();
-                log.info(jsonPid);
-                String jsonFid = jsonObject.optJSONArray("field_ids").toString();
-                log.info(jsonFid);
-
-				List<String> patent_ids = (List<String>) JacksonJSONUtils.readValue(jsonPid, new TypeReference<List<String>>(){});
-				List<String> field_ids = (List<String>) JacksonJSONUtils.readValue(jsonFid, new TypeReference<List<String>>(){});
-
-				String bussinessId = tokenBean.getBusiness().getBusiness_id();
-				
-				List<Patent> listPatent = patentService.getExcelByPatentIds(patent_ids, bussinessId);
-				
-				String fileName = tokenBean.getBusiness().getBusiness_name();
-				ByteArrayInputStream fileOut = ExcelUtils.Patent2Excel(field_ids, listPatent, bussinessId);
-				
-				HttpHeaders headers = new HttpHeaders();
-				headers.add( "Content-disposition", "attachment; filename="+fileName+".xls" );
-				
-
-				return ResponseEntity
-		                .ok()
-		                .headers(headers)
-		                .contentType(MediaType.parseMediaType("application/ms-excel"))
-		                .body(new InputStreamResource(fileOut));
-			} else {
-				responseBody.setCode(Constants.INT_NO_PERMISSION);
-				return null;
-			}
-		} else {
+	public ResponseEntity<InputStreamResource> exportPatentExcel(HttpServletRequest request, @RequestBody String receiveJSONString) throws IOException {
+		log.info("exportpatent");
+		StringResponseBody responseBody = new StringResponseBody();
+		AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+		if (tokenBean == null) {
 			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 			return null;
 		}
+		Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+		if (!tokenBean.checkPermission(permission.getPermission_id())) {
+			responseBody.setCode(Constants.INT_NO_PERMISSION);
+			return null;
+		}
+
+		String businessId = tokenBean.getBusiness().getBusiness_id();
+		String fileName = tokenBean.getBusiness().getBusiness_name();
+
+		JSONObject jsonObject = new JSONObject(receiveJSONString);
+		String jsonPid = jsonObject.optJSONArray("patent_ids").toString();
+		String jsonFid = jsonObject.optJSONArray("field_ids").toString();
+
+		List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(jsonPid, new TypeReference<List<String>>() {});
+		List<String> fieldIds = (List<String>) JacksonJSONUtils.readValue(jsonFid, new TypeReference<List<String>>() {});
+
+		List<Patent> listPatent = patentService.getExcelByPatentIds(patentIds, businessId);
+		ByteArrayInputStream fileOut = excelExportService.PatentToExcel(fieldIds, listPatent, businessId);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-disposition", "attachment; filename=" + fileName + ".xls");
+
+		return ResponseEntity
+				.ok()
+				.headers(headers)
+				.contentType(MediaType.parseMediaType("application/ms-excel"))
+				.body(new InputStreamResource(fileOut));
+
 	}
 
     @RequestMapping(value = "/api/getallexcelfield", method = {RequestMethod.GET }, produces = Constants.CONTENT_TYPE_JSON)
