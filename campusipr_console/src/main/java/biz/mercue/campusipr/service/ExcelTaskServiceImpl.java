@@ -609,53 +609,66 @@ public class ExcelTaskServiceImpl implements ExcelTaskService {
 //									errorColumnList.add(fieldMap.getExcel_field_index());
 //									log.info("patentApplNo補空");
 //									log.info("Cell==null(跟Type3不同)- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
-                                        break;
+                                      //1002 空的申請號也要匯入
+                                        patent.setPatent_appl_no("");
+                                        log.info("跟Type3不同");
+//                                    	break;
                                     }
                                     String patentApplNo = "";
                                     if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-                                        int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
-                                        // type is null --> jump out for loop
-                                        if (cellType == 3) {
-//										errorRowList.add(rowIndex);
-//										errorColumnList.add(fieldMap.getExcel_field_index());
-//										log.info("ErrorIndex:申請號為null，cellType == 3- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
-                                            break;
+                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
+                                        String cellValue = getCellValue(cell);
+                                        if (!StringUtils.isNULL(cellValue)) {
+                                            patent.setPatent_appl_no(cellValue);
                                         }
-
-                                        // type is numeric --> need to add country name
-                                        if (cellType == 0) {
-                                            log.info("type is numeric");
-                                            row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
-                                            patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
-                                            //有沒有含中文字or非需求字的判斷
-//										if(checkApplyNo(patentApplNo) ==true) {
-//											errorRowList.add(rowIndex);
-//											errorColumnList.add(fieldMap.getExcel_field_index());
-//											log.info("歐北輸入申請號''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
-//											break;
-//										}
-                                        }
-                                        // type is string
-                                        if (cellType == 1) {
-                                            patentApplNo = row.getCell(excelFieldIndex).getStringCellValue().replaceAll("[\\s\\u00A0]+", "").trim();
-                                            if (row.getCell(excelFieldIndex).getStringCellValue() == "" || patentApplNo.isEmpty()) {
-//											errorRowList.add(rowIndex);
-//											errorColumnList.add(fieldMap.getExcel_field_index());
-//											log.info("ErrorIndex:申請號為''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
-                                                break;
-                                            }
-                                            //有沒有含中文字or非需求字的判斷
-//										if(checkApplyNo(patentApplNo) ==true) {
-//										errorRowList.add(rowIndex);
-//										errorColumnList.add(fieldMap.getExcel_field_index());
-//										log.info("歐北輸入申請號''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());										
-//										break;
-//										}
-                                            log.info(patentApplNo);
-                                        }
-                                        patent.setPatent_appl_no(patentApplNo);
-                                        isApplNoNull = false;
+//                                        int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+//                                        int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
+//                                        // type is null --> jump out for loop
+//                                        if (cellType == 3) {
+////										errorRowList.add(rowIndex);
+////										errorColumnList.add(fieldMap.getExcel_field_index());
+////										log.info("ErrorIndex:申請號為null，cellType == 3- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+//                                        	//1002 空的申請號也要匯入
+//                                        	 Cell cell = row.getCell(fieldMap.getExcel_field_index());
+//                                             cell.setCellValue(patentApplNo);
+//                                             log.info("cellType == 3");
+////                                        	break;
+//                                        }
+//
+//                                        // type is numeric --> need to add country name
+//                                        if (cellType == 0) {
+//                                            log.info("type is numeric");
+//                                            row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
+//                                            patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
+//                                            //有沒有含中文字or非需求字的判斷
+////										if(checkApplyNo(patentApplNo) ==true) {
+////											errorRowList.add(rowIndex);
+////											errorColumnList.add(fieldMap.getExcel_field_index());
+////											log.info("歐北輸入申請號''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+////											break;
+////										}
+//                                        }
+//                                        // type is string
+//                                        if (cellType == 1) {
+//                                            patentApplNo = row.getCell(excelFieldIndex).getStringCellValue().replaceAll("[\\s\\u00A0]+", "").trim();
+//                                            if (row.getCell(excelFieldIndex).getStringCellValue() == "" || patentApplNo.isEmpty()) {
+////											errorRowList.add(rowIndex);
+////											errorColumnList.add(fieldMap.getExcel_field_index());
+////											log.info("ErrorIndex:申請號為''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+//                                            //1002 空的申請號也要匯入
+////                                                break;
+//                                            }
+//                                            //有沒有含中文字or非需求字的判斷
+////										if(checkApplyNo(patentApplNo) ==true) {
+////										errorRowList.add(rowIndex);
+////										errorColumnList.add(fieldMap.getExcel_field_index());
+////										log.info("歐北輸入申請號''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());										
+////										break;
+////										}
+                                            log.info(patentApplNo.isEmpty());
+//                                        }
+//                                        patent.setPatent_appl_no(patentApplNo);
+//                                        isApplNoNull = false;
                                     }
                                     break;
                                 case Constants.PATENT_APPL_DATE_FIELD:
@@ -930,10 +943,15 @@ public class ExcelTaskServiceImpl implements ExcelTaskService {
 					}*/
 
                     log.info("patent add");
-                    if (!StringUtils.isNULL(patent.getPatent_appl_no()) && !StringUtils.isNULL(patent.getPatent_appl_country())) {
+                    if (!StringUtils.isNULL(patent.getPatent_appl_country())) {
                         patent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
                         listPatent.add(patent);
                     }
+                    //1002 使用者要求沒有輸入申請號
+//                    if (!StringUtils.isNULL(patent.getPatent_appl_no()) && !StringUtils.isNULL(patent.getPatent_appl_country())) {
+//                        patent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
+//                        listPatent.add(patent);
+//                    }
                 }
             }
             rowIndex++;

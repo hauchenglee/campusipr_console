@@ -23,8 +23,8 @@ import biz.mercue.campusipr.util.ServiceChinaPatent;
 import biz.mercue.campusipr.util.ServiceTaiwanPatent;
 import biz.mercue.campusipr.util.ServiceUSPatent;
 import biz.mercue.campusipr.util.StringUtils;
-//import biz.mercue.campusipr.util.SyncThread;
-//import biz.mercue.campusipr.util.Task;
+import biz.mercue.campusipr.util.SyncThread;
+import biz.mercue.campusipr.util.Task;
 
 
 
@@ -445,73 +445,75 @@ public class PatentServiceImpl implements PatentService {
 	@Override
 	public  void setTask(List<Patent> patentList) {
 		// 初始化要執行的任務列表
+//		Patent editPatent = new Patent();
 //		List <Patent> patentLists = new ArrayList<Patent>();
-//		for(int i = 0; i < patentLists.size(); i++) {
-//			patentLists.add(new Patent());
+//		for(int i = 0; i < patentList.size(); i++) {
+//			editPatent = patentList.get(i);
+//			patentLists.add(editPatent);
 //		}
-//		Patent editPatent;
-//		List<Task> taskList = new ArrayList();
-//		for (int i = 0; i < patentLists.size(); i++) {
-//			editPatent = patentLists.get(i);
-//			patentLists.add(new Task(i,editPatent));
-//			log.info(Thread.currentThread().getState());
-//		}
+		Patent editPatent;
+		List<Task> taskList = new ArrayList();
+		for (int i = 0; i < patentList.size(); i++) {
+			editPatent = patentList.get(i);
+			taskList.add(new Task(i,editPatent));
+			log.info(Thread.currentThread().getState());
+		}
 //		 設定要啟動的工作執行緒數為 5 個
-//		int threadCount = 5;
-//		List[] taskListPerThread = distributeTasks(patentLists, threadCount);
-//		System.out.println("實際要啟動的工作執行緒數：" + taskListPerThread.length);
-//		for (int i = 0; i < taskListPerThread.length; i++) {
-//			Thread workThread = new SyncThread(taskListPerThread[i], i);
-//			workThread.start();
-//		}
+		int threadCount = 5;
+		List[] taskListPerThread = distributeTasks(taskList, threadCount);
+		System.out.println("實際要啟動的工作執行緒數：" + taskListPerThread.length);
+		for (int i = 0; i < taskListPerThread.length; i++) {
+			Thread workThread = new SyncThread(taskListPerThread[i], i);
+			workThread.start();
+		}
 	}
 
 	public static List[] distributeTasks(List taskList, int threadCount) {
-//		// 每個執行緒至少要執行的任務數,假如不為零則表示每個執行緒都會分配到任務
-//		int minTaskCount = taskList.size() / threadCount;
-//		// 平均分配後還剩下的任務數，不為零則還有任務依個附加到前面的執行緒中
-//		int remainTaskCount = taskList.size() % threadCount;
-//		// 實際要啟動的執行緒數,如果工作執行緒比任務還多
-//		// 自然只需要啟動與任務相同個數的工作執行緒，一對一的執行
-//		// 畢竟不打算實現了執行緒池，所以用不著預先初始化好休眠的執行緒
-//		int actualThreadCount = minTaskCount > 0 ? threadCount
-//				: remainTaskCount;
-//		// 要啟動的執行緒陣列，以及每個執行緒要執行的任務列表
-//		List[] taskListPerThread = new List[actualThreadCount];
-//		int taskIndex = 0;
-//		// 平均分配後多餘任務，每附加給一個執行緒後的剩餘數，重新宣告與 remainTaskCount
-//		// 相同的變數，不然會在執行中改變 remainTaskCount 原有值，產生麻煩
-//		int remainIndces = remainTaskCount;
-//		for (int i = 0; i < taskListPerThread.length; i++) {
-//			taskListPerThread[i] = new ArrayList();
-//			// 如果大於零，執行緒要分配到基本的任務
-//			if (minTaskCount > 0) {
-//				for (int j = taskIndex; j < minTaskCount + taskIndex; j++) {
-//					taskListPerThread[i].add(taskList.get(j));
-//				}
-//				taskIndex += minTaskCount;
-//			}
-//			// 假如還有剩下的，則補一個到這個執行緒中
-//			if (remainIndces > 0) {
-//				taskListPerThread[i].add(taskList.get(taskIndex++));
-//				remainIndces--;
-//			}
-//		}
-//		// 列印任務的分配情況
-//		for (int i = 0; i < taskListPerThread.length; i++) {
-//			System.out.println("執行緒 "
-//					+ i
-//					+ " 的任務數："
-//					+ taskListPerThread[i].size()
-////					+ " 區間["
-////					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
-////					+ ","
-////					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
-////							.getTaskId() + "]"
-//							);
-//		}
-//		return taskListPerThread;
-		return null;
+		// 每個執行緒至少要執行的任務數,假如不為零則表示每個執行緒都會分配到任務
+		int minTaskCount = taskList.size() / threadCount;
+		// 平均分配後還剩下的任務數，不為零則還有任務依個附加到前面的執行緒中
+		int remainTaskCount = taskList.size() % threadCount;
+		// 實際要啟動的執行緒數,如果工作執行緒比任務還多
+		// 自然只需要啟動與任務相同個數的工作執行緒，一對一的執行
+		// 畢竟不打算實現了執行緒池，所以用不著預先初始化好休眠的執行緒
+		int actualThreadCount = minTaskCount > 0 ? threadCount
+				: remainTaskCount;
+		// 要啟動的執行緒陣列，以及每個執行緒要執行的任務列表
+		List[] taskListPerThread = new List[actualThreadCount];
+		int taskIndex = 0;
+		// 平均分配後多餘任務，每附加給一個執行緒後的剩餘數，重新宣告與 remainTaskCount
+		// 相同的變數，不然會在執行中改變 remainTaskCount 原有值，產生麻煩
+		int remainIndces = remainTaskCount;
+		for (int i = 0; i < taskListPerThread.length; i++) {
+			taskListPerThread[i] = new ArrayList();
+			// 如果大於零，執行緒要分配到基本的任務
+			if (minTaskCount > 0) {
+				for (int j = taskIndex; j < minTaskCount + taskIndex; j++) {
+					taskListPerThread[i].add(taskList.get(j));
+				}
+				taskIndex += minTaskCount;
+			}
+			// 假如還有剩下的，則補一個到這個執行緒中
+			if (remainIndces > 0) {
+				taskListPerThread[i].add(taskList.get(taskIndex++));
+				remainIndces--;
+			}
+		}
+		// 列印任務的分配情況
+		for (int i = 0; i < taskListPerThread.length; i++) {
+			System.out.println("執行緒 "
+					+ i
+					+ " 的任務數："
+					+ taskListPerThread[i].size()
+//					+ " 區間["
+//					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
+//					+ ","
+//					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
+//							.getTaskId() + "]"
+							);
+		}
+		return taskListPerThread;
+//		return null;
 	}
 	
 	/**
@@ -541,7 +543,10 @@ public class PatentServiceImpl implements PatentService {
 //		setTask(patentList);
 		String businessId = business.getBusiness_id();
 		for (Patent editPatent : patentList) {
-			int syncResult = syncPatentData(editPatent);
+			//使用者可能沒有輸入申請號
+			if(editPatent.getPatent_appl_no() != null) {
+				int syncResult = syncPatentData(editPatent);
+			}
 			if (!editPatent.isIs_sync()) {
 				editPatent.setPatent_appl_no(StringUtils.generateApplNoRandom(editPatent.getPatent_appl_no()));
 			}
