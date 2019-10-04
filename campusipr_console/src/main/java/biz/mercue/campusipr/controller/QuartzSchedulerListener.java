@@ -136,11 +136,13 @@ public class QuartzSchedulerListener implements SchedulerListener{
 		//TODO for debug
 
 		// auto sync patent job
-//		try {
-//			quartzService.createAutoSyncPatentJob();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		try {
+			quartzService.createAutoSyncPatentJob();
+		} catch (Exception e) {
+			log.error("createAutoSyncPatentJob in QuartzSchedulerListener");
+			log.error("exception", e);
+		}
+
 //		List<ReminderTask> taskList = reminderService.getAvailableReminder();
 //		log.info("un send task list size: " + taskList.size());
 //		for(ReminderTask task: taskList) {

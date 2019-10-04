@@ -50,8 +50,8 @@ public class CountryDaoImpl extends AbstractDao<String,  Country> implements Cou
 	@Override
 	public List<Country> getListByFuzzy(String name){
 		Criteria criteria =  createEntityCriteria();
-		Criterion c1 = Restrictions.like("country_name", "%"+name+"%");
-		Criterion c2 = Restrictions.like("country_alias_name", "%"+name+"%");
+		Criterion c1 = Restrictions.eq("country_name", name);
+		Criterion c2 = Restrictions.eq("country_alias_name", name);
 	
 		criteria.add(Restrictions.or(c1, c2));
 		return criteria.list();
