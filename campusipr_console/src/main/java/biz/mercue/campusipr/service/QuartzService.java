@@ -148,16 +148,16 @@ public class QuartzService {
 		JobDetail job = JobBuilder.newJob(AutoSyncPatentJob.class)
 				.withIdentity("syncPatent_job", "syncPatent")
 				.build();
-//		CronTrigger trigger = (CronTrigger) TriggerBuilder.newTrigger()
-//				.withIdentity("syncPatent_tri", "syncPatent")
-//				.startNow()
-//				.withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * Sun")) // every sunday
-//				.build();
-		SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
+		CronTrigger trigger = (CronTrigger) TriggerBuilder.newTrigger()
 				.withIdentity("syncPatent_tri", "syncPatent")
 				.startNow()
-//				.withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(30).repeatForever())
+				.withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * Sun")) // every sunday
 				.build();
+//		SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
+//				.withIdentity("syncPatent_tri", "syncPatent")
+//				.startNow()
+////				.withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(30).repeatForever())
+//				.build();
 		scheduler.scheduleJob(job, trigger);
 	}
 
