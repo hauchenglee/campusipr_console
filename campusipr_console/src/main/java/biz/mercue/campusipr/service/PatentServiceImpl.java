@@ -515,7 +515,7 @@ public class PatentServiceImpl implements PatentService {
 		return taskListPerThread;
 //		return null;
 	}
-	
+
 	/**
 	 * 	excel匯入最終有三種結果，其相對應的條件判斷：
 	 * 	1. add new patent（新增專利）：
@@ -882,6 +882,31 @@ public class PatentServiceImpl implements PatentService {
 				patent.getPatentDesc().setPatent(patent);
 			}
 
+			if (patent.getPatentClaim() != null) {
+				String context_claim_all = patent.getPatentClaim().getContext_claim();
+				patent.getPatentClaim().setPatent_claim_id(KeyGeneratorUtils.generateRandomString());
+
+				if (context_claim_all.length() > 5000) {
+					String context_claim_5000 = context_claim_all.substring(0, 5000);
+					context_claim_5000 += "...(完整內容請由官方專利局取得)";
+					patent.getPatentClaim().setContext_claim(context_claim_5000);
+				}
+
+				patent.getPatentClaim().setPatent(patent);
+			}
+
+			if (patent.getPatentAbstract() != null) {
+				String abs = patent.getPatentAbstract().getContext_abstract();
+				patent.getPatentAbstract().setPatent_abstract_id(KeyGeneratorUtils.generateRandomString());
+
+				if (abs.length() > 5000) {
+					String abs_5000 = abs.substring(0, 5000);
+					abs_5000 += "...(完整內容請由官方專利局取得)";
+					patent.getPatentAbstract().setContext_abstract(abs_5000);
+				}
+
+				patent.getPatentAbstract().setPatent(patent);
+			}
 			patent.setEdit_source(Patent.EDIT_SOURCE_SERVICE);
 			return Constants.INT_SUCCESS;
 		} else {
