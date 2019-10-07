@@ -1,6 +1,9 @@
 package biz.mercue.campusipr.service;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import biz.mercue.campusipr.dao.*;
 import biz.mercue.campusipr.model.*;
@@ -445,37 +448,47 @@ public class PatentServiceImpl implements PatentService {
 	@Override
 	public  void setTask(List<Patent> patentList) {
 		// 初始化要執行的任務列表
-//		Patent editPatent = new Patent();
-//		List <Patent> patentLists = new ArrayList<Patent>();
-//		for(int i = 0; i < patentList.size(); i++) {
-//			editPatent = patentList.get(i);
-//			patentLists.add(editPatent);
-//		}
 		Patent editPatent;
 		List<Task> taskList = new ArrayList();
 		for (int i = 0; i < patentList.size(); i++) {
 			editPatent = patentList.get(i);
 			taskList.add(new Task(i,editPatent));
-			log.info(Thread.currentThread().getState());
+//			log.info("setTask: "+editPatent.getPatent_appl_no());
 		}
-//		 設定要啟動的工作執行緒數為 5 個
-		int threadCount = 5;
-		List[] taskListPerThread = distributeTasks(taskList, threadCount);
-		System.out.println("實際要啟動的工作執行緒數：" + taskListPerThread.length);
-		for (int i = 0; i < taskListPerThread.length; i++) {
-			Thread workThread = new SyncThread(taskListPerThread[i], i);
-			workThread.start();
+//		 設定要啟動的工作執行緒數
+		int threadCount = 10;
+		List[] taskListPerThread = distributeThread(taskList, threadCount);
+		log.info("實際要啟動的工作執行緒數：" + taskListPerThread.length);
+//		Thread workThread = null ;
+//		for (int i = 0; i < taskListPerThread.length; i++) {
+//			workThread = new SyncThread(taskListPerThread[i], i);
+//			workThread.start();
+//		}
+
+		ExecutorService es = Executors.newFixedThreadPool(10);
+		try {
+			CountDownLatch cdl = new CountDownLatch(taskListPerThread.length);
+			for (int i = 0; i < taskListPerThread.length; i++) {
+				es.execute(new SyncThread(taskListPerThread[i], i, cdl));
+			}
+			log.info("getCount: "+cdl.getCount());
+			cdl.await();
+			log.info("thread running finish");
+		} catch (Exception e) {
+			log.error(e);
+		}finally {
+			es.shutdown();
 		}
+		
 	}
 
-	public static List[] distributeTasks(List taskList, int threadCount) {
+	public  List[] distributeTasks(List taskList, int threadCount) {
 		// 每個執行緒至少要執行的任務數,假如不為零則表示每個執行緒都會分配到任務
 		int minTaskCount = taskList.size() / threadCount;
 		// 平均分配後還剩下的任務數，不為零則還有任務依個附加到前面的執行緒中
 		int remainTaskCount = taskList.size() % threadCount;
 		// 實際要啟動的執行緒數,如果工作執行緒比任務還多
 		// 自然只需要啟動與任務相同個數的工作執行緒，一對一的執行
-		// 畢竟不打算實現了執行緒池，所以用不著預先初始化好休眠的執行緒
 		int actualThreadCount = minTaskCount > 0 ? threadCount
 				: remainTaskCount;
 		// 要啟動的執行緒陣列，以及每個執行緒要執行的任務列表
@@ -499,21 +512,55 @@ public class PatentServiceImpl implements PatentService {
 				remainIndces--;
 			}
 		}
-		// 列印任務的分配情況
 		for (int i = 0; i < taskListPerThread.length; i++) {
-			System.out.println("執行緒 "
+			log.info("執行緒 "
 					+ i
 					+ " 的任務數："
 					+ taskListPerThread[i].size()
-//					+ " 區間["
+					+ " 區間["
+					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
+					+ ","
+					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
+							.getTaskId() + "]"
+							);
+		}
+		return taskListPerThread;
+//		return null;
+	}
+	
+	public  List[] distributeThread(List taskList, int threadCount) {
+		int minTaskCount = taskList.size() / threadCount;
+		int remainTaskCount = taskList.size() % threadCount ;
+		int actualThreadCount = minTaskCount > 0 ? threadCount
+				: remainTaskCount;
+		int remainIndces = remainTaskCount;
+		int taskIndex = 0;
+		int rangeIndex = 0;
+		List[] taskListPerThread = new List[threadCount];
+		for (rangeIndex = 0; rangeIndex <= minTaskCount; rangeIndex++) {
+			for (taskIndex = 0; taskIndex < threadCount; taskIndex++) {
+				taskListPerThread[rangeIndex].add(taskList.get(taskIndex));
+			}
+			if (remainIndces > 0) {
+				taskListPerThread[rangeIndex].add(taskList.get(taskIndex++));
+				remainIndces--;
+			}
+		}
+		
+		
+		for (int i = 0; i < minTaskCount; i++) {
+			log.info("執行緒 "
+					+ i
+					+ " 的任務數："
+//					+ taskListPerThread[i].size()
+					+ " 區間["
 //					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
-//					+ ","
+					+ ","
 //					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
 //							.getTaskId() + "]"
 							);
 		}
 		return taskListPerThread;
-//		return null;
 	}
 
 	/**
@@ -3938,7 +3985,7 @@ public class PatentServiceImpl implements PatentService {
 		}
 	}
 
-	private void syncPatentStatus(Patent patent) {
+	public void syncPatentStatus(Patent patent) {
 		// 02/23新增根據日期同步狀態
 //		log.info("syncPatentStatus");
 		List<Status> ListStatus = statusDao.getEditable();

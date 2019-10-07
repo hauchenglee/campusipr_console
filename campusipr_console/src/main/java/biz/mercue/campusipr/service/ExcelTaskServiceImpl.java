@@ -407,53 +407,54 @@ public class ExcelTaskServiceImpl implements ExcelTaskService {
         return rowIsEmpty;
     }
 
-    private List<Patent> readBook2Patent(Workbook book, List<FieldMap> listField, List<Integer> other_info_index, String excelTaskId) {
-        log.info("readBook2Patent");
-        String pattern = "[0-9]";
-        List<Patent> listPatent = new ArrayList<Patent>();
-        Sheet sheet = book.getSheetAt(0);
-        int physicalNumberOfRows = sheet.getPhysicalNumberOfRows();
-        log.info(physicalNumberOfRows);
-        int rowIndex = 0;
-        int emptyCell = 0;
-        int x = 0;
-        int y = 0;
-        List<Integer> errorRowList = new ArrayList<Integer>();
-        List<Integer> errorColumnList = new ArrayList<Integer>();
-        List<Integer> emptyRowList = new ArrayList<Integer>();
-        List<Country> listCountry = countryDao.getAll();
-        log.info("getLastRowNum: " + sheet.getLastRowNum());
-        Set<Integer> emptySet = new HashSet<Integer>();
-        for (y = 0; y < sheet.getLastRowNum(); y++) {
+	private List<Patent> readBook2Patent(Workbook book, List<FieldMap> listField, List<Integer> other_info_index,
+			String excelTaskId) {
+		log.info("readBook2Patent");
+		String pattern = "[0-9]";
+		List<Patent> listPatent = new ArrayList<Patent>();
+		Sheet sheet = book.getSheetAt(0);
+		int physicalNumberOfRows = sheet.getPhysicalNumberOfRows();
+		log.info(physicalNumberOfRows);
+		int rowIndex = 0;
+		int emptyCell = 0;
+		int x = 0;
+		int y = 0;
+		List<Integer> errorRowList = new ArrayList<Integer>();
+		List<Integer> errorColumnList = new ArrayList<Integer>();
+		List<Integer> emptyRowList = new ArrayList<Integer>();
+		List<Country> listCountry = countryDao.getAll();
+		log.info("getLastRowNum: " + sheet.getLastRowNum());
+		Set<Integer> emptySet = new HashSet<Integer>();
+		for (y = 0; y < sheet.getLastRowNum(); y++) {
 //			log.info(y +"行，有 "+sheet.getRow(y).getLastCellNum()+"格");
 
-            if (sheet.getRow(y) == null) {
-                book.getSheetAt(0).createRow(y);
+			if (sheet.getRow(y) == null) {
+				book.getSheetAt(0).createRow(y);
 //				log.info(sheet.getRow(y).getLastCellNum());
-                if (sheet.getRow(y).getLastCellNum() == -1) {
-                    emptyRowList.add(y);
-                    emptySet.add(y);
+				if (sheet.getRow(y).getLastCellNum() == -1) {
+					emptyRowList.add(y);
+					emptySet.add(y);
 //					log.info(y +": Row is null");
-                }
-            }
+				}
+			}
 
-            if (sheet.getRow(y) != null && sheet.getRow(y).isFormatted() && sheet.getRow(y).getLastCellNum() == -1) {
-                emptyRowList.add(y);
-                emptySet.add(y);
+			if (sheet.getRow(y) != null && sheet.getRow(y).isFormatted() && sheet.getRow(y).getLastCellNum() == -1) {
+				emptyRowList.add(y);
+				emptySet.add(y);
 //				log.info(y + "行有格式");
-            }
-            if (sheet.getRow(y) != null) {
-                if (sheet.getRow(y).getLastCellNum() == -1 && !sheet.getRow(y).isFormatted()) {
-                    emptyRowList.add(y);
-                    emptySet.add(y);
+			}
+			if (sheet.getRow(y) != null) {
+				if (sheet.getRow(y).getLastCellNum() == -1 && !sheet.getRow(y).isFormatted()) {
+					emptyRowList.add(y);
+					emptySet.add(y);
 //					log.info(y + "行有格式，ROW == -1");
-                }
-                for (x = 0; x < sheet.getRow(y).getLastCellNum(); x++) {
+				}
+				for (x = 0; x < sheet.getRow(y).getLastCellNum(); x++) {
 
-                    if (sheet.getRow(y).getCell(x) == null || sheet.getRow(y).getCell(x).getCellType() == 3
-                            || sheet.getRow(y).getCell(x).getCellType() == Cell.CELL_TYPE_BLANK
-                            || sheet.getRow(y).getLastCellNum() == -1) {
-                        emptyCell++;
+					if (sheet.getRow(y).getCell(x) == null || sheet.getRow(y).getCell(x).getCellType() == 3
+							|| sheet.getRow(y).getCell(x).getCellType() == Cell.CELL_TYPE_BLANK
+							|| sheet.getRow(y).getLastCellNum() == -1) {
+						emptyCell++;
 //						if(sheet.getRow(y).getCell(x) == null) {
 //							log.info("a");
 //						}else if(sheet.getRow(y).getCell(x).getCellType() == 3) {
@@ -466,511 +467,507 @@ public class ExcelTaskServiceImpl implements ExcelTaskService {
 //							log.info("e");
 //						}
 //						log.info(emptyCell);
-                    }
-                    if (sheet.getRow(y).getCell(x) != null) {
-                        int type = sheet.getRow(y).getCell(x).getCellType();
-                        if (type == 1) {
-                            String value = sheet.getRow(y).getCell(x).getStringCellValue().trim().replaceAll("[\\s\\u00A0]+", "");
-                            if (value.isEmpty() || value == null || value == "") {
-                                emptyCell++;
+					}
+					if (sheet.getRow(y).getCell(x) != null) {
+						int type = sheet.getRow(y).getCell(x).getCellType();
+						if (type == 1) {
+							String value = sheet.getRow(y).getCell(x).getStringCellValue().trim()
+									.replaceAll("[\\s\\u00A0]+", "");
+							if (value.isEmpty() || value == null || value == "") {
+								emptyCell++;
 //								log.info("type 1 empty ");
-                            }
+							}
 //							log.info("type 1 :" + value);
-                        }
-                    }
-                    if (emptyCell == sheet.getRow(y).getLastCellNum()) {
-                        emptyRowList.add(y);
-                        emptySet.add(y);
+						}
+					}
+					if (emptyCell == sheet.getRow(y).getLastCellNum()) {
+						emptyRowList.add(y);
+						emptySet.add(y);
 //						log.info(y + "行是空行");
-                    }
+					}
 
-                    if (sheet.getRow(y).getLastCellNum() == 1 && sheet.getRow(y).getCell(sheet.getRow(rowIndex).getLastCellNum()) == null) {
-                        emptyRowList.add(y);
-                        emptySet.add(y);
+					if (sheet.getRow(y).getLastCellNum() == 1
+							&& sheet.getRow(y).getCell(sheet.getRow(rowIndex).getLastCellNum()) == null) {
+						emptyRowList.add(y);
+						emptySet.add(y);
 //						log.info(y + "行是空行，有空格的那種");
-                    }
-                }
-                emptyCell = 0;
-            }
-        }
-        for (int r = 0; r < emptyRowList.size(); r++) {
-            int emptyRowIndex = emptyRowList.get(r);
-            if (sheet.getRow(emptyRowIndex) != null) {
+					}
+				}
+				emptyCell = 0;
+			}
+		}
+		for (int r = 0; r < emptyRowList.size(); r++) {
+			int emptyRowIndex = emptyRowList.get(r);
+			if (sheet.getRow(emptyRowIndex) != null) {
 //				log.info("emptyRowList.size(): "+emptyRowList.size()+", emptyRowIndex: "+emptyRowIndex);
-                book.getSheetAt(0).removeRow(sheet.getRow(emptyRowIndex));
+				book.getSheetAt(0).removeRow(sheet.getRow(emptyRowIndex));
 //				log.info("成功移除第"+emptyRowIndex+"行");
-            }
-        }
-        List<Integer> sortEmpty = new ArrayList<Integer>(emptySet);
-        Collections.sort(sortEmpty);
-        log.info("emptyRow: " + sortEmpty);
-        for (int r = 0; r < sortEmpty.size(); r++) {
-            int emptyRowIndex = sortEmpty.get(r);
-            book.getSheetAt(0).shiftRows((emptyRowIndex + 1 - r), sheet.getLastRowNum(), -1);
+			}
+		}
+		List<Integer> sortEmpty = new ArrayList<Integer>(emptySet);
+		Collections.sort(sortEmpty);
+		log.info("emptyRow: " + sortEmpty);
+		for (int r = 0; r < sortEmpty.size(); r++) {
+			int emptyRowIndex = sortEmpty.get(r);
+			book.getSheetAt(0).shiftRows((emptyRowIndex + 1 - r), sheet.getLastRowNum(), -1);
 //			log.info("移除成功第"+(emptyRowIndex)+"行");
-        }
-        for (Row row : sheet) {
+		}
+		for (Row row : sheet) {
 //			log.info("Row");
-            if (rowIndex == 0) {
-                log.info("Title Row");
-            } else {
-                if (sheet.getRow(rowIndex) == null || sheet.getRow(rowIndex).getLastCellNum() == -1
-                        || (sheet.getRow(rowIndex).getLastCellNum() == 1 && row.getCell(sheet.getRow(rowIndex).getLastCellNum()) == null)
-                        || (rowIndex >= (sheet.getLastRowNum()) && sheet.getLastRowNum() > 1 && checkRow(row))
-                ) {
-                    log.info("break");
-                    break;
-                } else {
-                    int lastCell = sheet.getRow(rowIndex).getLastCellNum();
+			if (rowIndex == 0) {
+				log.info("Title Row");
+			} else {
+				if (sheet.getRow(rowIndex) == null || sheet.getRow(rowIndex).getLastCellNum() == -1
+						|| (sheet.getRow(rowIndex).getLastCellNum() == 1
+								&& row.getCell(sheet.getRow(rowIndex).getLastCellNum()) == null)
+						|| (rowIndex >= (sheet.getLastRowNum()) && sheet.getLastRowNum() > 1 && checkRow(row))) {
+					log.info("break");
+					break;
+				} else {
+					int lastCell = sheet.getRow(rowIndex).getLastCellNum();
 //					log.info(lastCell);
 
-                    String countryName = null;
-                    Patent patent = new Patent();
-                    PatentExtension patentExtension = new PatentExtension();
-                    boolean isApplNoNull = true;
-                    for (FieldMap fieldMap : listField) {
-                        if (fieldMap.getExcel_field_index() != -1) {
-                            PatentField field = fieldMap.getField();
-                            if (field == null) {
-                                log.error("field is null");
-                            }
-                            switch (fieldMap.getField().getField_id()) {
-                                case Constants.PATENT_NAME_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patent.setPatent_name(cellValue);
-                                            patent.setPatent_excel_name(cellValue);
-                                        }
-                                    }
-                                    log.info("patent name:" + patent.getPatent_name());
-                                    break;
-                                case Constants.PATENT_NAME_EN_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patent.setPatent_name_en(cellValue);
-                                            patent.setPatent_excel_name_en(cellValue);
-                                        }
-                                    }
-                                    break;
-                                case Constants.PATENT_COUNTRY_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) == null) {
-                                        errorRowList.add(rowIndex);
-                                        errorColumnList.add(fieldMap.getExcel_field_index());
-                                        emptyCell++;
+					String countryName = null;
+					Patent patent = new Patent();
+					PatentExtension patentExtension = new PatentExtension();
+					boolean isApplNoNull = true;
+					for (FieldMap fieldMap : listField) {
+						if (fieldMap.getExcel_field_index() != -1) {
+							PatentField field = fieldMap.getField();
+							if (field == null) {
+								log.error("field is null");
+							}
+							switch (fieldMap.getField().getField_id()) {
+							case Constants.PATENT_NAME_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patent.setPatent_name(cellValue);
+										patent.setPatent_excel_name(cellValue);
+									}
+								}
+								log.info("patent name:" + patent.getPatent_name());
+								break;
+							case Constants.PATENT_NAME_EN_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patent.setPatent_name_en(cellValue);
+										patent.setPatent_excel_name_en(cellValue);
+									}
+								}
+								break;
+							case Constants.PATENT_COUNTRY_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) == null) {
+									errorRowList.add(rowIndex);
+									errorColumnList.add(fieldMap.getExcel_field_index());
+									emptyCell++;
 //									log.info("無國家- row:"+rowIndex+"、col:" +fieldMap.getExcel_field_index());
-                                    }
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        countryName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue().trim().replaceAll("[\\s\\u00A0]+", "");
+								}
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									countryName = row.getCell(fieldMap.getExcel_field_index()).getStringCellValue()
+											.trim().replaceAll("[\\s\\u00A0]+", "");
 //									log.info(countryName);
-                                        if (!StringUtils.isNULL(countryName)) {
-                                            for (Country country : listCountry) {
-                                                if (country.getCountry_name().contains(countryName)
-                                                        || country.getCountry_alias_name().contains(countryName)) {
-                                                    patent.setPatent_appl_country(country.getCountry_id());
-                                                    break;
-                                                }
-                                            }
-                                            if (StringUtils.isNULL(patent.getPatent_appl_country())) {
-                                                errorRowList.add(rowIndex);
-                                                errorColumnList.add(fieldMap.getExcel_field_index());
-                                                log.info("patent.getPatent_appl_country() is null- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
-                                            }
-                                        }
-                                        if (StringUtils.isNULL(countryName)) {
-                                            if (!StringUtils.isNULL(patent.getPatent_appl_no())) {
-                                                errorRowList.add(rowIndex);
-                                                errorColumnList.add(fieldMap.getExcel_field_index());
+									if (!StringUtils.isNULL(countryName)) {
+										for (Country country : listCountry) {
+											if (country.getCountry_name().contains(countryName)
+													|| country.getCountry_alias_name().contains(countryName)) {
+												patent.setPatent_appl_country(country.getCountry_id());
+												break;
+											}
+										}
+										if (StringUtils.isNULL(patent.getPatent_appl_country())) {
+											errorRowList.add(rowIndex);
+											errorColumnList.add(fieldMap.getExcel_field_index());
+											log.info("patent.getPatent_appl_country() is null- row:" + rowIndex
+													+ "、col:" + fieldMap.getExcel_field_index());
+										}
+									}
+									if (StringUtils.isNULL(countryName)) {
+										if (!StringUtils.isNULL(patent.getPatent_appl_no())) {
+											errorRowList.add(rowIndex);
+											errorColumnList.add(fieldMap.getExcel_field_index());
 //											log.info("countryName is null and apply no isn't null- row:" +rowIndex+"、col:" +fieldMap.getExcel_field_index());
-                                            }
-                                            errorRowList.add(rowIndex);
-                                            errorColumnList.add(fieldMap.getExcel_field_index());
+										}
+										errorRowList.add(rowIndex);
+										errorColumnList.add(fieldMap.getExcel_field_index());
 //										log.info("countryName is null- row:" +rowIndex+"、col:" +fieldMap.getExcel_field_index());
-                                        }
-                                    }
-                                    break;
-                                case Constants.PATENT_NO_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patent.setPatent_no(cellValue);
-                                        }
-                                    }
+									}
+								}
+								break;
+							case Constants.PATENT_NO_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patent.setPatent_no(cellValue);
+									}
+								}
 //								log.info("patent no:"+patent.getPatent_no());
-                                    break;
-                                case Constants.PATENT_APPL_NO_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) == null) {
-                                        row.createCell(fieldMap.getExcel_field_index()).setCellValue("");
-//									errorRowList.add(rowIndex);
-//									errorColumnList.add(fieldMap.getExcel_field_index());
-//									log.info("patentApplNo補空");
-//									log.info("Cell==null(跟Type3不同)- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
-                                      //1002 空的申請號也要匯入
-                                        patent.setPatent_appl_no("");
-                                        log.info("跟Type3不同");
-//                                    	break;
-                                    }
-                                    String patentApplNo = "";
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patent.setPatent_appl_no(cellValue);
-                                        }
-//                                        int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-//                                        int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell type
-//                                        // type is null --> jump out for loop
-//                                        if (cellType == 3) {
-////										errorRowList.add(rowIndex);
-////										errorColumnList.add(fieldMap.getExcel_field_index());
-////										log.info("ErrorIndex:申請號為null，cellType == 3- row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
-//                                        	//1002 空的申請號也要匯入
-//                                        	 Cell cell = row.getCell(fieldMap.getExcel_field_index());
-//                                             cell.setCellValue(patentApplNo);
-//                                             log.info("cellType == 3");
-////                                        	break;
-//                                        }
-//
-//                                        // type is numeric --> need to add country name
-//                                        if (cellType == 0) {
-//                                            log.info("type is numeric");
-//                                            row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell type numeric to string
-//                                            patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
-//                                            //有沒有含中文字or非需求字的判斷
-////										if(checkApplyNo(patentApplNo) ==true) {
-////											errorRowList.add(rowIndex);
-////											errorColumnList.add(fieldMap.getExcel_field_index());
-////											log.info("歐北輸入申請號''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
-////											break;
-////										}
-//                                        }
-//                                        // type is string
-//                                        if (cellType == 1) {
-//                                            patentApplNo = row.getCell(excelFieldIndex).getStringCellValue().replaceAll("[\\s\\u00A0]+", "").trim();
-//                                            if (row.getCell(excelFieldIndex).getStringCellValue() == "" || patentApplNo.isEmpty()) {
-////											errorRowList.add(rowIndex);
-////											errorColumnList.add(fieldMap.getExcel_field_index());
-////											log.info("ErrorIndex:申請號為''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
-//                                            //1002 空的申請號也要匯入
-////                                                break;
-//                                            }
-//                                            //有沒有含中文字or非需求字的判斷
-////										if(checkApplyNo(patentApplNo) ==true) {
-////										errorRowList.add(rowIndex);
-////										errorColumnList.add(fieldMap.getExcel_field_index());
-////										log.info("歐北輸入申請號''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());										
-////										break;
-////										}
-                                            log.info(patentApplNo.isEmpty());
-//                                        }
-//                                        patent.setPatent_appl_no(patentApplNo);
-//                                        isApplNoNull = false;
-                                    }
-                                    break;
-                                case Constants.PATENT_APPL_DATE_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        Date date = parseDateCell(cell);
-                                        patent.setPatent_appl_date(date);
-                                    }
-                                    break;
-                                case Constants.PATENT_PUBLISH_NO_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patent.setPatent_publish_no(cellValue);
-                                        }
-                                    }
-                                    break;
-                                case Constants.PATENT_PUBLISH_DATE_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        Date date = parseDateCell(cell);
-                                        patent.setPatent_publish_date(date);
-                                    }
-                                    break;
-                                case Constants.PATENT_NOTICE_NO_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patent.setPatent_notice_no(cellValue);
-                                        }
-                                    }
-                                    break;
-                                case Constants.PATENT_NOTICE_DATE_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        Date date = parseDateCell(cell);
-                                        patent.setPatent_notice_date(date);
-                                    }
-                                    break;
-                                case Constants.APPLIANT_NAME_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
-                                        List<String> list_name = parseCellPattern(cellValue);
-                                        List<Applicant> listApplicant = new ArrayList<Applicant>();
-                                        if (list_name != null && list_name.size() > 0) {
-                                            for (String name : list_name) {
-                                                Applicant applicant = new Applicant();
-                                                applicant.setApplicant_name(name);
-                                                listApplicant.add(applicant);
-                                            }
-                                        }
-                                        patent.setListApplicant(listApplicant);
-                                        patent.setPatent_excel_applicant(listApplicant);
-                                    }
-                                    break;
-                                case Constants.ASSIGNEE_NAME_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
-                                        List<String> list_name = parseCellPattern(cellValue);
-                                        List<Assignee> listAssignee = new ArrayList<Assignee>();
-                                        if (list_name != null && list_name.size() > 0) {
-                                            for (String name : list_name) {
-                                                Assignee assignee = new Assignee();
-                                                assignee.setAssignee_name(name);
-                                                listAssignee.add(assignee);
-                                            }
-                                        }
-                                        patent.setListAssignee(listAssignee);
-                                        patent.setPatent_excel_assignee(listAssignee);
-                                    }
-                                    break;
-                                case Constants.INVENTOR_NAME_FIELD:
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
-                                        List<String> list_name = parseCellPattern(cellValue);
-                                        List<Inventor> listInventor = new ArrayList<Inventor>();
-                                        if (list_name != null && list_name.size() > 0) {
-                                            for (String name : list_name) {
-                                                Inventor inv = new Inventor();
-                                                inv.setInventor_name(name);
-                                                listInventor.add(inv);
-                                            }
-                                        }
-                                        patent.setListInventor(listInventor);
-                                        patent.setPatent_excel_inventor(listInventor);
-                                    }
-                                    break;
-                                case Constants.SCHOOL_NO_FIELD:
-                                    log.info(fieldMap.getExcel_field_index());
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patentExtension.setBusiness_num(cellValue);
-                                            patent.setExtension(patentExtension);
-                                            patent.setPatent_excel_school_no(cellValue);
-                                        }
-                                    } else {
-                                        patentExtension.setBusiness_num("");
-                                        ;
-                                        patent.setExtension(patentExtension);
-                                    }
-                                    break;
-                                case Constants.SCHOOL_APPL_YEAR_FIELD:
-                                    log.info(fieldMap.getExcel_field_index());
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patentExtension.setExtension_appl_year(cellValue);
-                                            patent.setExtension(patentExtension);
-                                            patent.setPatent_excel_school_appl_year(cellValue);
-                                        }
-                                    } else {
-                                        patentExtension.setExtension_appl_year("");
-                                        ;
-                                        patent.setExtension(patentExtension);
-                                    }
-                                    break;
-                                case Constants.SCHOOL_DEPARTMENT_FIELD:
-                                    log.info(fieldMap.getExcel_field_index());
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
-                                        Cell cell = row.getCell(excelFieldIndex);
-                                        List<String> list_name = parseCellPattern(cell);
-                                        List<Department> listDepartment = new ArrayList<>();
-                                        if (list_name != null && list_name.size() > 0) {
-                                            for (String name : list_name) {
-                                                Department department = new Department();
-                                                department.setDepartment_name(name);
-                                                listDepartment.add(department);
-                                            }
-                                        }
-                                        patent.setListDepartment(listDepartment);
-                                    }
-                                    break;
-                                case Constants.SCHOOL_SUBSIDY_UNIT:
-                                    log.info(fieldMap.getExcel_field_index());
-                                    // 補助單位
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patentExtension.setExtension_subsidy_unit(cellValue);
-                                            patent.setExtension(patentExtension);
-                                        }
-                                    } else {
-                                        patentExtension.setExtension_subsidy_unit("");
-                                        ;
-                                        patent.setExtension(patentExtension);
-                                    }
-                                    break;
-                                case Constants.SCHOOL_SUBSIDY_NO:
-                                    log.info(fieldMap.getExcel_field_index());
-                                    // 補助編號
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patentExtension.setExtension_subsidy_num(cellValue);
-                                            patent.setExtension(patentExtension);
-                                        }
-                                    } else {
-                                        patentExtension.setExtension_subsidy_num("");
-                                        ;
-                                        patent.setExtension(patentExtension);
-                                    }
-                                    break;
-                                case Constants.SCHOOL_SUBSIDY_PLAN:
-                                    log.info(fieldMap.getExcel_field_index());
-                                    // 補助計劃名稱
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patentExtension.setExtension_subsidy_plan(cellValue);
-                                            patent.setExtension(patentExtension);
-                                        }
-                                    } else {
-                                        patentExtension.setExtension_subsidy_plan("");
-                                        ;
-                                        patent.setExtension(patentExtension);
-                                    }
-                                    break;
-                                case Constants.SCHOOL_AGENT:
-                                    log.info(fieldMap.getExcel_field_index());
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patentExtension.setExtension_agent(cellValue);
-                                            patent.setExtension(patentExtension);
-                                        }
-                                    } else {
-                                        patentExtension.setExtension_agent("");
-                                        ;
-                                        patent.setExtension(patentExtension);
-                                    }
-                                    break;
-                                case Constants.SCHOOL_AGENT_NO:
-                                    log.info(fieldMap.getExcel_field_index());
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            patentExtension.setExtension_agent_num(cellValue);
-                                            patent.setExtension(patentExtension);
-                                        }
-                                    } else {
-                                        patentExtension.setExtension_agent_num("");
-                                        ;
-                                        patent.setExtension(patentExtension);
-                                    }
-                                    break;
-                                case Constants.SCHOOL_MEMO_FIELD:
-                                    log.info(fieldMap.getExcel_field_index());
-                                    if (row.getCell(fieldMap.getExcel_field_index()) != null) {
-                                        Cell cell = row.getCell(fieldMap.getExcel_field_index());
-                                        String cellValue = getCellValue(cell);
-                                        if (!StringUtils.isNULL(cellValue)) {
-                                            log.info(cellValue);
-                                            patentExtension.setExtension_memo(cellValue);
-                                            patent.setExtension(patentExtension);
-                                            patent.setPatent_excel_memo(cellValue);
-                                        }
-                                    } else {
-                                        patentExtension.setExtension_memo("");
-                                        patent.setExtension(patentExtension);
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
+								break;
+							case Constants.PATENT_APPL_NO_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) == null) {
+									row.createCell(fieldMap.getExcel_field_index()).setCellValue("");
+									errorRowList.add(rowIndex);
+									errorColumnList.add(fieldMap.getExcel_field_index());
+									log.info("patentApplNo補空");
+									log.info("Cell==null(跟Type3不同)- row:" + rowIndex + "、col:"
+											+ fieldMap.getExcel_field_index());
+									break;
+								}
+								String patentApplNo = "";
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+									int cellType = row.getCell(fieldMap.getExcel_field_index()).getCellType(); // cell
+									// type
+									// type is null --> jump out for loop
+									if (cellType == 3) {
+										errorRowList.add(rowIndex);
+										errorColumnList.add(fieldMap.getExcel_field_index());
+										log.info("ErrorIndex:申請號為null，cellType == 3- row:" + rowIndex + "、col:"
+												+ fieldMap.getExcel_field_index());
+										break;
+									}
+
+									// type is numeric --> need to add country name
+									if (cellType == 0) {
+										log.info("type is numeric");
+										row.getCell(excelFieldIndex).setCellType(Cell.CELL_TYPE_STRING); // change cell
+										// type
+										// numeric
+										// to string
+										patentApplNo = row.getCell(excelFieldIndex).getStringCellValue();
+										// 有沒有含中文字or非需求字的判斷
+//										if(checkApplyNo(patentApplNo) ==true) {
+//											errorRowList.add(rowIndex);
+//											errorColumnList.add(fieldMap.getExcel_field_index());
+//											log.info("歐北輸入申請號''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());
+//											break;
+//										}
+									}
+									// type is string
+									if (cellType == 1) {
+										patentApplNo = row.getCell(excelFieldIndex).getStringCellValue()
+												.replaceAll("[\\s\\u00A0]+", "").trim();
+										if (row.getCell(excelFieldIndex).getStringCellValue() == ""
+												|| patentApplNo.isEmpty()) {
+											errorRowList.add(rowIndex);
+											errorColumnList.add(fieldMap.getExcel_field_index());
+											log.info("ErrorIndex:申請號為''，row:" + rowIndex + "、col:"
+													+ fieldMap.getExcel_field_index());
+											break;
+										}
+										// 有沒有含中文字or非需求字的判斷
+//										if(checkApplyNo(patentApplNo) ==true) {
+//										errorRowList.add(rowIndex);
+//										errorColumnList.add(fieldMap.getExcel_field_index());
+//										log.info("歐北輸入申請號''，row:" + rowIndex + "、col:" + fieldMap.getExcel_field_index());										
+//										break;
+//										}
+										log.info(patentApplNo);
+									}
+									patent.setPatent_appl_no(patentApplNo);
+									isApplNoNull = false;
+								}
+								break;
+							case Constants.PATENT_APPL_DATE_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									Date date = parseDateCell(cell);
+									patent.setPatent_appl_date(date);
+								}
+								break;
+							case Constants.PATENT_PUBLISH_NO_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patent.setPatent_publish_no(cellValue);
+									}
+								}
+								break;
+							case Constants.PATENT_PUBLISH_DATE_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									Date date = parseDateCell(cell);
+									patent.setPatent_publish_date(date);
+								}
+								break;
+							case Constants.PATENT_NOTICE_NO_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patent.setPatent_notice_no(cellValue);
+									}
+								}
+								break;
+							case Constants.PATENT_NOTICE_DATE_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									Date date = parseDateCell(cell);
+									patent.setPatent_notice_date(date);
+								}
+								break;
+							case Constants.APPLIANT_NAME_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
+									List<String> list_name = parseCellPattern(cellValue);
+									List<Applicant> listApplicant = new ArrayList<Applicant>();
+									if (list_name != null && list_name.size() > 0) {
+										for (String name : list_name) {
+											Applicant applicant = new Applicant();
+											applicant.setApplicant_name(name);
+											listApplicant.add(applicant);
+										}
+									}
+									patent.setListApplicant(listApplicant);
+									patent.setPatent_excel_applicant(listApplicant);
+								}
+								break;
+							case Constants.ASSIGNEE_NAME_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
+									List<String> list_name = parseCellPattern(cellValue);
+									List<Assignee> listAssignee = new ArrayList<Assignee>();
+									if (list_name != null && list_name.size() > 0) {
+										for (String name : list_name) {
+											Assignee assignee = new Assignee();
+											assignee.setAssignee_name(name);
+											listAssignee.add(assignee);
+										}
+									}
+									patent.setListAssignee(listAssignee);
+									patent.setPatent_excel_assignee(listAssignee);
+								}
+								break;
+							case Constants.INVENTOR_NAME_FIELD:
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cellValue = row.getCell(fieldMap.getExcel_field_index());
+									List<String> list_name = parseCellPattern(cellValue);
+									List<Inventor> listInventor = new ArrayList<Inventor>();
+									if (list_name != null && list_name.size() > 0) {
+										for (String name : list_name) {
+											Inventor inv = new Inventor();
+											inv.setInventor_name(name);
+											listInventor.add(inv);
+										}
+									}
+									patent.setListInventor(listInventor);
+									patent.setPatent_excel_inventor(listInventor);
+								}
+								break;
+							case Constants.SCHOOL_NO_FIELD:
+								log.info(fieldMap.getExcel_field_index());
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patentExtension.setBusiness_num(cellValue);
+										patent.setExtension(patentExtension);
+										patent.setPatent_excel_school_no(cellValue);
+									}
+								} else {
+									patentExtension.setBusiness_num("");
+									;
+									patent.setExtension(patentExtension);
+								}
+								break;
+							case Constants.SCHOOL_APPL_YEAR_FIELD:
+								log.info(fieldMap.getExcel_field_index());
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patentExtension.setExtension_appl_year(cellValue);
+										patent.setExtension(patentExtension);
+										patent.setPatent_excel_school_appl_year(cellValue);
+									}
+								} else {
+									patentExtension.setExtension_appl_year("");
+									;
+									patent.setExtension(patentExtension);
+								}
+								break;
+							case Constants.SCHOOL_DEPARTMENT_FIELD:
+								log.info(fieldMap.getExcel_field_index());
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									int excelFieldIndex = fieldMap.getExcel_field_index(); // excel field index
+									Cell cell = row.getCell(excelFieldIndex);
+									List<String> list_name = parseCellPattern(cell);
+									List<Department> listDepartment = new ArrayList<>();
+									if (list_name != null && list_name.size() > 0) {
+										for (String name : list_name) {
+											Department department = new Department();
+											department.setDepartment_name(name);
+											listDepartment.add(department);
+										}
+									}
+									patent.setListDepartment(listDepartment);
+								}
+								break;
+							case Constants.SCHOOL_SUBSIDY_UNIT:
+								log.info(fieldMap.getExcel_field_index());
+								// 補助單位
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patentExtension.setExtension_subsidy_unit(cellValue);
+										patent.setExtension(patentExtension);
+									}
+								} else {
+									patentExtension.setExtension_subsidy_unit("");
+									;
+									patent.setExtension(patentExtension);
+								}
+								break;
+							case Constants.SCHOOL_SUBSIDY_NO:
+								log.info(fieldMap.getExcel_field_index());
+								// 補助編號
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patentExtension.setExtension_subsidy_num(cellValue);
+										patent.setExtension(patentExtension);
+									}
+								} else {
+									patentExtension.setExtension_subsidy_num("");
+									;
+									patent.setExtension(patentExtension);
+								}
+								break;
+							case Constants.SCHOOL_SUBSIDY_PLAN:
+								log.info(fieldMap.getExcel_field_index());
+								// 補助計劃名稱
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patentExtension.setExtension_subsidy_plan(cellValue);
+										patent.setExtension(patentExtension);
+									}
+								} else {
+									patentExtension.setExtension_subsidy_plan("");
+									;
+									patent.setExtension(patentExtension);
+								}
+								break;
+							case Constants.SCHOOL_AGENT:
+								log.info(fieldMap.getExcel_field_index());
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patentExtension.setExtension_agent(cellValue);
+										patent.setExtension(patentExtension);
+									}
+								} else {
+									patentExtension.setExtension_agent("");
+									;
+									patent.setExtension(patentExtension);
+								}
+								break;
+							case Constants.SCHOOL_AGENT_NO:
+								log.info(fieldMap.getExcel_field_index());
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										patentExtension.setExtension_agent_num(cellValue);
+										patent.setExtension(patentExtension);
+									}
+								} else {
+									patentExtension.setExtension_agent_num("");
+									;
+									patent.setExtension(patentExtension);
+								}
+								break;
+							case Constants.SCHOOL_MEMO_FIELD:
+								log.info(fieldMap.getExcel_field_index());
+								if (row.getCell(fieldMap.getExcel_field_index()) != null) {
+									Cell cell = row.getCell(fieldMap.getExcel_field_index());
+									String cellValue = getCellValue(cell);
+									if (!StringUtils.isNULL(cellValue)) {
+										log.info(cellValue);
+										patentExtension.setExtension_memo(cellValue);
+										patent.setExtension(patentExtension);
+										patent.setPatent_excel_memo(cellValue);
+									}
+								} else {
+									patentExtension.setExtension_memo("");
+									patent.setExtension(patentExtension);
+								}
+								break;
+							default:
+								break;
+							}
 //							log.info("errorList: Column" + errorColumnList + "Row" + errorRowList);
-                        }
-                    } // close for (FieldMap fieldMap : listField)
-                    // handle not select title and index, and iterator field not select value
-                    Map<String, Integer> sorted = handleTitleMap(book, other_info_index);
-                    String appendOtherInfo = "";
-                    if (other_info_index.size() > 0 && !isApplNoNull) {
-                        for (Map.Entry map : sorted.entrySet()) {
-                            Integer fieldIndex = (Integer) map.getValue();
-                            String fieldTitle = (String) map.getKey();
-                            if (row.getCell(fieldIndex) != null) {
-                                if (fieldTitle.equals("申請日") || fieldTitle.equals("公開日") || fieldTitle.equals("公告日")) {
-                                    Cell cell = row.getCell(fieldIndex);
-                                    Date date = parseDateCell(cell);
-                                    if (date != null) {
-                                        String strDate = DateUtils.getSimpleSlashFormatDate(date);
-                                        appendOtherInfo += fieldTitle + "：" + strDate + "\n";
-                                    }
-                                } else {
-                                    Cell cell = row.getCell(fieldIndex);
-                                    String cellValue = getCellValue(cell);
-                                    appendOtherInfo += fieldTitle + "：" + cellValue + "\n";
-                                }
-                            }
-                        }
-                    }
-                    //log.info(appendOtherInfo);
+						}
+					} // close for (FieldMap fieldMap : listField)
+						// handle not select title and index, and iterator field not select value
+					Map<String, Integer> sorted = handleTitleMap(book, other_info_index);
+					String appendOtherInfo = "";
+					if (other_info_index.size() > 0 && !isApplNoNull) {
+						for (Map.Entry map : sorted.entrySet()) {
+							Integer fieldIndex = (Integer) map.getValue();
+							String fieldTitle = (String) map.getKey();
+							if (row.getCell(fieldIndex) != null) {
+								if (fieldTitle.equals("申請日") || fieldTitle.equals("公開日") || fieldTitle.equals("公告日")) {
+									Cell cell = row.getCell(fieldIndex);
+									Date date = parseDateCell(cell);
+									if (date != null) {
+										String strDate = DateUtils.getSimpleSlashFormatDate(date);
+										appendOtherInfo += fieldTitle + "：" + strDate + "\n";
+									}
+								} else {
+									Cell cell = row.getCell(fieldIndex);
+									String cellValue = getCellValue(cell);
+									appendOtherInfo += fieldTitle + "：" + cellValue + "\n";
+								}
+							}
+						}
+					}
+					// log.info(appendOtherInfo);
 
-                    if (!StringUtils.isNULL(appendOtherInfo)) {
-                        patentExtension.setExtension_other_information(appendOtherInfo);
-                        patent.setExtension(patentExtension);
-                    }
-                    // 註解掉影響：如果欄位未選擇或是無值，不會抹除db other info數據
-					/* else {
-						patentExtension.setExtension_other_information("");
+					if (!StringUtils.isNULL(appendOtherInfo)) {
+						patentExtension.setExtension_other_information(appendOtherInfo);
 						patent.setExtension(patentExtension);
-					}*/
+					}
+					// 註解掉影響：如果欄位未選擇或是無值，不會抹除db other info數據
+					/*
+					 * else { patentExtension.setExtension_other_information("");
+					 * patent.setExtension(patentExtension); }
+					 */
 
-                    log.info("patent add");
-                    if (!StringUtils.isNULL(patent.getPatent_appl_country())) {
-                        patent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
-                        listPatent.add(patent);
-                    }
-                    //1002 使用者要求沒有輸入申請號
-//                    if (!StringUtils.isNULL(patent.getPatent_appl_no()) && !StringUtils.isNULL(patent.getPatent_appl_country())) {
-//                        patent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
-//                        listPatent.add(patent);
-//                    }
-                }
-            }
-            rowIndex++;
+					log.info("patent add");
+					if (!StringUtils.isNULL(patent.getPatent_appl_no())
+							&& !StringUtils.isNULL(patent.getPatent_appl_country())) {
+						patent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
+						listPatent.add(patent);
+					}
+				}
+			}
+			rowIndex++;
 //			log.info("rowIndex: "+rowIndex);
 
-        }
-        log.info("rowIndex: " + rowIndex);
-        int errorRowIndex = errorRowList.size();
-        log.info(errorRowIndex);
-        if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
-            return listPatent;
-        } else {
-            log.info("Errorlist is not Empty");
-            log.info("errorList: Column" + errorColumnList + "Row" + errorRowList);
-            setColorOnError(book, errorColumnList, errorRowList);
-            log.info("Color Set");
-            return null;
-        }
-    }
+		}
+		log.info("rowIndex: " + rowIndex);
+		int errorRowIndex = errorRowList.size();
+		log.info(errorRowIndex);
+		if (errorColumnList.isEmpty() || errorRowList.isEmpty()) {
+			return listPatent;
+		} else {
+			log.info("Errorlist is not Empty");
+			log.info("errorList: Column" + errorColumnList + "Row" + errorRowList);
+			setColorOnError(book, errorColumnList, errorRowList);
+			log.info("Color Set");
+			return null;
+		}
+	}
 
     private void setColorOnError(Workbook book, List<Integer> errorColumnList, List<Integer> errorRowList) {
         int x = 0;

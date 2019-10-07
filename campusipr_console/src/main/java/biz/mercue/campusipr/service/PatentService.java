@@ -82,4 +82,6 @@ public interface PatentService {
 
 	int test(Patent editPatent);
 
+	void syncPatentStatus(Patent patent);
+
 }
