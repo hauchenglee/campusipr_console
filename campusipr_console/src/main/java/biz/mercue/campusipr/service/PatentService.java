@@ -15,17 +15,17 @@ public interface PatentService {
 
 	int demo(String applNo, String businessId, String patentId, String str);
 
-	int addPatent(Patent patent);
+	int addPatent(Patent patent) throws Exception;
 
 //	int syncPatentStatus(Patent patent);
 
-	int syncPatentsByApplicant(List<Patent> list, String adminId, String businessId, String ip);
+	int syncPatentsByApplicant(List<Patent> list, String adminId, String businessId, String ip) throws Exception;
 
 	int syncPatentData(Patent patent);
 
-	int addPatentByApplNo(Patent patent, Admin admin, Business business, int sourceFrom);
+	int addPatentByApplNo(Patent patent, Admin admin, Business business, int sourceFrom) throws Exception;
 
-	Map<String, Patent> addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip);
+	Map<String, Patent> addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip) throws Exception;
 
     Map<String, Patent> syncPatentDataBySchedule(Patent patent);
 
@@ -35,7 +35,7 @@ public interface PatentService {
 
 	int mergeDiffPatent(String dbPatentId, Patent editPatent, Admin admin, Business business);
 
-	int updatePatent(Patent patent, String businessId);
+	int updatePatent(Patent patent, String businessId) throws Exception;
 
 	ListQueryForm advancedSearch(String searchStr, String business, int page, int pageSize);
 
@@ -43,7 +43,7 @@ public interface PatentService {
 
 	int mergeDiffPatentByExcel(Map<String, Patent> mergeMap, Admin admin, Business business);
 
-	int authorizedUpdatePatent(String businessId, Patent patent);
+	int authorizedUpdatePatent(String businessId, Patent patent) throws Exception;
 
 	List<Patent> getExcelByPatentIds(List<String> idList, String businessId);
 

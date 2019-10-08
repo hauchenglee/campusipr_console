@@ -25,15 +25,15 @@ public class Annuity extends BaseBean{
 	
 	@JsonView(View.PatentDetail.class)
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date annuity_date;
+	private Date annuity_date; // 有效起始日
 	
 	
 	@JsonView(View.PatentDetail.class)
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date annuity_end_date;
+	private Date annuity_end_date; // 下次繳費期限日
 	
 	@JsonView(View.PatentDetail.class)
-	private int annuity_charge_year;
+	private int annuity_charge_year; // 本次繳費年數
 	
 	
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -46,7 +46,7 @@ public class Annuity extends BaseBean{
 	private boolean is_paid;
 
 	@JsonView(View.PatentDetail.class)
-	private boolean is_reminder = true;
+	private boolean is_reminder; // E-mail 提醒
 	
 	@JsonView(View.PatentDetail.class)
 	private String business_id;

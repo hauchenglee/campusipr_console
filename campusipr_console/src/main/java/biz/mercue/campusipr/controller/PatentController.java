@@ -53,7 +53,7 @@ public class PatentController {
 	
 	@RequestMapping(value="/api/addpatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String addPatent(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="businessId",required=false) String businessId) {
+	public String addPatent(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="businessId",required=false) String businessId) throws Exception {
 		log.info("addPatent ");
 		Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
 		BeanResponseBody responseBody  = new BeanResponseBody();
@@ -111,7 +111,7 @@ public class PatentController {
 	
 	@RequestMapping(value="/api/addpatentbyapplno", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String addPatentByApplNo(HttpServletRequest request,@RequestBody String receiveJSONString, @RequestParam(value ="businessId",required=false) String businessId) {
+	public String addPatentByApplNo(HttpServletRequest request,@RequestBody String receiveJSONString, @RequestParam(value ="businessId",required=false) String businessId) throws Exception {
 		log.info("addPatentByApplNo ");
 		
 		BeanResponseBody responseBody  = new BeanResponseBody();
@@ -198,7 +198,7 @@ public class PatentController {
 	
 	@RequestMapping(value="/api/updatepatent", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String updatePatent(HttpServletRequest request,@RequestBody String receiveJSONString) {
+	public String updatePatent(HttpServletRequest request,@RequestBody String receiveJSONString) throws Exception {
 		log.info("updatePatent ");
 	
 		StringResponseBody responseBody  = new StringResponseBody();
@@ -517,7 +517,7 @@ public class PatentController {
 	
 	@RequestMapping(value = "/api/submitexceltask", method = {RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String submitExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) {
+	public String submitExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
 		log.info("submitExcelTask ");
 		BeanResponseBody responseBody = new BeanResponseBody();
 		Map<Integer, List<Patent>> mapPatent = new HashMap<>();
@@ -619,7 +619,7 @@ public class PatentController {
 
 	@RequestMapping(value="/api/syncapplicant", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
-	public String syncApplicantData(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page) {
+	public String syncApplicantData(HttpServletRequest request,@RequestBody String receiveJSONString,@RequestParam(value ="page",required=false,defaultValue ="1") int page) throws Exception {
 		log.info("syncapplicant ");
 		ListResponseBody responseBody  = new ListResponseBody();
 		JSONObject jsonObject = new JSONObject(receiveJSONString);

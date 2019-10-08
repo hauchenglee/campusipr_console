@@ -170,7 +170,7 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	@Override
-	public int addPatent(Patent patent) {
+	public int addPatent(Patent patent) throws Exception {
 
 		if (StringUtils.isNULL(patent.getPatent_id())) {
 			patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
@@ -347,7 +347,7 @@ public class PatentServiceImpl implements PatentService {
 	 * @return: result
 	 */
 	@Override
-	public int addPatentByApplNo(Patent editPatent, Admin admin, Business business, int sourceFrom) {
+	public int addPatentByApplNo(Patent editPatent, Admin admin, Business business, int sourceFrom) throws Exception {
 		log.info("addPatentByApplNo");
 		int taskResult = Constants.INT_SYSTEM_PROBLEM;
 
@@ -582,7 +582,7 @@ public class PatentServiceImpl implements PatentService {
 	 * @return
 	 */
 	@Override
-	public Map<String, Patent> addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip) {
+	public Map<String, Patent> addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip) throws Exception {
 		Map<String, Patent> mergeMap = new HashMap<>();
 		if (patentList == null) {
 			return null;
@@ -1037,7 +1037,7 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	@Override
-	public int syncPatentsByApplicant(List<Patent> list, String adminId, String businessId, String ip) {
+	public int syncPatentsByApplicant(List<Patent> list, String adminId, String businessId, String ip) throws Exception {
 		int taskResult = -1;
 		Business ownBusiness = businessDao.getById(businessId);
 		List<String> englishNames = new ArrayList<>();
@@ -1458,7 +1458,7 @@ public class PatentServiceImpl implements PatentService {
 	}
 	
 	@Override
-	public int authorizedUpdatePatent(String businessId, Patent patent) {
+	public int authorizedUpdatePatent(String businessId, Patent patent) throws Exception {
 		Patent dbBean = patentDao.getById(businessId, patent.getPatent_id());
 		if (dbBean != null) {
 			return updatePatent(patent, businessId);
@@ -1468,7 +1468,7 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	@Override
-	public int updatePatent(Patent patent, String businessId) {
+	public int updatePatent(Patent patent, String businessId) throws Exception {
 		log.info("updatePatent:" + patent.getPatent_id());
 		List<PatentEditHistory> editList = new ArrayList<PatentEditHistory>();
 		Patent dbBean = patent.getComparePatent();
@@ -3662,7 +3662,12 @@ public class PatentServiceImpl implements PatentService {
 		}
 	}
 
-	private void handleReminder(Patent patent, List<Business> listBusiness) {
+	/**
+	 * 原本的reminder方法，裡面內容未改寫
+	 * @param patent
+	 * @param listBusiness
+	 */
+	private void handleReminder_origin(Patent patent, List<Business> listBusiness) {
 		try {
 			List<ReminderTask> reminderList = reminderDao.getAvailableReminderByPatentId(patent.getPatent_id());
 			log.info("remove reminder patent:"+patent.getPatent_id());
@@ -3763,6 +3768,146 @@ public class PatentServiceImpl implements PatentService {
 		} catch (Exception e) {
 			log.error(e);
 		}
+	}
+
+	/**
+	 * 這是我重構handler reminder功能，未完成未測試
+	 * @param patent
+	 * @param listBusiness
+	 * @throws Exception
+	 */
+	private void handleReminder(Patent patent, List<Business> listBusiness) throws Exception {
+		List<ReminderTask> reminderList = reminderDao.getAvailableReminderByPatentId(patent.getPatent_id());
+		log.info("remove reminder patent:" + patent.getPatent_id());
+		for (ReminderTask reminder : reminderList) {
+			reminderDao.delete(reminder.getTask_id());
+			quartzService.removeJob(reminder);
+		}
+		List<Annuity> listAnnuity = patent.getListAnnuity();
+		if (listAnnuity == null || listAnnuity.size() <= 0) {
+			return;
+		}
+
+		for (Annuity annuity : listAnnuity) {
+			for (Business business : listBusiness) {
+				// 專利繳費提醒 -> E-mail 提醒日 -> 90天前 30天前 07天前 自定 到期日隔一天
+				List<AnnuityReminder> annuityReminderList = annuityReminderDao.getByBusinessId(business.getBusiness_id());
+
+				// 立即設置繳費提醒list
+				List<AnnuityReminder> listARSendRightNow = new ArrayList<>();
+
+				// 建立現在時間now
+				Date now = DateUtils.getDayStart(new Date());
+
+				// for each每個繳費E-mail 提醒日
+				for (AnnuityReminder annuityReminder : annuityReminderList) {
+					// 如果該E-mail 提醒日不需要繳費提醒 -> 不執行以下程序
+					if (!annuityReminder.isAvailable()) continue;
+
+					// 取得E-mail 提醒日日期設定，並轉換成calendar
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(annuity.getAnnuity_end_date());
+					calendar.add(Calendar.DATE, -annuityReminder.getEmail_day());
+
+					// 建立新的reminder，功用為提醒任務的系統排程
+					ReminderTask reminder = new ReminderTask();
+					reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
+					reminder.setPatent_id(patent.getPatent_id());
+					reminder.setBusiness_id(annuityReminder.getBusiness().getBusiness_id());
+					reminder.setTask_type(ReminderTask.reminderTypeAnnuity);
+					reminder.setTask_date(calendar.getTime());
+					reminder.setReminder_day(annuityReminder.getEmail_day());
+					reminder.setIs_send(false);
+
+					if (annuity.getAnnuity_end_date().after(now)
+							&& patent.getEdit_source() == Patent.EDIT_SOURCE_SERVICE) {
+						annuity.setIs_reminder(true);
+					} else {
+						annuity.setIs_reminder(annuity.is_reminder());
+					}
+					reminder.setIs_remind(annuity.is_reminder());
+
+					// if啟動未來排程時間
+					if (reminder.getTask_date().after(now) && reminder.is_remind() && !reminder.is_send()) {
+						log.info("send on scheduler");
+						reminderDao.create(reminder);
+						quartzService.createJob(reminder);
+					}
+
+					// if符合發送提醒信件條件
+					if (reminder.getTask_date().equals(now) ||
+							(now.compareTo(reminder.getTask_date()) >= 0 &&
+									now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
+						listARSendRightNow.add(annuityReminder);
+						log.info("send right now List:" + listARSendRightNow.size());
+					}
+				} // end annuityReminder for loop（for each每個繳費E-mail 提醒日）
+
+				// 如果沒有符合需要發送提醒信件 -> 不執行以下程序
+				if (listARSendRightNow.isEmpty()) continue;
+
+				// get last expire reminder but annuity not expire
+				// 排程提醒過期了，但是繳費提醒截止尚未過期
+
+				// 取得最接近now的繳費提醒
+				// 例如
+				AnnuityReminder sendRemindInfo = listARSendRightNow.get(listARSendRightNow.size() - 1);
+
+				Calendar calendarNowSend = Calendar.getInstance();
+				calendarNowSend.setTime(annuity.getAnnuity_end_date());
+				calendarNowSend.add(Calendar.DATE, -sendRemindInfo.getEmail_day());
+
+				ReminderTask reminder = new ReminderTask();
+				reminder.setTask_id(KeyGeneratorUtils.generateRandomString());
+				reminder.setPatent_id(patent.getPatent_id());
+				reminder.setBusiness_id(sendRemindInfo.getBusiness().getBusiness_id());
+				reminder.setTask_type(ReminderTask.reminderTypeAnnuity);
+				reminder.setTask_date(calendarNowSend.getTime());
+				reminder.setReminder_day(sendRemindInfo.getEmail_day());
+				reminder.setIs_send(false);
+
+				if (annuity.getAnnuity_end_date().after(now)
+						&& patent.getEdit_source() == Patent.EDIT_SOURCE_SERVICE) {
+					annuity.setIs_reminder(true);
+				} else {
+					annuity.setIs_reminder(annuity.is_reminder());
+				}
+				reminder.setIs_remind(annuity.is_reminder());
+
+				// 再次確認是否發送信件
+				if (reminder.getTask_date().equals(now) ||
+						(now.compareTo(reminder.getTask_date()) >= 0 &&
+								now.compareTo(annuity.getAnnuity_end_date()) <= 0)) {
+					if (reminder.is_remind()) {
+						log.info("send right now");
+						reminder.setIs_send(true);
+						reminderDao.create(reminder);
+						MailSender mail = new MailSender();
+						Country country = countryDao.getByLanguage(patent.getPatent_appl_country(), "tw");
+						patent.setCountry_name(country.getCountry_name());
+						String annuity_date = DateUtils.getSimpleSlashFormatDate(annuity.getAnnuity_end_date());
+						patent.setAnnuity_date(annuity_date);
+						List<PatentContact> listContact = new ArrayList<>();
+						for (PatentContact contact : patent.getListContact()) {
+							log.info("contact:" + contact.getContact_email());
+							if (contact.getBusiness() != null) {
+								if (reminder.getBusiness_id().equals(contact.getBusiness().getBusiness_id())) {
+									listContact.add(contact);
+								}
+							}
+						}
+						if (!listContact.isEmpty()) {
+							mail.sendPatentAnnuityReminder(patent, listContact);
+						} else {
+							log.error("no contact for this patent");
+						}
+					}
+				}
+
+
+
+			} // end business for loop
+		} // end annuity for loop
 	}
 
 	private void handleExtension(Patent dbPatent, Patent editPatent, String businessId) {
