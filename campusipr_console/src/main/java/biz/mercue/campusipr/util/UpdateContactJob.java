@@ -32,11 +32,21 @@ public class UpdateContactJob implements Job {
         Business business = businessService.getById(businessId);
 
         try {
-            List<PatentContact> patentContactList = contactService.getDefaultContactByBusiness(businessId);
-            log.info("patentContactList size: " + patentContactList.size());
-            if (!patentContactList.isEmpty()) {
-                for (PatentContact contact : patentContactList) {
-                    contactService.updateContactByBusiness(contact, contact.getPatent_contact_id(), business);
+            // 以下被檢測出No row with the given identifier exists
+            // 不清楚原因，故先行註解
+            // 猜測：舊資料造成干擾（）
+//            List<PatentContact> patentContactList = contactService.getDefaultContactByBusiness(businessId);
+
+            // 這是修改上面的bug
+            // 解法：不取出完整的bean，而是取出相應的pk，再用這個pk去getById
+            List<String> contactIds = contactService.getDefaultContactIdsByBusiness(businessId);
+            log.info("contactIds size: " + contactIds.size());
+            if (!contactIds.isEmpty()) {
+                for (String contactId : contactIds) {
+                    PatentContact contact = contactService.getById(contactId);
+                    if (contact != null && StringUtils.isNULL(contact.getPatent_contact_id())) {
+                        contactService.updateContactByBusiness(contact, contact.getPatent_contact_id(), business);
+                    }
                 }
             }
             long end = System.nanoTime();
