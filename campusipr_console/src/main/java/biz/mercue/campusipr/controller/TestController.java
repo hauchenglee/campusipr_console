@@ -32,7 +32,6 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 @Controller
 public class TestController {
-	
 	private Logger log = Logger.getLogger(this.getClass().getName());
 	
 	@Autowired
