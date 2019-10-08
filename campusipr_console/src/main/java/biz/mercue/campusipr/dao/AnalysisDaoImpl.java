@@ -102,6 +102,11 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listBusiness as lb " 
 						+ "WHERE p.is_sync = 1 " 
 						+ "and lb.business_id = :businessId "
+						+ "OR (p.is_sync = 0 "
+						+ "AND p.patent_appl_no IS NOT NULL "
+						+ "AND p.patent_appl_date IS NOT NULL "
+						+ "AND p.patent_notice_no IS NULL " 
+						+ "AND p.patent_publish_no IS NULL) "
 						+ "GROUP BY date_format(patent_appl_date, '%Y') "
 						+ "Order by date_format(patent_appl_date, '%Y') asc";
 
@@ -411,6 +416,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "WHERE p.is_sync = 1 " 
 						+ "and lb.business_id = :businessId "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "OR (p.is_sync = 0 "
+						+ "AND p.patent_appl_no IS NOT NULL "
+						+ "AND p.patent_appl_date IS NOT NULL "
+						+ "AND p.patent_notice_no IS NULL " 
+						+ "AND p.patent_publish_no IS NULL "
+						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate)) "
 						+ "GROUP BY date_format(patent_appl_date, '%Y') ";
 
 		Query q = session.createQuery(queryStr);

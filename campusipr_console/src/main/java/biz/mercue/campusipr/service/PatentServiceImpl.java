@@ -552,12 +552,12 @@ public class PatentServiceImpl implements PatentService {
 			log.info("執行緒 "
 					+ i
 					+ " 的任務數："
-//					+ taskListPerThread[i].size()
+					+ taskListPerThread[i].size()
 					+ " 區間["
-//					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
+					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
 					+ ","
-//					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
-//							.getTaskId() + "]"
+					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
+							.getTaskId() + "]"
 							);
 		}
 		return taskListPerThread;
@@ -594,10 +594,10 @@ public class PatentServiceImpl implements PatentService {
 			if(editPatent.getPatent_appl_no() != null) {
 				int syncResult = syncPatentData(editPatent);
 			}
+//			syncPatentStatus(editPatent);
 			if (!editPatent.isIs_sync()) {
 				editPatent.setPatent_appl_no(StringUtils.generateApplNoRandom(editPatent.getPatent_appl_no()));
 			}
-
 			log.info("editPatent.getPatent_appl_no(): " + editPatent.getPatent_appl_no());
 			editPatent.setSync_date(DateUtils.getDayStart(new Date()));
 			editPatent.setAdmin(admin);
