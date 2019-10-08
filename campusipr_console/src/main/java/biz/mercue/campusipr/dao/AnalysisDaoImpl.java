@@ -1007,9 +1007,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		Session session = getSession();
 		String queryStr = "SELECT distinct ld.department_id, ld.department_name,  p.patent_id, p.patent_appl_country, patent_appl_no "
 						+ "FROM Patent as p " 
-						+ "JOIN p.listBusiness as lb "
 						+ "JOIN p.listDepartment as ld "
-						+ "where lb.business_id = :businessId "
+						+ "where ld.business_id = :businessId "
 						+ "and d.department_name = :departmentId"
 						+ "group by p.patent_id";
 		Query q = session.createQuery(queryStr);
