@@ -457,13 +457,8 @@ public class PatentServiceImpl implements PatentService {
 		}
 //		 設定要啟動的工作執行緒數
 		int threadCount = 10;
-		List[] taskListPerThread = distributeThread(taskList, threadCount);
+		List[] taskListPerThread = distributeTasks(taskList, threadCount);
 		log.info("實際要啟動的工作執行緒數：" + taskListPerThread.length);
-//		Thread workThread = null ;
-//		for (int i = 0; i < taskListPerThread.length; i++) {
-//			workThread = new SyncThread(taskListPerThread[i], i);
-//			workThread.start();
-//		}
 
 		ExecutorService es = Executors.newFixedThreadPool(10);
 		try {
@@ -529,37 +524,43 @@ public class PatentServiceImpl implements PatentService {
 	}
 	
 	public  List[] distributeThread(List taskList, int threadCount) {
-		int minTaskCount = taskList.size() / threadCount;
+		int rangeCount = taskList.size() / threadCount;
 		int remainTaskCount = taskList.size() % threadCount ;
-		int actualThreadCount = minTaskCount > 0 ? threadCount
+		int actualThreadCount = rangeCount > 0 ? threadCount
 				: remainTaskCount;
 		int remainIndces = remainTaskCount;
 		int taskIndex = 0;
 		int rangeIndex = 0;
 		List[] taskListPerThread = new List[threadCount];
-		for (rangeIndex = 0; rangeIndex <= minTaskCount; rangeIndex++) {
+		log.info("rangeCount: "+rangeCount);
+		log.info("remainTaskCount: "+remainTaskCount);
+		log.info("actualThreadCount: "+actualThreadCount);
+		for (rangeIndex = 0; rangeIndex < rangeCount; rangeIndex++) {
+			taskListPerThread[rangeIndex] = new ArrayList();
 			for (taskIndex = 0; taskIndex < threadCount; taskIndex++) {
 				taskListPerThread[rangeIndex].add(taskList.get(taskIndex));
+				log.info("taskIndex: "+taskIndex);
 			}
 			if (remainIndces > 0) {
 				taskListPerThread[rangeIndex].add(taskList.get(taskIndex++));
 				remainIndces--;
 			}
+//			log.info("rangeIndex: "+rangeIndex);
 		}
-		
-		
-		for (int i = 0; i < minTaskCount; i++) {
-			log.info("執行緒 "
-					+ i
-					+ " 的任務數："
-					+ taskListPerThread[i].size()
-					+ " 區間["
-					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
-					+ ","
-					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
-							.getTaskId() + "]"
-							);
-		}
+//		
+//		
+//		for (int i = 0; i < minTaskCount; i++) {
+//			log.info("執行緒 "
+//					+ i
+//					+ " 的任務數："
+//					+ taskListPerThread[i].size()
+//					+ " 區間["
+//					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
+//					+ ","
+//					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
+//							.getTaskId() + "]"
+//							);
+//		}
 		return taskListPerThread;
 	}
 
