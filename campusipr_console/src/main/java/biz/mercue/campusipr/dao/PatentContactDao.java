@@ -9,4 +9,6 @@ public interface PatentContactDao {
     PatentContact getById(String id);
 
     List<PatentContact> getDefaultContactByBusiness(String businessId);
+
+    List<String> getDefaultContactIdsByBusiness(String businessId);
 }

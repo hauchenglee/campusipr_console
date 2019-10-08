@@ -19,8 +19,18 @@ public class PatentContactServiceImpl implements PatentContactService {
     private PatentContactDao patentContactDao;
 
     @Override
+    public PatentContact getById(String contactId) {
+        return patentContactDao.getById(contactId);
+    }
+
+    @Override
     public List<PatentContact> getDefaultContactByBusiness(String businessId) {
         return patentContactDao.getDefaultContactByBusiness(businessId);
+    }
+
+    @Override
+    public List<String> getDefaultContactIdsByBusiness(String businessId) {
+        return patentContactDao.getDefaultContactIdsByBusiness(businessId);
     }
 
     @Override
