@@ -16,7 +16,9 @@ public interface AnnuityReminderDao {
 	void create(AnnuityReminder reminder);
 		
 	List<AnnuityReminder> getByBusinessId(String businessId);
-	
+
+	List<AnnuityReminder> getAvailableByBusinessId(String businessId);
+
 	List<AnnuityReminder> getByBusinessIds(List<String> businessIds);
 
 }

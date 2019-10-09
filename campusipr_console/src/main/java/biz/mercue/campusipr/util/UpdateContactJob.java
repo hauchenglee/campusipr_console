@@ -44,7 +44,7 @@ public class UpdateContactJob implements Job {
             if (!contactIds.isEmpty()) {
                 for (String contactId : contactIds) {
                     PatentContact contact = contactService.getById(contactId);
-                    if (contact != null && StringUtils.isNULL(contact.getPatent_contact_id())) {
+                    if (contact != null && !StringUtils.isNULL(contact.getPatent_contact_id())) {
                         contactService.updateContactByBusiness(contact, contact.getPatent_contact_id(), business);
                     }
                 }
