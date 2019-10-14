@@ -745,10 +745,8 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	private void contactData(Patent patent) {
+		//處理每次預設新增的聯絡人
 		try {
-			if(patent.isIs_public()) {
-				return;
-			}
 			List<PatentContact> editContactList = patent.getListContact();
 			if (editContactList != null) {
 				for (PatentContact contact : editContactList) {
@@ -3504,7 +3502,7 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	private void handleContact(Patent dbPatent, Patent editPatent, String businessId) {
-		
+		//在既有專利中，處理畫面上所有聯絡人	
 		try {
 			List<PatentContact> listContact = editPatent.getListContact();
 			List<PatentContact> dbListContact = dbPatent.getListContact();
