@@ -2,6 +2,8 @@ package biz.mercue.campusipr.util;
 
 
 
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -28,10 +30,10 @@ public class Task {
 	private static Logger log = Logger.getLogger(Task.class.getName());
 
 	// 任務的初始化方法
-	public Task(int taskId, Patent editPatent) {
+	public Task(int taskId, List[] taskListPerThread) {
 		this.status = READY;
 		this.taskId = taskId;
-		this.patent = editPatent;
+//		this.patent = taskListPerThread;
 	}
 
 	/**

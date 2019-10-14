@@ -447,24 +447,23 @@ public class PatentServiceImpl implements PatentService {
 
 	@Override
 	public  void setTask(List<Patent> patentList) {
-		// 初始化要執行的任務列表
+		ExecutorService es = Executors.newFixedThreadPool(10);
 		Patent editPatent;
+		List[] perPool = distributeTasks(patentList);
 		List<Task> taskList = new ArrayList();
+		
 		for (int i = 0; i < patentList.size(); i++) {
+			
 			editPatent = patentList.get(i);
-			taskList.add(new Task(i,editPatent));
+			taskList.add(new Task(i,perPool));
 //			log.info("setTask: "+editPatent.getPatent_appl_no());
 		}
-//		 設定要啟動的工作執行緒數
-		int threadCount = 10;
-		List[] taskListPerThread = distributeTasks(taskList, threadCount);
-		log.info("實際要啟動的工作執行緒數：" + taskListPerThread.length);
+		log.info("實際要啟動的工作執行緒數：" + perPool.length);
 
-		ExecutorService es = Executors.newFixedThreadPool(10);
 		try {
-			CountDownLatch cdl = new CountDownLatch(taskListPerThread.length);
-			for (int i = 0; i < taskListPerThread.length; i++) {
-				es.execute(new SyncThread(taskListPerThread[i], i, cdl));
+			CountDownLatch cdl = new CountDownLatch(perPool.length);
+			for (int i = 0; i < perPool.length; i++) {
+				es.execute(new SyncThread(perPool[i], i, cdl));
 			}
 			log.info("getCount: "+cdl.getCount());
 			cdl.await();
@@ -477,31 +476,23 @@ public class PatentServiceImpl implements PatentService {
 		
 	}
 
-	public  List[] distributeTasks(List taskList, int threadCount) {
-		// 每個執行緒至少要執行的任務數,假如不為零則表示每個執行緒都會分配到任務
-		int minTaskCount = taskList.size() / threadCount;
-		// 平均分配後還剩下的任務數，不為零則還有任務依個附加到前面的執行緒中
-		int remainTaskCount = taskList.size() % threadCount;
-		// 實際要啟動的執行緒數,如果工作執行緒比任務還多
-		// 自然只需要啟動與任務相同個數的工作執行緒，一對一的執行
-		int actualThreadCount = minTaskCount > 0 ? threadCount
+	public  List[] distributeTasks(List taskList) {
+		int range = 100;
+		int minTaskCount = taskList.size() / range;
+		int remainTaskCount = taskList.size() % range;
+		int actualThreadCount = minTaskCount > 0 ? range
 				: remainTaskCount;
-		// 要啟動的執行緒陣列，以及每個執行緒要執行的任務列表
 		List[] taskListPerThread = new List[actualThreadCount];
 		int taskIndex = 0;
-		// 平均分配後多餘任務，每附加給一個執行緒後的剩餘數，重新宣告與 remainTaskCount
-		// 相同的變數，不然會在執行中改變 remainTaskCount 原有值，產生麻煩
 		int remainIndces = remainTaskCount;
 		for (int i = 0; i < taskListPerThread.length; i++) {
 			taskListPerThread[i] = new ArrayList();
-			// 如果大於零，執行緒要分配到基本的任務
 			if (minTaskCount > 0) {
 				for (int j = taskIndex; j < minTaskCount + taskIndex; j++) {
 					taskListPerThread[i].add(taskList.get(j));
 				}
 				taskIndex += minTaskCount;
 			}
-			// 假如還有剩下的，則補一個到這個執行緒中
 			if (remainIndces > 0) {
 				taskListPerThread[i].add(taskList.get(taskIndex++));
 				remainIndces--;
@@ -520,50 +511,8 @@ public class PatentServiceImpl implements PatentService {
 							);
 		}
 		return taskListPerThread;
-//		return null;
 	}
 	
-	public  List[] distributeThread(List taskList, int threadCount) {
-		int rangeCount = taskList.size() / threadCount;
-		int remainTaskCount = taskList.size() % threadCount ;
-		int actualThreadCount = rangeCount > 0 ? threadCount
-				: remainTaskCount;
-		int remainIndces = remainTaskCount;
-		int taskIndex = 0;
-		int rangeIndex = 0;
-		List[] taskListPerThread = new List[threadCount];
-		log.info("rangeCount: "+rangeCount);
-		log.info("remainTaskCount: "+remainTaskCount);
-		log.info("actualThreadCount: "+actualThreadCount);
-		for (rangeIndex = 0; rangeIndex < rangeCount; rangeIndex++) {
-			taskListPerThread[rangeIndex] = new ArrayList();
-			for (taskIndex = 0; taskIndex < threadCount; taskIndex++) {
-				taskListPerThread[rangeIndex].add(taskList.get(taskIndex));
-				log.info("taskIndex: "+taskIndex);
-			}
-			if (remainIndces > 0) {
-				taskListPerThread[rangeIndex].add(taskList.get(taskIndex++));
-				remainIndces--;
-			}
-//			log.info("rangeIndex: "+rangeIndex);
-		}
-//		
-//		
-//		for (int i = 0; i < minTaskCount; i++) {
-//			log.info("執行緒 "
-//					+ i
-//					+ " 的任務數："
-//					+ taskListPerThread[i].size()
-//					+ " 區間["
-//					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
-//					+ ","
-//					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
-//							.getTaskId() + "]"
-//							);
-//		}
-		return taskListPerThread;
-	}
-
 	/**
 	 * 	excel匯入最終有三種結果，其相對應的條件判斷：
 	 * 	1. add new patent（新增專利）：
@@ -797,6 +746,9 @@ public class PatentServiceImpl implements PatentService {
 
 	private void contactData(Patent patent) {
 		try {
+			if(patent.isIs_public()) {
+				return;
+			}
 			List<PatentContact> editContactList = patent.getListContact();
 			if (editContactList != null) {
 				for (PatentContact contact : editContactList) {
@@ -806,7 +758,6 @@ public class PatentServiceImpl implements PatentService {
 					}
 				}
 			}
-
 			if (patent.getBusiness() != null&&editContactList == null) {
 				Business business = patent.getBusiness();
 				PatentContact pContact = new PatentContact();
@@ -3556,9 +3507,7 @@ public class PatentServiceImpl implements PatentService {
 		
 		try {
 			List<PatentContact> listContact = editPatent.getListContact();
-			
-//			log.info("getSourceFrom: "+editPatent.getSourceFrom());
-			
+			List<PatentContact> dbListContact = dbPatent.getListContact();
 			if (Patent.EDIT_SOURCE_IMPORT == editPatent.getEdit_source()&&listContact != null) {
 				PatentContact dbcontact = new PatentContact();
 				for (PatentContact contact : listContact) {
@@ -3571,7 +3520,12 @@ public class PatentServiceImpl implements PatentService {
 					dbcontact.setContact_order(contact.getContact_order());
 					dbcontact.setCreate_date(new Date());
 				}
-				dbPatent.addContact(dbcontact);
+				if(listContact != null && listContact.size() == 1 
+						&& dbListContact != null && dbListContact.size() > 0 ) {
+					log.info("EDIT_SOURCE_IMPORT: 重複Import");					
+				}else {
+					dbPatent.addContact(dbcontact);
+				}
 			}else if(Patent.EDIT_SOURCE_SERVICE == editPatent.getEdit_source()&&listContact != null && listContact.size() > 0
 					&& editPatent.getSourceFrom() !=Constants.PATENT_SCHEDULED){
 				PatentContact dbcontact = new PatentContact();
@@ -3586,7 +3540,7 @@ public class PatentServiceImpl implements PatentService {
 					dbcontact.setCreate_date(new Date());
 				}
 				dbPatent.addContact(dbcontact);
-//				log.info("EDIT_SOURCE_SERVICE");
+				log.info("EDIT_SOURCE_SERVICE");
 			}else if(editPatent.getSourceFrom() ==Constants.PATENT_SCHEDULED){
 				log.info("系統同步，聯絡人不更新");
 			}

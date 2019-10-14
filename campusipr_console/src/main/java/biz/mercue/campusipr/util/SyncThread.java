@@ -50,6 +50,7 @@ public class SyncThread extends Thread implements Runnable{
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+				log.error(e);
 			}finally {
 				this.mCountDownLatch.countDown();
 			}
