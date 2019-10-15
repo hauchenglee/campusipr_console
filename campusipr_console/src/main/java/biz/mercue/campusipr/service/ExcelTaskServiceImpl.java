@@ -219,65 +219,46 @@ public class ExcelTaskServiceImpl implements ExcelTaskService {
 
 
     @Override
-    public Map<Integer, List<Patent>> submitTask(ExcelTask bean, Admin admin) {
+    public List<Patent> submitTask(ExcelTask bean, Admin admin) throws Exception {
         ExcelTask dbBean = dao.getByBusinessId(admin.getBusiness().getBusiness_id(), bean.getExcel_task_id());
-        boolean is_continue = true;
-        FileInputStream fileInputStream = null;
-        Map<Integer, List<Patent>> mapPatent = new HashMap<>();
-        try {
-            if (dbBean != null) {
-                List<FieldMap> filedList = bean.getListMap();
-                List<Integer> other_info_index = bean.getOther_info_index();
-                if (filedList.size() > 0) {
-                    Map<String, FieldMap> maps = convertFieldList2Map(filedList);
-                    if (checkRequiredField(maps)) {
-                        File excel = new File(Constants.FILE_UPLOAD_PATH + File.separator + dbBean.getTask_file_name());
-                        fileInputStream = new FileInputStream(excel);
-                        Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
-                        String extensionName = FilenameUtils.getExtension(excel.getName());
-                        log.info(extensionName);
-//						List<Patent> listPatent = this.readBook2Patent(removeRow(book), filedList, other_info_index, bean.getExcel_task_id());
-                        List<Patent> listPatent = this.readBook2Patent(book, filedList, other_info_index, bean.getExcel_task_id());
-                        if (listPatent == null || listPatent.size() == 0) {
-                            mapPatent.put(Constants.INT_DATA_ERROR, null);
-                            if ("xls".equalsIgnoreCase(extensionName)) {
-                                book2FileXls(book, admin, dbBean.getExcel_task_id());
-                            }
-                            if ("xlsx".equalsIgnoreCase(extensionName)) {
-                                book2FileXlsx(book, admin, dbBean.getExcel_task_id());
-                            }
-                            log.info(dbBean.getExcel_task_id());
-                            return mapPatent;
-                        }
-                        mapPatent.put(Constants.INT_SUCCESS, listPatent);
-                        return mapPatent;
-                    } else {
-                        mapPatent.put(Constants.INT_DATA_ERROR, null);
-                        return mapPatent;
-                    }
-                } else {
-                    mapPatent.put(Constants.INT_DATA_ERROR, null);
-                    return mapPatent;
-                }
-
-            } else {
-                mapPatent.put(Constants.INT_CANNOT_FIND_DATA, null);
-                return mapPatent;
-            }
-        } catch (Exception e) {
-            log.error("Exception :" + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            if (fileInputStream != null) {
-                try {
-                    fileInputStream.close();
-                } catch (Exception e) {
-                    log.error("Exception:" + e.getMessage());
-                }
-            }
+        if (dbBean == null) {
+            log.error("dbBean == null: " + Constants.INT_CANNOT_FIND_DATA);
+            throw new Exception();
         }
-        mapPatent.put(Constants.INT_SYSTEM_PROBLEM, null);
-        return mapPatent;
+
+        List<FieldMap> filedList = bean.getListMap();
+        if (filedList.isEmpty()) {
+            log.error("filedList.isEmpty(): " + Constants.INT_DATA_ERROR);
+            throw new Exception();
+        }
+
+        List<Integer> other_info_index = bean.getOther_info_index();
+        Map<String, FieldMap> maps = convertFieldList2Map(filedList);
+        if (!checkRequiredField(maps)) {
+            log.error("checkRequiredField == false: " + Constants.INT_DATA_ERROR);
+            throw new Exception();
+        }
+
+        File excel = new File(Constants.FILE_UPLOAD_PATH + File.separator + dbBean.getTask_file_name());
+        FileInputStream fileInputStream = new FileInputStream(excel);
+        Workbook book = ExcelUtils.file2Workbook(fileInputStream, excel.getName());
+        String extensionName = FilenameUtils.getExtension(excel.getName());
+        log.info(extensionName);
+
+        List<Patent> listPatent = readBook2Patent(book, filedList, other_info_index, bean.getExcel_task_id());
+        if (listPatent == null || listPatent.isEmpty()) {
+            if ("xls".equalsIgnoreCase(extensionName)) {
+                book2FileXls(book, admin, dbBean.getExcel_task_id());
+            }
+            if ("xlsx".equalsIgnoreCase(extensionName)) {
+                book2FileXlsx(book, admin, dbBean.getExcel_task_id());
+            }
+            log.info(dbBean.getExcel_task_id());
+            throw new CustomException.DataErrorException();
+        }
+
+        fileInputStream.close();
+        return listPatent;
     }
 
     public void book2FileXls(Workbook book, Admin admin, String excelTaskId) {

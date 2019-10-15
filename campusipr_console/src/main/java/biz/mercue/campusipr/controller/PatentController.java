@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Controller
 public class PatentController {
@@ -514,46 +516,79 @@ public class PatentController {
 		responseBody.setCode(Constants.INT_SUCCESS);
 		return responseBody.getJacksonString(View.ExcelTask.class);
 	}
-	
-	@RequestMapping(value = "/api/submitexceltask", method = {RequestMethod.POST }, produces = Constants.CONTENT_TYPE_JSON)
+
+	@RequestMapping(value = "/api/submitexceltask", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
 	@ResponseBody
 	public String submitExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
-		log.info("submitExcelTask ");
+		log.info("submitExcelTask");
 		BeanResponseBody responseBody = new BeanResponseBody();
-		Map<Integer, List<Patent>> mapPatent = new HashMap<>();
-		String ip = request.getRemoteAddr();
 		AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-		if (tokenBean != null) {
-			ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
-			mapPatent = excelTaskService.submitTask(task, tokenBean.getAdmin());
-			int responseBodyCode = Constants.INT_SYSTEM_PROBLEM;
-			for (Integer mapPatentKey : mapPatent.keySet()) {
-				log.info("mapPatentKey: " + mapPatentKey);
-				switch (mapPatentKey) {
-					case Constants.INT_SUCCESS:
-						Map<String, Patent> mergeMap = patentService.addPatentByExcel(mapPatent.get(mapPatentKey), tokenBean.getAdmin(), tokenBean.getBusiness(), ip);
-						if (mergeMap != null && !mergeMap.isEmpty()) {
-							responseBodyCode = patentService.mergeDiffPatentByExcel(mergeMap, tokenBean.getAdmin(), tokenBean.getBusiness());
-						} else {
-							responseBodyCode = Constants.INT_SUCCESS;
+		if (tokenBean == null) {
+			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+			return responseBody.getJacksonString(View.ExcelTask.class);
+		}
+
+		String ip = request.getRemoteAddr();
+		Admin admin = tokenBean.getAdmin();
+		Business business = tokenBean.getBusiness();
+		ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
+		List<Patent> patentList = excelTaskService.submitTask(task, admin);
+
+		// 使用非同步，將patentList以十為一組，每組為一個task，並用runnable分別執行
+		int patentListSize = patentList.size();
+		int quotient = patentListSize / 10; // 商數
+		int remainder = patentListSize % 10; // 餘數
+
+		if (patentListSize <= 10) {
+			Runnable runnable = () -> {
+				try {
+					Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentList, admin, business, ip);
+					if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
+				} catch (Exception e) {
+					log.error("exception", e);
+				}
+			};
+			ExecutorService executorService = Executors.newSingleThreadExecutor();
+			executorService.execute(runnable);
+			executorService.shutdown();
+		} else {
+			// 以十為一組
+			for (int i = 1; i <= patentListSize; i++) {
+				if (i % 10 == 0) {
+					List<Patent> patentListQuotient = patentList.subList(i - 10, i);
+					Runnable runnable = () -> {
+						try {
+							Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentListQuotient, admin, business, ip);
+							if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
+						} catch (Exception e) {
+							log.error("exception", e);
 						}
-						break;
-					case Constants.INT_DATA_ERROR:
-						responseBodyCode = Constants.INT_DATA_ERROR;
-						break;
-					case Constants.INT_CANNOT_FIND_DATA:
-						responseBodyCode = Constants.INT_CANNOT_FIND_DATA;
-						break;
-					case Constants.INT_SYSTEM_PROBLEM:
-						responseBodyCode = Constants.INT_SYSTEM_PROBLEM;
-						break;
+					};
+					ExecutorService executorService = Executors.newSingleThreadExecutor();
+					executorService.execute(runnable);
+					executorService.shutdown();
 				}
 			}
-			responseBody.setCode(responseBodyCode);
-			responseBody.setBean(task);
-		} else {
-			responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+
+			// 處理餘數List
+			if (remainder != 0) {
+				List<Patent> patentListRemainder = patentList.subList(quotient * 10, patentListSize);
+				Runnable runnable = () -> {
+					try {
+						Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentListRemainder, admin, business, ip);
+						if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
+					} catch (Exception e) {
+						log.error("exception", e);
+					}
+				};
+				ExecutorService executorService = Executors.newSingleThreadExecutor();
+				executorService.execute(runnable);
+				executorService.shutdown();
+			}
 		}
+
+		responseBody.setCode(Constants.INT_SUCCESS);
+		responseBody.setBean(task);
 		return responseBody.getJacksonString(View.ExcelTask.class);
 	}
 

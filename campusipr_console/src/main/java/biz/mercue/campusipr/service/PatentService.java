@@ -41,7 +41,7 @@ public interface PatentService {
 
 	void patentHistoryFirstAdd(Patent patent, String patentId, String businessId);
 
-	int mergeDiffPatentByExcel(Map<String, Patent> mergeMap, Admin admin, Business business);
+	void mergeDiffPatentByExcel(Map<String, Patent> mergeMap, Admin admin, Business business);
 
 	int authorizedUpdatePatent(String businessId, Patent patent) throws Exception;
 

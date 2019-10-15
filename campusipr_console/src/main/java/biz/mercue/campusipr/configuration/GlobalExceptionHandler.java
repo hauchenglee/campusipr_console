@@ -1,9 +1,9 @@
 package biz.mercue.campusipr.configuration;
 
 import biz.mercue.campusipr.util.Constants;
+import biz.mercue.campusipr.util.CustomException;
 import biz.mercue.campusipr.util.ExceptionResponseBody;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,8 +17,6 @@ import java.io.IOException;
 @ResponseBody
 public class GlobalExceptionHandler {
     private Logger log = Logger.getLogger(this.getClass().getName());
-
-    @Autowired
     private static ExceptionResponseBody responseBody = new ExceptionResponseBody();
 
     private HttpStatus _200 = HttpStatus.OK;
@@ -28,6 +26,15 @@ public class GlobalExceptionHandler {
         responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
     }
 
+    // custom exception
+    @ExceptionHandler(CustomException.DataErrorException.class)
+    public ResponseEntity TokenNullException(CustomException.DataErrorException e) {
+        log.error("DataErrorException: " + e.getMessage());
+        responseBody.setCode(Constants.INT_DATA_ERROR);
+        return new ResponseEntity<>(responseBody, _200);
+    }
+
+    // java exception
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity NullPointerException(NullPointerException e) {
         log.error("NullPointerException", e);

@@ -47,13 +47,13 @@ public class HttpRequestUtils {
 			try {
 			    Response response = call.execute();
 			    responseStr = response.body().string();
+			    response.body().close();
 			} catch (IOException e) {
 				log.error(e);
 			}
 			
 			//print result
 			log.info(responseStr);
-
 			return responseStr;
 	}
 		
@@ -126,6 +126,7 @@ public class HttpRequestUtils {
 				try {
 				    Response response = call.execute();
 				    responseStr = response.body().string();
+					response.body().close();
 				} catch (IOException e) {
 					log.error(e);
 				}
