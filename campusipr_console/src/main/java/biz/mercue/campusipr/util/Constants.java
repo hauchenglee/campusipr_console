@@ -300,6 +300,7 @@ public class Constants {
 	public static final String APPL_COUNTRY_TW = "tw";
 	public static final String APPL_COUNTRY_US = "us";
 	public static final String APPL_COUNTRY_CN = "cn";
+	public static final String APPL_COUNTRY_JP = "jp"; 
 	
 	public static final String BUSINESS_PLATFORM = "04ea692278889b6621409d68c88aab17";
 	

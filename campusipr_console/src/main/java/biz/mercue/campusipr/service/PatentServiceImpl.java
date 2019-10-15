@@ -430,74 +430,6 @@ public class PatentServiceImpl implements PatentService {
 		}
 		return taskResult;
 	}
-
-	@Override
-	public  void setTask(List<Patent> patentList) {
-		ExecutorService es = Executors.newFixedThreadPool(10);
-		Patent editPatent;
-		List[] perPool = distributeTasks(patentList);
-		List<Task> taskList = new ArrayList();
-		
-		for (int i = 0; i < patentList.size(); i++) {
-			
-			editPatent = patentList.get(i);
-			taskList.add(new Task(i,perPool));
-//			log.info("setTask: "+editPatent.getPatent_appl_no());
-		}
-		log.info("實際要啟動的工作執行緒數：" + perPool.length);
-
-		try {
-			CountDownLatch cdl = new CountDownLatch(perPool.length);
-			for (int i = 0; i < perPool.length; i++) {
-				es.execute(new SyncThread(perPool[i], i, cdl));
-			}
-			log.info("getCount: "+cdl.getCount());
-			cdl.await();
-			log.info("thread running finish");
-		} catch (Exception e) {
-			log.error(e);
-		}finally {
-			es.shutdown();
-		}
-		
-	}
-
-	public  List[] distributeTasks(List taskList) {
-		int range = 100;
-		int minTaskCount = taskList.size() / range;
-		int remainTaskCount = taskList.size() % range;
-		int actualThreadCount = minTaskCount > 0 ? range
-				: remainTaskCount;
-		List[] taskListPerThread = new List[actualThreadCount];
-		int taskIndex = 0;
-		int remainIndces = remainTaskCount;
-		for (int i = 0; i < taskListPerThread.length; i++) {
-			taskListPerThread[i] = new ArrayList();
-			if (minTaskCount > 0) {
-				for (int j = taskIndex; j < minTaskCount + taskIndex; j++) {
-					taskListPerThread[i].add(taskList.get(j));
-				}
-				taskIndex += minTaskCount;
-			}
-			if (remainIndces > 0) {
-				taskListPerThread[i].add(taskList.get(taskIndex++));
-				remainIndces--;
-			}
-		}
-		for (int i = 0; i < taskListPerThread.length; i++) {
-			log.info("執行緒 "
-					+ i
-					+ " 的任務數："
-					+ taskListPerThread[i].size()
-					+ " 區間["
-					+ ((Task) taskListPerThread[i].get(0)).getTaskId()
-					+ ","
-					+ ((Task) taskListPerThread[i].get(taskListPerThread[i].size() - 1))
-							.getTaskId() + "]"
-							);
-		}
-		return taskListPerThread;
-	}
 	
 	/**
 	 * 	excel匯入最終有三種結果，其相對應的條件判斷：
@@ -523,14 +455,12 @@ public class PatentServiceImpl implements PatentService {
 		if (patentList == null) {
 			return null;
 		}
-//		setTask(patentList);
 		String businessId = business.getBusiness_id();
 		for (Patent editPatent : patentList) {
 			//使用者可能沒有輸入申請號
 			if(editPatent.getPatent_appl_no() != null) {
 				int syncResult = syncPatentData(editPatent);
 			}
-//			syncPatentStatus(editPatent);
 			if (!editPatent.isIs_sync()) {
 				editPatent.setPatent_appl_no(StringUtils.generateApplNoRandom(editPatent.getPatent_appl_no()));
 			}
@@ -4503,12 +4433,5 @@ public class PatentServiceImpl implements PatentService {
 			log.error(e);
 		}
 		return null;
-	}
-	
-	public int test(Patent patent) {
-		log.info("test ");
-		log.info(patent.getPatent_appl_no());
-		return 0;
-	}
-	
+	}	
 }
