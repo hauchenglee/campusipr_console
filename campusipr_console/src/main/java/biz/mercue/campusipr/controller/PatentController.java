@@ -534,58 +534,64 @@ public class PatentController {
 		ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
 		List<Patent> patentList = excelTaskService.submitTask(task, admin);
 
-		// 使用非同步，將patentList以十為一組，每組為一個task，並用runnable分別執行
-		int patentListSize = patentList.size();
-		int quotient = patentListSize / 10; // 商數
-		int remainder = patentListSize % 10; // 餘數
-
-		if (patentListSize <= 10) {
-			Runnable runnable = () -> {
-				try {
-					Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentList, admin, business, ip);
-					if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
-				} catch (Exception e) {
-					log.error("exception", e);
-				}
-			};
-			ExecutorService executorService = Executors.newSingleThreadExecutor();
-			executorService.execute(runnable);
-			executorService.shutdown();
-		} else {
-			// 以十為一組
-			for (int i = 1; i <= patentListSize; i++) {
-				if (i % 10 == 0) {
-					List<Patent> patentListQuotient = patentList.subList(i - 10, i);
-					Runnable runnable = () -> {
-						try {
-							Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentListQuotient, admin, business, ip);
-							if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
-						} catch (Exception e) {
-							log.error("exception", e);
-						}
-					};
-					ExecutorService executorService = Executors.newSingleThreadExecutor();
-					executorService.execute(runnable);
-					executorService.shutdown();
-				}
-			}
-
-			// 處理餘數List
-			if (remainder != 0) {
-				List<Patent> patentListRemainder = patentList.subList(quotient * 10, patentListSize);
-				Runnable runnable = () -> {
-					try {
-						Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentListRemainder, admin, business, ip);
-						if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
-					} catch (Exception e) {
-						log.error("exception", e);
-					}
-				};
-				ExecutorService executorService = Executors.newSingleThreadExecutor();
-				executorService.execute(runnable);
-				executorService.shutdown();
-			}
+		// 同步作法，全部處理完成才回傳結果
+		Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentList, admin, business, ip);
+		if (!mergeMap.isEmpty()) {
+			patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
 		}
+
+//		// 非同步作法，將patentList以十為一組，每組為一個task，並用runnable分別執行
+//		int patentListSize = patentList.size();
+//		int quotient = patentListSize / 10; // 商數
+//		int remainder = patentListSize % 10; // 餘數
+//
+//		if (patentListSize <= 10) {
+//			Runnable runnable = () -> {
+//				try {
+//					Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentList, admin, business, ip);
+//					if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
+//				} catch (Exception e) {
+//					log.error("exception", e);
+//				}
+//			};
+//			ExecutorService executorService = Executors.newSingleThreadExecutor();
+//			executorService.execute(runnable);
+//			executorService.shutdown();
+//		} else {
+//			// 以十為一組
+//			for (int i = 1; i <= patentListSize; i++) {
+//				if (i % 10 == 0) {
+//					List<Patent> patentListQuotient = patentList.subList(i - 10, i);
+//					Runnable runnable = () -> {
+//						try {
+//							Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentListQuotient, admin, business, ip);
+//							if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
+//						} catch (Exception e) {
+//							log.error("exception", e);
+//						}
+//					};
+//					ExecutorService executorService = Executors.newSingleThreadExecutor();
+//					executorService.execute(runnable);
+//					executorService.shutdown();
+//				}
+//			}
+//
+//			// 處理餘數List
+//			if (remainder != 0) {
+//				List<Patent> patentListRemainder = patentList.subList(quotient * 10, patentListSize);
+//				Runnable runnable = () -> {
+//					try {
+//						Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentListRemainder, admin, business, ip);
+//						if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
+//					} catch (Exception e) {
+//						log.error("exception", e);
+//					}
+//				};
+//				ExecutorService executorService = Executors.newSingleThreadExecutor();
+//				executorService.execute(runnable);
+//				executorService.shutdown();
+//			}
+//		}
 
 		responseBody.setCode(Constants.INT_SUCCESS);
 		responseBody.setBean(task);
