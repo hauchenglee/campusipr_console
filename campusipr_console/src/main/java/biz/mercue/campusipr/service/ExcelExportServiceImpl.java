@@ -17,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -64,10 +65,10 @@ public class ExcelExportServiceImpl implements ExcelExportService {
         // excel匯出時使用者所勾選的欄位標題field list
         List<String> titleList = new ArrayList<>();
         List<PatentField> fieldList = fieldDao.getAllExcelExportFields();
-        for (PatentField dbField : fieldList) {
-            String dbFieldId = dbField.getField_id(); // database patent_field primary key
-            String dbFieldName = dbField.getField_name(); // database patent_field field_name
-            for (String fieldId : fieldIds) {
+        for (String fieldId : fieldIds) {
+            for (PatentField dbField : fieldList) {
+                String dbFieldId = dbField.getField_id(); // database patent_field primary key
+                String dbFieldName = dbField.getField_name(); // database patent_field field_name
                 if (dbFieldId.equals(fieldId)) {
                     titleList.add(dbFieldName);
                 }
@@ -140,6 +141,40 @@ public class ExcelExportServiceImpl implements ExcelExportService {
                                 index++;
                             }
                             row.createCell(columnCount).setCellValue(statusStr);
+                        }
+                        columnCount++;
+                        break;
+                    case Constants.PATENT_COST_FIELD:
+                        log.info("columnCount: " + columnCount + ", PATENT_COST_FIELD: " + Constants.PATENT_COST_FIELD);
+                        List<PatentCost> costList = patent.getListCost();
+                        if (costList != null && !costList.isEmpty()) {
+                            StringBuilder costStr = new StringBuilder();
+                            for (int i = 0; i < costList.size(); i++) {
+                                String costPrice = String.valueOf(costList.get(i).getCost_price());
+                                String costCurrency = costList.get(i).getCost_currency();
+                                String costName = costList.get(i).getCost_name();
+                                String costUnit = costList.get(i).getCost_unit();
+                                String costMemo = costList.get(i).getCost_memo();
+                                Date costDate = costList.get(i).getCost_date();
+                                String costDateStr = "";
+                                if (costDate != null) costDateStr = DateUtils.getSimpleSlashFormatDate(costDate);
+
+                                if (!StringUtils.isNULL(costPrice))
+                                    costStr.append(costPrice);
+                                if (!StringUtils.isNULL(costCurrency))
+                                    costStr.append(costCurrency);
+                                if (!StringUtils.isNULL(costName))
+                                    costStr.append("、").append(costName);
+                                if (!StringUtils.isNULL(costUnit))
+                                    costStr.append("、").append(costUnit);
+                                if (!StringUtils.isNULL(costMemo))
+                                    costStr.append("、").append(costMemo);
+                                if (!StringUtils.isNULL(costDateStr))
+                                    costStr.append("、").append(costDateStr);
+                                if (i != costList.size() - 1)
+                                    costStr.append("\n");
+                            }
+                            row.createCell(columnCount).setCellValue(costStr.toString());
                         }
                         columnCount++;
                         break;
