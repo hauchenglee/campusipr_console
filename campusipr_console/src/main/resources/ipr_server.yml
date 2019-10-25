@@ -1,9 +1,9 @@
 ip: localhost:8080
 jdbc:
     driverClassName : "com.mysql.cj.jdbc.MysqlConnectionPoolDataSource"
-    url: "jdbc:mysql://localhost:3306/campusipr_console?useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Taipei&characterEncoding=utf8&maxAllowedPacket=33554432"
-    username: root
-    password: MyNewPass4!
+    url: "jdbc:mysql://192.168.0.40:3306/campusipr_console?useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Taipei&characterEncoding=utf8&maxAllowedPacket=33554432"
+    username: mercue37
+    password: Mercue@5402
   
 hibernate:
     dialect: org.hibernate.dialect.MySQLDialect
@@ -21,9 +21,10 @@ path:
     graphicsmagick: 
    
 url:
-    image: "http://192.168.0.37:8080/imageservice/campusipr/"
-    video: "http://192.168.0.37:8080/imageservice/campusipr/"
-    file:  "http://192.168.0.37:8080/imageservice/campusipr/"
+    image: "https://impact.moe.gov.tw/imageservice/campusipr/"
+    video: "https://impact.moe.gov.tw/imageservice/campusipr/"
+    file: "https://impact.moe.gov.tw/imageservice/campusipr/"
+    sync_file:  "https://impact.moe.gov.tw/imageservice/campusipr/bup/sync_file/"
 
 
 jieba: 
@@ -50,12 +51,12 @@ patent_api:
     patent_token_eu : QWV0UjhhdGlmeTZiRzBzRDNiZkdsaHBObVBmUkRlZ0E6YTY1bXVjUzZobm5yMGNRUg==
     
 mail:
-    mail_username : contact@mercue.biz
-    mail_pwd : Mercue_5024
+    mail_username : ipservice@impacttaiwan.org
+    mail_pwd : Mercue@5402
     mail_host : smtp.gmail.com
     mail_host_port : 587
     mail_starttls : true
-    mail_from : contact@mercue.biz
+    mail_from : ipservice@impacttaiwan.org
 
 html:
     forget_password : /opt/impact/html/forgetpwd.html
@@ -65,7 +66,7 @@ html:
     annuity_reminder :  /opt/impact/html/annuity_reminder.html
     url_reset_password_transfer :  http://192.168.0.37:8080/campusipr_console/resetpassword
     url_enable_password_transfer :  http://192.168.0.37:8080/campusipr_console/enablepassword
-    url_login : http://192.168.0.37:8080/impact
-    url_reset_password :  http://192.168.0.37:8080/impact/app/html/resetpwd.html
-    url_enable_password :  http://192.168.0.37:8080/impact/app/html/enablepwd.html
-    url_patent_content :  http://192.168.0.37:8080/impact/html/patent-content/search?patent_id=
+    url_login : https://impact.moe.gov.tw/impact
+    url_reset_password :  https://impact.moe.gov.tw/database/app/html/resetpwd.html
+    url_enable_password :  https://impact.moe.gov.tw/database/app/html/enablepwd.html
+    url_patent_content :  https://impact.moe.gov.tw/database/html/patent-content/search?patent_id=

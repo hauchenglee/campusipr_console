@@ -67,8 +67,8 @@ public class AdminController {
 		String email = reqJSON.optString("admin_email");
 		String password = reqJSON.optString("admin_password");
 		String recaptcha = reqJSON.optString("recaptcha");
-		
-		boolean isHuman = GoogleService.getReCaptchaResult(recaptcha);
+//		 GoogleService.getReCaptchaResult(recaptcha);
+		boolean isHuman = true;
 		
 		//TODO fordebug
 		isHuman = true;
