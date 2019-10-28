@@ -50,12 +50,13 @@ patent_api:
     patent_token_eu : QWV0UjhhdGlmeTZiRzBzRDNiZkdsaHBObVBmUkRlZ0E6YTY1bXVjUzZobm5yMGNRUg==
     
 mail:
-    mail_username : contact@mercue.biz
-    mail_pwd : Mercue_5024
+    mail_username : ipservice@impacttaiwan.org
+    mail_pwd : Mercue@5402
     mail_host : smtp.gmail.com
     mail_host_port : 587
     mail_starttls : true
-    mail_from : contact@mercue.biz
+    mail_from : ipservice@impacttaiwan.org
+
 
 html:
     forget_password : /opt/impact/html/forgetpwd.html
