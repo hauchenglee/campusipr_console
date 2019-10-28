@@ -150,6 +150,10 @@ public class ExcelExportServiceImpl implements ExcelExportService {
                         if (costList != null && !costList.isEmpty()) {
                             StringBuilder costStr = new StringBuilder();
                             for (int i = 0; i < costList.size(); i++) {
+                                // 排除不同學校的business id
+                                String costBusinessId = costList.get(i).getBusiness_id();
+                                if (!costBusinessId.equals(businessId)) continue;
+
                                 String costPrice = String.valueOf(costList.get(i).getCost_price());
                                 String costCurrency = costList.get(i).getCost_currency();
                                 String costName = costList.get(i).getCost_name();
