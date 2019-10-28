@@ -3739,9 +3739,9 @@ public class PatentServiceImpl implements PatentService {
 				patent.setAnnuity_date(annuity_date);
 				List<PatentContact> listContact = new ArrayList<>();
 				for (PatentContact contact : patent.getListContact()) {
-					log.info("contact:" + contact.getContact_email());
 					if (contact.getBusiness() != null) {
 						if (reminder.getBusiness_id().equals(contact.getBusiness().getBusiness_id())) {
+							log.info("contact:" + contact.getContact_email());
 							listContact.add(contact);
 						}
 					}
