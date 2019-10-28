@@ -1,9 +1,9 @@
 ip: localhost:8080
 jdbc:
     driverClassName : "com.mysql.cj.jdbc.MysqlConnectionPoolDataSource"
-    url: "jdbc:mysql://localhost:3306/campusipr_console?useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Taipei&characterEncoding=utf8&maxAllowedPacket=33554432"
+    url: "jdbc:mysql://192.168.2.71:3306/campusipr_console?useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Asia/Taipei&characterEncoding=utf8&maxAllowedPacket=33554432"
     username: root
-    password: Mercue@5402
+    password: 54027890
   
 hibernate:
     dialect: org.hibernate.dialect.MySQLDialect
