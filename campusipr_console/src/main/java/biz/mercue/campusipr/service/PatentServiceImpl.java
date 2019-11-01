@@ -4042,13 +4042,15 @@ public class PatentServiceImpl implements PatentService {
 
 		// 檢查，如果平台登入，並且刪除專利平台與其他學校共同持有 -> 禁止刪除
 		List<String> checkPlatformBusiness = new ArrayList<>();
-		for (Business dbBusiness : businessList) {
-			if (businessList.size() == 1) break;
-			String dbBusinessId = dbBusiness.getBusiness_id();
-			checkPlatformBusiness.add(dbBusinessId);
-		}
-		if (checkPlatformBusiness.contains(Constants.BUSINESS_PLATFORM)) {
-			return;
+		if (businessId.equals(Constants.BUSINESS_PLATFORM)) {
+			for (Business dbBusiness : businessList) {
+				if (businessList.size() == 1) break;
+				String dbBusinessId = dbBusiness.getBusiness_id();
+				checkPlatformBusiness.add(dbBusinessId);
+			}
+			if (checkPlatformBusiness.contains(Constants.BUSINESS_PLATFORM)) {
+				return;
+			}
 		}
 
 		// 開始刪除

@@ -102,19 +102,7 @@ public class MercueConfiguration implements WebMvcConfigurer{
         return new BCryptPasswordEncoder();
     }
 
-	// RequestInterceptorAdapter
-	@Bean
-	public RequestInterceptorAdapter requestInterceptorAdapter() {
-		return new RequestInterceptorAdapter();
-	}
-
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(requestInterceptorAdapter());
-	}
-
 	// schedule
-	
 	@Bean
 	public QuartzSchedulerListener quartzSchedulerListener() {
 		QuartzSchedulerListener listener = new QuartzSchedulerListener();

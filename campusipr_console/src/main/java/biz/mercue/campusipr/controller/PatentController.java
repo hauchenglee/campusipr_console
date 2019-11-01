@@ -51,10 +51,11 @@ public class PatentController {
     @PostMapping(value = "/api/addpatent", produces = Constants.CONTENT_TYPE_JSON)
     public String addPatent(HttpServletRequest request, @RequestBody String receiveJSONString, @RequestParam(value = "businessId", required = false) String businessId) throws Exception {
         log.info("/api/addpatent");
+        AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
         BeanResponseBody responseBody = new BeanResponseBody();
-        AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-
         String ip = request.getRemoteAddr();
         patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
         patent.setBusiness(tokenBean.getBusiness());
@@ -69,11 +70,12 @@ public class PatentController {
     }
 
     @PostMapping(value = "/api/syncpatentdata", produces = Constants.CONTENT_TYPE_JSON)
-    public String syncPatentData(HttpServletRequest request, @RequestBody String receiveJSONString, @RequestParam(value = "no", required = false) String patentApplNo) {
+    public String syncPatentData(HttpServletRequest request, @RequestBody String receiveJSONString, @RequestParam(value = "no", required = false) String patentApplNo) throws Exception {
         log.info("/api/syncpatentdata ");
-        BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
 
+        BeanResponseBody responseBody = new BeanResponseBody();
         String ip = request.getRemoteAddr();
         Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
         Admin admin = adminService.getById(Constants.SYSTEM_ADMIN);
@@ -91,12 +93,13 @@ public class PatentController {
     @PostMapping(value = "/api/addpatentbyapplno", produces = Constants.CONTENT_TYPE_JSON)
     public String addPatentByApplNo(HttpServletRequest request, @RequestBody String receiveJSONString, @RequestParam(value = "businessId", required = false) String businessId) throws Exception {
         log.info("/api/addpatentbyapplno");
-        BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
         if (StringUtils.isNULL(businessId)) {
             businessId = tokenBean.getBusiness_id();
         }
 
+        BeanResponseBody responseBody = new BeanResponseBody();
         String ip = request.getRemoteAddr();
         Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
         Admin admin = adminService.getById(Constants.SYSTEM_ADMIN);
@@ -113,11 +116,12 @@ public class PatentController {
     }
 
     @PostMapping(value = "/api/checknopublicapplno", produces = Constants.CONTENT_TYPE_JSON)
-    public String checkNoPublicApplNo(HttpServletRequest request, @RequestBody String receiveJSONString) {
+    public String checkNoPublicApplNo(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
         log.info("/api/checknopublicapplno");
-        JSONResponseBody responseBody = new JSONResponseBody();
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
 
+        JSONResponseBody responseBody = new JSONResponseBody();
         String ip = request.getRemoteAddr();
         Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
         Admin admin = adminService.getById(Constants.SYSTEM_ADMIN);
@@ -133,11 +137,12 @@ public class PatentController {
     }
 
     @PostMapping(value = "/api/mergepatent", produces = Constants.CONTENT_TYPE_JSON)
-    public String mergePatent(HttpServletRequest request, @RequestBody String receiveJSONString) {
+    public String mergePatent(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
         log.info("/api/mergepatent");
-        BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
 
+        BeanResponseBody responseBody = new BeanResponseBody();
         String ip = request.getRemoteAddr();
         Patent patent = (Patent) JacksonJSONUtils.readValue(receiveJSONString, Patent.class);
         Admin admin = adminService.getById(Constants.SYSTEM_ADMIN);
@@ -156,6 +161,8 @@ public class PatentController {
     public String updatePatent(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
         log.info("/api/updatepatent");
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.EDIT);
         if (!tokenBean.checkPermission(permission.getPermission_id())) {
             throw new CustomException.NoPermission();
@@ -180,6 +187,8 @@ public class PatentController {
                                 @RequestParam(value = "asc", required = false, defaultValue = "1") int is_asc) throws Exception {
         log.info("/api/patentlist");
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
         if (!tokenBean.checkPermission(permission.getPermission_id())) {
             throw new CustomException.NoPermission();
@@ -197,6 +206,8 @@ public class PatentController {
         log.info("/api/getpatentbyid/{patentId}: " + patentId);
         BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
         if (!tokenBean.checkPermission(permission.getPermission_id())) {
             throw new CustomException.NoPermission();
@@ -216,8 +227,11 @@ public class PatentController {
     }
 
     @GetMapping(value = "/api/getallpatentbyid/{patentId}", produces = Constants.CONTENT_TYPE_JSON)
-    public String getAllPatentbyId(HttpServletRequest request, @PathVariable String patentId) {
+    public String getAllPatentbyId(HttpServletRequest request, @PathVariable String patentId) throws Exception {
         log.info("/api/getallpatentbyid/{patentId}: " + patentId);
+        AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         BeanResponseBody responseBody = new BeanResponseBody();
         Patent patent = patentService.getById(null, patentId);
         responseBody.setCode(Constants.INT_SUCCESS);
@@ -229,6 +243,8 @@ public class PatentController {
     public String deletePatentById(HttpServletRequest request, @PathVariable String patentId) throws Exception {
         log.info("/api/deletepatentbyid/{patentId}: " + patentId);
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         BeanResponseBody responseBody = new BeanResponseBody();
         patentService.deleteById(patentId, tokenBean.getBusiness_id());
         responseBody.setCode(Constants.INT_SUCCESS);
@@ -239,6 +255,8 @@ public class PatentController {
     public String deletePatentByIds(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
         log.info("/api/deletepatentbyids");
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         BeanResponseBody responseBody = new BeanResponseBody();
         JSONObject jsonObject = new JSONObject(receiveJSONString);
         String jsonPid = jsonObject.optJSONArray("patent_ids").toString();
@@ -256,6 +274,8 @@ public class PatentController {
                                        @RequestParam(value = "page", required = false, defaultValue = "1") int page) throws Exception {
         log.info("/api/getpatenthistorybyid");
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
         if (!tokenBean.checkPermission(permission.getPermission_id())) {
             throw new CustomException.NoPermission();
@@ -280,12 +300,13 @@ public class PatentController {
     @PostMapping(value = "/api/combinepatentfamily", produces = Constants.CONTENT_TYPE_JSON)
     public String combinePatentFamily(HttpServletRequest request,
                                       @RequestBody String receiveJSONString,
-                                      @RequestParam(value = "patent_id", required = false) String patentId) {
+                                      @RequestParam(value = "patent_id", required = false) String patentId) throws Exception {
         log.info("/api/combinepatentfamily");
-        log.info(receiveJSONString);
+        AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         BeanResponseBody responseBody = new BeanResponseBody();
         PatentFamily family = (PatentFamily) JacksonJSONUtils.readValue(receiveJSONString, PatentFamily.class);
-        AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
         boolean permissionResult = tokenBean.checkPermission(Constants.PERMISSION_CROSS_BUSINESS);
         String businessId = permissionResult ? Constants.BUSINESS_PLATFORM : tokenBean.getBusiness().getBusiness_id();
 
@@ -304,6 +325,8 @@ public class PatentController {
         log.info("/api/getpatentbyfamily/{familyId}: " + familyId);
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
         if (!tokenBean.checkPermission(permission.getPermission_id())) {
             throw new CustomException.NoPermission();
@@ -319,6 +342,8 @@ public class PatentController {
     public ResponseEntity<InputStreamResource> exportPatentExcel(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
         log.info("/api/exportpatentexcel");
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
         if (!tokenBean.checkPermission(permission.getPermission_id())) {
             throw new CustomException.NoPermission();
@@ -364,6 +389,8 @@ public class PatentController {
     public String importPatentExcel(HttpServletRequest request, @RequestParam("file") MultipartFile file) throws Exception {
         log.info("/api/importpatentexcel");
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         if (file == null || file.getOriginalFilename() == null) {
             throw new Exception();
         }
@@ -379,8 +406,9 @@ public class PatentController {
     public String getTaskField(HttpServletRequest request, @PathVariable String taskId) throws Exception {
         log.info("/api/gettaskfield/{taskId}: " + taskId);
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-        BeanResponseBody responseBody = new BeanResponseBody();
+        if (tokenBean == null) throw new CustomException.TokenNullException();
 
+        BeanResponseBody responseBody = new BeanResponseBody();
         ExcelTask task = excelTaskService.getTaskField(tokenBean.getAdmin(), taskId);
         responseBody.setCode(Constants.INT_SUCCESS);
         responseBody.setBean(task);
@@ -388,12 +416,13 @@ public class PatentController {
     }
 
     @PostMapping(value = "/api/previewexceltask", produces = Constants.CONTENT_TYPE_JSON)
-    public String previewExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) {
+    public String previewExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
         log.info("/api/previewexceltask ");
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         BeanResponseBody responseBody = new BeanResponseBody();
         ExcelTask task = (ExcelTask) JacksonJSONUtils.readValue(receiveJSONString, ExcelTask.class);
-
         int result = excelTaskService.previewTask(task, tokenBean.getAdmin());
         responseBody.setCode(result);
         responseBody.setBean(task);
@@ -403,9 +432,10 @@ public class PatentController {
     @PostMapping(value = "/api/submitexceltask", produces = Constants.CONTENT_TYPE_JSON)
     public String submitExcelTask(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
         log.info("/api/submitexceltask");
-        BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
 
+        BeanResponseBody responseBody = new BeanResponseBody();
         String ip = request.getRemoteAddr();
         Admin admin = tokenBean.getAdmin();
         Business business = tokenBean.getBusiness();
@@ -484,6 +514,8 @@ public class PatentController {
                                @RequestParam(value = "asc", required = false, defaultValue = "1") int is_asc) throws Exception {
         log.info("/api/searchpatent");
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
         if (!tokenBean.checkPermission(permission.getPermission_id())) {
             throw new CustomException.NoPermission();
@@ -510,6 +542,8 @@ public class PatentController {
     public String getEditPatentStatus(HttpServletRequest request) throws Exception {
         log.info("/api/geteditpatentstatus");
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
         if (!tokenBean.checkPermission(permission.getPermission_id())) {
             throw new CustomException.NoPermission();
@@ -528,6 +562,8 @@ public class PatentController {
                                     @RequestParam(value = "page", required = false, defaultValue = "1") int page) throws Exception {
         log.info("/api/syncapplicant");
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
         if (!tokenBean.checkPermission(permission.getPermission_id())) {
             throw new CustomException.NoPermission();
@@ -580,15 +616,17 @@ public class PatentController {
     @PostMapping(value = "/api/advancedsearch", produces = Constants.CONTENT_TYPE_JSON)
     public String advanceSearch(HttpServletRequest request,
                                 @RequestBody String receiveJSONString,
-                                @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
+                                @RequestParam(value = "page", required = false, defaultValue = "1") int page) throws Exception {
         log.info("/api/advancedsearch");
+        AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) throw new CustomException.TokenNullException();
+
         ListResponseBody responseBody = new ListResponseBody();
         JSONObject jsonObject = new JSONObject(receiveJSONString);
         String query = jsonObject.optString("searchText");
 
-        AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
         try {
-            ListQueryForm form = patentService.advancedSearch(query, adminToken.getBusiness_id(), page, Constants.SYSTEM_PAGE_SIZE);
+            ListQueryForm form = patentService.advancedSearch(query, tokenBean.getBusiness_id(), page, Constants.SYSTEM_PAGE_SIZE);
             responseBody.setCode(Constants.INT_SUCCESS);
             responseBody.setListQuery(form);
         } catch (Exception e) {
