@@ -4226,7 +4226,44 @@ public class PatentServiceImpl implements PatentService {
 			patentDao.delete(deletePatentId);
 		}
 	}
-	
+
+	@Override
+	public void deletePatentByScheduled(String deletePatentId, String businessId) {
+		// delete portfolio
+		List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
+		Iterator<Portfolio> portfolioIter = dbPortfolioList.iterator();
+		while (portfolioIter.hasNext()) {
+			Portfolio dbPortfolio = portfolioIter.next();
+			List<Patent> patentList = dbPortfolio.getListPatent();
+			if (patentList != null || !patentList.isEmpty()) {
+				Iterator<Patent> patentIter = patentList.iterator();
+				while (patentIter.hasNext()) {
+					Patent patent = patentIter.next();
+					if (patent.getPatent_id().equals(deletePatentId)) {
+						patentIter.remove();
+					}
+				}
+			}
+		}
+
+		// delete family
+		PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
+		if (dbFamily != null) {
+			List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
+			for (Patent patent : dbPatentFamilyList) {
+				if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
+					dbPatentFamilyList.remove(patent);
+				}
+			}
+			if (dbPatentFamilyList.size() < 2) {
+				familyDao.delete(dbFamily.getPatent_family_id());
+			}
+		}
+
+		log.info("start to delete patent all");
+		patentDao.delete(deletePatentId);
+	}
+
 	@Override
 	public String deleteAll(String businessId) {
 		Business business = businessDao.getById(businessId);
