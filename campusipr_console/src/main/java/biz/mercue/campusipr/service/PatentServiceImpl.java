@@ -4023,225 +4023,208 @@ public class PatentServiceImpl implements PatentService {
 	}
 
 	@Override
-	public void deleteById(String deletePatentId, String businessId) {
-		try {
-			log.info("delete by id");
-			Patent dbPatent = patentDao.getById(deletePatentId);
-			List<Business> businessList = dbPatent.getListBusiness();
-			log.info("businessId: " + businessId);
-			if (businessList.size() > 1) {
-				// delete business id relationship
-				List<Business> newBusinessList = new ArrayList<>();
-				for (Business dbPatentBusiness : businessList) {
-					if (!dbPatentBusiness.getBusiness_id().equals(businessId)) {
-						newBusinessList.add(dbPatentBusiness);
-					}
-				}
-				if (!newBusinessList.isEmpty()) {
-					dbPatent.setListBusiness(newBusinessList);
-				}
-
-				// delete extension bus
-				String extensionId = "";
-				List<PatentExtension> dbExtensionList = dbPatent.getListExtension();
-				for (PatentExtension dbExtension : dbExtensionList) {
-					if (dbExtension != null && !StringUtils.isNULL(dbExtension.getBusiness_id())) {
-						if (dbExtension.getBusiness_id().equals(businessId)) {
-							extensionId = dbExtension.getExtension_id();
-						}
-					}
-				}
-				if (!StringUtils.isNULL(extensionId)) {
-					patentDao.deletePatentExtension(extensionId);
-				}
-
-				// delete cost
-				List<PatentCost> dbCostList = dbPatent.getListCost();
-				List<String> costIds = new ArrayList<>();
-				for (PatentCost dbCost : dbCostList) {
-					if (dbCost != null && !StringUtils.isNULL(dbCost.getBusiness_id())) {
-						if (dbCost.getBusiness_id().equals(businessId)) {
-							costIds.add(dbCost.getCost_id());
-						}
-					}
-				}
-				for (String costId : costIds) {
-					if (!StringUtils.isNULL(costId)) {
-						patentDao.deleteCost(costId);
-					}
-				}
-
-				// delete status
-				List<PatentStatus> dbPatentStatusList = dbPatent.getListPatentStatus();
-				List<String> statusIds = new ArrayList<>();
-				for (PatentStatus dbPatentStatus : dbPatentStatusList) {
-					if (dbPatentStatus != null && !StringUtils.isNULL(dbPatentStatus.getBusiness_id())) {
-						if (dbPatentStatus.getBusiness_id().equals(businessId)) {
-							Status status = dbPatentStatus.getStatus();
-							if (status.getStatus_from().equals("user")) {
-								statusIds.add(status.getStatus_id());
-							}
-						}
-					}
-				}
-				for (String statusId : statusIds) {
-					if (!StringUtils.isNULL(statusId)) {
-						patentDao.deleteStatus(statusId);
-						patentDao.deletePatentStatus(deletePatentId, statusId);
-					}
-				}
-
-				// delete history
-				List<PatentEditHistory> dbHistoryList = dbPatent.getListHistory();
-				List<String> historyIds = new ArrayList<>();
-				for (PatentEditHistory dbHistory : dbHistoryList) {
-					if (dbHistory != null && !StringUtils.isNULL(dbHistory.getBusiness_id())) {
-						if (dbHistory.getBusiness_id().equals(businessId)) {
-							historyIds.add(dbHistory.getHistory_id());
-						}
-					}
-				}
-				for (String historyId : historyIds) {
-					if (!StringUtils.isNULL(historyId)) {
-						patentDao.deleteHistory(historyId);
-					}
-				}
-
-				// delete contact
-				List<PatentContact> dbContactList = dbPatent.getListContact();
-				List<String> contactIds = new ArrayList<>();
-				for (PatentContact dbContact : dbContactList) {
-					if (dbContact != null && !StringUtils.isNULL(dbContact.getBusiness().getBusiness_id())) {
-						if (dbContact.getBusiness().getBusiness_id().equals(businessId)) {
-							contactIds.add(dbContact.getPatent_contact_id());
-						}
-					}
-				}
-				for (String contactId : contactIds) {
-					if (!StringUtils.isNULL(contactId)) {
-						patentDao.deletePatentContactByKey(contactId);
-					}
-				}
-
-				// delete portfolio relationship
-				List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
-				for (Portfolio dbPortfolio : dbPortfolioList) {
-					List<Patent> patentList = dbPortfolio.getListPatent();
-					if (patentList != null || !patentList.isEmpty()) {
-						for (Patent patent : patentList) {
-							if (patent.getPatent_id().equals(deletePatentId)) {
-								patentList.remove(patent);
-							}
-						}
-					}
-				}
-
-				// delete family
-				PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
-				if (dbFamily != null) {
-					List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
-					for (Patent patent : dbPatentFamilyList) {
-						if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
-							dbPatentFamilyList.remove(patent);
-						}
-					}
-					if (dbPatentFamilyList.size() < 2) {
-						familyDao.delete(dbFamily.getPatent_family_id());
-					}
-				}
-
-				// delete department
-				List<Department> dbDepartmentList = dbPatent.getListDepartment();
-				List<String> newDepartmentIds = new ArrayList<>();
-				for (Department dbDepartment : dbDepartmentList) {
-					if (dbDepartment != null && !StringUtils.isNULL(dbDepartment.getBusiness_id())) {
-						if (dbDepartment.getBusiness_id().equals(businessId)) {
-							newDepartmentIds.add(dbDepartment.getDepartment_id());
-						}
-					}
-				}
-				for (String departmentId : newDepartmentIds) {
-					if (!StringUtils.isNULL(departmentId)) {
-						patentDao.deleteDepartment(departmentId);
-					}
-				}
-
-				log.info("start to delete patent one by one");
-			} else {
-				// delete portfolio
-				List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
-				Iterator<Portfolio> portfolioIter = dbPortfolioList.iterator();
-                while (portfolioIter.hasNext()) {
-                    Portfolio dbPortfolio = portfolioIter.next();
-                    List<Patent> patentList = dbPortfolio.getListPatent();
-                    if (patentList != null || !patentList.isEmpty()) {
-                        Iterator<Patent> patentIter = patentList.iterator();
-                        while (patentIter.hasNext()) {
-                            Patent patent = patentIter.next();
-                            if (patent.getPatent_id().equals(deletePatentId)) {
-                                patentIter.remove();
-                            }
-                        }
-                    }
-                }
-
-				// delete family
-				PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
-				if (dbFamily != null) {
-					List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
-					for (Patent patent : dbPatentFamilyList) {
-						if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
-							dbPatentFamilyList.remove(patent);
-						}
-					}
-					if (dbPatentFamilyList.size() < 2) {
-						familyDao.delete(dbFamily.getPatent_family_id());
-					}
-				}
-
-				log.info("start to delete patent all");
-				patentDao.delete(deletePatentId);
-			}
-		} catch (Exception e) {
-			log.error(e);
+	public void deleteByIds(List<String> patentIds, String business) throws Exception {
+		for (String deletePatentId : patentIds) {
+			deleteById(deletePatentId, business);
 		}
 	}
 
 	@Override
-	public void deletePatentByScheduled(String deletePatentId, String businessId) {
-		// delete portfolio
-		List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
-		Iterator<Portfolio> portfolioIter = dbPortfolioList.iterator();
-		while (portfolioIter.hasNext()) {
-			Portfolio dbPortfolio = portfolioIter.next();
-			List<Patent> patentList = dbPortfolio.getListPatent();
-			if (patentList != null || !patentList.isEmpty()) {
-				Iterator<Patent> patentIter = patentList.iterator();
-				while (patentIter.hasNext()) {
-					Patent patent = patentIter.next();
-					if (patent.getPatent_id().equals(deletePatentId)) {
-						patentIter.remove();
+	public void deleteById(String deletePatentId, String businessId) throws Exception {
+		log.info("delete by id");
+		Patent dbPatent = patentDao.getById(deletePatentId);
+		if (dbPatent == null) {
+			throw new CustomException.CanNotFindDataException();
+		}
+
+		List<Business> businessList = dbPatent.getListBusiness();
+		log.info("login businessId: " + businessId);
+
+		// 檢查，如果平台登入，並且刪除專利平台與其他學校共同持有 -> 禁止刪除
+		List<String> checkPlatformBusiness = new ArrayList<>();
+		for (Business dbBusiness : businessList) {
+			if (businessList.size() == 1) break;
+			String dbBusinessId = dbBusiness.getBusiness_id();
+			checkPlatformBusiness.add(dbBusinessId);
+		}
+		if (checkPlatformBusiness.contains(Constants.BUSINESS_PLATFORM)) {
+			return;
+		}
+
+		// 開始刪除
+		if (businessList.size() > 1) {
+			// delete business id relationship
+			List<Business> newBusinessList = new ArrayList<>();
+			for (Business dbPatentBusiness : businessList) {
+				if (!dbPatentBusiness.getBusiness_id().equals(businessId)) {
+					newBusinessList.add(dbPatentBusiness);
+				}
+			}
+			if (!newBusinessList.isEmpty()) {
+				dbPatent.setListBusiness(newBusinessList);
+			}
+
+			// delete extension bus
+			String extensionId = "";
+			List<PatentExtension> dbExtensionList = dbPatent.getListExtension();
+			for (PatentExtension dbExtension : dbExtensionList) {
+				if (dbExtension != null && !StringUtils.isNULL(dbExtension.getBusiness_id())) {
+					if (dbExtension.getBusiness_id().equals(businessId)) {
+						extensionId = dbExtension.getExtension_id();
 					}
 				}
 			}
-		}
+			if (!StringUtils.isNULL(extensionId)) {
+				patentDao.deletePatentExtension(extensionId);
+			}
 
-		// delete family
-		PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
-		if (dbFamily != null) {
-			List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
-			for (Patent patent : dbPatentFamilyList) {
-				if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
-					dbPatentFamilyList.remove(patent);
+			// delete cost
+			List<PatentCost> dbCostList = dbPatent.getListCost();
+			List<String> costIds = new ArrayList<>();
+			for (PatentCost dbCost : dbCostList) {
+				if (dbCost != null && !StringUtils.isNULL(dbCost.getBusiness_id())) {
+					if (dbCost.getBusiness_id().equals(businessId)) {
+						costIds.add(dbCost.getCost_id());
+					}
 				}
 			}
-			if (dbPatentFamilyList.size() < 2) {
-				familyDao.delete(dbFamily.getPatent_family_id());
+			for (String costId : costIds) {
+				if (!StringUtils.isNULL(costId)) {
+					patentDao.deleteCost(costId);
+				}
 			}
-		}
 
-		log.info("start to delete patent all");
-		patentDao.delete(deletePatentId);
+			// delete status
+			List<PatentStatus> dbPatentStatusList = dbPatent.getListPatentStatus();
+			List<String> statusIds = new ArrayList<>();
+			for (PatentStatus dbPatentStatus : dbPatentStatusList) {
+				if (dbPatentStatus != null && !StringUtils.isNULL(dbPatentStatus.getBusiness_id())) {
+					if (dbPatentStatus.getBusiness_id().equals(businessId)) {
+						Status status = dbPatentStatus.getStatus();
+						if (status.getStatus_from().equals("user")) {
+							statusIds.add(status.getStatus_id());
+						}
+					}
+				}
+			}
+			for (String statusId : statusIds) {
+				if (!StringUtils.isNULL(statusId)) {
+					patentDao.deleteStatus(statusId);
+					patentDao.deletePatentStatus(deletePatentId, statusId);
+				}
+			}
+
+			// delete history
+			List<PatentEditHistory> dbHistoryList = dbPatent.getListHistory();
+			List<String> historyIds = new ArrayList<>();
+			for (PatentEditHistory dbHistory : dbHistoryList) {
+				if (dbHistory != null && !StringUtils.isNULL(dbHistory.getBusiness_id())) {
+					if (dbHistory.getBusiness_id().equals(businessId)) {
+						historyIds.add(dbHistory.getHistory_id());
+					}
+				}
+			}
+			for (String historyId : historyIds) {
+				if (!StringUtils.isNULL(historyId)) {
+					patentDao.deleteHistory(historyId);
+				}
+			}
+
+			// delete contact
+			List<PatentContact> dbContactList = dbPatent.getListContact();
+			List<String> contactIds = new ArrayList<>();
+			for (PatentContact dbContact : dbContactList) {
+				if (dbContact != null && !StringUtils.isNULL(dbContact.getBusiness().getBusiness_id())) {
+					if (dbContact.getBusiness().getBusiness_id().equals(businessId)) {
+						contactIds.add(dbContact.getPatent_contact_id());
+					}
+				}
+			}
+			for (String contactId : contactIds) {
+				if (!StringUtils.isNULL(contactId)) {
+					patentDao.deletePatentContactByKey(contactId);
+				}
+			}
+
+			// delete portfolio relationship
+			List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
+			for (Portfolio dbPortfolio : dbPortfolioList) {
+				List<Patent> patentList = dbPortfolio.getListPatent();
+				if (patentList != null || !patentList.isEmpty()) {
+					for (Patent patent : patentList) {
+						if (patent.getPatent_id().equals(deletePatentId)) {
+							patentList.remove(patent);
+						}
+					}
+				}
+			}
+
+			// delete family
+			PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
+			if (dbFamily != null) {
+				List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
+				for (Patent patent : dbPatentFamilyList) {
+					if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
+						dbPatentFamilyList.remove(patent);
+					}
+				}
+				if (dbPatentFamilyList.size() < 2) {
+					familyDao.delete(dbFamily.getPatent_family_id());
+				}
+			}
+
+			// delete department
+			List<Department> dbDepartmentList = dbPatent.getListDepartment();
+			List<String> newDepartmentIds = new ArrayList<>();
+			for (Department dbDepartment : dbDepartmentList) {
+				if (dbDepartment != null && !StringUtils.isNULL(dbDepartment.getBusiness_id())) {
+					if (dbDepartment.getBusiness_id().equals(businessId)) {
+						newDepartmentIds.add(dbDepartment.getDepartment_id());
+					}
+				}
+			}
+			for (String departmentId : newDepartmentIds) {
+				if (!StringUtils.isNULL(departmentId)) {
+					patentDao.deleteDepartment(departmentId);
+				}
+			}
+
+			log.info("start to delete patent one by one");
+		} else {
+			// delete portfolio
+			List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
+			Iterator<Portfolio> portfolioIter = dbPortfolioList.iterator();
+			while (portfolioIter.hasNext()) {
+				Portfolio dbPortfolio = portfolioIter.next();
+				List<Patent> patentList = dbPortfolio.getListPatent();
+				if (patentList != null || !patentList.isEmpty()) {
+					Iterator<Patent> patentIter = patentList.iterator();
+					while (patentIter.hasNext()) {
+						Patent patent = patentIter.next();
+						if (patent.getPatent_id().equals(deletePatentId)) {
+							patentIter.remove();
+						}
+					}
+				}
+			}
+
+			// delete family
+			PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
+			if (dbFamily != null) {
+				List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
+				for (Patent patent : dbPatentFamilyList) {
+					if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
+						dbPatentFamilyList.remove(patent);
+					}
+				}
+				if (dbPatentFamilyList.size() < 2) {
+					familyDao.delete(dbFamily.getPatent_family_id());
+				}
+			}
+
+			log.info("start to delete patent all");
+			patentDao.delete(deletePatentId);
+		}
 	}
 	
 	@Override

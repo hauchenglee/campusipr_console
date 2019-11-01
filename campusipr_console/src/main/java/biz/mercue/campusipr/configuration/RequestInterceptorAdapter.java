@@ -7,7 +7,7 @@ import biz.mercue.campusipr.service.QuartzService;
 import biz.mercue.campusipr.util.CustomException;
 import biz.mercue.campusipr.util.JWTUtils;
 import biz.mercue.campusipr.util.StringUtils;
-import lombok.extern.log4j.Log4j;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -17,8 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 
-@Log4j
 public class RequestInterceptorAdapter extends HandlerInterceptorAdapter {
+    private Logger log = Logger.getLogger(this.getClass().getName());
+
     @Autowired
     private QuartzService quartzService;
 

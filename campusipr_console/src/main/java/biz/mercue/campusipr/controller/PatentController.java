@@ -4,7 +4,6 @@ import biz.mercue.campusipr.model.*;
 import biz.mercue.campusipr.service.*;
 import biz.mercue.campusipr.util.*;
 import com.fasterxml.jackson.core.type.TypeReference;
-import lombok.extern.log4j.Log4j;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -246,7 +245,7 @@ public class PatentController {
         TypeReference<?> typeReference = new TypeReference<List<String>>() {};
         List<String> patentIds = (List<String>) JacksonJSONUtils.readValue(jsonPid, typeReference);
 
-//        patentService.deleteByIds(patentIds, tokenBean.getBusiness_id());
+        patentService.deleteByIds(patentIds, tokenBean.getBusiness_id());
         responseBody.setCode(Constants.INT_SUCCESS);
         return responseBody.getJacksonString(View.PatentDetail.class);
     }
