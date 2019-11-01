@@ -34,6 +34,34 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(responseBody, _200);
     }
 
+    @ExceptionHandler(CustomException.TokenIdNullException.class)
+    public ResponseEntity TokenIdNullException(CustomException.TokenIdNullException e) {
+        log.error("TokenIdNullException");
+        responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+        return new ResponseEntity<>(responseBody, _200);
+    }
+
+    @ExceptionHandler(CustomException.TokenNullException.class)
+    public ResponseEntity TokenNullException(CustomException.TokenNullException e) {
+        log.error("TokenNullException");
+        responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
+        return new ResponseEntity<>(responseBody, _200);
+    }
+
+    @ExceptionHandler(CustomException.NoPermission.class)
+    public ResponseEntity NoPermission(CustomException.NoPermission e) {
+        log.error("NoPermission");
+        responseBody.setCode(Constants.INT_NO_PERMISSION);
+        return new ResponseEntity<>(responseBody, _200);
+    }
+
+    @ExceptionHandler(CustomException.SyntaxError.class)
+    public ResponseEntity SyntaxError(CustomException.SyntaxError e) {
+        log.error("SyntaxError: " + e.getMessage());
+        responseBody.setCode(Constants.INT_INCORRECT_SYNTAX);
+        return new ResponseEntity<>(responseBody, _200);
+    }
+
     // java exception
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity NullPointerException(NullPointerException e) {
