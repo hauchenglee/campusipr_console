@@ -35,6 +35,20 @@ public class FileUtils {
         return convFile;
     }
 
+    public static ByteArrayInputStream convertFileToByteArray(File file) throws IOException {
+        InputStream fis = new FileInputStream(file);
+        byte[] buffer = new byte[4096];
+        int bytesRead = 0;
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+
+        while ((bytesRead = fis.read(buffer)) != -1) {
+            bao.write(buffer, 0, bytesRead);
+        }
+
+        byte[] data = bao.toByteArray();
+        return new ByteArrayInputStream(data);
+    }
+
     public static String readHtml(String filePath) {
         StringBuilder contentBuilder = new StringBuilder();
         try {

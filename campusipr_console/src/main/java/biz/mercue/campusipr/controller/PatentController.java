@@ -590,17 +590,8 @@ public class PatentController {
         JSONObject dataJSON = new JSONObject(receiveJSONString);
         String fileName = dataJSON.optString("file_name");
         File f = new File(Constants.FILE_UPLOAD_PATH + fileName);
-        InputStream fis = new FileInputStream(f);
-        byte[] buffer = new byte[4096];
-        int bytesRead = 0;
-        ByteArrayOutputStream bao = new ByteArrayOutputStream();
 
-        while ((bytesRead = fis.read(buffer)) != -1) {
-            bao.write(buffer, 0, bytesRead);
-        }
-
-        byte[] data = bao.toByteArray();
-        ByteArrayInputStream fileOut = new ByteArrayInputStream(data);
+        ByteArrayInputStream fileOut = FileUtils.convertFileToByteArray(f);
 
         HttpHeaders headers = new HttpHeaders();
 //			String fileName = "錯誤回報";
