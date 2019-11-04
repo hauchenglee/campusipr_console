@@ -315,33 +315,5 @@ public class TestController {
 			rowIndex ++;
         }
 		return list;
-	}
-
-	@RequestMapping(value="/api/deleteAllFortest", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-	@ResponseBody
-	public String analysisTest(HttpServletRequest request,
-			@RequestBody String receiveJSONString,
-			@RequestParam(value ="order_field",required=false,defaultValue = "") String fieldId,
-			@RequestParam(value ="asc",required=false,defaultValue = "1") int is_asc) {
-		log.info("analysisTest ");
-		JSONObject jsonObject = new JSONObject(receiveJSONString);
-//		JSONResponseBody responseBody = new JSONResponseBody();
-		BeanResponseBody response = new BeanResponseBody();
-		String businessId = jsonObject.optString("business_id");
-//		JSONArray businessName = jsonObject.optJSONArray("business_name");
-//		JSONArray statusDesc=jsonObject.optJSONArray("statusDesc");
-//		JSONArray countryId = jsonObject.optJSONArray("country_id");
-//		log.info(jsonObject.optJSONArray("statusDesc").length());
-//		log.info(statusDesc);
-//		JSONObject analyizeData = analysisService.schoolData(statusDesc, businessName, countryId);
-//		JSONObject analyizeData = analysisService.testAnalysis(businessId, beginTime, endTime);
-//		log.info(analyizeData);
-		String delectData  = patentService.deleteAll(businessId.toString());
-		String result = JacksonJSONUtils.mapObjectWithView(response, View.Public.class);
-		response.setCode(Constants.INT_SUCCESS);
-//		responseBody.setCode(Constants.INT_SUCCESS);
-//		responseBody.setData(delectData);
-		return result;
-	}
-	
+	}	
 }

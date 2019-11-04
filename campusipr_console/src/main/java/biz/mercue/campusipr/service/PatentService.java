@@ -73,8 +73,6 @@ public interface PatentService {
 
     void deletePatentByScheduled(String deletePatentId, String businessId);
 
-    String deleteAll(String businessId);
-
     void syncPatentStatus(Patent patent);
 
 }
