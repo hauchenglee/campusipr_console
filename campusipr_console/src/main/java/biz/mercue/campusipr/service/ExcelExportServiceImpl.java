@@ -164,19 +164,19 @@ public class ExcelExportServiceImpl implements ExcelExportService {
                                 if (costDate != null) costDateStr = DateUtils.getSimpleSlashFormatDate(costDate);
 
                                 if (!StringUtils.isNULL(costPrice))
-                                    costStr.append(costPrice);
+                                    costStr.append("費用金額：").append(costPrice);
                                 if (!StringUtils.isNULL(costCurrency))
-                                    costStr.append(costCurrency);
+                                    costStr.append(" ").append(costCurrency);
                                 if (!StringUtils.isNULL(costName))
-                                    costStr.append("、").append(costName);
+                                    costStr.append("\n").append("項目：").append(costName);
                                 if (!StringUtils.isNULL(costUnit))
-                                    costStr.append("、").append(costUnit);
+                                    costStr.append("\n").append("收款人：").append(costUnit);
                                 if (!StringUtils.isNULL(costMemo))
-                                    costStr.append("、").append(costMemo);
+                                    costStr.append("\n").append("備註：").append(costMemo);
                                 if (!StringUtils.isNULL(costDateStr))
-                                    costStr.append("、").append(costDateStr);
+                                    costStr.append("\n").append("日期：").append(costDateStr);
                                 if (i != costList.size() - 1)
-                                    costStr.append("\n");
+                                    costStr.append("\n\n");
                             }
                             row.createCell(columnCount).setCellValue(costStr.toString());
                         }
