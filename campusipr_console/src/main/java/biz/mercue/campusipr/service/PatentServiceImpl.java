@@ -4214,7 +4214,9 @@ public class PatentServiceImpl implements PatentService {
 			PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
 			if (dbFamily != null) {
 				List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
-				for (Patent patent : dbPatentFamilyList) {
+				Iterator<Patent> patentFamilyIter = dbPatentFamilyList.iterator();
+				while(patentFamilyIter.hasNext()) {
+					Patent patent = patentFamilyIter.next();
 					if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
 						dbPatentFamilyList.remove(patent);
 					}
