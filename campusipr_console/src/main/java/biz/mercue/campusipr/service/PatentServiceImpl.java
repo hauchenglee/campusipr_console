@@ -4150,13 +4150,13 @@ public class PatentServiceImpl implements PatentService {
 
 			// delete portfolio relationship
 			List<Portfolio> dbPortfolioList = portfolioDao.getPortfolioList();
-			for (Portfolio dbPortfolio : dbPortfolioList) {
-				List<Patent> patentList = dbPortfolio.getListPatent();
-				if (patentList != null || !patentList.isEmpty()) {
-					for (Patent patent : patentList) {
-						if (patent.getPatent_id().equals(deletePatentId)) {
-							patentList.remove(patent);
-						}
+
+			for (Portfolio portfolio : dbPortfolioList) {
+				List<Patent> patentList = portfolio.getListPatent();
+				for (int j = 0; j < patentList.size(); j++) {
+					Patent patent = patentList.get(j);
+					if (patent.getPatent_id().equals(deletePatentId)) {
+						patentList.remove(patent);
 					}
 				}
 			}
@@ -4165,7 +4165,8 @@ public class PatentServiceImpl implements PatentService {
 			PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
 			if (dbFamily != null) {
 				List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
-				for (Patent patent : dbPatentFamilyList) {
+				for (int i = 0; i < dbPatentFamilyList.size(); i++) {
+					Patent patent = dbPatentFamilyList.get(i);
 					if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
 						dbPatentFamilyList.remove(patent);
 					}
@@ -4214,7 +4215,7 @@ public class PatentServiceImpl implements PatentService {
 			PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
 			if (dbFamily != null) {
 				List<Patent> dbPatentFamilyList = dbFamily.getListPatent();
-				for(int i = 1;i<dbPatentFamilyList.size();i++) {	
+				for (int i = 0; i < dbPatentFamilyList.size(); i++) {
 					Patent patent = dbPatentFamilyList.get(i);
 					if (patent.getPatent_id().equals(deletePatentId) && dbPatentFamilyList.size() >= 2) {
 						dbPatentFamilyList.remove(patent);
