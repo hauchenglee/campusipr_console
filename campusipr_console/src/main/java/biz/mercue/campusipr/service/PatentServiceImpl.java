@@ -267,6 +267,14 @@ public class PatentServiceImpl implements PatentService {
 		if (listAnnuity != null && listAnnuity.size() > 0) {
 			for (Annuity mAnnuity : listAnnuity) {
 				mAnnuity.setAnnuity_id(KeyGeneratorUtils.generateRandomString());
+
+				Date endDate = mAnnuity.getAnnuity_end_date();
+				if (endDate != null && endDate.after(new Date())) {
+					mAnnuity.setIs_reminder(true);
+				} else {
+					mAnnuity.setIs_reminder(false);
+				}
+
 				mAnnuity.setPatent(patent);
 			}
 		}
@@ -3686,7 +3694,15 @@ public class PatentServiceImpl implements PatentService {
 					reminder.setTask_date(calendar.getTime());
 					reminder.setReminder_day(annuityReminder.getEmail_day());
 					reminder.setIs_send(false);
-					reminder.setIs_remind(annuity.is_reminder());
+//					reminder.setIs_remind(annuity.is_reminder());
+
+					if (calendar.getTime().after(new Date())) {
+						annuity.setIs_reminder(true);
+						reminder.setIs_remind(true);
+					} else {
+						annuity.setIs_reminder(false);
+						reminder.setIs_remind(false);
+					}
 
 					// if啟動未來排程時間
 					if (reminder.getTask_date().after(now) && reminder.is_remind() && !reminder.is_send()) {
