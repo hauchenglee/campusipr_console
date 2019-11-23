@@ -3694,14 +3694,16 @@ public class PatentServiceImpl implements PatentService {
 					reminder.setTask_date(calendar.getTime());
 					reminder.setReminder_day(annuityReminder.getEmail_day());
 					reminder.setIs_send(false);
-//					reminder.setIs_remind(annuity.is_reminder());
+					reminder.setIs_remind(annuity.is_reminder());
 
-					if (calendar.getTime().after(new Date())) {
-						annuity.setIs_reminder(true);
-						reminder.setIs_remind(true);
-					} else {
-						annuity.setIs_reminder(false);
-						reminder.setIs_remind(false);
+					if (patent.sourceFrom == Constants.PATENT_EXCEL_IMPORT) {
+						if (calendar.getTime().after(new Date())) {
+							annuity.setIs_reminder(true);
+							reminder.setIs_remind(true);
+						} else {
+							annuity.setIs_reminder(false);
+							reminder.setIs_remind(false);
+						}
 					}
 
 					// if啟動未來排程時間
