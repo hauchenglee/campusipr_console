@@ -4227,8 +4227,9 @@ public class PatentServiceImpl implements PatentService {
 						}
 					}
 				}
+				dbPortfolio.setPortfolio_patent_num(patentList.size());
 			}
-
+			
 			// delete family
 			PatentFamily dbFamily = familyDao.getByPatentIdAndBusinessId(deletePatentId, businessId);
 			if (dbFamily != null) {
