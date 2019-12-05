@@ -51,7 +51,7 @@ patent_api:
     
 mail:
     mail_username : ipservice@impacttaiwan.org
-    mail_pwd : Mercue@5402
+    mail_pwd : IMPACT1003
     mail_host : smtp.gmail.com
     mail_host_port : 587
     mail_starttls : true
