@@ -607,9 +607,12 @@ public class PatentServiceImpl implements PatentService {
 		log.info(editPatentApplNo);
 
 		if (StringUtils.isNULL(editPatentApplNo)) {
-			log.info("申請號為空 -> 存入資料庫，申請號random");
-			editPatent.setPatent_appl_no(StringUtils.generateApplNoRandom(editPatentApplNo));
-			return patentDao.updatePatentApplNo(editPatent.getPatent_id(), editPatent.getPatent_appl_no());
+			// 有點忘記之前為啥寫申請號為空，但還是存random string進入資料庫
+//			log.info("申請號為空 -> 存入資料庫，申請號random");
+//			editPatent.setPatent_appl_no(StringUtils.generateApplNoRandom(editPatentApplNo));
+
+			// 現在改成如果前端把申請號刪除（length == 0），就直接存入空字串到資料庫
+			return patentDao.updatePatentApplNo(editPatent.getPatent_id(), "");
 		}
 
 		List<Patent> dbPatentList = patentDao.getPatentListByApplNo(editApplNoWithoutAt);
