@@ -181,6 +181,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "FROM Patent as p "
 						+ "JOIN p.listDepartment as ld " 
 						+ "WHERE ld.business_id = :businessId "
+						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "AND  p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
@@ -201,6 +202,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listInventor as li "
 						+ "JOIN p.listBusiness as lb " 
 						+ "WHERE lb.business_id = :businessId "
+						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "AND  p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
@@ -223,6 +225,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "WHERE li.inventor_name_en is not NULL "
 						+ "and li.inventor_name is Null " 
 						+ "and lb.business_id = :businessId "
+						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "AND  p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
@@ -297,10 +300,12 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "FROM Patent as p "
 						+ "WHERE lb.business_id = :businessId "
 						+ "AND (date_format(patent_appl_date, '%Y') between :beginDate and :endDate)"
+						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "AND  p.is_sync = 0 "
 						+ "AND p.patent_appl_no IS NULL "
 						+ "AND p.patent_notice_no IS NULL "
-						+ "AND p.patent_publish_no IS NULL ";
+						+ "AND p.patent_publish_no IS NULL "
+						;
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		Timestamp bd = new Timestamp(beginDate);
@@ -328,6 +333,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listDepartment as ld " 
 						+ "WHERE (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "and ld.business_id = :businessId "
+						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "and p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -357,6 +363,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listBusiness as lb " 
 						+ "WHERE (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "and lb.business_id = :businessId "
+						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "and p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
@@ -388,6 +395,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "and li.inventor_name is Null "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "and lb.business_id = :businessId "
+						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "and p.is_sync = 1 ";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
@@ -482,7 +490,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 							+ "( select MAX(ls.create_date) "
 							+ "FROM p.listPatentStatus as ls "
 							+ "JOIN ls.primaryKey.status as lsps "
-							+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+							+ "where p.patent_id = ls.primaryKey.patent.patent_id  "
 							+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp) ) "
 						+ "group by p.patent_appl_country";
 
@@ -520,7 +528,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "( select MAX(ls.create_date) "
 					+ "FROM p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as lsps "
-					+ "where p.patent_id = ls.primaryKey.patent.patent_id ) "
+					+ "where p.patent_id = ls.primaryKey.patent.patent_id  "
 					+ "and lsps.status_desc in (:statusPublish, :statusNotice, :statusApp) ) "
 				+ "group by p.patent_appl_country";
 		
@@ -815,6 +823,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "FROM Patent as p "
 						+ "JOIN p.listDepartment as ld " 
 						+ "where ld.business_id = :businessId "
+						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "and p.is_sync = 1 "
 						+ "group by ld.department_name";
 		Query q = session.createQuery(queryStr);
@@ -897,6 +906,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "JOIN p.listDepartment as ld "
 						+ "where ld.business_id = :businessId "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
+						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "and p.is_sync = 1 "
 						+ "group by ld.department_name";
 		Query q = session.createQuery(queryStr);
