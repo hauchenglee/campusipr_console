@@ -429,8 +429,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "and lb.business_id = :businessId "
 						+ "AND p.patent_appl_no IS NOT NULL "
 						+ "AND p.patent_appl_date IS NOT NULL "
-						+ "AND p.patent_notice_no IS NULL " 
-						+ "AND p.patent_publish_no IS NULL "
+						+ "AND (p.patent_notice_no IS NULL or p.patent_notice_no = '')" 
+						+ "AND (p.patent_publish_no IS NULL or p.patent_publish_no = '') "
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate)) "
 						+ "GROUP BY date_format(patent_appl_date, '%Y') ";
 
