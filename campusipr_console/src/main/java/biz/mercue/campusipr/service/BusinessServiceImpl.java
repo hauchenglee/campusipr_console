@@ -71,43 +71,49 @@ public class BusinessServiceImpl implements BusinessService{
 			    }
 				business.setCreate_date(new Date());
 				addBusiness(business);
-				//add sync work quartz
-				List<SynchronizeBusiness> syncList = syncDao.getAllSyncTask();
-				
-				//this sunday
-				Calendar c = Calendar.getInstance();
-				c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-				c.add(Calendar.DATE, 7);
-				
-				SynchronizeBusiness sync = new SynchronizeBusiness();
-				sync.setSync_id(KeyGeneratorUtils.generateRandomString());
-				sync.setSync_date(DateUtils.getDayStart(c.getTime()));
-				c.add(Calendar.DATE, 7);
-				sync.setSync_next_date(DateUtils.getDayStart(c.getTime()));
-				sync.setBusiness(business);
-				Random rand = new Random();
-				int n = rand.nextInt(60);
-				//get max random number
-				int random_time = n;
-				if (syncList.size() > 0) {
-					random_time = syncList.get(syncList.size()-1).getRandom_time() + n;
-				}
-				sync.setRandom_time(random_time);
-				
-				syncDao.create(sync);
-				
-				SynchronizeTask syncTask = new SynchronizeTask();
-				syncTask.setTask_id(KeyGeneratorUtils.generateRandomString());
-				syncTask.setSync(sync);
-				Calendar cTask = Calendar.getInstance();
-				cTask.setTime(DateUtils.getDayStart(sync.getSync_date()));
-				cTask.add(Calendar.MINUTE, sync.getRandom_time());
-				syncTask.setTask_date(cTask.getTime());
-				syncTask.setBusiness_id(business.getBusiness_id());
-				syncTask.setIs_sync(false);
-				syncTaskDao.create(syncTask);
-				
-				quartzService.createJob(syncTask);
+
+
+
+				// 2019/02/22 Charles寫的
+				// 2019/12/06 buki註解掉，原因經過迭代後的版本，下面的code已經不符合使用，不過因為不清楚是不是有後續沒注意到的影響
+				// 所以先註解觀察
+//				//add sync work quartz
+//				List<SynchronizeBusiness> syncList = syncDao.getAllSyncTask();
+//
+//				//this sunday
+//				Calendar c = Calendar.getInstance();
+//				c.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+//				c.add(Calendar.DATE, 7);
+//
+//				SynchronizeBusiness sync = new SynchronizeBusiness();
+//				sync.setSync_id(KeyGeneratorUtils.generateRandomString());
+//				sync.setSync_date(DateUtils.getDayStart(c.getTime()));
+//				c.add(Calendar.DATE, 7);
+//				sync.setSync_next_date(DateUtils.getDayStart(c.getTime()));
+//				sync.setBusiness(business);
+//				Random rand = new Random();
+//				int n = rand.nextInt(60);
+//				//get max random number
+//				int random_time = n;
+//				if (syncList.size() > 0) {
+//					random_time = syncList.get(syncList.size()-1).getRandom_time() + n;
+//				}
+//				sync.setRandom_time(random_time);
+//
+//				syncDao.create(sync);
+//
+//				SynchronizeTask syncTask = new SynchronizeTask();
+//				syncTask.setTask_id(KeyGeneratorUtils.generateRandomString());
+//				syncTask.setSync(sync);
+//				Calendar cTask = Calendar.getInstance();
+//				cTask.setTime(DateUtils.getDayStart(sync.getSync_date()));
+//				cTask.add(Calendar.MINUTE, sync.getRandom_time());
+//				syncTask.setTask_date(cTask.getTime());
+//				syncTask.setBusiness_id(business.getBusiness_id());
+//				syncTask.setIs_sync(false);
+//				syncTaskDao.create(syncTask);
+//
+//				quartzService.createJob(syncTask);
 				
 				result = Constants.INT_SUCCESS;
 			}else {

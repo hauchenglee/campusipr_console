@@ -556,31 +556,32 @@ public class PatentController {
         return responseBody.getJacksonString(View.Patent.class);
     }
 
-    @PostMapping(value = "/api/syncapplicant", produces = Constants.CONTENT_TYPE_JSON)
-    public String syncApplicantData(HttpServletRequest request,
-                                    @RequestBody String receiveJSONString,
-                                    @RequestParam(value = "page", required = false, defaultValue = "1") int page) throws Exception {
-        log.info("/api/syncapplicant");
-        AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-        if (tokenBean == null) throw new CustomException.TokenNullException();
-
-        Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
-        if (!tokenBean.checkPermission(permission.getPermission_id())) {
-            throw new CustomException.NoPermission();
-        }
-
-        ListResponseBody responseBody = new ListResponseBody();
-        JSONObject jsonObject = new JSONObject(receiveJSONString);
-        String businessId = jsonObject.getString("business_id");
-        String ip = request.getRemoteAddr();
-        List<Patent> list = new ArrayList<>();
-
-        int taskResult = patentService.syncPatentsByApplicant(list, Constants.SYSTEM_ADMIN, businessId, ip);
-        responseBody.setCode(taskResult);
-        responseBody.setTotal_count(list.size());
-        responseBody.setList(list);
-        return responseBody.getJacksonString(View.Patent.class);
-    }
+    // 2019/12/06:檢測後，前端沒用到，先註解掉，如果沒有任何異常可以刪掉此api
+//    @PostMapping(value = "/api/syncapplicant", produces = Constants.CONTENT_TYPE_JSON)
+//    public String syncApplicantData(HttpServletRequest request,
+//                                    @RequestBody String receiveJSONString,
+//                                    @RequestParam(value = "page", required = false, defaultValue = "1") int page) throws Exception {
+//        log.info("/api/syncapplicant");
+//        AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+//        if (tokenBean == null) throw new CustomException.TokenNullException();
+//
+//        Permission permission = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_PATENT_CONTENT, Constants.VIEW);
+//        if (!tokenBean.checkPermission(permission.getPermission_id())) {
+//            throw new CustomException.NoPermission();
+//        }
+//
+//        ListResponseBody responseBody = new ListResponseBody();
+//        JSONObject jsonObject = new JSONObject(receiveJSONString);
+//        String businessId = jsonObject.getString("business_id");
+//        String ip = request.getRemoteAddr();
+//        List<Patent> list = new ArrayList<>();
+//
+//        int taskResult = patentService.syncPatentsByApplicant(list, Constants.SYSTEM_ADMIN, businessId, ip);
+//        responseBody.setCode(taskResult);
+//        responseBody.setTotal_count(list.size());
+//        responseBody.setList(list);
+//        return responseBody.getJacksonString(View.Patent.class);
+//    }
 
     @PostMapping(value = "/api/downloadexport", produces = Constants.CONTENT_TYPE_JSON)
     public ResponseEntity<InputStreamResource> downloadFile(HttpServletRequest request,
