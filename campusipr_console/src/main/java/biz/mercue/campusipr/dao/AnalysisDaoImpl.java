@@ -33,8 +33,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "AND p.is_sync = 0 "
 						+ "AND p.patent_appl_no IS NOT NULL "
 						+ "AND p.patent_appl_date IS NOT NULL "
-						+ "AND p.patent_notice_no IS NULL " 
-						+ "AND p.patent_publish_no IS NULL";
+						+ "AND (p.patent_notice_no Is NULL or p.patent_notice_no = '') " 
+						+ "AND (p.patent_publish_no Is NULL or p.patent_publish_no = '')";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
@@ -55,8 +55,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "AND p.patent_appl_date IS NOT NULL "
 						+ "AND p.patent_appl_no IS NOT NULL "
-						+ "AND p.patent_notice_no IS NULL " 
-						+ "AND p.patent_publish_no IS NULL";
+						+ "AND (p.patent_notice_no Is NULL or p.patent_notice_no = '') " 
+						+ "AND (p.patent_publish_no Is NULL or p.patent_publish_no = '')";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		Timestamp bd = new Timestamp(beginDate);
@@ -106,8 +106,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "and lb.business_id = :businessId "
 						+ "AND p.patent_appl_no IS NOT NULL "
 						+ "AND p.patent_appl_date IS NOT NULL "
-						+ "AND p.patent_notice_no IS NULL " 
-						+ "AND p.patent_publish_no IS NULL) "
+						+ "AND (p.patent_notice_no Is NULL or p.patent_notice_no = '') " 
+						+ "AND (p.patent_publish_no Is NULL or p.patent_publish_no = '')) "
 						+ "GROUP BY date_format(patent_appl_date, '%Y') "
 						+ "Order by date_format(patent_appl_date, '%Y') asc";
 
@@ -146,9 +146,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 				+ "JOIN p.listBusiness as lb "
 				+ "WHERE p.is_sync = 0 "
 				+ "and lb.business_id = :businessId "
-				+ "AND p.patent_appl_no Is NULL "
-				+ "AND p.patent_notice_no Is NULL "
-				+ "AND p.patent_publish_no Is NULL ";
+				+ "AND (p.patent_appl_no Is NULL or p.patent_appl_no ='') "
+				+ "AND (p.patent_notice_no Is NULL or p.patent_notice_no = '') "
+				+ "AND (p.patent_publish_no Is NULL or p.patent_publish_no = '') ";
 //		String queryStr = "SELECT count(distinct p.patent_id) "
 //						+ "FROM Patent as p "
 //						+ "JOIN p.listBusiness as lb "
@@ -302,9 +302,9 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "AND (date_format(patent_appl_date, '%Y') between :beginDate and :endDate)"
 						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "AND  p.is_sync = 0 "
-						+ "AND p.patent_appl_no IS NULL "
-						+ "AND p.patent_notice_no IS NULL "
-						+ "AND p.patent_publish_no IS NULL "
+						+ "AND (p.patent_appl_no IS NULL or p.patent_appl_no = '') "
+						+ "AND (p.patent_notice_no Is NULL or p.patent_notice_no = '') "
+						+ "AND (p.patent_publish_no Is NULL or p.patent_publish_no = '') "
 						;
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
