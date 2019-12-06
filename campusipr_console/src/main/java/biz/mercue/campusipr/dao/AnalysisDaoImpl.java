@@ -1086,14 +1086,14 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "JOIN p.listPatentStatus as ls "
 					+ "JOIN ls.primaryKey.status as lsps "
 					+ "where lb.business_id = :businessId "
-					+ "and p.patent_publish_date is NULL "
+					+ "and (p.patent_publish_no is NULL or p.patent_publish_no = '')"
 					+ "and lsps.status_desc = :statusDesc "
 					+ "and p.is_sync = 1 "
-					+ "and p.patent_appl_country in ('tw','us','cn') "
-					+ "and ls.create_date = "
-						+ "( select MAX(ls.create_date) "
-						+ "FROM p.listPatentStatus as ls "
-						+ "where p.patent_id = ls.primaryKey.patent.patent_id ) ";
+					+ "and p.patent_appl_country in ('tw','us','cn') ";
+//					+ "and ls.create_date = "
+//						+ "( select MAX(ls.create_date) "
+//						+ "FROM p.listPatentStatus as ls "
+//						+ "where p.patent_id = ls.primaryKey.patent.patent_id ) ";
 			
 		Query q = session.createQuery(queryStr);
 		String statusDesc = "公開";
@@ -1118,7 +1118,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 					+ "where lb.business_id = :businessId "
 					+ "and lsps.status_desc = :statusDesc "
 					+ "and p.is_sync = 1 "
-					+ "and p.patent_appl_country in ('tw','us','cn') ";
+					+ "and p.patent_appl_country in ('tw','us','cn') "
+					+ "and (p.patent_publish_no is not NULL and p.patent_publish_date is not NULL)";
 			
 		Query q = session.createQuery(queryStr);
 		String statusDesc = "公告";
