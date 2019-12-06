@@ -21,7 +21,6 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 	private Logger log = Logger.getLogger(this.getClass().getName());
 	
 	//所有日期都依申請日選擇??
-	// 預設：未官方同步專利
 	@Override
 	public int countUnApplPatent(String businessId) {
 //		log.info("申請案數量");
@@ -34,7 +33,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "AND p.patent_appl_no IS NOT NULL "
 						+ "AND p.patent_appl_date IS NOT NULL "
 						+ "AND (p.patent_notice_no Is NULL or p.patent_notice_no = '') " 
-						+ "AND (p.patent_publish_no Is NULL or p.patent_publish_no = '')";
+						+ "AND (p.patent_publish_no Is NULL or p.patent_publish_no = '')"
+						+ "AND p.patent_appl_country in ('tw','us','cn') ";
 		Query q = session.createQuery(queryStr);
 		if (!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
@@ -43,6 +43,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 //		log.info(count);
 		return (int) count;
 	}
+	
 	@Override
 	public int countUnApplPatentByYear(String businessId, Long beginDate, Long endDate) {
 //		log.info("申請案數量");
@@ -56,7 +57,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "AND p.patent_appl_date IS NOT NULL "
 						+ "AND p.patent_appl_no IS NOT NULL "
 						+ "AND (p.patent_notice_no Is NULL or p.patent_notice_no = '') " 
-						+ "AND (p.patent_publish_no Is NULL or p.patent_publish_no = '')";
+						+ "AND (p.patent_publish_no Is NULL or p.patent_publish_no = '')"
+						+ "AND p.patent_appl_country in ('tw','us','cn') ";
 		Query q = session.createQuery(queryStr);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		Timestamp bd = new Timestamp(beginDate);
@@ -104,6 +106,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "and lb.business_id = :businessId "
 						+ "OR (p.is_sync = 0 "
 						+ "and lb.business_id = :businessId "
+						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "AND p.patent_appl_no IS NOT NULL "
 						+ "AND p.patent_appl_date IS NOT NULL "
 						+ "AND (p.patent_notice_no Is NULL or p.patent_notice_no = '') " 
@@ -148,7 +151,8 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 				+ "and lb.business_id = :businessId "
 				+ "AND (p.patent_appl_no Is NULL or p.patent_appl_no ='') "
 				+ "AND (p.patent_notice_no Is NULL or p.patent_notice_no = '') "
-				+ "AND (p.patent_publish_no Is NULL or p.patent_publish_no = '') ";
+				+ "AND (p.patent_publish_no Is NULL or p.patent_publish_no = '') "
+				+ "AND p.patent_appl_country in ('tw','us','cn') ";
 //		String queryStr = "SELECT count(distinct p.patent_id) "
 //						+ "FROM Patent as p "
 //						+ "JOIN p.listBusiness as lb "
@@ -427,6 +431,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 						+ "and (date_format(patent_appl_date, '%Y') between :beginDate and :endDate) "
 						+ "OR (p.is_sync = 0 "
 						+ "and lb.business_id = :businessId "
+						+ "AND p.patent_appl_country in ('tw','us','cn') "
 						+ "AND p.patent_appl_no IS NOT NULL "
 						+ "AND p.patent_appl_date IS NOT NULL "
 						+ "AND (p.patent_notice_no IS NULL or p.patent_notice_no = '')" 
