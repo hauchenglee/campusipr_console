@@ -372,7 +372,7 @@ public class Constants {
 	public static String LOCAL_IP = "";
 	public static String IPs = "";
 	
-	public static final List<Integer> defaultReminderDays = Arrays.asList(365, 90, 30, 7, -1); 
+	public static final List<Integer> defaultReminderDays = Arrays.asList(90, 30, 7, -1);
 
 	// sourceFrom
 	public static final int PATENT_APPL_SYNC = 1;

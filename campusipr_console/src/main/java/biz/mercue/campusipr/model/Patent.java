@@ -52,31 +52,30 @@ public class Patent extends BaseBean{
 	//all
 	@JsonView({View.Patent.class,View.PortfolioDetail.class})
 	private String patent_appl_country;
-	
-	//all
-	@JsonView(View.Patent.class)
-	private Date patent_appl_date;
-	
+
 	//all
 	@JsonView({View.Patent.class, View.PortfolioDetail.class, View.PatentIdApplNo.class})
-	private String patent_appl_no;
+	private String patent_appl_no; // 申請號
+
+	//all
+	@JsonView(View.Patent.class)
+	private Date patent_appl_date; // 申請日
 	
 	//all
 	@JsonView(View.Patent.class)
-	private String patent_notice_no;
-	
-	
-	//all
-	@JsonView(View.Patent.class)
-	private Date patent_notice_date;
+	private String patent_notice_no; // 公開號
 	
 	//all
 	@JsonView(View.Patent.class)
-	private String patent_publish_no;
+	private Date patent_notice_date; // 公開日
 	
 	//all
 	@JsonView(View.Patent.class)
-	private Date patent_publish_date;
+	private String patent_publish_no; // 公告號
+	
+	//all
+	@JsonView(View.Patent.class)
+	private Date patent_publish_date; // 公告日
 	
 	//all
 	@JsonView(View.Patent.class)
