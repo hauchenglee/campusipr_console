@@ -151,7 +151,7 @@ public class QuartzService {
 		CronTrigger trigger = (CronTrigger) TriggerBuilder.newTrigger()
 				.withIdentity("syncPatent_tri", "syncPatent")
 				.startNow()
-				.withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 ? * SUN *")) // every sunday
+				.withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?")) // every sunday
 				.build();
 //		SimpleTrigger trigger = (SimpleTrigger) TriggerBuilder.newTrigger()
 //				.withIdentity("syncPatent_tri", "syncPatent")
