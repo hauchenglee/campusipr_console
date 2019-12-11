@@ -17,8 +17,12 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 public class PatentController {
@@ -447,6 +451,30 @@ public class PatentController {
         if (!mergeMap.isEmpty()) {
             patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
         }
+
+//        int nThread = 100;
+//        ExecutorService threadPool = Executors.newFixedThreadPool(nThread);
+//
+//        for (Patent patent : patentList) {
+//            threadPool.execute(() -> {
+//                Map<String, Patent> mergeMap = null;
+//                try {
+//                    mergeMap = patentService.addPatentByExcelSync(patent, admin, business, ip);
+//                    if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
+//                } catch (Exception e) {
+//                    log.error("exception", e);
+//                }
+//            });
+//        }
+//        threadPool.shutdown();
+//        try {
+//            threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//            System.out.println("threadPool await exception:");
+//            System.out.println(e.toString());
+//        }
+
 
 //		// 非同步作法，將patentList以十為一組，每組為一個task，並用runnable分別執行
 //		int patentListSize = patentList.size();
