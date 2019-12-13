@@ -22,22 +22,11 @@ public class GlobalExceptionHandler {
     private HttpStatus _200 = HttpStatus.OK;
     private HttpStatus _500 = HttpStatus.INTERNAL_SERVER_ERROR;
 
-    public GlobalExceptionHandler() {
-        responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
-    }
-
     // custom exception
     @ExceptionHandler(CustomException.DataErrorException.class)
     public ResponseEntity TokenNullException(CustomException.DataErrorException e) {
         log.error("DataErrorException: " + e.getMessage());
         responseBody.setCode(Constants.INT_DATA_ERROR);
-        return new ResponseEntity<>(responseBody, _200);
-    }
-
-    @ExceptionHandler(CustomException.TokenIdNullException.class)
-    public ResponseEntity TokenIdNullException(CustomException.TokenIdNullException e) {
-        log.error("TokenIdNullException");
-        responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
         return new ResponseEntity<>(responseBody, _200);
     }
 
@@ -66,24 +55,28 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity NullPointerException(NullPointerException e) {
         log.error("NullPointerException", e);
+        responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
         return new ResponseEntity<>(responseBody, _200);
     }
 
     @ExceptionHandler(FileNotFoundException.class)
     public ResponseEntity FileNotFound(FileNotFoundException e) {
         log.error("FileNotFoundException", e);
+        responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
         return new ResponseEntity<>(responseBody, _200);
     }
 
     @ExceptionHandler(IOException.class)
     public ResponseEntity IOException(IOException e) {
         log.error("IOException", e);
+        responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
         return new ResponseEntity<>(responseBody, _200);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity Exception(Exception e) {
         log.error("Exception", e);
+        responseBody.setCode(Constants.INT_SYSTEM_PROBLEM);
         return new ResponseEntity<>(responseBody, _200);
     }
 }
