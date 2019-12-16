@@ -53,7 +53,7 @@ public class HttpRequestUtils {
 			}
 			
 			//print result
-			log.info(responseStr);
+//			log.info(responseStr);
 			return responseStr;
 	}
 		
@@ -99,7 +99,7 @@ public class HttpRequestUtils {
 				in.close();
 			}
 			//print result
-			log.info(response.toString());
+//			log.info(response.toString());
 
 			return response.toString();
 	}
@@ -132,7 +132,7 @@ public class HttpRequestUtils {
 				}
 				
 				//print result
-				log.info(responseStr);
+//				log.info(responseStr);
 
 				return responseStr;
 	}
@@ -178,7 +178,7 @@ public class HttpRequestUtils {
 			in.close();
 		}
 		//print result
-		log.info(response.toString());
+//		log.info(response.toString());
 
 		return response.toString();
 			
