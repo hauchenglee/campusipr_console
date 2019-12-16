@@ -8,7 +8,7 @@ import java.util.Map;
 
 public interface PatentService {
 
-    int demo(String applNo, String businessId, String patentId, String str);
+    void demo(String applNo, String businessId, String patentId, String str);
 
     int addPatent(Patent patent) throws Exception;
 
@@ -70,8 +70,6 @@ public interface PatentService {
     void deleteByIds(List<String> patentIds, String business) throws Exception;
 
     void deleteById(String id, String businessId) throws Exception;
-
-    void deletePatentByScheduled(String deletePatentId, String businessId);
 
     void syncPatentStatus(Patent patent, int isSync);
 
