@@ -3410,18 +3410,10 @@ public class PatentServiceImpl implements PatentService {
 
             /*
              * 問題：如果已同步專利又再次同步，會出現annuity重複新增
-             * 解決：檢查是不是前端傳來的annuity，依據同步成功的edit_source
-             * 如果是官方同步的資料 -> 比對每一項欄位；否則（前端傳來的資料）-> 依據現有流程繼續進程
+             * 解決：不處理系統自動同步
              */
-            if (editPatent.isSchedule_is_sync()) {
-                Iterator<Annuity> iterator = listAnnuity.iterator();
-                while (iterator.hasNext()) {
-                    Annuity annuity = iterator.next();
-                    String annuityId = annuity.getAnnuity_id();
-                    if (StringUtils.isNULL(annuityId)) {
-                        iterator.remove();
-                    }
-                }
+            if (editPatent.sourceFrom == Constants.PATENT_SCHEDULED) {
+                return;
             }
 
             for (Annuity annuity : listAnnuity) {
@@ -3509,13 +3501,14 @@ public class PatentServiceImpl implements PatentService {
                     }
 
                     boolean result1 = reminder.getTask_date().equals(now); // 提醒日期為現在
-                    boolean result2 = now.compareTo(reminder.getTask_date()) >= 0; // 提醒日大於現在（尚未過期）
-                    boolean result3 = now.compareTo(annuity.getAnnuity_end_date()) <= 0; // 小於繳費截止日
-                    boolean result4 = reminder.is_remind(); // 是否要提醒
-                    boolean result5 = patent.getSourceFrom() == Constants.PATENT_SCHEDULED; // 是否為排程程序
+                    boolean result2 = annuity.getAnnuity_end_date().before(now); // 截止日大於今天（也就是過期了）
+                    boolean result3 = reminder.is_remind(); // 是否要提醒
+
+                    // 把排程註解掉原因是user想體驗每天送過期信的快感
+//                    boolean result4 = patent.getSourceFrom() == Constants.PATENT_SCHEDULED; // 是否為排程程序
 
                     // 符合發送提醒信件條件
-                    if ((result1 || (result2 && result3)) && result4 && !result5) {
+                    if ((result1 || result2) && result3) {
                         listARSendRightNow.add(annuityReminder);
                         log.info("send right now List: " + listARSendRightNow.size());
                     }
