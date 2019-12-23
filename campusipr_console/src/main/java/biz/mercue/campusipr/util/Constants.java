@@ -469,7 +469,12 @@ public class Constants {
 	public static final String ANALYSIS_PATENTAMOUNT = "專利申請總數";
 	public static final String ANALYSIS_PORTFOLIOAMOUNT = "專利組合總數";
 	public static final String ANALYSIS_PATENTAMOUNTBYYEAR = "歷年專利申請總數";
-
+	public static final String ANALYSIS_NOTICE = "已公開未公告申請案";
+	public static final String ANALYSIS_PUBLISH = "已公告專利";
+	public static final String ANALYSIS_APPL = "未公開/公告申請案";
+	public static final String ANALYSIS_TECH = "技術總數";
+	
+	
 	// regex pattern
 	public static final String REGEX_POSITIVE_INTEGER = "^[1-9]d*$";
 }
