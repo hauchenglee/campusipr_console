@@ -161,13 +161,11 @@ public class AdminDaoImpl extends AbstractDao<String, Admin> implements AdminDao
     @Override
     public List<Admin> getSchoolAdminList() {
         String hql = "select adm from Admin adm where adm.role.role_id = :ROLE_BUSINESS_MANAGER" +
-                " or adm.role.role_id = :ROLE_BUSINESS_PATENT" +
-                " or adm.role.role_id = :ROLE_COMMON_USER";
+                " or adm.role.role_id = :ROLE_BUSINESS_PATENT";
         Session session = getSession();
         Query query = session.createQuery(hql);
         query.setParameter("ROLE_BUSINESS_MANAGER", Constants.ROLE_BUSINESS_MANAGER);
         query.setParameter("ROLE_BUSINESS_PATENT", Constants.ROLE_BUSINESS_PATENT);
-        query.setParameter("ROLE_COMMON_USER", Constants.ROLE_COMMON_USER);
         return query.list();
     }
 }
