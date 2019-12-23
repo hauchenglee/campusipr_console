@@ -1,32 +1,29 @@
 package biz.mercue.campusipr.dao;
 
-import java.util.Date;
-import java.util.List;
-
 import biz.mercue.campusipr.model.Message;
 
+import java.util.List;
 
 public interface MessageDao {
-	
-	Message getById(String id);
-	
-	void addMessage(Message message);
+    Message getById(String id);
 
-	List<Message> getMessagesList(String senderId, String receiverId);
+    void addMessage(Message message);
 
-	List<Message> getMessagesBeforeTime(String senderId, String receiverId, long timeStamp);
+    List<Message> getMessagesList(String senderId, String receiverId);
 
-	List<Message> getMessagesBeforeAndEqualTime(String senderId, String receiverId, long timeStamp);
+    List<Message> getMessagesBeforeTime(String senderId, String receiverId, long timeStamp);
 
-	List<Message> getMessagesAfterTime(String senderId, String receiverId, long timeStamp);
+    List<Message> getMessagesBeforeAndEqualTime(String senderId, String receiverId, long timeStamp);
 
-	List<Message> getAdminMessages(String adminId,String targetId, int page, int pageSize);
+    List<Message> getMessagesAfterTime(String senderId, String receiverId, long timeStamp);
 
-	int  getCountAdminMessages(String adminId,String targetId);
+    List<Message> getAdminMessages(String adminId, String targetId, int page, int pageSize);
 
-	List<Message> searchText(String senderId, String receiverId, String text);
+    int getCountAdminMessages(String adminId, String targetId);
+
+    List<Message> searchText(String senderId, String receiverId, String text);
 
     Message getNewestMessage(String senderId, String receiverId);
 
-	void readMessage(String senderId, String receiverId);
+    void readMessage(String senderId, String receiverId);
 }

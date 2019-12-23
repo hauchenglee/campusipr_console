@@ -92,9 +92,13 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<Admin> getAllAdminAndNewestMessage(AdminToken adminToken) {
+        // check business id and admin id
+        boolean isBusinessUser = false;
+        String businessId = adminToken.getBusiness_id();
+        if (businessId.equals(Constants.BUSINESS_PLATFORM)) isBusinessUser = true;
         try {
             List<Admin> adminList = new ArrayList<>();
-            if (adminToken.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
+            if (isBusinessUser) {
 //				log.info("user is platform: return all school member");
                 adminList = adminDao.getSchoolAdminList();
                 for (Admin school : adminList) {
@@ -110,7 +114,7 @@ public class MessageServiceImpl implements MessageService {
                 Business platformBusiness = businessDao.getById(Constants.BUSINESS_PLATFORM);
                 Admin platformAdmin = new Admin();
                 platformAdmin.setAdmin_id("public_platform");
-                platformAdmin.setAdmin_name("中心平台");
+                platformAdmin.setAdmin_name("智能智財管理資料庫");
                 platformAdmin.setBusiness(platformBusiness);
                 adminList.add(platformAdmin);
                 for (Admin platform : adminList) {
