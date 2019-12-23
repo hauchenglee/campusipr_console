@@ -495,7 +495,6 @@ public class AnalysisController {
 				return null;
 			}
 		} catch (JSONException e) {
-			e.printStackTrace();
 			log.error(e);
 			return null;
 		}
