@@ -412,16 +412,15 @@ public class AnalysisServiceImpl implements AnalysisService {
 	@Override
 	public JSONObject platformOverview() {
 		int schoolSum = analysisDao.countSchool(null, null);
-//		int applSum  = analysisDao.countAllPatent();
 		int porfolioSum = analysisDao.countPorfolio(null, null);
-		List<Analysis> countYearPatent = new ArrayList<Analysis>();
-		List<Object> combineOverview = new ArrayList<Object>();
-
 		int noticeAmount = analysisDao.countNoticePatentByYear(null, null, null);
 		int publishAmount = analysisDao.countPublishPatentByYear(null, null, null);
+		List<Analysis> countYearPatent = new ArrayList<Analysis>();
+		List<Analysis> businessDefaultYear = new ArrayList<Analysis>();
+		List<Object> combineOverview = new ArrayList<Object>();
 
 		countYearPatent = analysisDao.overYearPatent(null, null, null);
-
+		businessDefaultYear = analysisDao.getBusinessDefaultYear();
 		Object yearToArray[][] = countYearPatent.toArray(new Object[countYearPatent.size()][0]);
 		combineOverview.addAll(combineOverview(yearToArray));
 
@@ -434,6 +433,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 		// 0924
 		result.put("noticeAmount", noticeAmount);
 		result.put("publishAmount", publishAmount);
+		
+		result.put("businessDefaultYear", businessDefaultYear);
 //		log.info(result);
 		return result;
 	}
@@ -442,12 +443,11 @@ public class AnalysisServiceImpl implements AnalysisService {
 	public JSONObject platformOverviewByYear(Long beginDate, Long endDate) {
 
 		int schoolSum = analysisDao.countSchool(beginDate, endDate);
-//		int applSum = analysisDao.countAllPatentByYear(beginDate, endDate);
 		int porfolioSum = analysisDao.countPorfolio(beginDate, endDate);
 
 		int noticeAmount = analysisDao.countNoticePatentByYear(null, beginDate, endDate);
 		int publishAmount = analysisDao.countPublishPatentByYear(null, beginDate, endDate);
-
+				
 		List<Analysis> countYearPatent = new ArrayList<Analysis>();
 		List<Object> combineOverview = new ArrayList<Object>();
 		countYearPatent = analysisDao.overYearPatent(null, beginDate, endDate);
@@ -629,7 +629,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 		getDefaultYear = analysisDao.getDefaultYear();
 
 //		12/16
-//		statusList=statusDao.getEditable();
+		statusList=statusDao.getEditable();
 //		countSchoolPatentTotal = analysisDao.countSchoolPatentTotal();
 //		countSchoolPatentApplStatus = analysisDao.countSchoolPatentApplStatus();
 //		countSchoolPatentNoticeStatus = analysisDao.countSchoolPatentNoticeStatus();
@@ -1491,10 +1491,11 @@ public class AnalysisServiceImpl implements AnalysisService {
 		ByteArrayOutputStream fileOut = null;
 		JSONObject platformOverview = platformOverviewByYear(beginDate, endDate);
 		String schoolSum = platformOverview.optString("schoolSum");
-		String applSum = platformOverview.optString("applSum");
+		String noticeAmount = platformOverview.optString("noticeAmount");
+		String publishAmount = platformOverview.optString("publishAmount");
 		String porfolioSum = platformOverview.optString("porfolioSum");
 		JSONArray analAllYearsList = platformOverview.optJSONArray("analAllYearsList");
-//		log.info(platformOverview);
+
 		try {
 			XSSFWorkbook workbook = new XSSFWorkbook();
 			XSSFSheet sheet = workbook.createSheet();
@@ -1506,23 +1507,29 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 			row = sheet.createRow((short) 1);
 			cell = row.createCell((short) 0);
-			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNT);
+			cell.setCellValue(Constants.ANALYSIS_NOTICE);
 			cell = row.createCell((short) 1);
-			cell.setCellValue(applSum);
+			cell.setCellValue(noticeAmount);
 
 			row = sheet.createRow((short) 2);
+			cell = row.createCell((short) 0);
+			cell.setCellValue(Constants.ANALYSIS_PUBLISH);
+			cell = row.createCell((short) 1);
+			cell.setCellValue(publishAmount);
+			
+			row = sheet.createRow((short) 3);
 			cell = row.createCell((short) 0);
 			cell.setCellValue(Constants.ANALYSIS_PORTFOLIOAMOUNT);
 			cell = row.createCell((short) 1);
 			cell.setCellValue(porfolioSum);
 
-			row = sheet.createRow((short) 4);
+			row = sheet.createRow((short) 5);
 			cell = row.createCell((short) 0);
 			cell.setCellValue(Constants.ANALYSIS_PATENTAMOUNTBYYEAR);
 			for (int dataInx = 0; dataInx < analAllYearsList.length(); dataInx++) {
 				Object yearData = platformOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(1);
 				Object countData = platformOverview.optJSONArray("analAllYearsList").getJSONArray(dataInx).get(0);
-				row = sheet.createRow((short) 5 + dataInx);
+				row = sheet.createRow((short) 6 + dataInx);
 				cell = row.createCell((short) 0);
 				cell.setCellValue(yearData.toString());
 				cell = row.createCell((short) 1);

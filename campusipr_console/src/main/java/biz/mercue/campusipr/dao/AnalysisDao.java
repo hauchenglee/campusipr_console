@@ -38,4 +38,5 @@ public interface AnalysisDao {
 	List<Analysis> eachCountry(String businessId, Long beginDate, Long endDate, String status);
 	List<Analysis> eachDepartment(String businessId, Long beginDate, Long endDate, String countryId);
 	List<Analysis> eachSchoolStatus(String status, Long beginDate, Long endDate);
+	List<Analysis> getBusinessDefaultYear();
 }

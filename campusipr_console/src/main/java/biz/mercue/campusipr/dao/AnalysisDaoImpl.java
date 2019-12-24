@@ -650,6 +650,18 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		return q.list();
 	}
 	
+	@Override
+	public List<Analysis> getBusinessDefaultYear() {
+		Session session = getSession();
+		String queryStr = "SELECT MIN(date_format(create_date, '%Y')), MAX(date_format(create_date, '%Y')) "
+						+ "FROM Business as b " 
+						+ "where b.business_id != :role ";
+		Query q = session.createQuery(queryStr);
+		q.setParameter("role", Constants.BUSINESS_PLATFORM);
+		log.info(q.list());
+		return q.list();
+	}
+	
 	// 專利組合
 	@Override
 	public int countPorfolio (Long beginDate, Long endDate) {
@@ -697,7 +709,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 		else {
 			queryStr += "AND b.create_date IS NOT NULL " ;
 		}
-		
+		log.info(queryStr);
 		Query q = session.createQuery(queryStr);
 		
 		if(beginDate!= null && endDate != null) {			
@@ -708,6 +720,7 @@ public class AnalysisDaoImpl extends AbstractDao<String, Analysis> implements An
 			String endDateFormat = sdf.format(ed);
 			q.setParameter("beginDate", beginDateFormat);
 			q.setParameter("endDate", endDateFormat);
+			log.info(beginDateFormat +" - "+ endDateFormat);
 		}
 		q.setParameter("role", Constants.BUSINESS_PLATFORM);
 
