@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Service("patentService")
 @Transactional
@@ -124,7 +127,7 @@ public class PatentServiceImpl implements PatentService {
     }
 
     @Override
-    public int addPatent(Patent patent) throws Exception {
+    public synchronized int addPatent(Patent patent) throws Exception {
 
         if (StringUtils.isNULL(patent.getPatent_id())) {
             patent.setPatent_id(KeyGeneratorUtils.generateRandomString());
@@ -419,17 +422,11 @@ public class PatentServiceImpl implements PatentService {
      * @return
      */
     @Override
+    @SuppressWarnings("Duplicates")
     public Map<String, Patent> addPatentByExcel(List<Patent> patentList, Admin admin, Business business, String ip) throws Exception {
         Map<String, Patent> mergeMap = new HashMap<>();
-        if (patentList == null) {
-            return null;
-        }
         String businessId = business.getBusiness_id();
         for (Patent editPatent : patentList) {
-            //使用者可能沒有輸入申請號
-            if (editPatent.getPatent_appl_no() != null) {
-                int syncResult = syncPatentData(editPatent);
-            }
             if (!editPatent.isIs_sync()) {
                 editPatent.setPatent_appl_no(StringUtils.generateApplNoRandom(editPatent.getPatent_appl_no()));
             }
@@ -1138,7 +1135,7 @@ public class PatentServiceImpl implements PatentService {
     }
 
     @Override
-    public int mergeDiffPatent(String dbPatentId, Patent editPatent, Admin admin, Business business) {
+    public synchronized int mergeDiffPatent(String dbPatentId, Patent editPatent, Admin admin, Business business) {
         log.info(dbPatentId);
         String editPatentId = editPatent.getPatent_id();
         Patent dbPatent = patentDao.getById(dbPatentId);
@@ -1299,7 +1296,7 @@ public class PatentServiceImpl implements PatentService {
     }
 
     @Override
-    public int updatePatent(Patent patent, String businessId) throws Exception {
+    public synchronized int updatePatent(Patent patent, String businessId) throws Exception {
         log.info("updatePatent: " + patent.getPatent_id());
         Patent dbBean = patent.getComparePatent();
         if (dbBean == null) {

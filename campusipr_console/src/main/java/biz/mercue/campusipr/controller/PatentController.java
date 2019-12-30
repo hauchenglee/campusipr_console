@@ -20,6 +20,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 public class PatentController {
@@ -431,87 +434,107 @@ public class PatentController {
         List<Patent> patentList = excelTaskService.submitTask(task, admin);
 
         // 同步作法，全部處理完成才回傳結果
-        Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentList, admin, business, ip);
-        if (!mergeMap.isEmpty()) {
-            patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
+//        Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentList, admin, business, ip);
+//        if (!mergeMap.isEmpty()) {
+//            patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
+//        }
+
+        int nThread = 100;
+        ExecutorService threadPool = Executors.newFixedThreadPool(nThread);
+        for (Patent patent : patentList) {
+            threadPool.execute(() -> {
+                try {
+                    if (!StringUtils.isNULL(patent.getPatent_appl_no())) {
+                        patentService.syncPatentData(patent);
+                    }
+                } catch (Exception e) {
+                    log.error("exception", e);
+                }
+            });
+        }
+        threadPool.shutdown();
+        try {
+            threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS); // 異步
+        } catch (InterruptedException e) {
+            log.error("threadPool await exception: " + e.getMessage());
         }
 
-//        int nThread = 100;
-//        ExecutorService threadPool = Executors.newFixedThreadPool(nThread);
+        Map<String, Patent> mergeListMap = patentService.addPatentByExcel(patentList, admin, business, ip);
+        if (!mergeListMap.isEmpty()) {
+            patentService.mergeDiffPatentByExcel(mergeListMap, admin, business);
+        }
+
+//		// 同步作法，將patentList以十為一組，每組為一個task，並用runnable分別執行
+//        int patentListSize = patentList.size();
+//        int spiltSize = 1;
+//        int quotient = patentListSize / spiltSize; // 商數
+//        int remainder = patentListSize % spiltSize; // 餘數
 //
-//        for (Patent patent : patentList) {
-//            threadPool.execute(() -> {
-//                Map<String, Patent> mergeMap = null;
+//        if (patentListSize <= spiltSize) {
+//            Runnable runnable = () -> {
 //                try {
-//                    mergeMap = patentService.addPatentByExcelSync(patent, admin, business, ip);
+//                    Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentList, admin, business, ip);
 //                    if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
 //                } catch (Exception e) {
 //                    log.error("exception", e);
 //                }
-//            });
-//        }
-//        threadPool.shutdown();
-//        try {
-//            threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//            System.out.println("threadPool await exception:");
-//            System.out.println(e.toString());
-//        }
-
-
-//		// 非同步作法，將patentList以十為一組，每組為一個task，並用runnable分別執行
-//		int patentListSize = patentList.size();
-//		int quotient = patentListSize / 10; // 商數
-//		int remainder = patentListSize % 10; // 餘數
+//            };
+//            ExecutorService executorService = Executors.newSingleThreadExecutor();
+//            executorService.execute(runnable);
+//            executorService.shutdown();
+//            try {
+//                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+//            } catch (InterruptedException e) {
+//                System.out.println("threadPool await exception:");
+//                System.out.println(e.toString());
+//            }
+//        } else {
+//            // 以十為一組
+//            for (int i = 1; i <= patentListSize; i++) {
+//                if (i % spiltSize == 0) {
+//                    List<Patent> patentListQuotient = patentList.subList(i - spiltSize, i);
+//                    Runnable runnable = () -> {
+//                        try {
+//                            Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentListQuotient, admin, business, ip);
+//                            if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
+//                        } catch (Exception e) {
+//                            log.error("exception", e);
+//                        }
+//                    };
+//                    ExecutorService executorService = Executors.newSingleThreadExecutor();
+//                    executorService.execute(runnable);
+//                    executorService.shutdown();
+//                    try {
+//                        executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+//                    } catch (InterruptedException e) {
+//                        System.out.println("threadPool await exception:");
+//                        System.out.println(e.toString());
+//                    }
+//                }
+//            }
 //
-//		if (patentListSize <= 10) {
-//			Runnable runnable = () -> {
-//				try {
-//					Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentList, admin, business, ip);
-//					if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
-//				} catch (Exception e) {
-//					log.error("exception", e);
-//				}
-//			};
-//			ExecutorService executorService = Executors.newSingleThreadExecutor();
-//			executorService.execute(runnable);
-//			executorService.shutdown();
-//		} else {
-//			// 以十為一組
-//			for (int i = 1; i <= patentListSize; i++) {
-//				if (i % 10 == 0) {
-//					List<Patent> patentListQuotient = patentList.subList(i - 10, i);
-//					Runnable runnable = () -> {
-//						try {
-//							Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentListQuotient, admin, business, ip);
-//							if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
-//						} catch (Exception e) {
-//							log.error("exception", e);
-//						}
-//					};
-//					ExecutorService executorService = Executors.newSingleThreadExecutor();
-//					executorService.execute(runnable);
-//					executorService.shutdown();
-//				}
-//			}
-//
-//			// 處理餘數List
-//			if (remainder != 0) {
-//				List<Patent> patentListRemainder = patentList.subList(quotient * 10, patentListSize);
-//				Runnable runnable = () -> {
-//					try {
-//						Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentListRemainder, admin, business, ip);
-//						if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
-//					} catch (Exception e) {
-//						log.error("exception", e);
-//					}
-//				};
-//				ExecutorService executorService = Executors.newSingleThreadExecutor();
-//				executorService.execute(runnable);
-//				executorService.shutdown();
-//			}
-//		}
+//            // 處理餘數List
+//            if (remainder != 0) {
+//                List<Patent> patentListRemainder = patentList.subList(quotient * spiltSize, patentListSize);
+//                Runnable runnable = () -> {
+//                    try {
+//                        Map<String, Patent> mergeMap = patentService.addPatentByExcel(patentListRemainder, admin, business, ip);
+//                        if (!mergeMap.isEmpty()) patentService.mergeDiffPatentByExcel(mergeMap, admin, business);
+//                    } catch (Exception e) {
+//                        log.error("exception", e);
+//                    }
+//                };
+//                ExecutorService executorService = Executors.newSingleThreadExecutor();
+//                executorService.execute(runnable);
+//                executorService.shutdown();
+//                try {
+//                    executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+//                } catch (InterruptedException e) {
+//                    System.out.println("threadPool await exception:");
+//                    System.out.println(e.toString());
+//                }
+//            }
+//        }
 
         responseBody.setCode(Constants.INT_SUCCESS);
         responseBody.setBean(task);
