@@ -4040,4 +4040,136 @@ public class PatentServiceImpl implements PatentService {
             patentDao.delete(deletePatentId);
         }
     }
+
+    // 以下的method先留著，原因是user可能不小心匯入錯誤excel，想要把匯入的patent刪除，所以寫了兩個method
+    // 使用作法是在"/api/submitexceltask"調用這兩個method，先正常模式add or update到數據庫，再調用delete刪除
+    @SuppressWarnings("Duplicates")
+    @Override
+    public List<Patent> getPatentListByExcel(List<Patent> patentList, Admin admin, Business business, String ip) throws Exception {
+        Map<String, Patent> mergeMap = new HashMap<>();
+        String businessId = business.getBusiness_id();
+        for (Patent editPatent : patentList) {
+            if (!editPatent.isIs_sync()) {
+                editPatent.setPatent_appl_no(StringUtils.generateApplNoRandom(editPatent.getPatent_appl_no()));
+            }
+            log.info("editPatent.getPatent_appl_no(): " + editPatent.getPatent_appl_no());
+            editPatent.setSync_date(DateUtils.getDayStart(new Date()));
+            editPatent.setAdmin(admin);
+            editPatent.setAdmin_ip(ip);
+            editPatent.setBusiness(business);
+
+            if (editPatent.getEdit_source() != Patent.EDIT_SOURCE_SERVICE) {
+                editPatent.setEdit_source(Patent.EDIT_SOURCE_HUMAN);
+            }
+
+            handleExtensionAddAsList(editPatent, business.getBusiness_id());
+            handleDepartmentAddAsList(editPatent, business.getBusiness_id());
+
+            List<Patent> dbPatentList = patentDao
+                    .getPatentListByApplNo(StringUtils.getApplNoWithoutAt(editPatent.getPatent_appl_no()));
+            Patent dbTargetPatent = new Patent(); // 將要作用（update or merge）的db patent bean
+            boolean isNotSync = true;
+            boolean isNotSameBusiness = true;
+            boolean isAdd = false;
+            boolean isMerge = false;
+
+            // add patent
+            if (!dbPatentList.isEmpty()) {
+                for (Patent dbPatent : dbPatentList) {
+                    if (dbPatent.isIs_sync()) {
+                        isNotSync = false;
+                        break;
+                    }
+                }
+                for (Patent dbPatent : dbPatentList) {
+                    for (Business dbBusiness : dbPatent.getListBusiness()) {
+                        String dbBid = dbBusiness.getBusiness_id();
+                        if (dbBid.equals(businessId)) {
+                            isNotSameBusiness = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (isNotSync && isNotSameBusiness || dbPatentList.isEmpty()) {
+                log.info("add patent patent by excel: " + editPatent.getPatent_appl_no());
+                this.addPatent(editPatent);
+                patentHistoryFirstAdd(editPatent, editPatent.getPatent_id(), business.getBusiness_id());
+                isAdd = true;
+            }
+
+            // update then merge
+            if (!isAdd) {
+                // 找出該學校原本在db的專利
+                for (Patent dbPatent : dbPatentList) {
+                    for (Business dbBusiness : dbPatent.getListBusiness()) {
+                        String dbBid = dbBusiness.getBusiness_id();
+                        if (dbBid.equals(businessId)) {
+                            dbTargetPatent = dbPatent;
+                        }
+                    }
+                }
+
+                // 找出在db中唯一同步的專利
+                Patent syncPatent = new Patent();
+                for (Patent dbPatent : dbPatentList) {
+                    if (dbPatent.isIs_sync()) {
+                        syncPatent = dbPatent;
+                        break;
+                    }
+                }
+
+                if (!StringUtils.isNULL(dbTargetPatent.getPatent_id())) {
+                    if (!isNotSync && !dbTargetPatent.isIs_sync()) {
+                        log.info("update then merge patent by excel: " + editPatent.getPatent_appl_no());
+                        editPatent.setComparePatent(dbTargetPatent);
+                        editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
+                        handleExtensionExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
+                        handleDepartmentExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
+                        updatePatent(editPatent, business.getBusiness_id());
+                        mergeMap.put(syncPatent.getPatent_id(), editPatent);
+                        isMerge = true;
+                    }
+                }
+            }
+
+            // just update（不是新增專利，也不是merge專利，前兩者以外的都走這流程）
+            if (!dbPatentList.isEmpty() && !isMerge && !isAdd) {
+                log.info("just update patent by excel: " + editPatent.getPatent_appl_no());
+                for (Patent dbPatent : dbPatentList) {
+                    for (Business dbBusinessInList : dbPatent.getListBusiness()) {
+                        if (business.getBusiness_id().equals(dbBusinessInList.getBusiness_id())) {
+                            // 本學校的patent
+                            editPatent.setFirstAddEditHistory(false);
+                            dbTargetPatent = dbPatent;
+                            contactData(editPatent);
+                            break;
+                        } else {
+                            if (dbPatent.isIs_sync()) {
+                                dbTargetPatent = dbPatent;
+                                contactData(editPatent);
+                            }
+                            editPatent.setFirstAddEditHistory(true);
+                        }
+                    }
+                }
+                editPatent.setComparePatent(dbTargetPatent);
+                handleExtensionExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
+                handleDepartmentExcelCompare(dbTargetPatent, editPatent, business.getBusiness_id());
+                editPatent.setSourceFrom(Constants.PATENT_EXCEL_IMPORT);
+                editPatent.setEdit_source(Patent.EDIT_SOURCE_IMPORT);
+                updatePatent(editPatent, business.getBusiness_id());
+            }
+        }
+        return patentList;
+    }
+
+    @Override
+    public void deletePatentList(List<Patent> patentList, String businessId) throws Exception {
+        for (Patent patent : patentList) {
+            deleteById(patent.getPatent_id(), businessId);
+        }
+    }
+
+    // 匯入excel刪除end
 }

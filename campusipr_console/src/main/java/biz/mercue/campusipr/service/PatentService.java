@@ -73,4 +73,10 @@ public interface PatentService {
 
     void syncPatentStatus(Patent patent, int isSync);
 
+    // 以下的method先留著，原因是user可能不小心匯入錯誤excel，想要把匯入的patent刪除，所以寫了兩個method
+    // 使用作法是在"/api/submitexceltask"調用這兩個method，先正常模式add or update到數據庫，再調用delete刪除
+    @SuppressWarnings("Duplicates")
+    List<Patent> getPatentListByExcel(List<Patent> patentList, Admin admin, Business business, String ip) throws Exception;
+
+    void deletePatentList(List<Patent> patentList, String businessId) throws Exception;
 }
