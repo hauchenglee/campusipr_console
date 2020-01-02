@@ -95,7 +95,9 @@ public class MessageServiceImpl implements MessageService {
         // check business id and admin id
         boolean isBusinessUser = false;
         String businessId = adminToken.getBusiness_id();
-        if (businessId.equals(Constants.BUSINESS_PLATFORM)) isBusinessUser = true;
+        if (businessId.equals(Constants.BUSINESS_PLATFORM)) {
+            isBusinessUser = true;
+        }
         try {
             List<Admin> adminList = new ArrayList<>();
             if (isBusinessUser) {

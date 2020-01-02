@@ -28,7 +28,9 @@ public class MessageController {
         Message message = (Message) JacksonJSONUtils.readValue(receiveJSONString, Message.class);
         BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
-        if (adminToken == null) throw new CustomException.TokenNullException();
+        if (adminToken == null) {
+            throw new CustomException.TokenNullException();
+        }
 
         messageService.addMessage(message, adminToken.getAdmin());
         responseBody.setCode(Constants.INT_SUCCESS);
@@ -60,15 +62,13 @@ public class MessageController {
     public String getMessageList(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
-        if (adminToken == null) throw new CustomException.TokenNullException();
+        if (adminToken == null) {
+            throw new CustomException.TokenNullException();
+        }
 
         JSONObject jsonObject = new JSONObject(receiveJSONString);
         String senderId = jsonObject.optString("sender_id");
         String receiverId = jsonObject.optString("receiver_id");
-
-        // check business id and admin id
-        String businessId = adminToken.getBusiness_id();
-        if (businessId.equals(Constants.BUSINESS_PLATFORM)) senderId = Constants.SYSTEM_ADMIN;
 
         List<Message> messageList = messageService.getMessagesList(senderId, receiverId);
         responseBody.setCode(Constants.INT_SUCCESS);
@@ -81,7 +81,9 @@ public class MessageController {
     public String getPreviousMessageList(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
-        if (adminToken == null) throw new CustomException.TokenNullException();
+        if (adminToken == null) {
+            throw new CustomException.TokenNullException();
+        }
 
         JSONObject jsonObject = new JSONObject(receiveJSONString);
         String senderId = jsonObject.optString("sender_id");
@@ -89,10 +91,6 @@ public class MessageController {
         long lastTimestamp = jsonObject.getLong("startTimestamp");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(lastTimestamp);
-
-        // check business id and admin id
-        String businessId = adminToken.getBusiness_id();
-        if (businessId.equals(Constants.BUSINESS_PLATFORM)) senderId = Constants.SYSTEM_ADMIN;
 
         List<Message> messageList = messageService.getMessagesBeforeTime(senderId, receiverId, lastTimestamp);
         responseBody.setCode(Constants.INT_SUCCESS);
@@ -112,10 +110,6 @@ public class MessageController {
         String receiverId = jsonObject.optString("receiver_id");
         long lastTimestamp = jsonObject.getLong("lastTimestamp");
 
-        // check business id and admin id
-        String businessId = adminToken.getBusiness_id();
-        if (businessId.equals(Constants.BUSINESS_PLATFORM)) senderId = Constants.SYSTEM_ADMIN;
-
         List<Message> messageList = messageService.getMessagesAfterTime(senderId, receiverId, lastTimestamp);
         responseBody.setCode(Constants.INT_SUCCESS);
         responseBody.setList(messageList);
@@ -128,16 +122,14 @@ public class MessageController {
         log.info("/api/searchpreviousmessage");
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
-        if (adminToken == null) throw new CustomException.TokenNullException();
+        if (adminToken == null) {
+            throw new CustomException.TokenNullException();
+        }
 
         JSONObject jsonObject = new JSONObject(receiveJSONString);
         String senderId = jsonObject.optString("sender_id");
         String receiverId = jsonObject.optString("receiver_id");
         long startTimestamp = jsonObject.getLong("startTimestamp");
-
-        // check business id and admin id
-        String businessId = adminToken.getBusiness_id();
-        if (businessId.equals(Constants.BUSINESS_PLATFORM)) senderId = Constants.SYSTEM_ADMIN;
 
         List<Message> messageList = messageService.getMessagesBeforeAndEqualTime(senderId, receiverId, startTimestamp);
         responseBody.setCode(Constants.INT_SUCCESS);
@@ -151,15 +143,13 @@ public class MessageController {
         log.info("/api/search/" + text);
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
-        if (adminToken == null) throw new CustomException.TokenNullException();
+        if (adminToken == null) {
+            throw new CustomException.TokenNullException();
+        }
 
         JSONObject jsonObject = new JSONObject(receiveJSONString);
         String senderId = jsonObject.optString("sender_id");
         String receiverId = jsonObject.optString("receiver_id");
-
-        // check business id and admin id
-        String businessId = adminToken.getBusiness_id();
-        if (businessId.equals(Constants.BUSINESS_PLATFORM)) senderId = Constants.SYSTEM_ADMIN;
 
         List<Message> messageList = messageService.searchText(senderId, receiverId, text);
         responseBody.setCode(Constants.INT_SUCCESS);
@@ -172,7 +162,9 @@ public class MessageController {
     public String getChatterList(HttpServletRequest request) throws Exception {
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
-        if (adminToken == null) throw new CustomException.TokenNullException();
+        if (adminToken == null) {
+            throw new CustomException.TokenNullException();
+        }
 
         List<Admin> adminList = messageService.getAllAdminAndNewestMessage(adminToken);
         responseBody.setCode(Constants.INT_SUCCESS);
@@ -186,15 +178,13 @@ public class MessageController {
     public String readMessage(HttpServletRequest request, @RequestBody String receiveJSONString) throws Exception {
         StringResponseBody responseBody = new StringResponseBody();
         AdminToken adminToken = adminTokenService.getById(JWTUtils.getJwtToken(request));
-        if (adminToken == null) throw new CustomException.TokenNullException();
+        if (adminToken == null) {
+            throw new CustomException.TokenNullException();
+        }
 
         JSONObject jsonObject = new JSONObject(receiveJSONString);
         String senderId = jsonObject.optString("sender_id");
         String receiverId = jsonObject.optString("receiver_id");
-
-        // check business id and admin id
-        String businessId = adminToken.getBusiness_id();
-        if (businessId.equals(Constants.BUSINESS_PLATFORM)) senderId = Constants.SYSTEM_ADMIN;
 
         messageService.readMessage(senderId, receiverId);
         responseBody.setCode(Constants.INT_SUCCESS);
