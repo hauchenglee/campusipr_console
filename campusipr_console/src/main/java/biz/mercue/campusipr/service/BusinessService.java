@@ -1,35 +1,31 @@
 package biz.mercue.campusipr.service;
 
-import java.util.List;
-
 import biz.mercue.campusipr.model.Business;
 import biz.mercue.campusipr.model.ListQueryForm;
 
-
+import java.util.List;
 
 public interface BusinessService {
 
-	void addBusiness(Business business);
-	
-	int safeAddBusiness(Business business);
+    void addBusiness(Business business);
 
-	int updateBusiness(Business business);
+    int safeAddBusiness(Business business);
 
-	void deleteBusiness(Business business);
-	
-	ListQueryForm getAllByPage(int page);
+    int updateBusiness(Business business);
 
-	ListQueryForm getAll();
-	
-	ListQueryForm search(String text,int page);
+    void deleteBusiness(Business business) throws Exception;
 
-	List<Business> getAvailable(int page,int pageSize);
-	
-	Business getById(String id);
-	
-	
-	List<Business> getByName(String name);
-	
-	List<Business> getByFuzzyName(String name);
+    ListQueryForm getAllByPage(int page);
 
+    ListQueryForm getAll();
+
+    ListQueryForm search(String text, int page);
+
+    List<Business> getAvailable(int page, int pageSize);
+
+    Business getById(String id);
+
+    List<Business> getByName(String name);
+
+    List<Business> getByFuzzyName(String name);
 }

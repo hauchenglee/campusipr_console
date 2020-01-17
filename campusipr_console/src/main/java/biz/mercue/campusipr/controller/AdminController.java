@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-@Controller
+@RestController
 public class AdminController {
     private Logger log = Logger.getLogger(this.getClass().getName());
 
@@ -34,7 +34,6 @@ public class AdminController {
     PermissionService permissionService;
 
     @RequestMapping(value = "/api/adminlogin", method = {RequestMethod.POST}, consumes = Constants.CONTENT_TYPE_JSON, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String login(HttpServletRequest request, @RequestBody String receiveJSONString) {
         MapResponseBody response = new MapResponseBody();
         log.info("receiveJSONString:" + receiveJSONString);
@@ -50,21 +49,17 @@ public class AdminController {
             response.setCode(handleResult);
             return response.getJacksonString(View.Public.class);
         }
-
         Admin adminBean = adminService.getByEmail(email);
         AdminToken tokenBean = adminTokenService.generateToken(adminBean.getAdmin_id());
-
         log.info("token: " + tokenBean.getAdmin_token_id());
         log.info("admin: " + tokenBean.getAdmin().getAdmin_id());
         log.info("business: " + tokenBean.getAdmin().getBusiness().getBusiness_name());
-
         response.setCode(Constants.INT_SUCCESS);
         response.setData(Constants.JSON_TOKEN, tokenBean.getAdmin_token_id());
         return response.getJacksonString(View.Public.class);
     }
 
     @RequestMapping(value = "/api/adminlogout", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String logout(HttpServletRequest request) {
         MapResponseBody response = new MapResponseBody();
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
@@ -75,21 +70,16 @@ public class AdminController {
         } else {
             response.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
         }
-
         return response.getJacksonString(View.Public.class);
     }
 
     //中心 管理者清單
     @RequestMapping(value = "/api/getadminlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String getAdminList(HttpServletRequest request, @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken token = adminTokenService.getById(JWTUtils.getJwtToken(request));
-
-
         if (token != null) {
             //TODO check permission
-
             List<Role> listRole = new ArrayList<Role>();
             Role platformRole = roleService.getById(Constants.ROLE_PLATFORM_MANAGER);
             //TODO check login user permission
@@ -116,21 +106,16 @@ public class AdminController {
                 patentRole.setListAdmin(patentForm.getList());
                 listRole.add(patentRole);
             }
-
-
             responseBody.setCode(Constants.INT_SUCCESS);
             responseBody.setList(listRole);
-
         } else {
             responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
 
         }
-
         return responseBody.getJacksonString(View.Role.class);
     }
 
     @RequestMapping(value = "/api/getrolelist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String getRoleList(HttpServletRequest request) {
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken token = adminTokenService.getById(JWTUtils.getJwtToken(request));
@@ -143,22 +128,15 @@ public class AdminController {
         }
 
         return responseBody.getJacksonString(View.Role.class);
-
     }
 
-
     @RequestMapping(value = "/api/getcustomerbusinessadminlist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String getCustomerBusinessAdminList(HttpServletRequest request, @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
         ListResponseBody responseBody = new ListResponseBody();
         AdminToken token = adminTokenService.getById(JWTUtils.getJwtToken(request));
-
-
         if (token != null) {
             //TODO check permission
-
             List<Role> listRole = new ArrayList<Role>();
-
             Role businessManagerRole = roleService.getById(Constants.ROLE_BUSINESS_MANAGER);
             Permission permission1 = permissionService.getSettingPermissionByModule(Constants.MODEL_CODE_BUSINESS_MANAGER, Constants.VIEW);
             if (token.checkPermission(permission1.getPermission_id())) {
@@ -218,20 +196,15 @@ public class AdminController {
                     listRole.add(userRole);
                 }
             }
-
             responseBody.setCode(Constants.INT_SUCCESS);
             responseBody.setList(listRole);
-
         } else {
             responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
         }
-
         return responseBody.getJacksonString(View.Role.class);
     }
 
-
     @RequestMapping(value = "/api/checkpassword", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String checkPassword(HttpServletRequest request, @RequestBody String receiveJSONString) {
         AdminToken token = adminTokenService.getById(JWTUtils.getJwtToken(request));
         BeanResponseBody responseBody = new BeanResponseBody();
@@ -246,23 +219,16 @@ public class AdminController {
         return responseBody.getJacksonString(View.Public.class);
     }
 
-
     @RequestMapping(value = "/api/searchrolelist", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String searchRoleList(HttpServletRequest request,
                                  @RequestParam(value = "role", required = true, defaultValue = "") String roleId,
                                  @RequestParam(value = "text", required = true, defaultValue = "") String text,
                                  @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
         BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken token = adminTokenService.getById(JWTUtils.getJwtToken(request));
-
-
         if (token != null) {
-
             Permission viewPermission = permissionService.getSettingPermissionByRoleAndModule(roleId, Constants.VIEW);
-
             if (viewPermission != null && token.checkPermission(viewPermission.getPermission_id())) {
-
                 String businessId = null;
                 if (!token.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
                     businessId = token.getBusiness().getBusiness_id();
@@ -274,7 +240,6 @@ public class AdminController {
                 role.setTotal_count(searchForm.getTotal_count());
                 role.setPage_size(Constants.SYSTEM_PAGE_SIZE);
                 role.setListAdmin(searchForm.getList());
-
                 responseBody.setCode(Constants.INT_SUCCESS);
                 responseBody.setBean(role);
             } else {
@@ -284,20 +249,13 @@ public class AdminController {
         } else {
             responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
         }
-
         return responseBody.getJacksonString(View.Role.class);
     }
 
-
     @RequestMapping(value = "/api/getcustomerbusinessrole", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String getCustomerBusinessRole(HttpServletRequest request, @RequestParam(value = "role", required = true, defaultValue = "") String roleId, @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
         BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken token = adminTokenService.getById(JWTUtils.getJwtToken(request));
-        log.info("page:" + page);
-        log.info("roleId:" + roleId);
-
-
         if (token != null) {
             //TODO check permission
             if (token.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
@@ -308,8 +266,6 @@ public class AdminController {
                     role.setListAdmin(listForm.getList());
                     role.setTotal_count(listForm.getTotal_count());
                     role.setPage_size(Constants.SYSTEM_PAGE_SIZE);
-
-
                     responseBody.setCode(Constants.INT_SUCCESS);
                     responseBody.setBean(role);
                 }
@@ -321,18 +277,13 @@ public class AdminController {
                     role.setListAdmin(listForm.getList());
                     role.setTotal_count(listForm.getTotal_count());
                     role.setPage_size(Constants.SYSTEM_PAGE_SIZE);
-
-
                     responseBody.setCode(Constants.INT_SUCCESS);
                     responseBody.setBean(role);
                 }
             }
-
         } else {
             responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
         }
-
-
         return responseBody.getJacksonString(View.Role.class);
     }
 
@@ -341,13 +292,10 @@ public class AdminController {
     public String addAdmin(HttpServletRequest request, @RequestBody String receiveJSONString) {
         BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken token = adminTokenService.getById(JWTUtils.getJwtToken(request));
-
         int taskResult = -1;
         if (token != null) {
-
             Admin admin = (Admin) JacksonJSONUtils.readValue(receiveJSONString, Admin.class);
             Role role = admin.getRole();
-
             if (checkRolePermission(role, token, Constants.ADD)) {
                 if (!token.checkPermission(Constants.PERMISSION_CROSS_BUSINESS)) {
                     admin.setBusiness(token.getBusiness());
@@ -355,7 +303,6 @@ public class AdminController {
                 taskResult = adminService.createAdmin(admin);
                 if (taskResult == Constants.INT_SUCCESS) {
                     responseBody.setCode(Constants.INT_SUCCESS);
-
                 } else if (taskResult == Constants.INT_USER_DUPLICATE) {
                     responseBody.setCode(Constants.INT_USER_DUPLICATE);
                 } else {
@@ -367,41 +314,30 @@ public class AdminController {
         } else {
             responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
         }
-
         return responseBody.getJacksonString(View.Admin.class);
     }
 
-
     @RequestMapping(value = "/api/getadmininfo", method = {RequestMethod.GET}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String getAdminInfo(HttpServletRequest request) {
         BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-
         if (tokenBean != null) {
-
             responseBody.setCode(Constants.INT_SUCCESS);
             responseBody.setBean(tokenBean.getAdmin());
-
         } else {
             responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
         }
-
         return responseBody.getJacksonString(View.Admin.class);
     }
 
     @RequestMapping(value = "/api/updateadmin", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String updateAdmin(HttpServletRequest request, @RequestBody String receiveJSONString) {
         BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken token = adminTokenService.getById(JWTUtils.getJwtToken(request));
-
         int taskResult = -1;
         if (token != null) {
-
             Admin admin = (Admin) JacksonJSONUtils.readValue(receiveJSONString, Admin.class);
             Role role = admin.getRole();
-
             if (checkRolePermission(role, token, Constants.EDIT)) {
                 taskResult = adminService.updateAdmin(admin);
                 if (taskResult == Constants.INT_SUCCESS) {
@@ -420,45 +356,31 @@ public class AdminController {
         return responseBody.getJacksonString(View.Admin.class);
     }
 
-
     @RequestMapping(value = "/api/forgetpassword", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String forgetPassword(HttpServletRequest request, @RequestBody String receiveJSONString) {
         BeanResponseBody responseBody = new BeanResponseBody();
-
         Admin admin = (Admin) JacksonJSONUtils.readValue(receiveJSONString, Admin.class);
-
         if (admin != null) {
             int taskResult = adminService.forgetPassword(admin);
             responseBody.setCode(taskResult);
-
         } else {
             responseBody.setCode(Constants.INT_CANNOT_FIND_DATA);
-
         }
-
         return responseBody.getJacksonString(View.Public.class);
     }
 
-
     @RequestMapping(value = "/api/updatepassword", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String updatePassword(HttpServletRequest request, @RequestBody String receiveJSONString) {
         BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken token = adminTokenService.getById(JWTUtils.getJwtToken(request));
-
-
         if (token != null) {
             JSONObject reqJSON = new JSONObject(receiveJSONString);
             String password = reqJSON.optString("password");
             String repassword = reqJSON.optString("repassword");
-
             if (!StringUtils.isNULL(password) && password.equals(repassword)) {
-
                 int taskResult = adminService.updatePassword(token.getAdmin().getAdmin_id(), password);
                 if (taskResult == Constants.INT_SUCCESS) {
                     responseBody.setCode(Constants.INT_SUCCESS);
-
                 } else if (taskResult == Constants.INT_CANNOT_FIND_DATA) {
                     responseBody.setCode(Constants.INT_CANNOT_FIND_DATA);
                 } else {
@@ -467,18 +389,13 @@ public class AdminController {
             } else {
                 responseBody.setCode(Constants.INT_PASSWORD_ERROR);
             }
-
-
         } else {
             responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
         }
-
         return responseBody.getJacksonString(View.Public.class);
     }
 
-
     @RequestMapping(value = "/api/modifypassword", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String modifyPassword(HttpServletRequest request, @RequestBody String receiveJSONString) {
         BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken token = adminTokenService.getById(JWTUtils.getJwtToken(request));
@@ -486,7 +403,6 @@ public class AdminController {
             Admin admin = (Admin) JacksonJSONUtils.readValue(receiveJSONString, Admin.class);
             if (admin != null) {
                 if (!StringUtils.isNULL(admin.getAdmin_password()) && admin.getAdmin_password().equals(admin.getRe_admin_password())) {
-
                     int taskResult = adminService.updatePassword(admin.getAdmin_id(), admin.getAdmin_password());
                     if (taskResult == Constants.INT_SUCCESS) {
                         responseBody.setCode(Constants.INT_SUCCESS);
@@ -501,25 +417,19 @@ public class AdminController {
             } else {
                 responseBody.setCode(Constants.INT_DATA_ERROR);
             }
-
-
         } else {
             responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
         }
         return responseBody.getJacksonString(View.Public.class);
     }
 
-
     @RequestMapping(value = "/api/resetpassword", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String resetPassword(HttpServletRequest request, @RequestBody String receiveJSONString) {
         BeanResponseBody responseBody = new BeanResponseBody();
-
         JSONObject reqJSON = new JSONObject(receiveJSONString);
         String token = reqJSON.optString("token");
         String password = reqJSON.optString("password");
         String repassword = reqJSON.optString("repassword");
-
         if (!StringUtils.isNULL(password) && password.equals(repassword)) {
             Admin admin = new Admin();
             admin.setToken(token);
@@ -527,7 +437,6 @@ public class AdminController {
             int taskResult = adminService.resetPassword(admin);
             if (taskResult == Constants.INT_SUCCESS) {
                 responseBody.setCode(Constants.INT_SUCCESS);
-
             } else if (taskResult == Constants.INT_CANNOT_FIND_DATA) {
                 responseBody.setCode(Constants.INT_CANNOT_FIND_DATA);
             } else {
@@ -536,39 +445,23 @@ public class AdminController {
         } else {
             responseBody.setCode(Constants.INT_PASSWORD_ERROR);
         }
-
         return responseBody.getJacksonString(View.Public.class);
     }
 
-
     @RequestMapping(value = "/api/saferemoveadmin", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String safeRemoveAdmin(HttpServletRequest request, @RequestBody String receiveJSONString) {
-
         AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
-
-        if (tokenBean != null) {
-
-        }
-
-
         return "";
     }
 
-
     @RequestMapping(value = "/api/invalidateadmin", method = {RequestMethod.POST}, produces = Constants.CONTENT_TYPE_JSON)
-    @ResponseBody
     public String invalidateAdmin(HttpServletRequest request, @RequestBody String receiveJSONString) {
         BeanResponseBody responseBody = new BeanResponseBody();
         AdminToken token = adminTokenService.getById(JWTUtils.getJwtToken(request));
-
-
         if (token != null) {
-
             Admin admin = (Admin) JacksonJSONUtils.readValue(receiveJSONString, Admin.class);
             admin.setAvailable(false);
             Role role = admin.getRole();
-
             if (checkRolePermission(role, token, Constants.EDIT)) {
                 adminService.updateAdmin(admin);
                 responseBody.setCode(Constants.INT_SUCCESS);
@@ -578,7 +471,6 @@ public class AdminController {
         } else {
             responseBody.setCode(Constants.INT_ACCESS_TOKEN_ERROR);
         }
-
         return responseBody.getJacksonString(View.Public.class);
     }
 
@@ -589,5 +481,20 @@ public class AdminController {
             hasPermission = token.checkPermission(permission.getPermission_id());
         }
         return hasPermission;
+    }
+
+    @PostMapping(value = "/api/changeadminrole", produces = Constants.CONTENT_TYPE_JSON)
+    public String changeBusinessRole(HttpServletRequest request, @RequestBody String receiveJSONString) {
+        BeanResponseBody responseBody = new BeanResponseBody();
+        AdminToken tokenBean = adminTokenService.getById(JWTUtils.getJwtToken(request));
+        if (tokenBean == null) {
+            throw new CustomException.TokenNullException();
+        }
+        JSONObject jsonObject = new JSONObject(receiveJSONString);
+        String adminId1 = jsonObject.optString("admin_id1");
+        String adminId2 = jsonObject.optString("admin_id2");
+        adminService.changeAdminRole(adminId1, adminId2);
+        responseBody.setCode(Constants.INT_SUCCESS);
+        return responseBody.getJacksonString(View.Public.class);
     }
 }

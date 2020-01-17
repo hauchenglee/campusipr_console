@@ -3,7 +3,6 @@ package biz.mercue.campusipr.dao;
 import biz.mercue.campusipr.model.Admin;
 import biz.mercue.campusipr.util.Constants;
 import biz.mercue.campusipr.util.StringUtils;
-import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
@@ -16,18 +15,11 @@ import java.util.List;
 
 @Repository("adminDao")
 public class AdminDaoImpl extends AbstractDao<String, Admin> implements AdminDao {
+
     @Override
     public Admin getById(String id) {
         return getByKey(id);
     }
-
-//	@Override
-//	public List<Admin> getByBusinessId(String businessId) {
-//		Criteria crit = createEntityCriteria();	
-//		crit.createAlias("business", "business");
-//		crit.add(Restrictions.eq("business.business_id", businessId));
-//		return  crit.list();
-//	}
 
     @Override
     public List<Admin> getRoleBusinessAdminList(String roleId, String businessId, int page, int pageSize) {
@@ -92,28 +84,8 @@ public class AdminDaoImpl extends AbstractDao<String, Admin> implements AdminDao
         return (int) count;
     }
 
-//	@Override
-//	public List<Admin> getRoleAdminList(String roleId,int page,int pageSize){
-//		Criteria crit = createEntityCriteria();	
-//		crit.createAlias("role", "role");
-//		crit.add(Restrictions.eq("role.role_id", roleId));
-//		crit.setFirstResult((page - 1) * pageSize);
-//		crit.setMaxResults(pageSize);
-//		return crit.list();
-//	}
-//	@Override
-//	public int getRoleAdminCount(String roleId) {
-//		Criteria crit = createEntityCriteria();	
-//		crit.createAlias("role", "role");
-//		crit.add(Restrictions.eq("role.role_id", roleId));
-//		crit.setProjection(Projections.rowCount());
-//		long count = (long)crit.uniqueResult();
-//		return (int)count;
-//	}
-
     @Override
     public Admin getByEmail(String email) {
-
         Criteria criteria = createEntityCriteria();
         criteria.add(Restrictions.eq("admin_email", email));
         return (Admin) criteria.uniqueResult();
@@ -121,26 +93,13 @@ public class AdminDaoImpl extends AbstractDao<String, Admin> implements AdminDao
 
     @Override
     public void createAdmin(Admin bean) {
-
         persist(bean);
     }
 
     @Override
     public void deleteAdmin(Admin bean) {
-
         delete(bean);
     }
-
-//	@Override
-//	public List<Admin> getAvailableByBusinessId(String businessId) {
-//		
-//		Criteria criteria = createEntityCriteria();	
-//		criteria.createAlias("business", "business");
-//		criteria.add(Restrictions.eq("business.business_id", businessId));
-//
-//		
-//		return criteria.list();
-//	}
 
     @Override
     public List<Admin> getAllAdminList() {
@@ -167,5 +126,17 @@ public class AdminDaoImpl extends AbstractDao<String, Admin> implements AdminDao
         query.setParameter("ROLE_BUSINESS_MANAGER", Constants.ROLE_BUSINESS_MANAGER);
         query.setParameter("ROLE_BUSINESS_PATENT", Constants.ROLE_BUSINESS_PATENT);
         return query.list();
+    }
+
+    @Override
+    public void updateAdminRole(String adminId, String roleId) {
+        String hql = "update Admin as admin " +
+                "set role_id = :roleId " +
+                "where admin_id = :adminId";
+        Session session = getSession();
+        Query query = session.createQuery(hql);
+        query.setParameter("adminId", adminId);
+        query.setParameter("roleId", roleId);
+        query.executeUpdate();
     }
 }

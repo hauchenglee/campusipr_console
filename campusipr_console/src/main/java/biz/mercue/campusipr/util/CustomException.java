@@ -1,7 +1,7 @@
 package biz.mercue.campusipr.util;
 
 public class CustomException {
-    public static class TokenNullException extends Exception {
+    public static class TokenNullException extends RuntimeException {
         public TokenNullException() {
         }
 
@@ -10,7 +10,7 @@ public class CustomException {
         }
     }
 
-    public static class CanNotFindDataException extends Exception {
+    public static class CanNotFindDataException extends RuntimeException {
         public CanNotFindDataException() {
         }
 
@@ -19,7 +19,7 @@ public class CustomException {
         }
     }
 
-    public static class DataErrorException extends Exception {
+    public static class DataErrorException extends RuntimeException {
         public DataErrorException() {
         }
 
@@ -28,7 +28,7 @@ public class CustomException {
         }
     }
 
-    public static class NoPermission extends Exception {
+    public static class NoPermission extends RuntimeException {
         public NoPermission() {
         }
 
@@ -37,7 +37,7 @@ public class CustomException {
         }
     }
 
-    public static class SyntaxError extends Exception {
+    public static class SyntaxError extends RuntimeException {
         public SyntaxError() {
         }
 
