@@ -280,7 +280,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 					" p.patent_id in (SELECT las.patent FROM las where las.assignee_name like :searchText or las.assignee_name_en like :searchText ) or" + 
 					" p.patent_id in (SELECT lap.patent FROM lap where lap.applicant_name like :searchText or lap.applicant_name_en like :searchText ))";
 		}else {
-			queryStr += " JOIN p.listBusiness as lb WHERE (lb.business_id not in :businessId and p.is_sync = 1) and" +
+			queryStr += " JOIN p.listBusiness as lb WHERE ((lb.business_id = :businessId) or (lb.business_id not in :businessId and p.is_sync = 1)) and" +
 					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" +
 					" p.patent_appl_country like :searchText or p.patent_appl_no like :searchText or" + 
 					" p.patent_notice_no like :searchText or p.patent_publish_no like :searchText or" + 
@@ -313,7 +313,6 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 				}
 			}
 		}
-		log.info(queryStr);
 		Query q = session.createQuery(queryStr);
 		if(!StringUtils.isNULL(businessId)) {
 			q.setParameter("businessId", businessId);
@@ -344,7 +343,7 @@ public class PatentDaoImpl extends AbstractDao<String,  Patent> implements Paten
 					" p.patent_id in (SELECT las.patent FROM las where las.assignee_name like :searchText or las.assignee_name_en like :searchText )or" + 
 					" p.patent_id in (SELECT lap.patent FROM lap where lap.applicant_name like :searchText or lap.applicant_name_en like :searchText ))";
 		}else {
-			queryStr += " JOIN p.listBusiness as lb WHERE (lb.business_id not in :businessId and p.is_sync = 1) and" +
+			queryStr += " JOIN p.listBusiness as lb WHERE ((lb.business_id = :businessId) or (lb.business_id not in :businessId and p.is_sync = 1)) and" +
 					" (p.patent_name like :searchText or p.patent_name_en like :searchText or" + 
 					" p.patent_appl_country like :searchText or p.patent_appl_no like :searchText or" + 
 					" p.patent_notice_no like :searchText or p.patent_publish_no like :searchText or" + 

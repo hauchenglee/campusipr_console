@@ -669,7 +669,7 @@ public class PatentServiceImpl implements PatentService {
         }
 
         int syncResult = Constants.INT_SYSTEM_PROBLEM;
-        String originApplNo = patent.getPatent_appl_no();
+        String originApplNo = patent.getPatent_appl_no().trim();
 
         if ((Constants.APPL_COUNTRY_TW.endsWith(patent.getPatent_appl_country()))) {
             if (originApplNo.length() == 10 || originApplNo.length() == 11) {
